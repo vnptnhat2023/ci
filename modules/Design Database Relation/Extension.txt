@@ -1,0 +1,25 @@
+FIELDS
+
++ id
++ Author ( VARCHAR: 32 )
++ Contact ( NULL | VARCHAR: 128 ) : PhoneNumber, Email, Website, FB, TWT, ...
+
+[ Server only:
+  + Category ( General_relation: [ 'name': ex, 'name_id': INT, 'ggid': 1, 'giid': INT ] )
+]
+
++ Category_Name: ( VARCHAR: 4 - 32 ) ?? JSON
++ Category_Slug: ( VARCHAR: 4 - 48 ) ?? JSON
+
++ Description ( NULL | VARCHAR: 512 )
++ title ( VARCHAR: 4 - 128 )
++ slug ( VARCHAR: 4 - 192 ) : folderName, fileName, className
++ Version ( FLOAT: >= 0.1 )
++ Name ( CHAR: 2; ENUM( 'ca', 'pa', 'gg', 'po' ) )
++ NameId ( INT )
++ NameSelf ( CHAR: 2; ENUM( 'ex', 'th' ) ) : different [ extension, theme, maybe have more ... ]
++ Status ( ENUM( 'enable', 'disable' ) )
+
+. Created_at ( DATE )
+. Updated_at ( DATE )
+. Deleted_at ( DATE )

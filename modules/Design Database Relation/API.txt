@@ -1,0 +1,46 @@
+GET http://localhost/codeigniter/login?username=administrator&password=123456
+
+###
+GET http://localhost/codeigniter/bapi/page
+
+###
+GET http://localhost/codeigniter/home/test
+
+###
+POST http://localhost/codeigniter/bapi/general_group/crud HTTP/1.1
+content-type: application/x-www-form-urlencoded
+
+title=extension
+&status=active
+
+###
+POST http://localhost/codeigniter/bapi/general_item/crud HTTP/1.1
+content-type: application/x-www-form-urlencoded
+
+title=Extension Movie
+&slug=Movie
+&status=active
+
+###
+PUT http://localhost/codeigniter/bapi/general_item/crud/1 HTTP/1.1
+content-type: application/x-www-form-urlencoded
+
+title=After page query
+&slug=after-query-page
+
+###
+GET http://localhost/codeigniter/bapi/extension?id[]=1&id[]=2&author[]=unknown&author[]=tester HTTP/1.1
+
+###
+POST http://localhost/codeigniter/bapi/extension/crud HTTP/1.1
+content-type: application/x-www-form-urlencoded
+title=extension
+&status=active
+
+### Not working
+POST http://localhost/codeigniter/bapi/extension/crud/create HTTP/1.1
+content-type: application/x-www-form-urlencoded
+events[0][method]=index&events[0][name]=curkit-event&events[1][method]=map&events[1][name]=curkit-map&hashed_file=$2y$10$.BFVQDspCzJDCS5mP/.DuegSDPfuHAJJnGUv8qtD3YzfCiY0kzkjK&author=Curkit&contact=ex@local.host&name=Curkit sample extension&slug=curkit
+
+###
+DELETE http://localhost/codeigniter/bapi/extension/crud/9 HTTP/1.1
