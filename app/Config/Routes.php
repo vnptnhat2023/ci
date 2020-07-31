@@ -53,14 +53,16 @@ if (file_exists(APPPATH . 'Config/' . ENVIRONMENT . '/Routes.php'))
 	require APPPATH . 'Config/' . ENVIRONMENT . '/Routes.php';
 }
 
-if ( $extStore = model('App\Models\Extension')->enabled() ) {
+$routes->cli( 'createdb', 'CLI_CreateDB::index' );
 
-	foreach ($extStore['uniqueClass'] as $ext => $notUsing) {
+// if ( $extStore = model('App\Models\Extension')->enabled() ) {
 
-		$extSpace = "\\Ext\\{$ext}\\{$ext}";
-		if ( method_exists( $extSpace, 'getRoutes' ) ) {
-			$extSpace::getRoutes($routes);
-		}
+// 	foreach ($extStore['uniqueClass'] as $ext => $notUsing) {
 
-	}
-}
+// 		$extSpace = "\\Ext\\{$ext}\\{$ext}";
+// 		if ( method_exists( $extSpace, 'getRoutes' ) ) {
+// 			$extSpace::getRoutes($routes);
+// 		}
+
+// 	}
+// }

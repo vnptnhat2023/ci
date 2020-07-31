@@ -51,15 +51,16 @@ Events::on('pre_system', function () {
 		Services::toolbar()->respond();
 	}
 
-	Events::trigger('extStore');
+	// Events::trigger('extStore');
 });
-
+/*
 Events::on( 'extStore', function(
 	string $Name = null,
 	$params = null,
 	callable $Callable = null,
 	bool $overrideParam = true
 ) {
+
 	# --- Cache all enabled extensions
 	if ( $storeData = model('\App\Models\Extension')->enabled() ) {
 		$store = $storeData['full'];
@@ -81,7 +82,7 @@ Events::on( 'extStore', function(
 			$extNotFound = [];
 
 			foreach ( $keys as $key ) {
-				# Format extension-className to camelCase with "UpperFisrtLetter"
+				# Format extension-className to camelCase with "UpperFirstLetter"
 				$fileName = strCamelCase( $store[ $key ][ 'slug' ] );
 				$methodName = $store[ $key ][ 'method' ];
 
@@ -132,3 +133,4 @@ Events::on( 'extStore', function(
 		}
 	}
 } );
+*/
