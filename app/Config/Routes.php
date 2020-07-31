@@ -10,6 +10,9 @@ if (file_exists(SYSTEMPATH . 'Config/Routes.php'))
 	require SYSTEMPATH . 'Config/Routes.php';
 }
 
+$routes->addPlaceholder('dotID', '(\d+\.?)+');#(\d\.?)+\d
+$routes->addPlaceholder('dashAlpha', '[a-z_-]+');
+
 /**
  * --------------------------------------------------------------------
  * Router Setup
@@ -48,4 +51,16 @@ $routes->get('/', 'Home::index');
 if (file_exists(APPPATH . 'Config/' . ENVIRONMENT . '/Routes.php'))
 {
 	require APPPATH . 'Config/' . ENVIRONMENT . '/Routes.php';
+}
+
+if ( $extStore = model('App\Models\Extension')->enabled() ) {
+
+	foreach ($extStore['uniqueClass'] as $ext => $notUsing) {
+
+		$extSpace = "\\Ext\\{$ext}\\{$ext}";
+		if ( method_exists( $extSpace, 'getRoutes' ) ) {
+			$extSpace::getRoutes($routes);
+		}
+
+	}
 }
