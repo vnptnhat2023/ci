@@ -4,6 +4,8 @@ namespace BAPI\Config;
 
 use BAPI\Config\Mixins\ConfigTrait;
 use CodeIgniter\Config\BaseConfig;
+use Config\Validation;
+
 /**
  * @if $name == 'ca' : $name_id = 0; $parent_id >= 0;
  * @else $name != 'ca' $parent_id = 0; $name_id > 0;
@@ -63,13 +65,13 @@ class Category extends BaseConfig
 					'post_type' => true,
 					'create_at' => false
 				],
-	
+
 				'default_post' => 1,
 				'pagination' => 'scroll',
 				'no_item' => 'The post not found',
 				'not_found' => 'Not found',
 				'record' => 10,
-	
+
 				'post_info' => [
 					'excerpt' => true,
 					'post_type' => true,
@@ -85,14 +87,14 @@ class Category extends BaseConfig
 	public function getRules(string $key = null) : array
 	{
 		$rules = [
-			'id' => \Config\Validation::ruleInt(),
+			'id' => Validation::ruleInt(),
 
 			'name' => [
 				'label' => 'name',
 				'rules' => 'required|in_list[ca,pa,po,cc]'
 			],
 
-			'name_id' => \Config\Validation::ruleInt( 'Name-Id', null, null, true ),
+			'name_id' => Validation::ruleInt( 'Name-Id', null, null, true ),
 
 			'title' => [
 				'label' => 'title',
@@ -114,14 +116,15 @@ class Category extends BaseConfig
 				'rules' => 'if_exist|trim|permit_empty|min_length[2]|max_length[128]'
 			],
 
-			'parent_id' => \Config\Validation::ruleInt( 'parent-Id', null, null, true ),
+			'parent_id' => Validation::ruleInt( 'parent-Id', null, null, true ),
 
 			'status' => [
 				'label' => 'status',
-				'rules' => 'required|in_list[publish,private,draff]'
+				'rules' => 'required|in_list[publish,private,draff]',
+				'default' => 'draff'
 			],
 
-			'sort' => \Config\Validation::ruleInt( 'sort', null, null, true )
+			'sort' => Validation::ruleInt( 'sort', null, null, true )
 		];
 
 		helper('array');

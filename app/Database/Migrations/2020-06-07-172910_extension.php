@@ -52,7 +52,7 @@ class Extension extends Migration
 				'type' => 'VARCHAR',
 				'constraint' => 64,
 				'null' => false,
-				'comment' => 'CamelcaseWithFirstChar'
+				'comment' => 'CamelCaseWithFirstChar'
 			],
 			'version' => [
 				'type' => 'VARCHAR',
