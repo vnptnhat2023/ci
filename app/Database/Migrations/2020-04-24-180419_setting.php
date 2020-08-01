@@ -4,7 +4,7 @@ namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
-class Setting extends Migration
+class general_setting extends Migration
 {
 	public function up()
 	{
@@ -55,11 +55,11 @@ class Setting extends Migration
 		->addField( $fields )
 		->addKey( 'id', true )
 		->addKey( 'setting_name', false, true )
-		->createTable( 'setting', true );
+		->createTable( 'general_setting', true );
 	}
 
 	public function down()
 	{
-		$this->forge->dropTable( 'setting', true );
+		$this->forge->dropTable( 'general_setting', true );
 	}
 }

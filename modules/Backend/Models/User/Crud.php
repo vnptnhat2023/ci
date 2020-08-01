@@ -2,8 +2,11 @@
 
 namespace BAPI\Models\User;
 
-class Crud extends \CodeIgniter\Model
+use CodeIgniter\Model;
+
+class Crud extends Model
 {
+
   protected $table = 'user';
 	protected $primaryKey = 'id';
 
@@ -133,15 +136,6 @@ class Crud extends \CodeIgniter\Model
 		];
 
     return $rules;
-  }
-
-  public function rulePatchUndelete () : array
-  {
-		$this->allowedFields = [ $this->deletedField ];
-
-    return [
-			$this->deletedField => \Config\Validation::ruleUndelete()
-		];
   }
 
   # --- User::group::__afterDelete using this method

@@ -1,4 +1,6 @@
-<?php namespace App\Models;
+<?php
+
+namespace App\Models;
 
 use CodeIgniter\Model;
 
@@ -11,11 +13,13 @@ class Extension extends Model
   protected $useTimestamps = true;
   protected $dateFormat = 'date';
 
-  public function enabled(bool $cache = true)
+  public function enabled ( bool $cache = true )
   {
-    $cacheId = config('Extension')->getSetting( 'cache.name' );
-    $cacheName = $this->_getCacheName($cacheId);
-    if ( cache($cacheName) ) { return cache($cacheName); }
+		$cacheId = config( 'Extension' ) ->getSetting( 'cache.name' );
+
+		$cacheName = $this->_getCacheName( $cacheId );
+
+    if ( $cached = cache( $cacheName ) ) return $cached;
 
 		$queryWhere = [
 			"{$this->table}.status" => 'enable',
@@ -23,34 +27,47 @@ class Extension extends Model
 			'Gg.status' => 'active',
 			'Gg.slug' => 'extension',
 			'Gi.status' => 'active',
-    ];
-    $querySelect = "{$this->table}.slug,
-    Gi.slug as event_name,Gi.title as method";
+		];
+
+    $querySelect = [
+			"{$this->table}.slug",
+			'Gi.slug as event_name',
+			'Gi.title as method'
+		];
 
 		# Gg.title as groupTitle,Gg.slug as groupSlug,
 		$data = $this
-		->select($querySelect)
-		->join('general_relation Gr', "Gr.name_id = {$this->table}.id")
-		->join('general_group Gg', 'Gg.id = Gr.ggid')
-		->join('general_item Gi', 'Gi.id = Gr.giid')
+		->select( implode( ',', $querySelect ) )
+
+		->join( 'general_relation Gr', "Gr.name_id = {$this->table}.id" )
+		->join( 'general_group Gg', 'Gg.id = Gr.ggid' )
+		->join( 'general_item Gi', 'Gi.id = Gr.giid' )
+
 		->where( $queryWhere )
+
     ->findAll();
 
     if ( $data )
     {
+			$classes = array_column( $data, 'slug', 'event_name' );
+
 			$data = [
 				'full' => $data,
-				'uniqueClass' => array_flip( array_column( $data, 'slug' ) )
+				'unique_class' => array_keys( array_flip( $classes ) )
 			];
-      if ( $cache === true ) { $data = $this->_saveCache( $cacheId, $data ); }
+
+      if ( $cache === true ) {
+				$data = $this->_saveCache( $cacheId, $data );
+			}
 
       return $data;
     }
-    else { return null; }
+
+		return null;
   }
 
 	/** WARNING: this method is NOT using ... delete late */
-  public function _findByEvent(string $eventName, $cache = true)
+  public function _findByEvent ( string $eventName, $cache = true )
   {
     $cacheName = $this->_getCacheName($eventName);
     $findWHere = [
@@ -69,14 +86,14 @@ class Extension extends Model
     else { return null; }
   }
 
-  public function _getCacheName(string $eventName) : string
+  public function _getCacheName ( string $eventName ) : string
   {
 		$prefix = config('Extension')->getSetting( 'cache.prefix' );
 
     return $prefix . "{$eventName}";
   }
 
-  public function _saveCache(string $eventName, $data)
+  public function _saveCache ( string $eventName, $data )
   {
     if ( empty($data) ) return $data;
 
@@ -88,7 +105,7 @@ class Extension extends Model
     return $data;
 	}
 
-	public function _deleteCache(string $eventName) : bool
+	public function _deleteCache ( string $eventName ) : bool
 	{
 		return cache()->delete( $this->_getCacheName( $eventName ) );
 	}

@@ -4,7 +4,7 @@ namespace App\Database\Seeds;
 
 use CodeIgniter\Database\Seeder;
 
-class AddPage extends Seeder
+class Page extends Seeder
 {
   public function run()
   {

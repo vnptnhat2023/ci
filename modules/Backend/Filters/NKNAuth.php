@@ -7,20 +7,17 @@ use CodeIgniter\Filters\FilterInterface;
 use CodeIgniter\HTTP\RequestInterface as req;
 use CodeIgniter\HTTP\ResponseInterface as res;
 
-class NKNAuth implements FilterInterface
+class NknAuth implements FilterInterface
 {
 
-  public function before( req $request, ...$params )
+  public function before( req $request, $arguments = null )
   {
-    $permission = $params[0] ?? [];
-    $nknAuth = \Config\Services::NknAuth();
-
-    if ( ! $nknAuth->hasPermission( $permission ) ) {
+    if ( ! \Config\Services::NknAuth()->hasPermission( $arguments ) ) {
       throw PageNotFoundException::forPageNotFound();
     }
   }
 
-  public function after( req $request, res $response )
+  public function after( req $request, res $response, $arguments = null )
   {
   }
 

@@ -1,4 +1,6 @@
-<?php namespace App\Libraries\Ext;
+<?php
+
+namespace App\Libraries\Ext;
 
 abstract class AbstractExtension {
 
@@ -18,6 +20,7 @@ abstract class AbstractExtension {
   }
 
 	/**
+	 * Wanna change this named to setParameters
 	 * @return self
 	 */
   final public function constructor( $params = null ) : self

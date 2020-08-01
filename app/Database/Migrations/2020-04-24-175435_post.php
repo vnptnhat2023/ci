@@ -48,14 +48,14 @@ class Post extends Migration
 
 			'name' => [
 				'type' => 'VARCHAR',
-				'constrain' => 64,
+				'constraint' => 64,
 				'null' => false,
 				'default' => 'category'
 			],
 
 			'name_id' => [
 				'type' => 'INT',
-				'constrain' => 11,
+				'constraint' => 11,
 				'unsigned' => true,
 				'null' => false,
 				'default' => 0
@@ -63,7 +63,7 @@ class Post extends Migration
 
 			'user_id' => [
 				'type' => 'INT',
-				'constrain' => 11,
+				'constraint' => 11,
 				'unsigned' => true,
 				'null' => false,
 				'default' => 0
@@ -71,7 +71,7 @@ class Post extends Migration
 
 			'media_relation_id' => [
 				'type' => 'INT',
-				'constrain' => 11,
+				'constraint' => 11,
 				'unsigned' => true,
 				'null' => false,
 				'default' => 0
@@ -85,7 +85,7 @@ class Post extends Migration
 
 			'typeof' => [
 				'type' => 'VARCHAR',
-				'constrain' => 64,
+				'constraint' => 64,
 				'null' => false,
 				'default' => 'text'
 			],

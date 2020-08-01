@@ -9,6 +9,12 @@ class Test extends BaseController {
 
 	protected $helpers = ['array'];
 
+	public function cfTrait()
+	{
+		$r = config( '\BAPI\Config\Extension' ) ->getSetting('cache');
+		var_dump( "{$r[ 'prefix' ]}{$r[ 'name' ]}" );
+	}
+
 	public function createMediaRelation ()
 	{
 		$data = [
@@ -442,7 +448,7 @@ class Test extends BaseController {
 		}
 	}
 
-	public function stategy ()
+	public function strategy ()
 	{
 		$t = new StateGyPattern\StateGy();
 		echo $t->run( new StateGyPattern\t1class ) . PHP_EOL;

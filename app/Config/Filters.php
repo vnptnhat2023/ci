@@ -11,6 +11,7 @@ class Filters extends BaseConfig
 		'toolbar'  => \CodeIgniter\Filters\DebugToolbar::class,
 		'honeypot' => \CodeIgniter\Filters\Honeypot::class,
 		'NknAuth' => \BAPI\Filters\NknAuth::class,
+		'throttle' => \App\Filters\Throttle::class
 	];
 
 	// Always applied before every request
@@ -29,10 +30,10 @@ class Filters extends BaseConfig
 	// (GET, POST, etc) as BEFORE filters only
 	//     like: 'post' => ['CSRF', 'throttle'],
 	public $methods = [
-		'post' => ['throttle'],
-		'put' => ['throttle'],
-		'patch' => ['throttle'],
-		'delete' => ['throttle'],
+		'post' => [ 'throttle' ],
+		'put' => [ 'throttle' ],
+		'patch' => [ 'throttle' ],
+		'delete' => [ 'throttle' ],
 	];
 
 	// List filter aliases and any before/after uri patterns

@@ -139,8 +139,7 @@ function isAssoc(array $data) : bool
  */
 function isVar( & $var, $return = null )
 {
-  isset($var) OR $var = $return;
-  return $var;
+  return $var ?? $return;
 }
 
 if ( ! function_exists('array_key_first') )

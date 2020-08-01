@@ -11,7 +11,7 @@ class Seed extends Seeder
     $this->call('User');
     $this->call('UserDetail');
     $this->call('UserGroup');
-    $this->call('Setting');
+    $this->call('GeneralSetting');
     $this->call('Page');
   }
 }

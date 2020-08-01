@@ -1,1 +1,158 @@
-9:"cp1251_ukrainian_ci";b:1;s:10:"cp1251_bin";b:1;s:17:"cp1251_general_ci";b:1;s:17:"cp1251_general_cs";b:1;s:16:"utf16_general_ci";b:1;s:9:"utf16_bin";b:1;s:16:"utf16_unicode_ci";b:1;s:18:"utf16_icelandic_ci";b:1;s:16:"utf16_latvian_ci";b:1;s:17:"utf16_romanian_ci";b:1;s:18:"utf16_slovenian_ci";b:1;s:15:"utf16_polish_ci";b:1;s:17:"utf16_estonian_ci";b:1;s:16:"utf16_spanish_ci";b:1;s:16:"utf16_swedish_ci";b:1;s:16:"utf16_turkish_ci";b:1;s:14:"utf16_czech_ci";b:1;s:15:"utf16_danish_ci";b:1;s:19:"utf16_lithuanian_ci";b:1;s:15:"utf16_slovak_ci";b:1;s:17:"utf16_spanish2_ci";b:1;s:14:"utf16_roman_ci";b:1;s:16:"utf16_persian_ci";b:1;s:18:"utf16_esperanto_ci";b:1;s:18:"utf16_hungarian_ci";b:1;s:16:"utf16_sinhala_ci";b:1;s:16:"utf16_german2_ci";b:1;s:26:"utf16_croatian_mysql561_ci";b:1;s:20:"utf16_unicode_520_ci";b:1;s:19:"utf16_vietnamese_ci";b:1;s:17:"utf16_croatian_ci";b:1;s:16:"utf16_myanmar_ci";b:1;s:18:"utf16le_general_ci";b:1;s:11:"utf16le_bin";b:1;s:17:"cp1256_general_ci";b:1;s:10:"cp1256_bin";b:1;s:20:"cp1257_lithuanian_ci";b:1;s:10:"cp1257_bin";b:1;s:17:"cp1257_general_ci";b:1;s:16:"utf32_general_ci";b:1;s:9:"utf32_bin";b:1;s:16:"utf32_unicode_ci";b:1;s:18:"utf32_icelandic_ci";b:1;s:16:"utf32_latvian_ci";b:1;s:17:"utf32_romanian_ci";b:1;s:18:"utf32_slovenian_ci";b:1;s:15:"utf32_polish_ci";b:1;s:17:"utf32_estonian_ci";b:1;s:16:"utf32_spanish_ci";b:1;s:16:"utf32_swedish_ci";b:1;s:16:"utf32_turkish_ci";b:1;s:14:"utf32_czech_ci";b:1;s:15:"utf32_danish_ci";b:1;s:19:"utf32_lithuanian_ci";b:1;s:15:"utf32_slovak_ci";b:1;s:17:"utf32_spanish2_ci";b:1;s:14:"utf32_roman_ci";b:1;s:16:"utf32_persian_ci";b:1;s:18:"utf32_esperanto_ci";b:1;s:18:"utf32_hungarian_ci";b:1;s:16:"utf32_sinhala_ci";b:1;s:16:"utf32_german2_ci";b:1;s:26:"utf32_croatian_mysql561_ci";b:1;s:20:"utf32_unicode_520_ci";b:1;s:19:"utf32_vietnamese_ci";b:1;s:17:"utf32_croatian_ci";b:1;s:16:"utf32_myanmar_ci";b:1;s:6:"binary";b:1;s:18:"geostd8_general_ci";b:1;s:11:"geostd8_bin";b:1;s:17:"cp932_japanese_ci";b:1;s:9:"cp932_bin";b:1;s:19:"eucjpms_japanese_ci";b:1;s:11:"eucjpms_bin";b:1;}s:12:"is_superuser";b:1;s:17:"is_create_db_priv";b:1;s:14:"is_reload_priv";b:1;s:12:"db_to_create";s:0:"";s:30:"dbs_where_create_table_allowed";a:1:{i:0;s:1:"*";}s:11:"dbs_to_test";b:0;s:15:"userprefs_mtime";s:10:"1596193985";s:14:"userprefs_type";s:2:"db";s:12:"config_mtime";i:1447170388;s:12:"is_grantuser";b:1;s:13:"is_createuser";b:1;s:11:"binary_logs";a:0:{}s:9:"userprefs";a:2:{s:20:"collation_connection";s:18:"utf8mb4_unicode_ci";s:12:"ThemeDefault";s:8:"pmahomme";}s:22:"lower_case_table_names";s:1:"1";s:19:"profiling_supported";b:0;}}tmpval|a:16:{s:15:"previous_serv
+<?php
+
+namespace BAPI\Models\Post;
+
+use CodeIgniter\Model;
+use Config\Validation;
+
+class Crud extends Model
+{
+
+  protected $table = 'post';
+	protected $primaryKey = 'id';
+
+  protected $returnType = 'array';
+	protected $dateFormat = 'date';
+
+  protected $useSoftDeletes = true;
+  protected $useTimestamps = true;
+
+  protected $beforeInsert = [ '__beforeInsert' ];
+  protected $beforeUpdate = [ '__beforeUpdate' ];
+
+
+  /**
+   * Search "**elias** table"-"field" with relations separate dash char
+   * @example $rules $rules[ 'user-username' ] = $configRules[ 'user_name' ]
+   * @return array rules
+   */
+  public function ruleSearch () : array
+  {
+		$configRules = config( '\BAPI\Config\Post' ) ->getRules();
+
+		$postRules = [
+			'id',
+			'title',
+			'slug',
+			'status',
+			'name',
+			'name_id',
+			'user_id',
+			'media_relation_id',
+			'typeof',
+		];
+
+    foreach ( $postRules as $rule ) {
+      $rules[ $rule ] = $configRules[ $rule ];
+		}
+
+		# --- Relation separate with dash char user_group_name
+		$rules[ 'user-username' ] = config( '\BAPI\Config\User' )
+		->getRules( 'user_name' );
+
+		$rules[ 'user_group-name' ] = config( '\BAPI\Config\User' )
+		->getRules( 'user_group_name' );
+
+		# --- Todo: let add more ...
+
+    return $rules;
+  }
+
+  public function ruleCreate () : array
+  {
+		$rules = config( '\BAPI\Config\Post' ) ->getRuleExcept( [ 'id' ] );
+
+		$rules[ 'slug' ] = Validation::modifier(
+			$rules[ 'slug' ], null, null, "is_unique[{$this->table}.slug]"
+		);
+
+		$this->allowedFields = array_keys( $rules );
+
+    return $rules;
+  }
+
+  public function rulePatch () : array
+  {
+    $rules[ 'group_id' ] = Validation::ruleInt(
+			'Id',
+			null,
+			"is_not_unique[{$this->table}.group_id]"
+		);
+
+    $rules[ 'status' ] = config( '\BAPI\Config\User' ) ->getRules( 'status' );
+
+		$this->allowedFields = [ 'group_id', 'status' ];
+
+    return $rules;
+  }
+
+  public function rulePut ( array $data ) : array
+  {
+		$id = $data[ 'id' ];
+
+    $configRules = config( '\BAPI\Config\User' ) ->getRules();
+
+    $rules = [
+      'username' => 'username',
+      'group_id' => 'group_id',
+      'email' => 'email',
+      'status' => 'status',
+      'password' => 'password',
+      'created' => 'created_at',
+      'updated' => 'updated_at',
+      'fullname' => 'fullname',
+      'phone' => 'phone',
+      'gender' => 'gender',
+      'birthday' => 'birthday'
+    ];
+
+		$rulesRequired = [ 'username', 'group_id', 'email', 'status' ];
+
+		$t = $this->table;
+		$pk = $this->primaryKey;
+    # Sometime many data just need 1 rule ( key != value )
+    foreach ($rules as $key => $value) {
+
+      $rules[ $key ] = $configRules[ $value ];
+
+      if ( $key === 'username' )
+      {
+        $rules[ 'username' ][ 'rules' ] .= "|is_unique[{$t}.username,{$pk},{$id}]";
+      }
+      else if ( $key === 'email' )
+      {
+        $rules[ 'email' ][ 'rules' ] .= "|is_unique[{$t}.email,{$pk},{$id}]";
+      }
+
+      if ( ! in_array( $key, $rulesRequired, true ) ) {
+        $rules[ $key ][ 'rules' ] .= '|if_exist';
+      }
+    }
+
+    $this->allowedFields = [
+			'username',
+			'group_id',
+			'email',
+			'password',
+			'status',
+			'created_at',
+			'updated_at'
+		];
+
+    return $rules;
+  }
+
+  protected function __beforeInsert ( array $data ) :array
+  {
+		print_r( $data ); die;
+
+    return $data;
+  }
+
+  protected function __beforeUpdate ( array $data ) :array
+  {
+    print_r( $data ); die;
+
+    return $data;
+  }
+}

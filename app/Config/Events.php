@@ -52,8 +52,23 @@ Events::on('pre_system', function () {
 	}
 
 	// Events::trigger('extStore');
+	/*
+	pre_system Called very early during system execution.
+	Only the benchmark and events class have been loaded at this point.
+	No routing or other processes have happened.
+
+	post_controller_constructor Called immediately
+	after your controller is instantiated,
+	but prior to any method calls happening.
+
+	post_system Called after the final rendered page is sent to the browser,
+	at the end of system execution after the finalized data is sent to the browser.
+
+	email Called after an email sent successfully from CodeIgniter\Email\Email.
+	Receives an array of the Email class’s properties as a parameter.
+	*/
 });
-/*
+
 Events::on( 'extStore', function(
 	string $Name = null,
 	$params = null,
@@ -133,4 +148,3 @@ Events::on( 'extStore', function(
 		}
 	}
 } );
-*/

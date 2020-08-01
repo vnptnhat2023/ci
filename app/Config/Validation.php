@@ -47,7 +47,7 @@ class Validation
 	 * 3. false $isZero = is_natural_no_zero
 	 * @return array
 	 */
-	public static function ruleInt(...$arg) : array
+	public static function ruleInt ( ...$arg ) : array
 	{
 		$before = empty( $arg[ 1 ] ) ? '' : $arg[ 1 ] . '|';
 		$after = empty( $arg[ 2 ] ) ? '' : '|' . $arg[ 2 ];
@@ -68,7 +68,7 @@ class Validation
 	 * @param null|string $after
 	 * @return array
 	 */
-	public static function ruleUndelete(...$arg) : array
+	public static function ruleUndelete ( ...$arg ) : array
 	{
 		$before = empty( $arg[ 1 ] ) ? '' : $arg[ 1 ] . '|';
 		$after = empty( $arg[ 2 ] ) ? '' : '|' . $arg[ 2 ];
@@ -88,7 +88,7 @@ class Validation
 	 * @param null|string $[3] After rule
 	 * @return array
 	 */
-	public static function modifier(...$arg) : array
+	public static function modifier ( ...$arg ) : array
 	{
 		if ( empty( $arg[ 0 ][ 'label' ] ) OR empty( $arg[ 0 ][ 'rules' ] ) ) {
 			return $arg[ 0 ] ?? [];
@@ -105,7 +105,7 @@ class Validation
 		return $rule;
 	}
 
-	public static function ruleEmail(string $label = 'email') : array
+	public static function ruleEmail ( string $label = 'email' ) : array
 	{
 		return [
 			'label' => $label,

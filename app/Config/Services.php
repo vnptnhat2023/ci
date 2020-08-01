@@ -18,13 +18,27 @@ use CodeIgniter\Config\Services as CoreServices;
 class Services extends CoreServices
 {
 
-	//    public static function example($getShared = true)
-	//    {
-	//        if ($getShared)
-	//        {
-	//            return static::getSharedInstance('example');
-	//        }
-	//
-	//        return new \CodeIgniter\Example();
-	//    }
+	/**
+	 * @return \App\Libraries\NknAuth
+	 */
+	public static function NknAuth(bool $getShared = true)
+	{
+		if ( $getShared === true ) {
+			return static::getSharedInstance( 'nknAuth' );
+		}
+
+		return new \App\Libraries\NknAuth();
+	}
+
+	/**
+	 * @return \App\Libraries\Extension
+	 */
+	public static function Extension(bool $getShared = true)
+	{
+		if ( $getShared === true ) {
+			return static::getSharedInstance( 'extension' );
+		}
+
+		return new \App\Libraries\Extension();
+	}
 }

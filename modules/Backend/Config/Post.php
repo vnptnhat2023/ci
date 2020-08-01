@@ -220,7 +220,7 @@ class Post extends BaseConfig
 
 			'excerpt' => [
 				'label' => 'excerpt',
-				'rules' => 'if_exist|trim|max_length[512]|alpha_numeric_punct'
+				'rules' => 'if_exist|trim|permit_empty|max_length[512]|alpha_numeric_punct'
 			],
 
 			'content' => [

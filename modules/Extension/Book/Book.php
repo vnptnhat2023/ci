@@ -44,6 +44,10 @@ class Book extends AbstractExtension
 		$routes->get( 'setting/extension', 'Setting::index',
 		['namespace' => '\Ext\Book\Controllers'] );
 
+		$routes->get( 'setting/extension/more', 'Setting::more',
+		['namespace' => '\Ext\Book\Controllers'] );
+
+		# CI4.0.4 not work with callable route
 		$routes->get( 'book_route123', function() {
 			return fView( 'FAPI_View', [ 'title' => ucfirst( self::map['name'] ) ] );
 		} );

@@ -27,7 +27,7 @@ class Category extends Migration
 
 			'name_id' => [
 				'type' => 'INT',
-				'constrain' => 11,
+				'constraint' => 11,
 				'unsigned' => true,
 				'null' => false,
         'default' => 0
@@ -56,14 +56,14 @@ class Category extends Migration
 
       'keyword' => [
 				'type' => 'TEXT',
-				'constrain' => 128,
+				'constraint' => 128,
         'null' => true,
 				'default' => null
 			],
 
       'parent_id' => [
 				'type' => 'INT',
-				'constrain' => 11,
+				'constraint' => 11,
 				'unsigned' => true,
 				'null' => false,
         'default' => 0
@@ -77,7 +77,7 @@ class Category extends Migration
 
       'sort' => [
 				'type' => 'INT',
-				'constrain' => 11,
+				'constraint' => 11,
 				'unsigned' => true,
 				'null' => false,
         'default' => 0

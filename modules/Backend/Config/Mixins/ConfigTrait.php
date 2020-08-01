@@ -2,12 +2,10 @@
 
 namespace BAPI\Config\Mixins;
 
-/**
- * Searches an array through dot syntax. Supports wildcard searches, like foo.*.bar
- * @method getSetting @return mixed
- */
 trait ConfigTrait
 {
+	abstract public function getRules ( string $key = null ) : array;
+
 	public function getSetting ( string $key = null )
 	{
 		helper('array');
@@ -17,5 +15,15 @@ trait ConfigTrait
 		return empty( $key )
 		? $class::setting
 		: dot_array_search( $key, $class::setting );
+	}
+
+	public function getRuleExcept (array $except)
+	{
+		return array_diff_key( $this->getRules(), array_flip( $except ) );
+	}
+
+	public function getRuleOnly (array $only)
+	{
+		return array_intersect_key( $this->getRules(), array_flip( $only ) );
 	}
 }
