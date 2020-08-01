@@ -6,6 +6,7 @@ use CodeIgniter\Database\Migration;
 
 class Category extends Migration
 {
+
 	public function up()
 	{
 
@@ -35,20 +36,22 @@ class Category extends Migration
       'title' => [
         'type' => 'VARCHAR',
         'constraint' => 32,
-        'null' => false
+        'null' => false,
+				'default' => 'unknown'
 			],
 
       'slug' => [
         'type' => 'VARCHAR',
         'constraint' => 48,
         'null' => false,
-        'unique' => true
+				'default' => 'unknown'
 			],
 
       'icon' => [
         'type' => 'VARCHAR',
         'constraint' => 32,
-        'null' => true
+				'null' => true,
+				'default' => 'unknown'
 			],
 
       'keyword' => [
@@ -102,6 +105,7 @@ class Category extends Migration
 		$this->forge
 		->addField( $fields )
 		->addKey( 'id', true )
+		->addKey( 'slug', false, true )
 		->createTable( 'category', true );
 	}
 

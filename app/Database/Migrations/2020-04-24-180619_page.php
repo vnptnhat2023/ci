@@ -1,11 +1,15 @@
-<?php namespace App\Database\Migrations;
+<?php
+
+namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
 class Page extends Migration
 {
+
 	public function up()
 	{
+
 		$fields = [
       'id' => [
         'type' => 'INT',
@@ -17,20 +21,22 @@ class Page extends Migration
       'title' => [
         'type' => 'VARCHAR',
         'constraint' => 32,
-        'null' => false
+				'null' => false,
+				'default' => 'unknown'
 			],
 
       'slug' => [
         'type' => 'VARCHAR',
         'constraint' => 48,
         'null' => false,
-        'unique' => true
+				'default' => 'unknown'
 			],
 
       'icon' => [
         'type' => 'VARCHAR',
         'constraint' => 32,
-        'null' => true
+				'null' => true,
+				'default' => null
 			],
 
       'content' => [
@@ -46,7 +52,8 @@ class Page extends Migration
 			],
 
       'advanced_position' => [
-        'type' => 'ENUM("top","bottom")',
+				'type' => 'ENUM("top","bottom")',
+				'null' => false,
         'default' => 'bottom'
 			],
 
@@ -65,7 +72,8 @@ class Page extends Migration
 
       'sort' => [
         'type' => 'INT',
-        'unsigned' => true,
+				'unsigned' => true,
+				'null' => false,
         'default' => 0
 			],
 
@@ -91,13 +99,9 @@ class Page extends Migration
 		$this->forge
 		->addField( $fields )
 		->addKey( 'id', true )
+		->addKey( 'slug', false, true )
 		->createTable( 'page', true );
-
-		# $this->forge->addKey('slug');
-    # $this->forge->addKey('parent_id');
 	}
-
-	//--------------------------------------------------------------------
 
 	public function down()
 	{

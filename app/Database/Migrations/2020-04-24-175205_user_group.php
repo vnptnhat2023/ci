@@ -6,8 +6,10 @@ use CodeIgniter\Database\Migration;
 
 class UserGroup extends Migration
 {
+
 	public function up()
 	{
+
 		$fields = [
 
 			'id' => [
@@ -20,7 +22,8 @@ class UserGroup extends Migration
 			'name' => [
 				'type' => 'VARCHAR',
 				'constraint' => 64,
-				'null' => false
+				'null' => false,
+				'default' => 'guest'
 			],
 
 			'permission' => [
@@ -42,8 +45,6 @@ class UserGroup extends Migration
 		->addKey( 'id', true )
 		->createTable( 'user_group', true );
 	}
-
-	//--------------------------------------------------------------------
 
 	public function down()
 	{

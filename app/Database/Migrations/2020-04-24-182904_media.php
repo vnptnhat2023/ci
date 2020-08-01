@@ -11,6 +11,7 @@ class Media extends Migration
 	{
 
 		$fields = [
+
       'id' => [
         'type' => 'INT',
         'constraint' => 11,
@@ -21,12 +22,14 @@ class Media extends Migration
       'name' => [
         'type' => 'VARCHAR',
         'constraint' => 32,
-        'null' => false
+				'null' => false,
+				'default' => 'po'
 			],
 
       'value' => [
         'type' => 'TEXT',
-        'null' => false
+				'null' => false,
+				'default' => 'unknown'
 			],
 
       'created_at' => [
@@ -53,8 +56,6 @@ class Media extends Migration
 		->addKey( 'id', true )
 		->createTable( 'media', true );
 	}
-
-	//--------------------------------------------------------------------
 
 	public function down()
 	{

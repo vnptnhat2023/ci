@@ -10,6 +10,7 @@ class MediaRelation extends Migration
 	{
 
 		$fields = [
+
       'id' => [
         'type' => 'INT',
         'constraint' => 11,
@@ -21,6 +22,7 @@ class MediaRelation extends Migration
         'type' => 'INT',
 				'constraint' => 11,
 				'unsigned' => true,
+				'null' => false,
         'default' => 0
 			],
 
@@ -28,6 +30,7 @@ class MediaRelation extends Migration
         'type' => 'INT',
 				'constraint' => 11,
 				'unsigned' => true,
+				'null' => false,
         'default' => 0
 			],
 
@@ -35,6 +38,7 @@ class MediaRelation extends Migration
         'type' => 'INT',
 				'constraint' => 11,
 				'unsigned' => true,
+				'null' => false,
         'default' => 0
 			],
 
@@ -42,6 +46,7 @@ class MediaRelation extends Migration
         'type' => 'INT',
 				'constraint' => 11,
 				'unsigned' => true,
+				'null' => false,
 				'default' => 0
 			],
 
@@ -49,6 +54,7 @@ class MediaRelation extends Migration
         'type' => 'INT',
 				'constraint' => 11,
 				'unsigned' => true,
+				'null' => false,
 				'default' => 0
       ]
 		];

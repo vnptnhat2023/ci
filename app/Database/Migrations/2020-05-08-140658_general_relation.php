@@ -1,18 +1,24 @@
-<?php namespace App\Database\Migrations;
+<?php
+
+namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
 class GeneralRelation extends Migration
 {
+
 	public function up()
 	{
+
 		$fields = [
+
       'id' => [
         'type' => 'INT',
         'constraint' => 11,
         'unsigned' => true,
         'auto_increment' => true
-      ],
+			],
+
       'name' => [
 				'type' => 'CHAR',
 				'constraint' => 2,
@@ -20,38 +26,46 @@ class GeneralRelation extends Migration
         'null' => false,
 				'comment' => 'ca,pa,po,gg,...'
 			],
+
 			'name_id' => [
 				'type' => 'INT',
 				'constraint' => 11,
 				'unsigned' => true,
-        'default' => 0,
-        'null' => false,
-				'comment' => 'If name is PO, it will be id of Post'
+				'null' => false,
+				'default' => 0,
+				'comment' => 'po: post, ca: category, pa: page'
 			],
-      'ggid' => [# cat_custom_id
+
+      'ggid' => [
         'type' => 'INT',
         'constraint' => 11,
-        'unsigned' => true,
+				'unsigned' => true,
+				'null' => false,
         'default' => 0,
 				'comment' => 'General group id'
-      ],
+			],
+
       'giid' => [# item_id
         'type' => 'INT',
         'constraint' => 11,
-        'unsigned' => true,
+				'unsigned' => true,
+				'null' => false,
         'default' => 0,
 				'comment' => 'General item Id'
-      ],
+			],
+
       'created_at'=> [
         'type' => 'DATE',
         'null' => true,
         'default' => null
-      ],
+			],
+
       'updated_at'=> [
         'type' => 'DATE',
         'null' => true,
         'default' => null
-      ],
+			],
+
       'deleted_at'=> [
         'type' => 'DATE',
         'null' => true,
@@ -59,14 +73,11 @@ class GeneralRelation extends Migration
       ]
 		];
 
-		$this->forge->addField($fields);
-
-		$this->forge->addKey( 'id', true );
-
-    $this->forge->createTable( 'general_relation', true );
+		$this->forge
+		->addField( $fields )
+		->addKey( 'id', true )
+		->createTable( 'general_relation', true );
 	}
-
-	//--------------------------------------------------------------------
 
 	public function down()
 	{

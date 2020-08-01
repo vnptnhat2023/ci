@@ -1,14 +1,10 @@
 <?php
 
-# use CodeIgniter\API\ResponseTrait;
-# use CodeIgniter\HTTP\RequestInterface;
-# use CodeIgniter\HTTP\ResponseInterface;
-
 namespace BAPI\Controllers\Mixins;
 
-# For trigger method
 use CodeIgniter\Database\Exceptions\DataException;
 use CodeIgniter\Exceptions\ModelException;
+
 
 /**
  * @method array ___updateMultiExist() Callable count instead of multiPatch do default
@@ -240,7 +236,7 @@ trait BAPITrait
 	 */
 	protected array $editRun = [];
 
-	private function _searchTraitChunk (array $data, string $methodName, array $params)
+	private function _searchTraitChunk ( array $data, string $methodName, array $params )
 	{
 		# --- [ title => Something great <^,^'> !Meow! ]
 		if ( array_key_exists( $methodName, $this->searchValueRequire ) ) {
@@ -258,7 +254,7 @@ trait BAPITrait
   /**
 	 * Read about the indexTrait method
    */
-  private function _searchTrait(
+  private function _searchTrait (
     array $except = [],
     string $methodName = 'like',
 		array $params = [],
@@ -457,7 +453,7 @@ trait BAPITrait
    * @eventController indexRun, return empty[]
    * @eventModel ruleSearch, (Elias first if exist | table_name)-fieldName
    */
-  protected function indexTrait(
+  protected function indexTrait (
     bool $search = false,
     array $except = [],
 		string $methodName = 'like',
@@ -482,7 +478,7 @@ trait BAPITrait
    * @afterCreate  [ [ string | int ] id, array data ]
    * @return mixed ResponseTrait | array; Prop: returnTypeTrait, default: ResponseTrait
    */
-  protected function createTrait()
+  protected function createTrait ()
   {
     if ( 0 === count( $this->request->getPost() ) ) {
       return $this->resErr( lang( 'api.errorEmptyData' ) );
@@ -539,7 +535,7 @@ trait BAPITrait
    * @property protectFirstId default: true
    * @property maximumDelete default: 1
    */
-  protected function deleteTrait($id = null, bool $purge = false)
+  protected function deleteTrait ( $id = null, bool $purge = false )
   {
     if ( ! $id ) {
 			$resErr = lang( 'Validation.required', [ 'field' => 'id' ] );
@@ -638,7 +634,7 @@ trait BAPITrait
    * @eController beforeMultiPatch, ModelEvent: rulePatch, rulePatchUndelete - [ array 'id' => $id ]
    * @eController beforeUpdate, afterUpdate - [ ( put ? int $id : array $id ), array $data, string $method]
    */
-  protected function updateTrait($id = null, bool $unDelPatch = false)
+  protected function updateTrait ( $id = null, bool $unDelPatch = false )
   {
 		$unDelPatch = ( $unDelPatch === true ) AND ( $this->model->useSoftDeletes === true );
 
@@ -729,7 +725,7 @@ trait BAPITrait
    * @param string $methodName = show|edit, default show
    * @return ResponseTrait|array
    */
-  protected function _editShowTrait( $id = null, string $methodName = 'show' )
+  protected function _editShowTrait ( $id = null, string $methodName = 'show' )
   {
     if ( ! $id ) {
 			return $this->resErr( lang( 'Validation.required', [ 'field' => 'id' ] ) );
@@ -774,7 +770,7 @@ trait BAPITrait
    * @param bool $unDelPatch restore softDeleted
    * @return array
    */
-  private function _singlePatch( &$id, array &$rawArray, bool $unDelPatch ) : array
+  private function _singlePatch ( &$id, array &$rawArray, bool $unDelPatch ) : array
   {
     if ( ( true === $unDelPatch ) AND ( true === $this->model->useSoftDeletes ) )
     {
@@ -819,7 +815,7 @@ trait BAPITrait
    * @param bool $unDelPatch restore softDeleted
    * @return array
    */
-  private function _multiPatch( &$id, array &$rawArray, bool $unDelPatch ) : array
+  private function _multiPatch ( &$id, array &$rawArray, bool $unDelPatch ) : array
   {
     $IdsCounter = count( $this->_idToArray($id) );
     if ( $IdsCounter <= $this->maximumUpdate )
@@ -882,7 +878,7 @@ trait BAPITrait
    * @param array &$rawArray
    * @return array
    */
-  private function _singlePut( &$id, array &$rawArray ) : array
+  private function _singlePut ( &$id, array &$rawArray ) : array
   {
     if ( ! $tempData = $this->model->select( $this->updateTemp ?? '1' )->find($id) ) {
       return [ 'error' => lang( 'Validation.is_not_unique', [ 'field' => 'Id' ] ) ];
@@ -908,7 +904,7 @@ trait BAPITrait
    * @param int $length
    * @return array
    */
-  public function _idToArray( string $id, string $sep = '.', int $len = 100 ) : array
+  public function _idToArray ( string $id, string $sep = '.', int $len = 100 ) : array
   {
     if ( empty($id) ) return [];
 
@@ -926,7 +922,7 @@ trait BAPITrait
   /**
    * Find some rules when we need them.
    */
-  private function _findRules(array $rawArray, array $ruleConfig, array $except = []) : array
+  private function _findRules ( array $rawArray, array $ruleConfig, array $except = [] ) : array
   {
 		helper( 'array' );
 
@@ -964,7 +960,7 @@ trait BAPITrait
     return $rules;
   }
 
-  private function trigger(string $event, array $eventData)
+  private function trigger ( string $event, array $eventData )
 	{
 		if (! isset($this->{$event}) || empty($this->{$event}))
 		{
@@ -984,7 +980,7 @@ trait BAPITrait
 		return $eventData;
   }
 
-  private function triggerModel(string $event, array $eventData)
+  private function triggerModel ( string $event, array $eventData )
 	{
 		if (! isset($this->{$event}) || empty($this->{$event}))
 		{
@@ -1004,7 +1000,7 @@ trait BAPITrait
 		return $eventData;
   }
 
-  public function resErr($data = null, string $key = 'error')
+  public function resErr ( $data = null, string $key = 'error' )
   {
     if ( $this->checkReturnTypeTrait() === 'array' )
     {
@@ -1034,7 +1030,7 @@ trait BAPITrait
   /**
    * When use $methodName, $data must be ARRAY, because it will unpack to args
    */
-  public function res($data = null, $methodName = null, string $key = 'success')
+  public function res ( $data = null, $methodName = null, string $key = 'success' )
   {
     if ( $this->checkReturnTypeTrait() === 'array' )
     {
@@ -1067,7 +1063,7 @@ trait BAPITrait
    * Check return Type of BAPITrait
    * @return string array|object
    */
-  private function checkReturnTypeTrait() : string
+  private function checkReturnTypeTrait () : string
   {
     return $this->returnTrait === 'array' ? 'array' : 'object';
   }

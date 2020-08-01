@@ -6,8 +6,10 @@ use CodeIgniter\Database\Migration;
 
 class User extends Migration
 {
+
 	public function up()
 	{
+
 		$fields = [
 
       'id' => [
@@ -20,31 +22,36 @@ class User extends Migration
       'group_id' => [
         'type' => 'INT',
         'constraint' => 11,
-        'unsigned' => true
+				'unsigned' => true,
+				'null' => false,
+				'default' => 0
 			],
 
       'username' => [
         'type' => 'VARCHAR',
         'constraint' => 32,
-        'unique' => true,
-        'null' => false
+				'null' => false,
+				'default' => 'unknown'
 			],
 
       'email' => [
         'type' => 'VARCHAR',
         'constraint' => 128,
         'unique' => true,
-        'null' => false
+				'null' => false,
+				'default' => 'unknown'
 			],
 
       'password' => [
         'type' => 'VARCHAR',
         'constraint' => 64,
-        'null' => false
+				'null' => false,
+				'default' => 'unknown'
 			],
 
       'status' => [
-        'type' => 'ENUM("active", "inactive", "banned")',
+				'type' => 'ENUM("active", "inactive", "banned")',
+				'null' => false,
         'default' => 'inactive'
 			],
 
@@ -58,7 +65,8 @@ class User extends Migration
       'last_login' => [
         'type' => 'VARCHAR',
         'constraint' => 64,
-        'null' => true
+				'null' => true,
+				'default' => null
 			],
 
       'last_activity' => [
@@ -88,14 +96,13 @@ class User extends Migration
 
 		$this->forge
 		->addField( $fields )
+
 		->addKey( 'id', true )
+		->addKey( 'username', false, true )
 		->addKey( 'group_id' )
+
 		->createTable( 'user', true );
-
-		# $this->forge->addKey( 'username', false, true );
 	}
-
-	//--------------------------------------------------------------------
 
 	public function down()
 	{

@@ -6,38 +6,48 @@ class GeneralGroup extends Migration
 {
 	public function up()
 	{
+
 		$fields = [
+
       'id' => [
         'type' => 'INT',
         'constraint' => 11,
         'unsigned' => true,
         'auto_increment' => true
-      ],
+			],
+
       'title' => [
         'type' => 'VARCHAR',
         'constraint' => 32,
-				'null' => false
-      ],
+				'null' => false,
+				'default' => 'unknown'
+			],
+
       'slug' => [
         'type' => 'VARCHAR',
         'constraint' => 48,
 				'null' => false,
-				'unique' => true
-      ],
+				'default' => 'unknown'
+			],
+
       'status' => [
-        'type' => 'ENUM("active", "inactive")',
+				'type' => 'ENUM("active", "inactive")',
+				'null' => false,
         'default' => 'active'
-      ],
+			],
+
       'created_at'=> [
         'type' => 'DATE',
         'null' => true,
         'default' => null
-      ],
+			],
+
       'updated_at'=> [
         'type' => 'DATE',
         'null' => true,
         'default' => null
-      ],
+			],
+
       'deleted_at'=> [
         'type' => 'DATE',
         'null' => true,
@@ -45,11 +55,11 @@ class GeneralGroup extends Migration
       ]
 		];
 
-		$this->forge->addField($fields);
-
-		$this->forge->addKey( 'id', true );
-
-    $this->forge->createTable( 'general_group', true );
+		$this->forge
+		->addField( $fields )
+		->addKey( 'id', true )
+		->addKey( 'slug', false, true )
+		->createTable( 'general_group', true );
 	}
 
 	//--------------------------------------------------------------------

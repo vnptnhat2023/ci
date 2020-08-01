@@ -1,4 +1,5 @@
 <?php
+
 namespace BAPI\Config;
 
 use BAPI\Config\Mixins\ConfigTrait;
@@ -40,54 +41,54 @@ class Page extends BaseConfig
 		// 'cache' => []
 	];
 
-	public function getRules(string $key = null) : array
+	public function getRules ( string $key = null ) : array
 	{
 		$rules = [
-			# id
+
 			'id' => \Config\Validation::ruleInt( 'id', 'required' ),
-			# title
+
 			'title' => [
 				'label' => 'title',
 				'rules' => 'trim|required|min_length[2]|max_length[32]'
 			],
-			# slug
+
 			'slug' => [
 				'label' => 'slug',
 				'rules' => 'trim|required|min_length[2]|max_length[48]|alpha_dash'
 			],
-			# icon
+
 			'icon' => [
 				'label' => 'icon',
 				'rules' => 'if_exist|trim|min_length[2]|max_length[32]|alpha_space'
 			],
-			# content
+
 			'content' => [
 				'label' => 'content',
 				'rules' => 'if_exist|trim|permit_empty'
 			],
-			# advanced_content
+
 			'advanced_content' => [
 				'label' => 'advanced content',
 				'rules' => 'if_exist|trim|permit_empty'
 			],
-			# advanced_position
+
 			'advanced_position' => [
 				'label' => 'advanced position',
 				'rules' => 'required|in_list[top,bottom]'
 			],
-			# parent_id
+
 			'parent_id' => \Config\Validation::ruleInt( 'parent id', null, null, true ),
-			# status
+
 			'status' => [
 				'label' => 'status',
 				'rules' => 'required|in_list[publish,private,draff]'
 			],
-			# sort
+
 			'sort' => \Config\Validation::ruleInt( 'sort', null, null, true )
 		];
 
 		helper('array');
 
-		return empty( $key ) ? $rules : ( dot_array_search( $key, $rules ) ?? $rules );
+		return empty( $key ) ? $rules : dot_array_search( $key, $rules );
 	}
 }

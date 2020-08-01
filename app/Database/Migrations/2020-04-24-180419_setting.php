@@ -8,6 +8,7 @@ class Setting extends Migration
 {
 	public function up()
 	{
+
 		$fields = [
 
       'id' => [
@@ -21,13 +22,14 @@ class Setting extends Migration
 				'type' => 'VARCHAR',
 				'constraint' => 64,
 				'null' => false,
-				'unique' => true
+				'default' => 'unknown'
 			],
 
       'setting_value' => [
 				'type' => 'VARCHAR',
 				'constraint' => 1000,
-				'null' => false
+				'null' => false,
+				'default' => 'unknown'
 			],
 
 			'created_at' => [
@@ -50,14 +52,11 @@ class Setting extends Migration
 		];
 
 		$this->forge
-		->addField($fields)
+		->addField( $fields )
 		->addKey( 'id', true )
+		->addKey( 'setting_name', false, true )
 		->createTable( 'setting', true );
-
-		// $this->forge->addKey('setting_name');
 	}
-
-	//--------------------------------------------------------------------
 
 	public function down()
 	{

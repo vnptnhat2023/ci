@@ -3,8 +3,9 @@
 namespace BAPI\Config;
 
 use BAPI\Config\Mixins\ConfigTrait;
+use CodeIgniter\Config\BaseConfig;
 
-class GeneralRelation extends \CodeIgniter\Config\BaseConfig
+class GeneralRelation extends BaseConfig
 {
 	use ConfigTrait;
 
@@ -16,9 +17,11 @@ class GeneralRelation extends \CodeIgniter\Config\BaseConfig
 		]
 	];
 
-	public function getRules(string $key = null) : array
+	public function getRules ( string $key = null ) : array
 	{
+
 		$rules = [
+
 			'id' => \Config\Validation::ruleInt( 'id', 'required' ),
 
 			'name' => [
@@ -48,6 +51,6 @@ class GeneralRelation extends \CodeIgniter\Config\BaseConfig
 
 		helper('array');
 
-		return empty( $key ) ? $rules : ( dot_array_search( $key, $rules ) ?? $rules );
+		return empty( $key ) ? $rules : dot_array_search( $key, $rules );
 	}
 }

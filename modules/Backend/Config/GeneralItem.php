@@ -11,7 +11,9 @@ class GeneralItem extends BaseConfig
 	use ConfigTrait;
 
   private const setting = [
+
 		'db' => [
+
 			'create' => [
 				'maximum_rows' => 1
 			],
@@ -37,9 +39,10 @@ class GeneralItem extends BaseConfig
 		]
 	];
 
-	public function getRules(string $key = null) : array
+	public function getRules ( string $key = null ) : array
 	{
 		$rules = [
+
 			'id' => \Config\Validation::ruleInt( 'id', 'required' ),
 
 			'title' => [
@@ -60,6 +63,6 @@ class GeneralItem extends BaseConfig
 
 		helper('array');
 
-		return empty( $key ) ? $rules : ( dot_array_search( $key, $rules ) ?? $rules );
+		return empty( $key ) ? $rules : dot_array_search( $key, $rules );
 	}
 }

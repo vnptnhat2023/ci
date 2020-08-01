@@ -7,21 +7,21 @@ use CodeIgniter\Config\BaseConfig;
 use Config\Validation;
 
 /**
- * @if $name == 'ca' : $name_id = 0; $parent_id >= 0;
- * @else $name != 'ca' $parent_id = 0; $name_id > 0;
- */
-
- /** 05-05-20
-	if ( $name == 'ca' )
-	{
-		$name = 'ca';  =>  $name_id = 0;
-		$parent_id >= 0;// Find parent id and name
-	}
-	else
-	{
-		$parent_id = 0;// Find parent id and name
-		$name_id > 0;  =>  $name != 'ca';
-	}
+ * 1. if $name == 'ca' : $name_id = 0; $parent_id >= 0;
+ * 2. else $name != 'ca' $parent_id = 0; $name_id > 0;
+ * 3. 05-05-20
+* ```
+ * if ( $name == 'ca' )
+ * {
+ * 	 $name = 'ca';  =>  $name_id = 0;
+ * 	 $parent_id >= 0;// Find parent id and name
+ * }
+ * else
+ * {
+ * 	 $parent_id = 0;// Find parent id and name
+ * 	 $name_id > 0;  =>  $name != 'ca';
+ * }
+ * ```
  */
 
 class Category extends BaseConfig
@@ -84,9 +84,10 @@ class Category extends BaseConfig
 		]
 	];
 
-	public function getRules(string $key = null) : array
+	public function getRules ( string $key = null ) : array
 	{
 		$rules = [
+
 			'id' => Validation::ruleInt(),
 
 			'name' => [
@@ -129,6 +130,6 @@ class Category extends BaseConfig
 
 		helper('array');
 
-		return empty( $key ) ? $rules : ( dot_array_search( $key, $rules ) ?? $rules );
+		return empty( $key ) ? $rules : dot_array_search( $key, $rules );
 	}
 }

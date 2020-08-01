@@ -37,18 +37,22 @@ class GeneralGroup extends BaseConfig
 		]
 	];
 
-	public function getRules(string $key = null) : array
+	public function getRules ( string $key = null ) : array
 	{
 		$rules = [
+
 			'id' => \Config\Validation::ruleInt( 'id', 'required' ),
+
 			'title' => [
 				'label' => 'title',
 				'rules' => 'trim|required|min_length[2]|max_length[32]'
 			],
+
 			'slug' => [
 				'label' => 'slug',
 				'rules' => 'trim|required|min_length[2]|max_length[48]|alpha_dash'
 			],
+
 			'status' => [
 				'label' => 'status',
 				'rules' => 'required|in_list[active,inactive]'
@@ -57,6 +61,6 @@ class GeneralGroup extends BaseConfig
 
 		helper('array');
 
-		return empty( $key ) ? $rules : ( dot_array_search( $key, $rules ) ?? $rules );
+		return empty( $key ) ? $rules : dot_array_search( $key, $rules );
 	}
 }

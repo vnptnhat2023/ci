@@ -6,8 +6,10 @@ use CodeIgniter\Database\Migration;
 
 class UserDetail extends Migration
 {
+
 	public function up()
 	{
+
 		$fields = [
 
 			'id' => [
@@ -20,24 +22,29 @@ class UserDetail extends Migration
 			'user_id' => [
 				'type' => 'INT',
 				'constraint' => 11,
-				'unsigned' => true
+				'unsigned' => true,
+				'null' => false,
+				'default' => 0
 			],
 
 			'fullname' => [
 				'type' => 'VARCHAR',
 				'constraint' => 50,
-				'null' => true
+				'null' => true,
+				'default' => null
 			],
 
 			'phone' => [
 				'type' => 'VARCHAR',
 				'constraint' => 20,
-				'null' => true
+				'null' => true,
+				'default' => null
 			],
 
 			'gender' => [
-				'type' => 'ENUM("male","female")',
-				'default' => 'male'
+				'type' => 'ENUM("male","female","unknown")',
+				'default' => 'male',
+				'null' => false
 			],
 
 			'birthday' => [
@@ -50,11 +57,9 @@ class UserDetail extends Migration
 		$this->forge
 		->addField( $fields )
 		->addKey( 'id', true )
-		->addKey('user_id')
-		->createTable('user_detail');
+		->addKey( 'user_id' )
+		->createTable( 'user_detail' );
 	}
-
-	//--------------------------------------------------------------------
 
 	public function down()
 	{

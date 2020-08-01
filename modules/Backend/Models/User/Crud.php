@@ -5,15 +5,16 @@ namespace BAPI\Models\User;
 class Crud extends \CodeIgniter\Model
 {
   protected $table = 'user';
-  protected $primaryKey = 'id';
+	protected $primaryKey = 'id';
+
   protected $returnType = 'array';
 	protected $dateFormat = 'date';
 
   protected $useSoftDeletes = true;
   protected $useTimestamps = true;
 
-  protected $beforeInsert = ['__beforeCreate'];
-  protected $beforeUpdate = ['__beforeUpdate'];
+  protected $beforeInsert = [ '__beforeCreate' ];
+  protected $beforeUpdate = [ '__beforeUpdate' ];
 
 
   /**
@@ -21,61 +22,68 @@ class Crud extends \CodeIgniter\Model
    * @Use user_group-name
    * @return array rules
    */
-  public function ruleSearch() : array
+  public function ruleSearch () : array
   {
-		$configRules = config('\BAPI\Config\User')->getRules();
+		$configRules = config( '\BAPI\Config\User' )->getRules();
 
     foreach ( [ 'username', 'password', 'email', 'status' ] as $rule ) {
       $rules[ $rule ] = $configRules[ $rule ];
 		}
 
-    $rules['user_group-name'] = $configRules['user_group_name'];
+    $rules[ 'user_group-name' ] = $configRules[ 'user_group_name' ];
 
     return $rules;
   }
 
-  public function ruleCreate() : array
+  public function ruleCreate () : array
   {
-    $this->allowedFields = [ 'username', 'email', 'password', 'status' ];
+    $this->allowedFields = [
+			'username',
+			'email',
+			'password',
+			'status'
+		];
 
-		$configRules = config('\BAPI\Config\User')->getRules();
+		$configRules = config( '\BAPI\Config\User' ) ->getRules();
 
-		$usernameRule = $configRules['username'];
+		$usernameRule = $configRules[ 'username' ];
 
-    $emailRule = $configRules['email'];
+    $emailRule = $configRules[ 'email' ];
 
-		$usernameRule['rules'] .= "|is_unique[{$this->table}.username]";
+		$usernameRule[ 'rules' ] .= "|is_unique[{$this->table}.username]";
 
-    $emailRule['rules'] .= "|is_unique[{$this->table}.email]";
+    $emailRule[ 'rules' ] .= "|is_unique[{$this->table}.email]";
 
     $rules = [
       'username' => $usernameRule,
       'email' => $emailRule,
-      'password' => $configRules['password'],
-      'status' => $configRules['status']
+      'password' => $configRules[ 'password' ],
+      'status' => $configRules[ 'status' ]
     ];
 
     return $rules;
   }
 
-  public function rulePatch() : array
+  public function rulePatch () : array
   {
-    $rules['group_id'] = \Config\Validation::ruleInt(
-      'Id', null, "is_not_unique[{$this->table}.group_id]"
+    $rules[ 'group_id' ] = \Config\Validation::ruleInt(
+			'Id',
+			null,
+			"is_not_unique[{$this->table}.group_id]"
 		);
 
-    $rules['status'] = config('\BAPI\Config\User')->getRules('status');
+    $rules[ 'status' ] = config( '\BAPI\Config\User' ) ->getRules( 'status' );
 
 		$this->allowedFields = [ 'group_id', 'status' ];
 
     return $rules;
   }
 
-  public function rulePut(array $data) : array
+  public function rulePut ( array $data ) : array
   {
-		$id = $data['id'];
+		$id = $data[ 'id' ];
 
-    $configRules = config('\BAPI\Config\User')->getRules();
+    $configRules = config( '\BAPI\Config\User' ) ->getRules();
 
     $rules = [
       'username' => 'username',
@@ -93,17 +101,20 @@ class Crud extends \CodeIgniter\Model
 
 		$rulesRequired = [ 'username', 'group_id', 'email', 'status' ];
 
+		$t = $this->table;
+		$pk = $this->primaryKey;
     # Sometime many data just need 1 rule ( key != value )
     foreach ($rules as $key => $value) {
+
       $rules[ $key ] = $configRules[ $value ];
 
-      if ( $key === 'username')
+      if ( $key === 'username' )
       {
-        $rules[ 'username' ][ 'rules' ] .= "|is_unique[{$this->table}.username,{$this->primaryKey},{$id}]";
+        $rules[ 'username' ][ 'rules' ] .= "|is_unique[{$t}.username,{$pk},{$id}]";
       }
       else if ( $key === 'email' )
       {
-        $rules[ 'email' ][ 'rules' ] .= "|is_unique[{$this->table}.email,{$this->primaryKey},{$id}]";
+        $rules[ 'email' ][ 'rules' ] .= "|is_unique[{$t}.email,{$pk},{$id}]";
       }
 
       if ( ! in_array( $key, $rulesRequired, true ) ) {
@@ -124,41 +135,43 @@ class Crud extends \CodeIgniter\Model
     return $rules;
   }
 
-  public function rulePatchUndelete() : array
+  public function rulePatchUndelete () : array
   {
 		$this->allowedFields = [ $this->deletedField ];
 
-    return [ $this->deletedField => \Config\Validation::ruleUndelete() ];
+    return [
+			$this->deletedField => \Config\Validation::ruleUndelete()
+		];
   }
 
   # --- User::group::__afterDelete using this method
-  public function allowedGroupField()
+  public function allowedGroupField ()
   {
     $this->allowedFields[] = 'group_id';
   }
 
-  protected function __beforeCreate(array $data) :array
+  protected function __beforeCreate ( array $data ) :array
   {
-		$password = $data['data']['password'];
+		$password = $data[ 'data' ][ 'password' ];
 
-		$data['data']['password'] = service( 'NknAuth' )
+		$data[ 'data' ][ 'password' ] = service( 'NknAuth' )
 		->get_password_hash( $password );
 
-		$data['data']['group_id'] = config( '\BAPI\Config\User' )
+		$data[ 'data' ][ 'group_id' ] = config( '\BAPI\Config\User' )
 		->getSetting( 'db.option.default_group' );
 
     return $data;
   }
 
-  protected function __beforeUpdate(array $data) :array
+  protected function __beforeUpdate ( array $data ) :array
   {
     if ( ! empty( $data[ 'data' ][ 'password' ] ) ) {
 			$password = $data[ 'data' ][ 'password' ];
 
-      $data['data']['password'] = service('NknAuth')->get_password_hash( $password );
+			$data[ 'data' ][ 'password' ] = service( 'NknAuth' )
+			->get_password_hash( $password );
     }
 
     return $data;
   }
-
 }

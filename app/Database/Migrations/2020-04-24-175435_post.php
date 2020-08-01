@@ -6,8 +6,10 @@ use CodeIgniter\Database\Migration;
 
 class Post extends Migration
 {
+
 	public function up()
 	{
+
 		$fields = [
 
 			'id' => [
@@ -20,13 +22,15 @@ class Post extends Migration
 			'title' => [
 				'type' => 'VARCHAR',
 				'constraint' => 128,
-				'null' => false
+				'null' => false,
+				'default' => 'unknown'
 			],
 
 			'slug' => [
 				'type' => 'VARCHAR',
 				'constraint' => 192,
-				'null' => false
+				'null' => false,
+				'default' => 'unknown'
 			],
 
 			'excerpt' => [
@@ -38,7 +42,8 @@ class Post extends Migration
 
 			'content' => [
 				'type' => 'TEXT',
-				'null' => false
+				'null' => false,
+				'default' => 'unknown'
 			],
 
 			'name' => [
@@ -110,8 +115,6 @@ class Post extends Migration
 		->addKey( 'slug', false, true )
 		->createTable( 'post', true );
 	}
-
-	//--------------------------------------------------------------------
 
 	public function down()
 	{

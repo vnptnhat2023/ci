@@ -253,8 +253,6 @@ class Post extends BaseConfig
 
 		helper( 'array' );
 
-		return empty( $key )
-		? $rules
-		: ( dot_array_search( $key, $rules ) ?? $rules );
+		return empty( $key ) ? $rules : dot_array_search( $key, $rules );
 	}
 }

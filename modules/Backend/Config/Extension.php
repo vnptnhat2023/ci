@@ -53,9 +53,10 @@ class Extension extends BaseConfig
 		]
 	];
 
-	public function getRules(string $key = null) : array
+	public function getRules ( string $key = null )  : array
 	{
 		$rules = [
+
 			'id' => \Config\Validation::ruleInt(),
 
 			'author' => [

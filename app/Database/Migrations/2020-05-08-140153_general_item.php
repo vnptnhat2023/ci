@@ -1,42 +1,56 @@
-<?php namespace App\Database\Migrations;
+<?php
+
+namespace App\Database\Migrations;
 
 use CodeIgniter\Database\Migration;
 
 class GeneralItem extends Migration
 {
+
 	public function up()
 	{
+
 		$fields = [
+
       'id' => [
         'type' => 'INT',
         'constraint' => 11,
         'unsigned' => true,
         'auto_increment' => true
-      ],
+			],
+
       'title' => [
         'type' => 'VARCHAR',
         'constraint' => 32,
-        'null' => false
-      ],
+        'null' => false,
+				'default' => 'unknown'
+			],
+
       'slug' => [
         'type' => 'VARCHAR',
         'constraint' => 48,
-        'null' => false
+        'null' => false,
+				'default' => 'unknown'
 			],
+
 			'status' => [
         'type' => 'ENUM("active", "inactive")',
-        'default' => 'active'
-      ],
+				'null' => false,
+				'default' => 'active',
+			],
+
       'created_at'=> [
         'type' => 'DATE',
         'null' => true,
         'default' => null
-      ],
+			],
+
       'updated_at'=> [
         'type' => 'DATE',
         'null' => true,
         'default' => null
-      ],
+			],
+
       'deleted_at'=> [
         'type' => 'DATE',
         'null' => true,
@@ -44,14 +58,11 @@ class GeneralItem extends Migration
       ]
 		];
 
-		$this->forge->addField( $fields );
-
-		$this->forge->addKey( 'id', true );
-
-    $this->forge->createTable( 'general_item', true );
+		$this->forge
+		->addField( $fields )
+		->addKey( 'id', true )
+		->createTable( 'general_item', true );
 	}
-
-	//--------------------------------------------------------------------
 
 	public function down()
 	{

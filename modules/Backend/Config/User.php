@@ -11,6 +11,7 @@ class User extends BaseConfig
 	use ConfigTrait;
 
   private const setting = [
+
 		# --- [ 'user', 'user_group' ]
 		'permission' => [
 			'all',
@@ -23,6 +24,7 @@ class User extends BaseConfig
 		],
 
 		'db' => [
+
 			'create' => [
 				'maximum_rows' => 1
 			],
@@ -63,9 +65,11 @@ class User extends BaseConfig
 		]
 	];
 
-	public function getRules(string $key = null) : array
+	public function getRules ( string $key = null ) : array
 	{
+
 		$rules = [
+
 			'id' => Validation::ruleInt( 'Id', 'required' ),
 
 			'group_id' => Validation::ruleInt( 'Group-Id' ),
@@ -118,6 +122,6 @@ class User extends BaseConfig
 
 		helper('array');
 
-		return empty( $key ) ? $rules : ( dot_array_search( $key, $rules ) ?? $rules );
+		return empty( $key ) ? $rules : dot_array_search( $key, $rules );
 	}
 }
