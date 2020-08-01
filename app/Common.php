@@ -75,7 +75,7 @@ if (! function_exists('runExtension'))
 			// throw FileNotFoundException::forFileNotFound($className);
 		}
 
-		return $serviceExtension->$className->constructor($params);
+		return $serviceExtension->$className->setParameter($params);
 	}
 }
 

@@ -1,25 +1,18 @@
-<?php namespace App\Libraries\Ext;
+<?php
+
+namespace App\Libraries\Ext;
 
 interface InterfaceExtension
 {
-  function __construct( $params = null );
 
-  public function constructor( $params = null ) : self;
+  public function setParameter ( $params = null ) : self;
 
-	/**
-	 * @return static::$getInstance
-	 */
-  public static function getInstance( $params = null ) : self;
+	/** @return mixed self::getParameter */
+	public function getParameter ();
 
-	// abstract public static function getMap( string $key = null ) : array;
-	// public static function getRoutes(RouteCollection $routes) : void;
+	/** @return static::$getInstance */
+	public static function getInstance ( $params = null ) : self;
 
-  function __clone();
-
-	function __wakeup();
-
-	/**
-	 * @return mixed self::getParameters
-	 */
-	public function getParameters();
+	# public static function getMap( string $key = null ) : array;
+	# public static function getRoutes(RouteCollection $routes) : void;
 }

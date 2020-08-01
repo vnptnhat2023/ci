@@ -2,38 +2,44 @@
 
 namespace App\Libraries\Ext;
 
-abstract class AbstractExtension {
+abstract class AbstractExtension implements InterfaceExtension {
 
-  final private function __construct( $params = null )
+
+  final private function __construct ( $params = null )
   {
 		if ( is_array( $params ) )
 		{
 			helper('array');
 
 			$params = isAssoc( $params ) ? [ $params ] : $params;
-			$this->constructor( ...$params );
+			$this->setParameter( ...$params );
 		}
 		else
 		{
-			$this->constructor($params);
+			$this->setParameter($params);
 		}
   }
 
-	/**
-	 * Wanna change this named to setParameters
-	 * @return self
-	 */
-  final public function constructor( $params = null ) : self
+
+  final public function setParameter ( $params = null ) : self
   {
-    $this->getParameters = $params;
+    $this->getParameter = $params;
 
     return $this;
   }
 
+
+	/** @return mixed self::getParameter */
+	final public function  getParameter()
+	{
+		return $this->getParameter;
+	}
+
+
 	/**
 	 * @return static::$getInstance
 	 */
-  final public static function getInstance( $params = null ) : self
+  final public static function getInstance ( $params = null ) : self
   {
 		$class = static::class;
 
@@ -55,18 +61,14 @@ abstract class AbstractExtension {
     return $class::$getInstance = new $class( $params );
 	}
 
-	// abstract public static function getMap( string $key = null ) : array;
-	// public static function getRoutes(RouteCollection $routes) : void;
+	# abstract public static function getMap( string $key = null ) : array;
 
-  final private function __clone() {}
+	# public static function getRoutes(RouteCollection $routes) : void;
 
-	final private function __wakeup() {}
 
-	/**
-	 * @return mixed self::getParameters
-	 */
-	final public function getParameters()
-	{
-		return $this->getParameters;
-	}
+  final private function __clone () {}
+
+
+	final private function __wakeup () {}
+
 }

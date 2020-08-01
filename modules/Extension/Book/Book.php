@@ -30,7 +30,7 @@ class Book extends AbstractExtension
 
   public function index()
   {
-    return $this->getParameters();
+    return $this->getParameter();
   }
 
 	public function map(string $key = null)
@@ -48,8 +48,8 @@ class Book extends AbstractExtension
 		['namespace' => '\Ext\Book\Controllers'] );
 
 		# CI4.0.4 not work with callable route
-		$routes->get( 'book_route123', function() {
-			return fView( 'FAPI_View', [ 'title' => ucfirst( self::map['name'] ) ] );
-		} );
+		// $routes->get( 'book_route123', function() {
+		// 	return fView( 'FAPI_View', [ 'title' => ucfirst( self::map['name'] ) ] );
+		// } );
 	}
 }

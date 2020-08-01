@@ -29,6 +29,6 @@ class Music extends AbstractExtension
 
   public function index()
   {
-    return $this->getParameters();
+    return $this->getParameter();
 	}
 }

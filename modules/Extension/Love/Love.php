@@ -35,7 +35,7 @@ class Love extends AbstractExtension
 
   public function index()
   {
-    return $this->getParameters();
+    return $this->getParameter();
   }
 
   public function love(int $id = 1)

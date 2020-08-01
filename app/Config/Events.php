@@ -136,7 +136,7 @@ Events::on( 'extStore', function(
 
 					foreach ( $extCreated as $extClassName => $methods ) {
 						if ( true === $overrideParam )
-							$service->$extClassName->constructor( $params );
+							$service->$extClassName->setParameter( $params );
 						else
 							$service->$extClassName( $params );
 					}

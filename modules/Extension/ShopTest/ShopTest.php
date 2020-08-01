@@ -39,8 +39,8 @@ final class ShopTest extends AbstractExtension
 
 	public function index()
 	{
-		$this->EvRegister( $this->getParameters );
-		// $this->data['withParameters'] = $this->getParameters;
+		$this->EvRegister( $this->getParameter );
+		// $this->data['withParameters'] = $this->getParameter;
 		$this->data['inputComponents'] = $this->inputComponents();
 		$this->data['rules'] = $this->rules();
 		// $this->EvTrigger();
@@ -50,7 +50,7 @@ final class ShopTest extends AbstractExtension
 
 	public function getData()
 	{
-		return $this->getParameters;
+		return $this->getParameter;
 	}
 
 	public function EvRegister($params = null)

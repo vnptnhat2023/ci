@@ -11,9 +11,9 @@ trait ExtensionTrait
 
 	/**
 	 * Receive data from global **function** ( handleExtension & runExtension )
-	 * @var mixed $getParameters
+	 * @var mixed $getParameter
 	 */
-	protected $getParameters;
+	protected $getParameter;
 
 	/**
 	 * Map from the database to this extension
