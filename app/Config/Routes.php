@@ -55,17 +55,14 @@ if (file_exists(APPPATH . 'Config/' . ENVIRONMENT . '/Routes.php'))
 
 $routes->cli( 'createdb', 'CLI_CreateDB::index' );
 
-
-$extCachedName = config( '\BAPI\Config\Extension' ) ->getSetting('cache');
+$extCachedName = config( '\BAPI\Config\Extension' ) ->getSetting( 'cache' );
 if ( $extCached = cache( "{$extCachedName[ 'prefix' ]}{$extCachedName[ 'name' ]}" ) ) {
 
 	foreach ( $extCached[ 'unique_class' ] as $ext ) {
+		$extNameSpace = "\\Ext\\{$ext}\\{$ext}";
 
-		$extSpace = "\\Ext\\{$ext}\\{$ext}";
-
-		if ( method_exists( $extSpace, 'getRoutes' ) ) {
-			$extSpace::getRoutes($routes);
+		if ( method_exists( $extNameSpace, 'getRouter' ) ) {
+			$extNameSpace::getRouter( $routes );
 		}
-
 	}
 }

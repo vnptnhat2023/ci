@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Libraries\Ext;
 
 trait ExtensionTrait
@@ -20,7 +21,7 @@ trait ExtensionTrait
 	 * @param string|null $key
 	 * @return mixed static::map[$key] | static::map | []
 	 */
-	final public static function getMap(string $key = null)
+	final public static function getMap ( string $key = null )
 	{
 		$class = static::class;
 

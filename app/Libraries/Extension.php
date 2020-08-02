@@ -1,39 +1,37 @@
-<?php namespace App\Libraries;
+<?php
+
+namespace App\Libraries;
 
 final class Extension {
 
   /** Store all enabled extension */
-  private static $loaded = [];
+  private static array $loaded = [];
 
-  /** Singleton pattern */
-  private static $getInstance = null;
+  private static ?object $getInstance = null;
 
   /** Set true when need modify $loaded, access withSetter():Method */
-  private $withSetter = false;
+  private bool $withSetter = false;
 
-
-  /** Singleton pattern */
-  public static function getInstance(array $classes = [])
-  {
-    if ( self::$getInstance ) {
-      return self::$getInstance->fill($classes);
-    }
-
-    return self::$getInstance = new Extension($classes);
-  }
-
-  public function __construct(array $classes = [])
+  public function __construct (array $classes = [] )
   {
     helper('string');
+    $this->fill( $classes );
+	}
 
-    $this->fill($classes);
+  public static function getInstance ( array $classes = [] )
+  {
+    if ( self::$getInstance ) {
+      return self::$getInstance->fill( $classes );
+    }
+
+    return self::$getInstance = new Extension( $classes );
   }
 
-  public function fill(array $classes = [])
+  public function fill ( array $classes = [] ) : void
   {
     if ( ! empty( $classes ) ) {
 
-      foreach ($classes as $key => $value) {
+      foreach ( $classes as $key => $value ) {
         $key = strCamelCase( $key );
 
         if ( ! array_key_exists( $key, self::$loaded ) )
@@ -52,19 +50,19 @@ final class Extension {
     }
   }
 
-  public function getLoaded() : array
+  public function getLoaded () : array
   {
     return self::$loaded;
   }
 
   /** When need modify $loaded property */
-  public function withSetter() : Extension
+  public function withSetter () : self
   {
     $this->withSetter = true;
     return $this;
   }
 
-  public function __call(string $key, $value)
+  public function __call ( string $key, $value )
 	{
 		$result = null;
     $key = strCamelCase( $key );
@@ -76,7 +74,7 @@ final class Extension {
     }
     else if ( method_exists( $this, $key ) )
     {
-			$result = $this->$key($value);
+			$result = $this->$key( $value );
     }
     else if ( property_exists( $this, $key ) )
     {
@@ -86,7 +84,7 @@ final class Extension {
 		return $result;
 	}
 
-	public function __get(string $key)
+	public function __get ( string $key )
 	{
 		$result = null;
     $key = strCamelCase( $key );
@@ -108,7 +106,7 @@ final class Extension {
 		return $result;
 	}
 
-	public function __set(string $key, $value = null) : Extension
+	public function __set ( string $key, $value = null ) : self
 	{
     $key = strCamelCase( $key );
 

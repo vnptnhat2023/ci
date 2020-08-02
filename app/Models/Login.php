@@ -1,7 +1,6 @@
 <?php namespace App\Models;
 
 use CodeIgniter\Model;
-use CodeIgniter\HTTP\Request;
 /**
  * author joeylevy
  * url https://github.com/joeylevy/CI_throttle/blob/master/library/Throttle

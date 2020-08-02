@@ -11,7 +11,7 @@ use CodeIgniter\Router\RouteCollection;
 // $routes->get( 'fapi', '\FAPI\Controllers\Home::index' );
 
 #GROUP
-$routes->group('fapi', ['namespace' => '\FAPI\Controllers'], function($routes) {
+$routes->group('front', ['namespace' => '\FAPI\Controllers'], function($routes) {
 
 	$routes->get( '/', 'Home::index' );
 

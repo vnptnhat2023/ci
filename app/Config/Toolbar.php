@@ -20,10 +20,10 @@ class Toolbar extends BaseConfig
 		\CodeIgniter\Debug\Toolbar\Collectors\Timers::class,
 		\CodeIgniter\Debug\Toolbar\Collectors\Database::class,
 		\CodeIgniter\Debug\Toolbar\Collectors\Logs::class,
-		\CodeIgniter\Debug\Toolbar\Collectors\Views::class,
+		// \CodeIgniter\Debug\Toolbar\Collectors\Views::class,
 		// \CodeIgniter\Debug\Toolbar\Collectors\Cache::class,
 		\CodeIgniter\Debug\Toolbar\Collectors\Files::class,
-		\CodeIgniter\Debug\Toolbar\Collectors\Routes::class,
+		// \CodeIgniter\Debug\Toolbar\Collectors\Routes::class,
 		\CodeIgniter\Debug\Toolbar\Collectors\Events::class,
 	];
 
@@ -40,7 +40,7 @@ class Toolbar extends BaseConfig
 	| 0 (zero) to not have any history stored, or -1 for unlimited history.
 	|
 	*/
-	public $maxHistory = 20;
+	public $maxHistory = 0;
 
 	/*
 	|--------------------------------------------------------------------------

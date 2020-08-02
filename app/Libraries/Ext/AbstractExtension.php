@@ -4,7 +4,6 @@ namespace App\Libraries\Ext;
 
 abstract class AbstractExtension implements InterfaceExtension {
 
-
   final private function __construct ( $params = null )
   {
 		if ( is_array( $params ) )
@@ -20,7 +19,6 @@ abstract class AbstractExtension implements InterfaceExtension {
 		}
   }
 
-
   final public function setParameter ( $params = null ) : self
   {
     $this->getParameter = $params;
@@ -28,13 +26,11 @@ abstract class AbstractExtension implements InterfaceExtension {
     return $this;
   }
 
-
 	/** @return mixed self::getParameter */
-	final public function  getParameter()
+	final public function getParameter ()
 	{
 		return $this->getParameter;
 	}
-
 
 	/**
 	 * @return static::$getInstance
@@ -65,10 +61,7 @@ abstract class AbstractExtension implements InterfaceExtension {
 
 	# public static function getRoutes(RouteCollection $routes) : void;
 
-
   final private function __clone () {}
 
-
 	final private function __wakeup () {}
-
 }

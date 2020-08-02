@@ -1,13 +1,9 @@
-<?php
+<?php namespace BAPI\Config;
 
-namespace BAPI\Config;
+use Config\Services;
 
-/**
- * @var \CodeIgniter\Router\RouteCollection $routes
- */
-
+$routes = Services::routes();
 # Option array[ controller, placeholder, only, except, websafe ]
-# only & except: ['index', 'show', 'create', 'update', 'delete', 'new', 'edit']
 
 $bapiPermData = [
 	'post',
@@ -21,15 +17,17 @@ $bapiPermData = [
 ];
 
 $bapiPermStr = implode( ',', $bapiPermData );
-
 $bapiOptions = [
 	'namespace' => '\BAPI\Controllers',
 	'filter' => "NknAuth:{$bapiPermStr}"
 ];
 
-# === BAPI ===
-$routes->group( 'bapi', $bapiOptions, function( $routes )
+$routes->group( 'backend', $bapiOptions, function ( $routes )
 {
+	$groupOptions = fn ( string $lastSegment, string $permission ) => [
+		'namespace' => "\\BAPI\\Controllers\\{$lastSegment}",
+		'filter' => "NknAuth:{$permission}"
+	];
 
 	$routes->get( '/', 'Home::index' );
 
@@ -37,154 +35,91 @@ $routes->group( 'bapi', $bapiOptions, function( $routes )
 	$routes->get( 'profile/(:num)/edit', 'User\Profile::show/$1' );
 	$routes->put( 'profile/(:num)', 'User\Profile::update/$1' );
 
-	# === User ===
-	$user = [
-		'namespace' => '\BAPI\Controllers\User',
-		'filter' => 'NknAuth:all'
-	];
-
-	$routes->group( 'user', $user, function( $routes )
+	$routes->group( 'user', $groupOptions( 'User', 'all' ), function ( $routes )
 	{
-		# ___ Crud ___
-		$routes->get( '/', 'Crud::index');
-		$routes->get( 'crud/(:num)/edit', 'Crud::edit/$1' );
-		$routes->get( 'crud/(:num)', 'Crud::show/$1' );
-		$routes->post( 'crud', 'Crud::create' );
+		$crudOption = [ 'except' => 'update,delete', 'placeholder' => '(:num)' ];
+		$routes->resource( 'crud', $crudOption );
 		$routes->delete( 'crud/(:dotID)', 'Crud::delete/$1' );
 		$routes->put( 'crud/(:num)', 'Crud::update/$1' );
 		$routes->patch( 'crud/(:dotID)', 'Crud::update/$1' );
 
-		# ___ Group ___
 		$routes->resource( 'group', [
 			'placeholder' => '(:num)',
 			'only' => [ 'index', 'create', 'delete', 'update' ]
 		] );
 
-		# ___ Setting ___
-		# $routes->get( 'setting|setting(:segment)', 'Setting::index/$1' );
 		$routes->resource( 'general_setting', [
 			'placeholder' => '(:dashAlpha)',
 			'only' => [ 'index', 'create', 'update', 'delete' ]
 		] );
 	});
 
-	# === POST ===
-	$post = [
-		'namespace' => '\BAPI\Controllers\Post',
-		'filter' => 'NknAuth:post'
-	];
-
-	$routes->group( 'post', $post, function( $routes )
+	$routes->group( 'post', $groupOptions( 'Post', 'post' ), function ( $routes )
 	{
-		# ___ Crud ___
-		$routes->get( '/', 'Crud::index');
-		$routes->get( 'crud/(:num)/edit', 'Crud::edit/$1' );
-		$routes->get( 'crud/(:num)', 'Crud::show/$1' );
-		$routes->post( 'crud', 'Crud::create' );
+		$crudOption = [ 'except' => 'new,update,delete', 'placeholder' => '(:num)' ];
+
+		$routes->resource( 'crud', $crudOption );
 		$routes->delete( 'crud/(:dotID)', 'Crud::delete/$1' );
 		$routes->put( 'crud/(:num)', 'Crud::update/$1' );
 		$routes->patch( 'crud/(:dotID)', 'Crud::update/$1' );
 
-		# ___ SETTING ___
 		$routes->resource( 'setting', [
 			'placeholder' => '(:dashAlpha)',
 			'only' => [ 'index', 'create', 'update', 'delete' ]
 		] );
 	});
 
-	# === PAGE ===
-	$page = [
-		'namespace' => '\BAPI\Controllers\Page',
-		'filter' => 'NknAuth:page'
-	];
+	$routes->group( 'page', $groupOptions( 'Page', 'page' ), fn ( $routes ) =>
+		$routes->resource( 'crud', [ 'placeholder' => '(:num)', 'except' => 'edit,new,show' ] )
+	);
 
-	$routes->group( 'page', $page, function( $routes )
-	{
-		$routes->get( '/', 'Crud::index');
-		$routes->post( 'crud', 'Crud::create' );
-		$routes->delete( 'crud/(:num)', 'Crud::delete/$1' );
-		$routes->put( 'crud/(:num)', 'Crud::update/$1' );
-		$routes->patch( 'crud/(:num)', 'Crud::update/$1' );
-	});
+	$routes->group( 'category',
+		$groupOptions( 'Category', 'category' ),
+		function ( $routes ) {
+			$option = [ 'only' => 'index,create,delete', 'placeholder' => '(:num)' ];
+			$routes->resource( 'crud', $option );
+			$routes->put( 'crud/(:num)', 'Crud::update/$1' );
+			$routes->patch( 'crud/(:dotID)', 'Crud::update/$1' );
+		}
+	);
 
-	# === CATEGORY ===
-	$category = [
-		'namespace' => '\BAPI\Controllers\Category',
-		'filter' => 'NknAuth:category'
-	];
+	$routes->group( 'general_group',
+		$groupOptions ( 'GeneralGroup', 'general_group' ),
+		function ( $routes ) {
+			$routes->post( 'crud', 'Crud::create' );
+			$routes->delete( 'crud/(:num)', 'Crud::delete/$1' );
+			$routes->put( 'crud/(:num)', 'Crud::update/$1' );
+			$routes->patch( 'crud/(:dotID)', 'Crud::update/$1' );
+		}
+	);
 
-	$routes->group( 'category', $category, function( $routes )
-	{
-		$routes->get( '/', 'Crud::index');
-		$routes->post( 'crud', 'Crud::create' );
-		$routes->delete( 'crud/(:num)', 'Crud::delete/$1' );
-		$routes->put( 'crud/(:num)', 'Crud::update/$1' );
-		$routes->patch( 'crud/(:dotID)', 'Crud::update/$1' );
-	});
+	$routes->group( 'general_item',
+		$groupOptions ( 'GeneralItem', 'general_item' ),
+		function ( $routes ) {
+			$routes->post( 'crud', 'Crud::create' );
+			$routes->delete( 'crud/(:num)', 'Crud::delete/$1' );
+			$routes->put( 'crud/(:num)', 'Crud::update/$1' );
+			$routes->patch( 'crud/(:dotID)', 'Crud::update/$1' );
+		}
+	);
 
-	# === General Group ===
-	$generalGroup = [
-		'namespace' => '\BAPI\Controllers\GeneralGroup',
-		'filter' => 'NknAuth:general_group'
-	];
+	$routes->group( 'general_relation',
+		$groupOptions ( 'GeneralRelation', 'general_relation' ),
+		fn ( $routes ) => $routes->get( '/', 'GroupItem::index')
+	);
 
-	$routes->group( 'general_group', $generalGroup, function( $routes )
-	{
-		// $routes->get( '/', 'Crud::index');
-		$routes->post( 'crud', 'Crud::create' );
-		$routes->delete( 'crud/(:num)', 'Crud::delete/$1' );
-		$routes->put( 'crud/(:num)', 'Crud::update/$1' );
-		$routes->patch( 'crud/(:dotID)', 'Crud::update/$1' );
-	});
+	$routes->group( 'general_theme',
+		$groupOptions ( 'Theme', 'general_theme' ),
+		fn ( $routes ) => $routes->get( '/', 'General::index')
+	);
 
-	# === General Item ===
-	$generalItem = [
-		'namespace' => '\BAPI\Controllers\GeneralItem',
-		'filter' => 'NknAuth:general_item'
-	];
+	$routes->group( 'extension',
+		$groupOptions ( 'Extension', 'extension' ),
+		function ( $routes ) {
+			$option = [ 'only' => 'index,create,delete', 'placeholder' => '(:num)' ];
+			$routes->resource( 'crud', $option );
+			$routes->patch( 'crud/(:dotID)', 'Crud::update/$1');
+		}
+	);
 
-	$routes->group( 'general_item', $generalItem, function( $routes )
-	{
-		// $routes->get( '/', 'Crud::index');
-		$routes->post( 'crud', 'Crud::create' );
-		$routes->delete( 'crud/(:num)', 'Crud::delete/$1' );
-		$routes->put( 'crud/(:num)', 'Crud::update/$1' );
-		$routes->patch( 'crud/(:dotID)', 'Crud::update/$1' );
-	});
-
-	# === General Relation ===
-	$generalRelation = [
-		'namespace' => '\BAPI\Controllers\GeneralRelation',
-		'filter' => 'NknAuth:general_relation'
-	];
-
-	$routes->group( 'general_relation', $generalRelation, function( $routes )
-	{
-		$routes->get( '/', 'GroupItem::index');
-	});
-
-	# === General Theme ===
-	$generalTheme = [
-		'namespace' => '\BAPI\Controllers\Theme',
-		'filter' => 'NknAuth:general_theme'
-	];
-
-	$routes->group( 'general_theme', $generalTheme, function( $routes )
-	{
-		$routes->get( '/', 'General::index');
-	});
-
-	# === Extension ===
-	$extension = [
-		'namespace' => '\BAPI\Controllers\Extension',
-		'filter' => 'NknAuth:extension'
-	];
-
-	$routes->group( 'extension', $extension, function( $routes )
-	{
-		$routes->get( '/', 'Crud::index');
-		$routes->post( 'crud', 'Crud::create');
-		$routes->patch( 'crud/(:dotID)', 'Crud::update/$1');
-		$routes->delete( 'crud/(:num)', 'Crud::delete/$1');
-	});
 });
