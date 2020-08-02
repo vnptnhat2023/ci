@@ -94,12 +94,11 @@ class GroupItem extends ResourceController
       $whereQuery[ "{$model->table}.name_id" ] = $rawArray['name_id'];
     }
 
-		$config = config('\BAPI\Config\GeneralRelation');
-
+		$config = config('\BAPI\Config\GeneralRelation') ->getSetting( 'fetch' );
     $limSortQuery = [
-      'orderBy' => 'Item.' . $config->setting('fetch.orderBy'),
-      'direction' => 'Item.' . $config->setting('fetch.direction'),
-      'limit' => $config->setting('fetch.record')
+      'orderBy' => 'Item.' . $config['orderBy'],
+      'direction' => 'Item.' . $config['direction'],
+      'limit' => $config['record']
 		];
 
 		# --- Fetch data

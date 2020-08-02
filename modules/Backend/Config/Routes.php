@@ -2,12 +2,9 @@
 
 namespace BAPI\Config;
 
-use CodeIgniter\Router\RouteCollection;
-
 /**
- * @var RouteCollection $routes
+ * @var \CodeIgniter\Router\RouteCollection $routes
  */
-
 
 # Option array[ controller, placeholder, only, except, websafe ]
 # only & except: ['index', 'show', 'create', 'update', 'delete', 'new', 'edit']
@@ -30,19 +27,23 @@ $bapiOptions = [
 	'filter' => "NknAuth:{$bapiPermStr}"
 ];
 
-$routes->get( 'api', 'Home::index', $bapiOptions );
-
 # === BAPI ===
-$routes->group( 'api', $bapiOptions, function( $routes )
+$routes->group( 'bapi', $bapiOptions, function( $routes )
 {
+
+	$routes->get( '/', 'Home::index' );
 
 	# ___ Profile ___
 	$routes->get( 'profile/(:num)/edit', 'User\Profile::show/$1' );
 	$routes->put( 'profile/(:num)', 'User\Profile::update/$1' );
 
 	# === User ===
-	$routes->group( 'user', [ 'namespace' => '\BAPI\Controllers\User',
-	'filter' => 'NknAuth:all' ], function( $routes )
+	$user = [
+		'namespace' => '\BAPI\Controllers\User',
+		'filter' => 'NknAuth:all'
+	];
+
+	$routes->group( 'user', $user, function( $routes )
 	{
 		# ___ Crud ___
 		$routes->get( '/', 'Crud::index');
@@ -68,8 +69,12 @@ $routes->group( 'api', $bapiOptions, function( $routes )
 	});
 
 	# === POST ===
-	$routes->group( 'post', [ 'namespace' => '\BAPI\Controllers\Post',
-	'filter' => 'NknAuth:post' ], function( $routes )
+	$post = [
+		'namespace' => '\BAPI\Controllers\Post',
+		'filter' => 'NknAuth:post'
+	];
+
+	$routes->group( 'post', $post, function( $routes )
 	{
 		# ___ Crud ___
 		$routes->get( '/', 'Crud::index');
@@ -88,8 +93,12 @@ $routes->group( 'api', $bapiOptions, function( $routes )
 	});
 
 	# === PAGE ===
-	$routes->group( 'page', [ 'namespace' => '\BAPI\Controllers\Page',
-	'filter' => 'NknAuth:page' ], function( $routes )
+	$page = [
+		'namespace' => '\BAPI\Controllers\Page',
+		'filter' => 'NknAuth:page'
+	];
+
+	$routes->group( 'page', $page, function( $routes )
 	{
 		$routes->get( '/', 'Crud::index');
 		$routes->post( 'crud', 'Crud::create' );
@@ -99,8 +108,12 @@ $routes->group( 'api', $bapiOptions, function( $routes )
 	});
 
 	# === CATEGORY ===
-	$routes->group( 'category', [ 'namespace' => 'BAPI\Controllers\Category',
-	'filter' => 'NknAuth:category' ], function( $routes )
+	$category = [
+		'namespace' => '\BAPI\Controllers\Category',
+		'filter' => 'NknAuth:category'
+	];
+
+	$routes->group( 'category', $category, function( $routes )
 	{
 		$routes->get( '/', 'Crud::index');
 		$routes->post( 'crud', 'Crud::create' );
@@ -110,8 +123,12 @@ $routes->group( 'api', $bapiOptions, function( $routes )
 	});
 
 	# === General Group ===
-	$routes->group( 'general_group', [ 'namespace' => 'BAPI\Controllers\GeneralGroup',
-	'filter' => 'NknAuth:general_group' ], function( $routes )
+	$generalGroup = [
+		'namespace' => '\BAPI\Controllers\GeneralGroup',
+		'filter' => 'NknAuth:general_group'
+	];
+
+	$routes->group( 'general_group', $generalGroup, function( $routes )
 	{
 		// $routes->get( '/', 'Crud::index');
 		$routes->post( 'crud', 'Crud::create' );
@@ -121,8 +138,12 @@ $routes->group( 'api', $bapiOptions, function( $routes )
 	});
 
 	# === General Item ===
-	$routes->group( 'general_item', [ 'namespace' => 'BAPI\Controllers\GeneralItem',
-	'filter' => 'NknAuth:general_item' ], function( $routes )
+	$generalItem = [
+		'namespace' => '\BAPI\Controllers\GeneralItem',
+		'filter' => 'NknAuth:general_item'
+	];
+
+	$routes->group( 'general_item', $generalItem, function( $routes )
 	{
 		// $routes->get( '/', 'Crud::index');
 		$routes->post( 'crud', 'Crud::create' );
@@ -132,22 +153,34 @@ $routes->group( 'api', $bapiOptions, function( $routes )
 	});
 
 	# === General Relation ===
-	$routes->group( 'general_relation', [ 'namespace' => 'BAPI\Controllers\GeneralRelation',
-	'filter' => 'NknAuth:general_relation' ], function( $routes )
+	$generalRelation = [
+		'namespace' => '\BAPI\Controllers\GeneralRelation',
+		'filter' => 'NknAuth:general_relation'
+	];
+
+	$routes->group( 'general_relation', $generalRelation, function( $routes )
 	{
 		$routes->get( '/', 'GroupItem::index');
 	});
 
 	# === General Theme ===
-	$routes->group( 'general_theme', [ 'namespace' => 'BAPI\Controllers\Theme',
-	'filter' => 'NknAuth:general_theme' ], function( $routes )
+	$generalTheme = [
+		'namespace' => '\BAPI\Controllers\Theme',
+		'filter' => 'NknAuth:general_theme'
+	];
+
+	$routes->group( 'general_theme', $generalTheme, function( $routes )
 	{
 		$routes->get( '/', 'General::index');
 	});
 
 	# === Extension ===
-	$routes->group( 'extension', [ 'namespace' => 'BAPI\Controllers\Extension',
-	'filter' => 'NknAuth:extension' ], function( $routes )
+	$extension = [
+		'namespace' => '\BAPI\Controllers\Extension',
+		'filter' => 'NknAuth:extension'
+	];
+
+	$routes->group( 'extension', $extension, function( $routes )
 	{
 		$routes->get( '/', 'Crud::index');
 		$routes->post( 'crud', 'Crud::create');

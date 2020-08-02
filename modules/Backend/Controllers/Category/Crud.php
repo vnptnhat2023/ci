@@ -1,7 +1,13 @@
-<?php namespace BAPI\Controllers\Category;
+<?php
+
+namespace BAPI\Controllers\Category;
 
 use \CodeIgniter\RESTful\ResourceController;
-use \BAPI\Controllers\Mixins\{ BAPITrait, CategoryCrudTrait };
+
+use \BAPI\Controllers\Mixins\{
+	BAPITrait,
+	CategoryCrudTrait
+};
 
 class Crud extends ResourceController
 {
@@ -23,7 +29,7 @@ class Crud extends ResourceController
 	# ==========================================================
 	public function __construct()
 	{
-		$config = ( new \BAPI\Config\Category() )->getSetting('db');
+		$config = ( new \BAPI\Config\Category() ) ->getSetting('db');
 
 		$this->maximumCreate = $config[ 'create' ][ 'maximum_rows' ];
 		$this->maximumUpdate = $config[ 'update' ][ 'maximum_rows' ];

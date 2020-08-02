@@ -8,10 +8,12 @@ use CodeIgniter\Router\RouteCollection;
  * @var RouteCollection $routes
  */
 
-$routes->get( 'wtf', '\FAPI\Controllers\Home::index' );
+// $routes->get( 'fapi', '\FAPI\Controllers\Home::index' );
 
 #GROUP
 $routes->group('fapi', ['namespace' => '\FAPI\Controllers'], function($routes) {
+
+	$routes->get( '/', 'Home::index' );
 
 	# === POST ===
 	$routes->group('post', ['namespace' => '\FAPI\Controllers\Post'], function($routes) {
