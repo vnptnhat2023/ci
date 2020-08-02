@@ -12,7 +12,7 @@ class NknAuth implements FilterInterface
 
   public function before( req $request, $arguments = null )
   {
-    if ( ! \Config\Services::NknAuth()->hasPermission( $arguments ) ) {
+    if ( ! \Config\Services::NknAuth()->hasPermission( $arguments ?: [] ) ) {
       throw PageNotFoundException::forPageNotFound();
     }
   }

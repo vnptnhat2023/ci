@@ -13,6 +13,7 @@ class Home extends BaseController {
 
 	public function index()
 	{
-		return bView('index', [ 'title' => 'Administrator management system' ]);
+		echo __METHOD__;
+		// return bView('index', [ 'title' => 'Administrator management system' ]);
 	}
 }

@@ -1,30 +1,20 @@
-<?php 
+<?php
+
 namespace FAPI\Controllers;
 
-class BaseController extends \CodeIgniter\Controller
-{
+use CodeIgniter\Controller;
+use CodeIgniter\HTTP\RequestInterface as Req;
+use CodeIgniter\HTTP\ResponseInterface as Res;
+use Psr\Log\LoggerInterface as Log;
 
-	/**
-	 * An array of helpers to be loaded automatically upon
-	 * class instantiation. These helpers will be available
-	 * to all other controllers that extend BaseController.
-	 *
-	 * @var array
-	 */
+class BaseController extends Controller
+{
 	protected $helpers = [];
 
-	/**
-	 * Constructor.
-	 */
-	public function initController(\CodeIgniter\HTTP\RequestInterface $request, \CodeIgniter\HTTP\ResponseInterface $response, \Psr\Log\LoggerInterface $logger)
+	public function initController(Req $req, Res $res, Log $log)
 	{
-		// Do Not Edit This Line
-		parent::initController($request, $response, $logger);
+		parent::initController($req, $res, $log);
 
-		//--------------------------------------------------------------------
-		// Preload any models, libraries, etc, here.
-		//--------------------------------------------------------------------
-		// E.g.:
 		$this->session = \Config\Services::session();
 	}
 

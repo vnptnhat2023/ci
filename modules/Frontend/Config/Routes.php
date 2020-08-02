@@ -1,16 +1,27 @@
 <?php
+
 namespace FAPI\Config;
 
-#GROUP
-$routes->group('fapi', ['namespace' => 'FAPI\Controllers'], function($routes) {
+use CodeIgniter\Router\RouteCollection;
 
-	$routes->get('/', 'Home::index');
-	#GROUP
+/**
+ * @var RouteCollection $routes
+ */
+
+$routes->get( 'wtf', '\FAPI\Controllers\Home::index' );
+
+#GROUP
+$routes->group('fapi', ['namespace' => '\FAPI\Controllers'], function($routes) {
+
+	# === POST ===
 	$routes->group('post', ['namespace' => '\FAPI\Controllers\Post'], function($routes) {
   	$routes->get('list', 'Article');
-  });
+	});
+
+	# === PAGE ===
   $routes->group('page', ['namespace' => '\FAPI\Controllers\Page'], function($routes) {
-  	$routes->get('list', 'Tree');
+  	$routes->get('/', 'Tree::index');
+  	$routes->get('list', 'Tree::index');
   });
 
 });

@@ -40,6 +40,8 @@ class Login extends BaseController {
 		{
 			echo "Bạn hãy thử đăng nhập lại sau 30 phút";
 		}
+
+		// d( session('oknkn') );
 	}
 
 	public function forgot()

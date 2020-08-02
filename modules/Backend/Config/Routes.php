@@ -2,15 +2,39 @@
 
 namespace BAPI\Config;
 
+use CodeIgniter\Router\RouteCollection;
+
+/**
+ * @var RouteCollection $routes
+ */
+
+
 # Option array[ controller, placeholder, only, except, websafe ]
 # only & except: ['index', 'show', 'create', 'update', 'delete', 'new', 'edit']
 
+$bapiPermData = [
+	'post',
+	'page',
+	'category',
+	'general_group',
+	'general_item',
+	'general_relation',
+	'general_theme',
+	'extension'
+];
+
+$bapiPermStr = implode( ',', $bapiPermData );
+
+$bapiOptions = [
+	'namespace' => '\BAPI\Controllers',
+	'filter' => "NknAuth:{$bapiPermStr}"
+];
+
+$routes->get( 'api', 'Home::index', $bapiOptions );
+
 # === BAPI ===
-$routes->group( 'bapi', [ 'namespace' => '\BAPI\Controllers',
-'filter' => 'NknAuth' ], function( $routes )
+$routes->group( 'api', $bapiOptions, function( $routes )
 {
-	# ___ Index ___
-	$routes->get( '/', 'Home::index' );
 
 	# ___ Profile ___
 	$routes->get( 'profile/(:num)/edit', 'User\Profile::show/$1' );
