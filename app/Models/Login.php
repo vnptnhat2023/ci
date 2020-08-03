@@ -1,8 +1,13 @@
-<?php namespace App\Models;
+<?php
 
+namespace App\Models;
+
+use CodeIgniter\Exceptions\ModelException;
 use CodeIgniter\Model;
+use Config\Services;
+
 /**
- * author joeylevy
+ * author Joey Levy
  * url https://github.com/joeylevy/CI_throttle/blob/master/library/Throttle
  */
 
@@ -10,28 +15,14 @@ class Login extends Model
 {
   protected $db;
 
-  private $login_attempts;
-  private $login_type = 1;
-  private $login_limit_one = 5;
-  private $login_limit = 10;
-  private $login_timeout = 30;
+  private int $login_attempts;
+  private int $login_type = 1;
+  private int $login_limit_one = 5;
+  private int $login_limit = 10;
+  private int $login_timeout = 30;
 
   protected $table = 'throttle';
-  // protected $primary_key = 'id';
-  // protected $returnType = 'array';
   protected $tempReturnType = 'object';
-  protected $useSoftDeletes = false;
-
-  // protected $allowedFields = ['name', 'email'];
-
-  // protected $useTimestamps = true;
-  // protected $createdField  = 'created_at';
-  // protected $updatedField  = 'updated_at';
-  // protected $deletedField  = 'deleted_at';
-
-  protected $validationRules    = [];
-  protected $validationMessages = [];
-  protected $skipValidation     = false;
 
   public function __construct()
   {
@@ -41,73 +32,78 @@ class Login extends Model
     // $this->throttle_cleanup();
   }
 
-  /**
-   * MY CUSTOM METHOD
-   */
-  public function config(int $type = 1, int $limit_one = 5, int $limit = 10, int $timeout = 30)
+  public function config ( int $type = 1, int $limit_one = 5, int $limit = 10, int $timeout = 30 )
   {
-    $this->login_type = $type;
-    $this->login_limit_one = $limit_one - 1;
-    $this->login_limit = $limit - 1;
-    $this->login_timeout = $timeout;
+		$this->login_type = $type;
+		$this->login_limit_one = ( $limit_one - 1 );
+		$this->login_limit = ( $limit - 1 );
+		$this->login_timeout = $timeout;
 
-    $request = \Config\Services::request();
-    $builder = $this->builder();
-    $this->login_attempts = $builder
-      ->where([ 'ip' => $request->getIPAddress(), 'type' => $type ])
-      ->countAll();
+		$whereQuery = [
+			'ip' => Services::request()->getIPAddress(),
+			'type' => $type
+		];
+
+		$row = $this->builder()
+		->selectCount( $this->primaryKey, 'count' )
+		->getWhere( $whereQuery )
+		->getRow();
+
+		if ( null === $row ) {
+			throw new ModelException('Number of rows cannot be empty');
+		}
+
+		$this->login_attempts = $row->count;
 
     return $this;
   }
 
   public function was_limited_one()
   {
-    if ($this->login_attempts > $this->login_limit_one)
-    {
-      return true;// return $this->timeout;
-    }
+    if ( $this->login_attempts > $this->login_limit_one ) return true;
+
     return false;
   }
 
   public function was_limited()
   {
-    if ($this->login_attempts >= $this->login_limit)
-    {
-        return $this->login_timeout;
-    }
-    return false;
-  }
+    if ($this->login_attempts >= $this->login_limit) return $this->login_timeout;
 
-  /**
-   * end MY CUSTOM METHOD
-   */
+    return false;
+	}
 
   /**
    * throttle multiple connections attempts to prevent abuse
    * @param int $type type of throttle to perform.
-   *
    */
   public function throttle()
   {
     if ( $this->was_limited() ) return $this->was_limited();
 
-    $request = \Config\Services::request();
-    $builder = $this->builder();
-    $builder->insert([
-        'ip' => $request->getIPAddress(),
-        'type' => $this->login_type,
-        'created_at' => date('Y/m/d H:i:s', time())
-    ]);
+		$data = [
+			'ip' => Services::request() ->getIPAddress(),
+			'type' => $this->login_type,
+			'created_at' => date('Y/m/d H:i:s', time())
+		];
 
-    return $this->login_attempts; // return current number of attempted logins
+    $this->builder()->insert( $data );
+
+    return $this->login_attempts;
   }
 
   public function throttle_cleanup()
   {
-    $formatted_current_time = date("Y-m-d H:i:s", strtotime('-' . (int) $this->timeout . ' minutes'));
+		$formatted_current_time = date(
+			"Y-m-d H:i:s",
+			strtotime('-' . (int) $this->timeout . ' minutes')
+		);
+
     $modifier = "DELETE FROM `{$this->table}`
-      WHERE created_at BETWEEN '1970-00-00 00:00:00'
-      AND '{$formatted_current_time}' AND `type` = ':type:'";
-    return $this->db->query($modifier, ['type' => $this->login_type]);
+		WHERE created_at
+		BETWEEN '1970-00-00 00:00:00'
+		AND '{$formatted_current_time}'
+		AND `type` = ':type:'";
+
+    return $this->db->query( $modifier, [ 'type' => $this->login_type ] );
   }
 }

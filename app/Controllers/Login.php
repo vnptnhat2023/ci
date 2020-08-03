@@ -34,15 +34,6 @@ class Login extends BaseController
 		}
 		else if ( true === $data[ 'success' ] )
 		{
-			$user = $this->NknAuth->getUserData();
-
-			$update = [
-				'last_login' => $this->request->getIPAddress(),
-				'last_activity' => date('Y-m-d')
-			];
-
-			$this->NknAuth->builder->update( $update, [ 'id' => $user[ 'id' ] ], 1 );
-
 			echo anchor( base_url(), lang( 'NknAuth.successLogged' ) );
 		}
 		else if ( true === $data[ 'was_limited' ] )

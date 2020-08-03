@@ -4,10 +4,7 @@ namespace App\Libraries;
 
 use CodeIgniter\Database\BaseBuilder;
 use CodeIgniter\Encryption\Encryption;
-use CodeIgniter\HTTP\Request;
 use CodeIgniter\Model;
-use CodeIgniter\Session\Session;
-use CodeIgniter\Validation\Validation;
 use Config\Services;
 
 /**
@@ -20,24 +17,7 @@ use Config\Services;
  */
 class NknAuth
 {
-	/**
-	 * Cookie name
-	 * @var string $NKNck
-	 */
-	private string $NKNck;
-
-	/**
-	 * Session name
-	 * @var string $NKNss
-	 */
-	private string $NKNss;
-
-	private array $throttle_config = [
-		'type' => 1,
-		'limit_one' => 5,
-		'limit' => 10,
-		'timeout' => 30
-	];
+	private \Config\Nkn $NknConfig;
 
 	private array $response = [
 		'forgot_password_denny' => false, // if loGed set "denny" to true (forgot password)
@@ -53,21 +33,9 @@ class NknAuth
 	];
 
 	/**
-	 * @var \CodeIgniter\Session\Session $session
+	 * @var \App\Models\Login $modelLogin
 	 */
-	protected Session $session;
-
-	protected Validation $validation;
-
-	/**
-	 * @var \CodeIgniter\HTTP\IncomingRequest $request
-	 */
-	protected Request $request;
-
-	/**
-	 * @var \App\Models\Login $throttle
-	 */
-	protected Model $throttle;
+	protected \App\Models\Login $modelLogin;
 
 	/**
 	 * @var \CodeIgniter\Database\BaseBuilder $builder
@@ -127,18 +95,13 @@ class NknAuth
 
 	public function __construct ()
 	{
-		$this->session = Services::session();
-		$this->request = Services::request();
-		$this->throttle = new \App\Models\Login();
-		$this->builder = db_connect()->table( 'User' );
+		$this->modelLogin = new \App\Models\Login();
+
+		$this->builder = db_connect()->table( 'user' );
 
 		helper( [ 'array', 'cookie' ] );
-		$NknConfig = new \Config\Nkn();
 
-		# --- Adding config
-		$this->NKNss = $NknConfig->NKNss;
-		$this->NKNck = $NknConfig->NKNck;
-		$this->throttle_config = $NknConfig->throttle;
+		$this->NknConfig = new \Config\Nkn();
 	}
 
 	/**
@@ -149,6 +112,12 @@ class NknAuth
 		$this->typeChecker( 'login' );
 
 		return $this;
+	}
+
+	public function logout ()
+	{
+		delete_cookie( $this->NknConfig::NKNck );
+		Services::session()->remove( $this->NknConfig::NKNss );
 	}
 
 	/**
@@ -201,6 +170,21 @@ class NknAuth
 		}
 	}
 
+	/** Set throttle config and get was_limited_one */
+	private function getConfig () : Model
+	{
+		$config = $this->modelLogin->config(
+			$this->NknConfig::throttle[ 'type' ],
+			$this->NknConfig::throttle[ 'limit_one' ],
+			$this->NknConfig::throttle[ 'limit' ],
+			$this->NknConfig::throttle[ 'timeout' ]
+		);
+
+		$this->response[ 'show_captcha' ] = $this->modelLogin->was_limited_one();
+
+		return $config;
+	}
+
 	/**
 	 * @param string|null $key
 	 * @return mixed
@@ -211,15 +195,26 @@ class NknAuth
 
 		if ( empty( $key ) )
 		{
-			return $this->session->get( $this->NKNss );
+			return Services::session()->get( $this->NknConfig::NKNss );
 		}
 		else
 		{
-			$userData = $this->session->get( $this->NKNss );
+			$userData = Services::session()->get( $this->NknConfig::NKNss );
 
 			return $userData[ $key ] ?? dot_array_search( $key, $userData );
 		}
 	}
+
+	public function getHashPass ( string $password, int $cost = 12 ) : string
+  {
+    $salt = password_hash( $password, PASSWORD_BCRYPT, [ 'cost' => $cost ] );
+    return $salt;
+  }
+
+  public function getVerifyPass ( string $password, string $salt ) : bool
+  {
+  	return password_verify( $password, $salt );
+  }
 
 	/**
 	 * Check in current User Session first, will be to $data
@@ -256,34 +251,17 @@ class NknAuth
 		return $boolVar;
 	}
 
-	public function getHashPass ( string $password, int $cost = 12 ) : string
-  {
-    $salt = password_hash( $password, PASSWORD_BCRYPT, [ 'cost' => $cost ] );
-    return $salt;
-  }
-
-  public function getVerifyPass ( string $password, string $salt ) : bool
-  {
-  	return password_verify( $password, $salt );
-  }
-
-	public function logout ()
-	{
-		delete_cookie( $this->NKNck );
-		$this->session->remove( $this->NKNss );
-	}
-
 	/**
-	* Check cookie, session: if have cookie will set session
-	* @return boolean
-	*/
+	 * Check cookie, session: if have cookie will set session
+	 * @return boolean
+	 */
 	public function isLogged ( bool $checkCookie = false ) : bool
 	{
-		if ( ! get_cookie( $this->NKNck ) && ! $this->session->get( $this->NKNss ) )
+		if ( ! get_cookie( $this->NknConfig::NKNck ) && ! Services::session()->get( $this->NknConfig::NKNss ) )
 		{
 			return false;
 		}
-		else if ( $this->session->get( $this->NKNss ) )
+		else if ( Services::session()->get( $this->NknConfig::NKNss ) )
 		{
 			return true;
 		}
@@ -292,7 +270,7 @@ class NknAuth
 			return false;
 		}
 
-		if ( ! $cookie = get_cookie( $this->NKNck ) ) return false;
+		if ( ! $cookie = get_cookie( $this->NknConfig::NKNck ) ) return false;
 
 		$exp = explode( '-', $cookie );
 
@@ -316,7 +294,7 @@ class NknAuth
 		}
 
 		$cToken = password_verify( $user[ 'cookie_token' ], $exp[0] );
-		$cIP = $user[ 'last_login' ] == $this->request->getIPAddress();
+		$cIP = $user[ 'last_login' ] == Services::request()->getIPAddress();
 
 		if ( false === $cToken || false === $cIP ) return false;
 
@@ -342,7 +320,7 @@ class NknAuth
 
 		$userData[ 'permission' ] = json_decode( $userData[ 'permission' ] );
 
-		$this->session->set( $this->NKNss, $userData );
+		Services::session()->set( $this->NknConfig::NKNss, $userData );
 
 		return true;
 	}
@@ -368,8 +346,8 @@ class NknAuth
 		}
 
 		$requestType = ( $type === 'login' ) ? 'password' : 'email';
-		$isNullUsername = is_null( $this->request->getPostGet( 'username' ) );
-		$isNullType = is_null( $this->request->getPostGet( $requestType ) );
+		$isNullUsername = is_null( Services::request()->getPostGet( 'username' ) );
+		$isNullType = is_null( Services::request()->getPostGet( $requestType ) );
 
 		$hasRequest = ! $isNullUsername && ! $isNullType;
 
@@ -391,42 +369,25 @@ class NknAuth
 		}
 		else
 		{
-			$this->validation = service( 'validation' );
-
 			$this->response = ( $type === 'login' )
 			? $this->loginValidate()
 			: $this->forgetValidate();
 		}
 	}
 
-	/** Set throttle config and get was_limited_one return boolean method */
-	private function getConfig () : Model
-	{
-		$config = $this->throttle->config(
-			$this->throttle_config[ 'type' ],
-			$this->throttle_config[ 'limit_one' ],
-			$this->throttle_config[ 'limit' ],
-			$this->throttle_config[ 'timeout' ]
-		);
-
-		$this->response[ 'show_captcha' ] = $this->throttle->was_limited_one();
-
-		return $config;
-	}
-
 	/** Validation form login and set session & cookie */
 	private function loginValidate () : array
 	{
-		$validate_group = $this->throttle->was_limited_one()
+		$validate_group = $this->modelLogin->was_limited_one()
 		? 'login_with_captcha'
 		: 'login';
 
-		$this->validation
-		->withRequest( $this->request )
+		Services::Validation()
+		->withRequest( Services::request() )
 		->setRules( $this->rules[ $validate_group ] );
 
-		if ( false === $this->validation->run() ) {
-			$this->response[ 'attemps' ] = $this->throttle->throttle() + 1;
+		if ( false === Services::Validation()->run() ) {
+			$this->response[ 'attemps' ] = $this->modelLogin->throttle() + 1;
 			$this->response[ 'load_view' ] = true;
 			$this->response[ 'wrong' ] = true;
 
@@ -434,12 +395,14 @@ class NknAuth
 		}
 
 		$selectQuery = [
-			'User.id',
-			'User.password',
-			'User.email',
-			'User.status',
-			'User.created_at',
-			'User.updated_at',
+			# user
+			'user.id',
+			'user.password',
+			'user.email',
+			'user.status',
+			'user.created_at',
+			'user.updated_at',
+			# user_group
 			'user_group.id as group_id',
 			'user_group.name as group_name',
 			'user_group.permission'
@@ -447,13 +410,13 @@ class NknAuth
 
 		$userData = $this->builder
 		->select( implode( ',', $selectQuery ) )
-		->join( 'user_group', 'user_group.id = User.group_id' )
-		->where( [ 'username' => $this->request->getPostGet( 'username' ) ] )
+		->join( 'user_group', 'user_group.id = user.group_id' )
+		->where( [ 'username' => Services::request()->getPostGet( 'username' ) ] )
 		->get()
 		->getRowArray();
 
 		if ( null === $userData ) {
-			$this->response[ 'attemps' ] = $this->throttle->throttle() + 1;
+			$this->response[ 'attemps' ] = $this->modelLogin->throttle() + 1;
 			$this->response[ 'load_view' ] = true;
 			$this->response[ 'wrong' ] = true;
 
@@ -461,12 +424,12 @@ class NknAuth
 		}
 
 		$verifyPassword = $this->getVerifyPass(
-			$this->request->getPostGet( 'password' ),
+			Services::request()->getPostGet( 'password' ),
 			$userData[ 'password' ]
 		);
 
 		if ( false === $verifyPassword ) {
-			$this->response[ 'attemps' ] = $this->throttle->throttle() + 1;
+			$this->response[ 'attemps' ] = $this->modelLogin->throttle() + 1;
 			$this->response[ 'load_view' ] = true;
 			$this->response[ 'wrong' ] = true;
 
@@ -475,7 +438,7 @@ class NknAuth
 
 		if ( $userData[ 'status' ] !== 'active' )
 		{
-			$this->response[ 'attemps' ] = $this->throttle->throttle() + 1;
+			$this->response[ 'attemps' ] = $this->modelLogin->throttle() + 1;
 			$this->response[ 'banned' ] = $userData[ 'status' ] == 'banned' ? true : false;
 			$this->response[ 'inactive' ] = $userData[ 'status' ] == 'inactive' ? true : false;
 
@@ -483,27 +446,55 @@ class NknAuth
 		}
 
 		$userData[ 'permission' ] = json_decode( $userData[ 'permission' ] );
+		# --- Set success to true
 		$this->response[ 'success' ] = true;
 		# --- Set user session
-		$this->session->set( $this->NKNss, $userData);
+		Services::session()->set( $this->NknConfig::NKNss, $userData );
 
-		if ( $this->request->getPostGet( 'remember_me' ) ) {
+		# --- Update data
+		$updateData = [
+			'last_login' => Services::request()->getIPAddress(),
+			'last_activity' => date('Y-m-d')
+		];
+
+		if ( Services::request()->getPostGet( 'remember_me' ) )
+		{
 			$randomKey = Encryption::createKey(8);
 			$idHex = bin2hex( $userData[ 'id' ] );
 			$keyHex = bin2hex( $randomKey );
 			$keyHash = password_hash( $keyHex, PASSWORD_DEFAULT );
 			$cookieValue = "{$keyHash}-{$idHex}";
 
-			$createToken = $this->builder
-			->where( 'id', $userData[ 'id' ] )
-			->update( [ 'cookie_token' => $keyHex ] );
+			# --- Add more cookie_token
+			$updateData[ 'cookie_token' ] = $keyHex;
 
-			if ( $createToken ) {
-				setcookie( $this->NKNck, $cookieValue, time()+60*60*24*7, '/' );
-			}
+			$updateSuccess = $this->builder->update(
+				$updateData,
+				[ 'id' => $userData[ 'id' ] ],
+				1
+			);
+
+			# Lol don't know why need set cookie after using dbQuery class
+			if ( $updateSuccess )
+			setcookie( $this->NknConfig::NKNck, $cookieValue, time()+60*60*24*7, '/' );
+
+			else
+			log_message( 'error', "{$userData[ 'id' ]} Logged, but update failed remember-me" );
+		}
+		else
+		{
+			$updateSuccess = $this->builder->update(
+				$updateData,
+				[ 'id' => $userData[ 'id' ] ],
+				1
+			);
+
+			if ( ! $updateSuccess )
+			log_message( 'error', "{$userData[ 'id' ]} Logged, but update failed" );
 		}
 
-		$this->throttle->throttle_cleanup();
+		# --- Cleanup throttle
+		$this->modelLogin->throttle_cleanup();
 
 		return $this->response;
 	}
@@ -511,17 +502,17 @@ class NknAuth
 	/** Validation form forgot password and send mail */
 	private function forgetValidate () : array
 	{
-		$validate_group = $this->throttle->was_limited_one()
+		$validate_group = $this->modelLogin->was_limited_one()
 		? 'forgot_password_with_captcha'
 		: 'forgot_password';
 
-		$this->validation
-		->withRequest( $this->request )
+		Services::Validation()
+		->withRequest( Services::request() )
 		->setRules( $this->rules[ $validate_group ] );
 
-		if ( false === $this->validation->run() ) {
+		if ( false === Services::Validation()->run() ) {
 			die( 'not passed' );
-			$this->response[ 'attemps' ] = $this->throttle->throttle() + 1;
+			$this->response[ 'attemps' ] = $this->modelLogin->throttle() + 1;
 			$this->response[ 'load_view' ] = true;
 			$this->response[ 'wrong' ] = true;
 
@@ -532,14 +523,14 @@ class NknAuth
 		$find_user = $this->builder
 		->select( 'username' )
 		->where( [
-			'username' => $this->request->getPostGet( 'username' ),
-			'email' => $this->request->getPostGet( 'email' )
+			'username' => Services::request()->getPostGet( 'username' ),
+			'email' => Services::request()->getPostGet( 'email' )
 		] )
 		->get();
 
 		if ( ! $user = $find_user->getRowArray() )
 		{
-			$this->response[ 'attemps' ] = $this->throttle->throttle() + 1;
+			$this->response[ 'attemps' ] = $this->modelLogin->throttle() + 1;
 			$this->response[ 'load_view' ] = true;
 			$this->response[ 'wrong' ] = true;
 		}
@@ -576,6 +567,3 @@ class NknAuth
     }
 	}
 }
-
-/* End of file my_auth.php */
-/* Location: ./app/libraries/My_auth.php */
