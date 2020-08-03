@@ -4,7 +4,8 @@ namespace BAPI\Controllers\Mixins;
 
 use CodeIgniter\Database\Exceptions\DataException;
 use CodeIgniter\Exceptions\ModelException;
-
+use Config\Services;
+use Config\Validation;
 
 /**
  * @method array ___updateMultiExist() Callable count instead of multiPatch do default
@@ -238,7 +239,6 @@ trait BAPITrait
 
 	private function _searchTraitChunk ( array $data, string $methodName, array $params )
 	{
-		# --- [ title => Something great <^,^'> !Meow! ]
 		if ( array_key_exists( $methodName, $this->searchValueRequire ) ) {
 			$errStr = lang( 'Api.errorIncorrectMethodArgsArray', [ $methodName ] );
 
@@ -246,6 +246,7 @@ trait BAPITrait
 		}
 
 		$data = $data[0] ?? $data;
+
 		$this->model->$methodName( $data, ...$params );
 
 		return $data;
@@ -259,25 +260,26 @@ trait BAPITrait
     string $methodName = 'like',
 		array $params = [],
 		bool $withOr = true
-  ) : array {
+	) : array
+	{
+		$req = Services::request()->getGet();
 
-    $req = \Config\Services::request()->getGet();
     if ( $reqCount = count( $req ) ) {
-      helper('array');
+
+			helper( 'array' );
 			$except[] = 'page';
 
 			if ( ! array_key_exists( $methodName, $this->searchStoreMethod ) ) {
-				return [ 'error' => lang('Api.errorNotSupportMethod', [ $methodName ]) ];
+				return [ 'error' => lang( 'Api.errorNotSupportMethod', [ $methodName ]) ];
 			}
 
       if ( $reqCount > 1 )
       {
         foreach ( $req as $fieldName => $value ) {
-          if ( in_array( $fieldName, $except, true ) )
-          {
-            continue;
-          }
-          else if ( false === strpos( $fieldName, '-' ) )
+
+          if ( in_array( $fieldName, $except, true ) ) continue;
+
+					if ( false === strpos( $fieldName, '-' ) )
           {
 						$data[] = [ $fieldName => $value ];
           }
@@ -287,17 +289,21 @@ trait BAPITrait
             $data[] = [ "{$keyFirstLast[ 'first' ]}.{$keyFirstLast[ 'last' ]}" => $value ];
           }
 				}
+
       }
       else
       {
-        $fieldName = array_key_first($req);
-        if ( in_array( $fieldName, $except, true ) ) { return []; }
+				$fieldName = array_key_first($req);
+
+				if ( in_array( $fieldName, $except, true ) ) return [];
+
         $data = $req;
         $value = $req[ $fieldName ];
 
         if ( false !== strpos( $fieldName, '-' ) ) {
 					# --- First = table-name; Last = field-name
-          $keyFirstLast = \array_key_first_last( explode( '-', $fieldName ) );
+					$keyFirstLast = \array_key_first_last( explode( '-', $fieldName ) );
+
           $data = [ "{$keyFirstLast[ 'first' ]}.{$keyFirstLast[ 'last' ]}" => $value ];
         }
       }
@@ -305,8 +311,7 @@ trait BAPITrait
       $modelRules = $this->triggerModel( 'ruleSearch', [] );
 			$rules = $this->_findRules( $req, $modelRules, $except );
 
-      if ( 0 === count( $rules ) )
-      {
+      if ( 0 === count( $rules ) ) {
 				$errArray = [ 'error' => 'Forget the search rule' ];
 
         if ( $reqCount <= count( $except ) ) {
@@ -317,23 +322,23 @@ trait BAPITrait
               $exceptCounter++;
             }
           }
-          return $exceptCounter >= $reqCount ? [] : $errArray;
+          return ( $exceptCounter >= $reqCount ) ? [] : $errArray;
         }
 
         return $errArray;
       }
-      else if ( isset( $rules['error'] ) )
-      {
-        return [ 'error' => $rules['error'] ];
-      }
-      else if ( ! service('validation')->setRules($rules)->run($req) )
-      {
-        return [ 'error' => service('validation')->getErrors() ];
-      }
-      else if ( count($data) >= 2 )
+
+			if ( isset( $rules[ 'error' ] ) ) return $rules;
+
+      if ( ! Services::validation() ->setRules( $rules ) ->run( $req ) ) {
+        return [ 'error' => Services::validation() ->getErrors() ];
+			}
+
+      if ( count( $data ) >= 2 )
       {
 				if ( true === $this->searchStoreMethod[ $methodName ] ) {
-					$groupBy = $this->groupBy ?: str_replace( ['.', '*'], '', array_keys($rules) );
+					$groupBy = $this->groupBy ?: str_replace( [ '.', '*' ], '', array_keys( $rules ) );
+
 					$this->model->groupBy( $groupBy );
 				}
 
@@ -341,14 +346,18 @@ trait BAPITrait
 
 				foreach ( $data as $key => $value ) {
 
-					if ( is_array( $value ) AND ( count($value) >= 2 ) )
+					if ( is_array( $value ) && ( count( $value ) >= 2 ) )
 					{
 						# --- Will never meet these cases, because has been break in method:
 						# --- [_findRules] line: if ( isAssoc( $value ) )
 						foreach ( $value as $deepKey => $deepValue ) {
-							if ( is_array( $deepValue ) AND ! isAssoc( $value ) ) {
-								$this->model->$methodName( $deepKey, $deepValue, ...$params );
-							} else { break 2; }
+
+							if ( is_array( $deepValue ) && ! isAssoc( $value ) )
+							$this->model->$methodName( $deepKey, $deepValue, ...$params );
+
+							else
+							break 2;
+
 						}
 					}
 					else
@@ -366,25 +375,20 @@ trait BAPITrait
 							}
 
 							foreach ( $value as $deepKey => $deepValue ) {
-								if ( is_array( $deepValue ) AND ! isAssoc( $deepValue ) ) {
-									$this->model->$methodName( $deepKey, $deepValue, ...$params );
-								} else { break 2; }
+
+								if ( is_array( $deepValue ) && ! isAssoc( $deepValue ) )
+								$this->model->$methodName( $deepKey, $deepValue, ...$params );
+
+								else
+								break 2;
+
 							}
 						}
 						else
 						{
 							$value = $this->_searchTraitChunk( $value, $methodName, $params );
-							if ( isset( $value[ 'error' ] ) ) { return $value; }
 
-							/*
-								if ( array_key_exists( $methodName, $this->searchValueRequire ) ) {
-									return [ 'error' => lang( 'Api.errorIncorrectMethodArgsArray', [ $methodName ] ) ];
-									break;
-								}
-
-								$value = $value[0] ?? $value;
-								$this->model->$methodName( $value, ...$params );
-							*/
+							if ( isset( $value[ 'error' ] ) ) return $value;
 						}
 					}
 				}
@@ -397,7 +401,8 @@ trait BAPITrait
 				$value =  $data[ $key ];
 
 				if ( true === $this->searchStoreMethod[ $methodName ] ) {
-					$groupBy = $this->groupBy ?: str_replace( ['.', '*'], '', array_keys($rules) );
+					$groupBy = $this->groupBy ?: str_replace( [ '.', '*' ], '', array_keys( $rules ) );
+
 					$this->model->groupBy( $groupBy );
 				}
 
@@ -423,14 +428,14 @@ trait BAPITrait
 					{
 						$data = $this->_searchTraitChunk( $data, $methodName, $params );
 
-						if ( isset( $data[ 'error' ] ) ) { return $data; }
+						if ( isset( $data[ 'error' ] ) ) return $data;
 					}
 				}
 				else
 				{
 					$data = $this->_searchTraitChunk( $data, $methodName, $params );
 
-					if ( isset( $data[ 'error' ] ) ) { return $data; }
+					if ( isset( $data[ 'error' ] ) ) return $data;
 				}
 
         return $data;
@@ -459,15 +464,18 @@ trait BAPITrait
 		string $methodName = 'like',
 		array $params = [],
     bool $withOr = true
-  ) {
+	)
+	{
 		# Can use many "Method" searches like here ...
     if ( $search ) {
-      $search = $this->_searchTrait( $except, $methodName, $params, $withOr );
-      if ( isset( $search['error'] ) ) { return $this->resErr( $search['error'] ); }
+			$search = $this->_searchTrait( $except, $methodName, $params, $withOr );
+
+      if ( isset( $search[ 'error' ] ) ) { return $this->resErr( $search[ 'error' ] ); }
 		}
 
-    $data = $this->trigger( 'indexRun', [] );
-    if ( isset( $data['error'] ) ) { return $this->resErr( $data['error'] ); }
+		$data = $this->trigger( 'indexRun', [] );
+
+    if ( isset( $data[ 'error' ] ) ) { return $this->resErr( $data[ 'error' ] ); }
 
     return $this->res( $data ?: [], null, '' );
   }
@@ -497,13 +505,13 @@ trait BAPITrait
 		if ( isset( $data[ 'error' ] ) ) return $this->resErr( $data[ 'error' ] );
 
 		# Handle validation
-    if ( ! service( 'validation' )->setRules( $rules )->run( $data[ 'data' ] ) ) {
-      return $this->resErr( service( 'validation' )->getErrors() );
+    if ( ! Services::validation() ->setRules( $rules ) ->run( $data[ 'data' ] ) ) {
+      return $this->resErr( Services::validation() ->getErrors() );
 		}
 
 		# Triggering after validate create
 		$data = $this->trigger( 'afterValidateCreate', $data );
-		if ( isset( $data['error'] ) ) return $this->resErr( $data[ 'error' ] );
+		if ( isset( $data[ 'error' ] ) ) return $this->resErr( $data[ 'error' ] );
 
 		if ( ! $id = $this->model->insert( $data[ 'data' ] ) )
     {
@@ -538,89 +546,75 @@ trait BAPITrait
   protected function deleteTrait ( $id = null, bool $purge = false )
   {
     if ( ! $id ) {
-			$resErr = lang( 'Validation.required', [ 'field' => 'id' ] );
-
-			return $this->resErr( $resErr );
+			return $this->resErr( lang( 'Validation.required', [ 'field' => 'id' ] ) );
 		}
 
 		if ( is_bool( $this->useSoftDelete ) && $this->model->useSoftDeletes !== $this->useSoftDelete ) {
 			$str = 'Declaration of ' . $this->modelName . '::useSoftDelete ';
 			$str .= 'must be set to ' . ( $this->useSoftDelete ? 'true' : 'false' );
+
 			throw new ModelException( $str );
 		}
 
 		# --- Format id to String-Array [ '1', '2', '3' ]
-		$ids = $this->_idToArray($id);
+		$ids = $this->_idToArray( $id );
+		$IdsCounter = count( $ids );
 
-		$IdsCounter = count($ids);
+		$rawArray = $this->request->getRawInput( 'purge' );
+    $purge = ( $purge === true || isset( $rawArray[ 'purge' ] ) ) ? true : false;
 
-		$rawArray = $this->request->getRawInput('purge');
+		if ( 0 === $IdsCounter ) return $this->resErr( lang( 'api.errorEmptyData' ) );
 
-    $purge = ( $purge === true || isset( $rawArray['purge'] ) ) ? true : false;
-
-    if ( 0 === $IdsCounter )
-    {
-      return $this->resErr( lang('api.errorEmptyData') );
-		}
-    # --- Do "protect first ID"
-    else if ( ( true === $this->protectFirstId ) && in_array( 1, $ids ) )
-    {
-      return $this->resErr( lang('api.errorFirstMem') );
+    # --- Do "protect for first ID"
+    if ( ( true === $this->protectFirstId ) && in_array( 1, $ids ) ) {
+      return $this->resErr( lang( 'api.errorFirstMem' ) );
     }
 
     # --- Do "Limit Record"
-    if ( $IdsCounter > $this->maximumDelete )
-    {
+    if ( $IdsCounter > $this->maximumDelete ) {
 			$errParam = [ 'field' => 'Id', 'param' => $this->maximumDelete ];
 
       return $this->resErr( lang( 'Validation.less_than_equal_to', $errParam ) );
     }
-    else
-    {
-      # --- Trigger beforeDelete
-			$data = $this->trigger( 'beforeDelete', [ 'id' => $ids, 'purge' => $purge ] );
 
-      if ( isset( $data['error'] ) ) { return $this->resErr( $data['error'] ); }
+		# --- Trigger beforeDelete
+		$data = $this->trigger( 'beforeDelete', [ 'id' => $ids, 'purge' => $purge ] );
+		if ( isset( $data[ 'error' ] ) ) return $this->resErr( $data[ 'error' ] );
 
-      if ( ( true === $purge ) && ( true === $this->model->useSoftDeletes ) ) {
-				$this->model->onlyDeleted();
-			}
+		if ( ( true === $purge ) && ( true === $this->model->useSoftDeletes ) ) {
+			$this->model->onlyDeleted();
+		}
 
-			/**
-			 * Find-All rows in the array $ids
-			 * @var array $available
-			 */
-			$available = $this->model
-			->select( $this->deleteTemp ?? '1' )
-			->whereIn( $this->model->primaryKey, $ids )
-			->findAll();
+		/**
+		 * Find-All rows in the array $ids
+		 * @var array $available
+		 */
+		$available = $this->model
+		->select( $this->deleteTemp ?? '1' )
+		->whereIn( $this->model->primaryKey, $ids )
+		->findAll();
 
-      if ( ( null === $available ) || ( count( $available ) != $IdsCounter ) )
-      {
-        # Something wrong from client $this->model->deletedField
-        return $this->resErr( lang( 'Validation.is_not_unique', [ 'field' => 'Id' ] ) );
-			}
-      else if ( false === $this->model->delete( $ids, $purge ) )
-      {
-        return $this->resErr( $this->model->errors() );
-			}
-      else
-      {
-				$this->deleteTemp = $available;
+		if ( ( null === $available ) || ( count( $available ) != $IdsCounter ) ) {
+			# Something wrong from client $this->model->deletedField
+			return $this->resErr( lang( 'Validation.is_not_unique', [ 'field' => 'Id' ] ) );
+		}
 
-        #Trigger afterDelete
-				$data = $this->trigger( 'afterDelete', $data );
+		if ( false === $this->model->delete( $ids, $purge ) ) {
+			return $this->resErr( $this->model->errors() );
+		}
 
-        if ( isset( $data['error'] ) ) { return $this->resErr( $data['error'] ); }
+		$this->deleteTemp = $available;
 
-				$respondSuccess = [
-					$data['success'] ?? null,
-					lang('api.deleteSuccess')
-				];
+		# Trigger afterDelete
+		$data = $this->trigger( 'afterDelete', $data );
+		if ( isset( $data[ 'error' ] ) ) return $this->resErr( $data[ 'error' ] );
 
-        return $this->res( $respondSuccess, 'respondDeleted' );
-      }
-    }
+		$respondSuccess = [
+			( $data[ 'success' ] ?? null ),
+			lang( 'api.deleteSuccess' )
+		];
+
+		return $this->res( $respondSuccess, 'respondDeleted' );
   }
 
   /**
@@ -636,23 +630,24 @@ trait BAPITrait
    */
   protected function updateTrait ( $id = null, bool $unDelPatch = false )
   {
-		$unDelPatch = ( $unDelPatch === true ) AND ( $this->model->useSoftDeletes === true );
+		$unDelPatch = ( $unDelPatch === true ) && ( $this->model->useSoftDeletes === true );
 
-    if ( empty( $id ) )
-    {
+    if ( empty( $id ) ) {
       return $this->resErr( lang( 'Validation.required', [ 'field' => 'id' ] ) );
     }
-    else if ( 0 === count( $this->request->getRawInput() ) )
-    {
-      $method = $this->request->getMethod();
-      if ( 'patch' !== $method OR ( 'patch' === $method AND false === $unDelPatch ) ) {
-        return $this->resErr( lang('api.errorEmptyData') );
+
+		if ( 0 === count( $this->request->getRawInput() ) ) {
+			$method = $this->request->getMethod();
+
+      if ( 'patch' !== $method || ( 'patch' === $method && false === $unDelPatch ) ) {
+        return $this->resErr( lang( 'api.errorEmptyData' ) );
       }
     }
 
     $rawArray = $this->request->getRawInput();
-    $method = $this->request->getMethod();
-    $unDelPatch = ( isset( $rawArray['undelete'] ) OR $unDelPatch ) ? true : false;
+		$method = $this->request->getMethod();
+
+    $unDelPatch = ( isset( $rawArray[ 'undelete' ] ) || $unDelPatch ) ? true : false;
 
     # --- Check method
     if ( $method === 'patch' )
@@ -668,55 +663,52 @@ trait BAPITrait
     }
     else
     {
-      return $this->res(
-        [ 'Bad Request', null, 'Request must one in: "Put, Patch"' ],
-        'failValidationError'
-      );
-    }
+			$errArg = [ 'Bad Request', null, 'Request must one in: "Put, Patch"' ];
+
+      return $this->res( $errArg, 'failValidationError' );
+		}
+
     # After checked method, all $id will inside as Array [ id => $id ]
-		if ( isset( $rules['error'] ) ) { return $this->resErr( $rules['error'] ); }
+		if ( isset( $rules[ 'error' ] ) ) return $this->resErr( $rules[ 'error' ] );
 
 		/**
 		 * @var int|array $idByMethod **put** = int $id, **other-wire** = array
 		 */
-		$idByMethod = ( $method === 'put' ) ? $id[0] : $id;
+		$idByMethod = ( $method === 'put' ) ? $id[ 0 ] : $id;
 
 		# --- Trigger beforeUpdate
     $data = $this->trigger( 'beforeUpdate', [
       'id' => $idByMethod, 'data' => $rawArray, 'method' => $method
     ] );
 
-    if ( isset( $data['error'] ) OR empty( $data['data'] ) ) {
-      return $this->resErr( $data['error'] ?? 'Something wrong!, data is empty...' );
+    if ( isset( $data[ 'error' ] ) || empty( $data[ 'data' ] ) ) {
+			$errArg = $data[ 'error' ] ?? 'Something wrong!, data is empty...';
+
+      return $this->resErr( $errArg );
     }
 
 		# --- Trigger before validations
 		$data = $this->trigger( 'beforeValidateUpdate', $data );
-		if ( isset( $data['error'] ) ) { return $this->resErr( $data['error'] ); }
+		if ( isset( $data[ 'error' ] ) ) return $this->resErr( $data[ 'error' ] );
 
     # --- Validate
-    $validation = service('validation');
-    if ( ! $validation->setRules( $rules )->run( $data['data'] ) )
-    {
-      return $this->resErr( $validation->getErrors() );
+    if ( ! Services::validation() ->setRules( $rules ) ->run( $data[ 'data' ] ) ) {
+      return $this->resErr( Services::validation() ->getErrors() );
 		}
 
 		# --- Trigger after validations
 		$data = $this->trigger( 'afterValidateUpdate', $data );
-		if ( isset( $data['error'] ) ) { return $this->resErr( $data['error'] ); }
+		if ( isset( $data[ 'error' ] ) ) return $this->resErr( $data[ 'error' ] );
 
-    if ( false === $this->model->update( $id, $data['data'] ) )
-    {
+    if ( false === $this->model->update( $id, $data[ 'data' ] ) ) {
       return $this->resErr( $this->model->errors() );
     }
-    else
-    {
-			# --- Trigger after updated
-      $data = $this->trigger( 'afterUpdate', $data );
-      if ( isset( $data['error'] ) ) { return $this->resErr( $data['error'] ); }
 
-      return $this->res( $data['success'] ?? lang('api.updateSuccess') );
-    }
+		# --- Trigger after updated
+		$data = $this->trigger( 'afterUpdate', $data );
+		if ( isset( $data[ 'error' ] ) ) return $this->resErr( $data[ 'error' ] );
+
+		return $this->res( $data[ 'success' ] ?? lang( 'api.updateSuccess' ) );
   }
 
   /**
@@ -731,26 +723,24 @@ trait BAPITrait
 			return $this->resErr( lang( 'Validation.required', [ 'field' => 'id' ] ) );
 		}
 
-    $validation = \Config\Services::validation()->setRules(
-			[ 'id' => \Config\Validation::ruleInt() ]
-		);
+    $validation = Services::validation()->setRules( [ 'id' => Validation::ruleInt() ] );
     $idArray = [ 'id' => $id ];
 
-    if ( ! $validation->run( $idArray ) )
-    {
-      return $this->resErr( $validation->getError('id') );
+    if ( ! $validation->run( $idArray ) ) {
+      return $this->resErr( $validation->getError( 'id' ) );
     }
-    else if ( $methodName === 'show' )
+
+		if ( $methodName === 'show' )
     {
       $data = $this->trigger( 'showRun', $idArray );
-      if ( isset( $data['error'] ) ) { return $this->resErr( $data['error'] ); }
+      if ( isset( $data[ 'error' ] ) ) return $this->resErr( $data[ 'error' ] );
 
       return $this->res( $data, null, '' );
     }
     else if ( $methodName === 'edit' )
     {
       $data = $this->trigger( 'editRun', $idArray );
-      if ( isset( $data['error'] ) ) { return $this->resErr( $data['error'] ); }
+      if ( isset( $data[ 'error' ] ) ) return $this->resErr( $data[ 'error' ] );
 
       return $this->res( $data, null, '' );
     }
@@ -772,37 +762,62 @@ trait BAPITrait
    */
   private function _singlePatch ( &$id, array &$rawArray, bool $unDelPatch ) : array
   {
-    if ( ( true === $unDelPatch ) AND ( true === $this->model->useSoftDeletes ) )
+    if ( ( true === $unDelPatch ) && ( true === $this->model->useSoftDeletes ) )
     {
-      if ( ! $this->model->select('1')->onlyDeleted()->find($id) ) {
-        return [ 'error' => lang( 'Validation.is_not_unique', [ 'field' => 'Id' ] ) ];
+			$isUniqueId = $this->model
+			->select( '1' )
+			->onlyDeleted()
+			->find( $id );
+
+      if ( ! $isUniqueId ) {
+				$errStr = lang( 'Validation.is_not_unique', [ 'field' => 'Id' ] );
+
+        return [ 'error' => $errStr ];
       }
 
       $rules = $this->triggerModel( 'rulePatchUndelete', [ 'id' => $id ] );
 
+			# Set undelete rule when need
       if ( ! isset( $rules[ $this->model->deletedField ] ) ) {
-        $rules[ $this->model->deletedField ] = \Config\Validation::ruleUndelete();
+        $rules[ $this->model->deletedField ] = Validation::ruleUndelete();
       }
 
       $rawArray[ $this->model->deletedField ] = null;
     }
     else
     {
-      if ( ! $tempData = $this->model->select( $this->updateTemp ?? '1' )->find($id) ) {
-        return [ 'error' => lang( 'Validation.is_not_unique', [ 'field' => 'Id' ] ) ];
+			$tempData = $this->model
+			->select( $this->updateTemp ?? '1' )
+			->find( $id );
+
+      if ( ! $tempData ) {
+				$errStr = lang( 'Validation.is_not_unique', [ 'field' => 'Id' ] );
+
+        return [ 'error' => $errStr ];
       }
 
+			# storing $tempData
       $this->updateTemp = $tempData;
 
-      $data = $this->trigger( 'beforeSinglePatch', [ 'id' => $id, 'data' => $rawArray ] );
-      if ( isset( $data['error'] ) ) { return [ 'error' => $data['error'] ]; }
+      $data = $this->trigger(
+				'beforeSinglePatch',
+				[ 'id' => $id, 'data' => $rawArray ]
+			);
 
-      $rawArray = $data['data'];
+      if ( isset( $data[ 'error' ] ) ) return [ 'error' => $data[ 'error' ] ];
 
-      $rules = $this->_findRules( $rawArray, $this->triggerModel( 'rulePatch', [ 'id' => $id ] ) );
+			# Set because $rawArray is a reference variable
+			$rawArray = $data[ 'data' ];
+
+      $rules = $this->_findRules(
+				$rawArray,
+				$this->triggerModel( 'rulePatch', [ 'id' => $id ] )
+			);
     }
 
-    $id = [ $id ];
+		# Storing id inside an array
+		$id = [ $id ];
+
     return $rules;
   }
 
@@ -817,58 +832,71 @@ trait BAPITrait
    */
   private function _multiPatch ( &$id, array &$rawArray, bool $unDelPatch ) : array
   {
-    $IdsCounter = count( $this->_idToArray($id) );
-    if ( $IdsCounter <= $this->maximumUpdate )
+		$IdsCounter = count( $this->_idToArray( $id ) );
+
+    if ( $IdsCounter > $this->maximumUpdate )
     {
-      $id = $this->_idToArray($id);
-      if ( ( true === $unDelPatch ) AND ( true === $this->model->useSoftDeletes ) ) {
-				$this->model->onlyDeleted();
+			$errArg = [ 'field' => 'Id', 'param' =>  $this->maximumUpdate ];
+
+      return [ 'error' => lang( 'Validation.less_than_equal_to', $errArg ) ];
+    }
+
+		$id = $this->_idToArray( $id );
+
+		if ( ( true === $unDelPatch ) && ( true === $this->model->useSoftDeletes ) ) {
+			$this->model->onlyDeleted();
+		}
+
+		if ( method_exists( $this, '___updateMultiExist' ) )
+		{
+			$available = $this->___updateMultiExist( [ 'id' => $id ] );
+
+			$available = (int) $available;
+		}
+		else
+		{
+			$available = $this->model->select( '1' )
+			->whereIn( $this->model->primaryKey, $id )
+			->countAllResults();
+		}
+
+		if ( $IdsCounter != $available )
+		{
+			$errStr = lang( 'Validation.is_not_unique', [ 'field' => 'Id' ] );
+
+			return [ 'error' => $errStr ];
+		}
+
+		if ( true === $unDelPatch )
+		{
+			$rules = $this->triggerModel( 'rulePatchUndelete', [ 'id' => $id ] );
+
+			# Set undelete rule when need
+			if ( ! isset( $rules[ $this->model->deletedField ] ) ) {
+				$rules[ $this->model->deletedField ] = Validation::ruleUndelete();
 			}
 
-      if ( method_exists( $this, '___updateMultiExist' ) )
-      {
-        $available = $this->___updateMultiExist( [ 'id' => $id ] );
-        $available = (int) $available;
-      }
-      else
-      {
-        $available = $this->model->select('1')
-        ->whereIn( $this->model->primaryKey, $id )
-        ->countAllResults();
-      }
+			$rawArray[ $this->model->deletedField ] = null;
+		}
+		else
+		{
+			$data = $this->trigger(
+				'beforeMultiPatch',
+				[ 'id' => $id, 'data' => $rawArray ]
+			);
 
-      if ( $IdsCounter != $available )
-      {
-        return ['error' => lang( 'Validation.is_not_unique', [ 'field' => 'Id' ] ) ];
-      }
-      else if ( true === $unDelPatch )
-      {
-        $rules = $this->triggerModel( 'rulePatchUndelete', [ 'id' => $id ] );
+			if ( isset( $data[ 'error' ] ) ) return [ 'error' => $data[ 'error' ] ];
 
-        if ( ! isset( $rules[ $this->model->deletedField ] ) ) {
-          $rules[ $this->model->deletedField ] = \Config\Validation::ruleUndelete();
-        }
+			# Set because $rawArray is a reference variable
+			$rawArray = $data[ 'data' ];
 
-        $rawArray[ $this->model->deletedField ] = null;
-      }
-      else
-      {
-        $data = $this->trigger( 'beforeMultiPatch', [ 'id' => $id, 'data' => $rawArray ] );
-        if ( isset( $data['error'] ) ) { return [ 'error' => $data['error'] ]; }
+			$rules = $this->_findRules(
+				$rawArray,
+				$this->triggerModel( 'rulePatch', [ 'id' => $id ] )
+			);
+		}
 
-        $rawArray = $data['data'];
-
-        $rules = $this->_findRules( $rawArray, $this->triggerModel( 'rulePatch', [ 'id' => $id ] ) );
-      }
-
-      return $rules;
-    }
-    else
-    {
-			$errFiled = [ 'field' => 'Id', 'param' =>  $this->maximumUpdate ];
-
-      return [ 'error' => lang( 'Validation.less_than_equal_to', $errFiled ) ];
-    }
+		return $rules;
   }
 
   /**
@@ -880,16 +908,22 @@ trait BAPITrait
    */
   private function _singlePut ( &$id, array &$rawArray ) : array
   {
-    if ( ! $tempData = $this->model->select( $this->updateTemp ?? '1' )->find($id) ) {
+		$tempData = $this->model
+		->select( $this->updateTemp ?? '1' )
+		->find( $id );
+
+    if ( ! $tempData ) {
       return [ 'error' => lang( 'Validation.is_not_unique', [ 'field' => 'Id' ] ) ];
     }
 
+		# Storing $tempData
     $this->updateTemp = $tempData;
 
     $data = $this->trigger( 'beforeSinglePut', [ 'id' => $id, 'data' => $rawArray ] );
-    if ( isset( $data['error'] ) ) { return [ 'error' => $data['error'] ]; }
+    if ( isset( $data[ 'error' ] ) ) return [ 'error' => $data[ 'error' ] ];
 
-    $rawArray = $data['data'];
+		# Set because $rawArray is a reference variable
+    $rawArray = $data[ 'data' ];
 
     $rules = $this->triggerModel( 'rulePut', [ 'id' => $id ] );
     $id = [ $id ];
@@ -898,7 +932,7 @@ trait BAPITrait
   }
 
   /**
-   * Format string: '1.2.3...' to array: ['1', '2',' 3', ...]
+   * Format string: '1.2.3...' to array: [ '1', '2',' 3', ...]
    * @param string $id
    * @param string @separate
    * @param int $length
@@ -906,14 +940,17 @@ trait BAPITrait
    */
   public function _idToArray ( string $id, string $sep = '.', int $len = 100 ) : array
   {
-    if ( empty($id) ) return [];
+    if ( empty( $id ) ) return [];
 
-    $id = explode( $sep, $id, $len );
-    $ids = [];
+		$id = explode( $sep, $id, $len );
+		$ids = [];
+
     foreach ( $id as $value ) {
+
       if ( $value !== '0' && ctype_digit($value) ) {
         $ids[] = $value;
-      }
+			}
+
     }
 
     return $ids;
@@ -936,15 +973,19 @@ trait BAPITrait
       }
       else if ( ! array_key_exists( $fieldName, $ruleConfig ) )
       {
-        return [ 'error' => lang( 'Validation.ruleNotFound', [ $fieldName ] ) ];
+				$rules = [ 'error' => lang( 'Validation.ruleNotFound', [ $fieldName ] ) ];
+
+				break;
       }
       else
       {
 				# --- Last if else
-				if ( is_array( $value ) AND ! empty( $value ) )
+				if ( is_array( $value ) && ! empty( $value ) )
 				{
 					if ( isAssoc( $value ) ) {
-						return [ 'error' => lang('Api.errorAssociationNotSupported') ];
+						$rules = [ 'error' => lang( 'Api.errorAssociationNotSupported' ) ];
+
+						break;
 					}
 
 					$rules[ "{$fieldName}.*" ] = $ruleConfig[ $fieldName ];
@@ -962,19 +1003,15 @@ trait BAPITrait
 
   private function trigger ( string $event, array $eventData )
 	{
-		if (! isset($this->{$event}) || empty($this->{$event}))
-		{
-			return $eventData;
-		}
+		if ( ! isset( $this->{$event} ) || empty( $this->{$event} ) ) return $eventData;
 
-		foreach ($this->{$event} as $callback)
+		foreach ( $this->{$event} as $callback )
 		{
-			if (! method_exists($this, $callback))
-			{
+			if ( ! method_exists( $this, $callback ) ) {
 				throw DataException::forInvalidMethodTriggered($callback);
 			}
 
-			$eventData = $this->{$callback}($eventData);
+			$eventData = $this->{$callback}( $eventData );
 		}
 
 		return $eventData;
@@ -982,19 +1019,15 @@ trait BAPITrait
 
   private function triggerModel ( string $event, array $eventData )
 	{
-		if (! isset($this->{$event}) || empty($this->{$event}))
-		{
-			return $eventData;
-		}
+		if ( ! isset( $this->{$event} ) || empty( $this->{$event} ) ) return $eventData;
 
-		foreach ($this->{$event} as $callback)
+		foreach ( $this->{$event} as $callback )
 		{
-			if (! method_exists($this->model, $callback))
-			{
+			if ( ! method_exists( $this->model, $callback ) ) {
 				throw DataException::forInvalidMethodTriggered($callback);
 			}
 
-			$eventData = $this->model->{$callback}($eventData);
+			$eventData = $this->model->{$callback}( $eventData );
 		}
 
 		return $eventData;
@@ -1002,29 +1035,22 @@ trait BAPITrait
 
   public function resErr ( $data = null, string $key = 'error' )
   {
-    if ( $this->checkReturnTypeTrait() === 'array' )
-    {
-      return [ $key => $data ];
-    }
-    else
-    {
-      if ( isset( $data['methodCallback'], $data['methodArgs'] ) ) {
+    if ( $this->checkReturnTypeTrait() === 'array' ) return [ $key => $data ];
 
-        $callback = (string) $data['methodCallback'];
+		if ( isset( $data[ 'methodCallback' ], $data[ 'methodArgs' ] ) ) {
 
-        if ( method_exists( $this, $callback ) )
-        {
-          $data = (array) $data['methodArgs'];
-          return $this->{$callback}(...$data);
-        }
-        else
-        {
-          throw DataException::forInvalidMethodTriggered($callback);
-        }
-      }
+			$callback = (string) $data[ 'methodCallback' ];
 
-      return $this->response->setJSON( [ $key => $data ] );
-    }
+			if ( ! method_exists( $this, $callback ) ) {
+				throw DataException::forInvalidMethodTriggered( $callback );
+			}
+
+			$data = (array) $data[ 'methodArgs' ];
+
+			return $this->{$callback}(...$data);
+		}
+
+		return $this->response->setJSON( [ $key => $data ] );
   }
 
   /**
@@ -1032,31 +1058,27 @@ trait BAPITrait
    */
   public function res ( $data = null, $methodName = null, string $key = 'success' )
   {
-    if ( $this->checkReturnTypeTrait() === 'array' )
-    {
-      return [ $key ?: 'data' => $data ];
-    }
-    else if ( empty($methodName) )
-    {
-      return $this->response->setJSON( ( $key !== '' ) ? [ $key => $data ] : $data );
-    }
-    else
-    {
-      $data = (array) $data;
+		if ( $this->checkReturnTypeTrait() === 'array' ) {
+			return [ $key ?: 'data' => $data ];
+		}
 
-      if ( method_exists( $this->response, $methodName ) )
-      {
-        return $this->response->{$methodName}( ...$data );
-      }
-      else if ( method_exists( $this, $methodName ) )
-      {
-        return $this->{$methodName}( ...$data );
-      }
-      else
-      {
-        return $this->respond( $data, 400, 'Unsupported Response Type');
-      }
+    if ( empty( $methodName ) ) {
+			$dataArg = ( $key !== '' ) ? [ $key => $data ] : $data;
+
+      return $this->response->setJSON( $dataArg );
     }
+
+		$data = (array) $data;
+
+		if ( method_exists( $this->response, $methodName ) ) {
+			return $this->response->{$methodName}( ...$data );
+		}
+
+		if ( method_exists( $this, $methodName ) ) {
+			return $this->{$methodName}( ...$data );
+		}
+
+		return $this->respond( $data, 400, 'Unsupported Response Type' );
   }
 
   /**
