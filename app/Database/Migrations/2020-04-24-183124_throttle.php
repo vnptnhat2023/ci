@@ -34,13 +34,13 @@ class Throttle extends Migration
 			],
 
 			'created_at'=> [
-        'type' => 'DATE',
+        'type' => 'DATETIME',
         'null' => true,
         'default' => null
 			],
 
       'updated_at'=> [
-        'type' => 'DATE',
+        'type' => 'DATETIME',
         'null' => true,
         'default' => null
 			]

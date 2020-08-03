@@ -70,7 +70,7 @@ class User extends Migration
 			],
 
       'last_activity' => [
-        'type' => 'DATE',
+        'type' => 'DATETIME',
         'null' => true,
         'default' => null
 			],

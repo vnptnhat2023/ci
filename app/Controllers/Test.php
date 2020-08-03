@@ -4,15 +4,23 @@
 use App\Libraries\DesignPattern as StateGyPattern;
 // use CodeIgniter\Autoloader\FileLocator;
 use CodeIgniter\Events\Events;
+use CodeIgniter\I18n\Time;
 
 class Test extends BaseController {
 
 	protected $helpers = ['array'];
 
-	public function cfTrait()
+	public function datetime()
 	{
-		$r = config( '\BAPI\Config\Extension' ) ->getSetting('cache');
-		var_dump( "{$r[ 'prefix' ]}{$r[ 'name' ]}" );
+		helper( 'array' );
+
+		// var_dump( isAssoc( ['a', 'b'] ) );die;
+		// $a = function ( array $arg = [] ) { return [ 'a', ...$arg ]; };
+
+		$c = [];
+		$b = [ 'b' => 'B' ];
+
+		var_dump( $b + $c );
 	}
 
 	public function createMediaRelation ()

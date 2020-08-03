@@ -378,119 +378,49 @@ class NknAuth
 	/** Validation form login and set session & cookie */
 	private function loginValidate () : array
 	{
-		$validate_group = $this->modelLogin->was_limited_one()
-		? 'login_with_captcha'
-		: 'login';
+		$type = $this->modelLogin->was_limited_one()
+		? 'login_with_captcha' : 'login';
 
 		Services::Validation()
 		->withRequest( Services::request() )
-		->setRules( $this->rules[ $validate_group ] );
+		->setRules( $this->rules[ $type ] );
 
-		if ( false === Services::Validation()->run() ) {
-			$this->response[ 'attemps' ] = $this->modelLogin->throttle() + 1;
-			$this->response[ 'load_view' ] = true;
-			$this->response[ 'wrong' ] = true;
-
-			return $this->response;
-		}
-
-		$selectQuery = [
-			# user
-			'user.id',
-			'user.password',
-			'user.email',
-			'user.status',
-			'user.created_at',
-			'user.updated_at',
-			# user_group
-			'user_group.id as group_id',
-			'user_group.name as group_name',
-			'user_group.permission'
-		];
+		if ( false === Services::Validation() ->run() )
+		return $this->incorrectInfo();
 
 		$userData = $this->builder
-		->select( implode( ',', $selectQuery ) )
+		->select( implode( ',', $this->loginColumns() ) )
 		->join( 'user_group', 'user_group.id = user.group_id' )
 		->where( [ 'username' => Services::request()->getPostGet( 'username' ) ] )
 		->get()
 		->getRowArray();
 
-		if ( null === $userData ) {
-			$this->response[ 'attemps' ] = $this->modelLogin->throttle() + 1;
-			$this->response[ 'load_view' ] = true;
-			$this->response[ 'wrong' ] = true;
-
-			return $this->response;
-		}
+		if ( null === $userData ) return $this->incorrectInfo();
 
 		$verifyPassword = $this->getVerifyPass(
 			Services::request()->getPostGet( 'password' ),
 			$userData[ 'password' ]
 		);
 
-		if ( false === $verifyPassword ) {
-			$this->response[ 'attemps' ] = $this->modelLogin->throttle() + 1;
-			$this->response[ 'load_view' ] = true;
-			$this->response[ 'wrong' ] = true;
-
-			return $this->response;
-		}
-
-		if ( $userData[ 'status' ] !== 'active' )
-		{
-			$this->response[ 'attemps' ] = $this->modelLogin->throttle() + 1;
-			$this->response[ 'banned' ] = $userData[ 'status' ] == 'banned' ? true : false;
-			$this->response[ 'inactive' ] = $userData[ 'status' ] == 'inactive' ? true : false;
-
-			return $this->response;
-		}
+		if ( false === $verifyPassword ) return $this->incorrectInfo();
+		if ( 'active' !== $userData[ 'status' ] )
+		return $this->denyStatus( $userData['status'] );
 
 		$userData[ 'permission' ] = json_decode( $userData[ 'permission' ] );
+
 		# --- Set success to true
 		$this->response[ 'success' ] = true;
+
 		# --- Set user session
 		Services::session()->set( $this->NknConfig::NKNss, $userData );
 
-		# --- Update data
-		$updateData = [
-			'last_login' => Services::request()->getIPAddress(),
-			'last_activity' => date('Y-m-d')
-		];
-
 		if ( Services::request()->getPostGet( 'remember_me' ) )
 		{
-			$randomKey = Encryption::createKey(8);
-			$idHex = bin2hex( $userData[ 'id' ] );
-			$keyHex = bin2hex( $randomKey );
-			$keyHash = password_hash( $keyHex, PASSWORD_DEFAULT );
-			$cookieValue = "{$keyHash}-{$idHex}";
-
-			# --- Add more cookie_token
-			$updateData[ 'cookie_token' ] = $keyHex;
-
-			$updateSuccess = $this->builder->update(
-				$updateData,
-				[ 'id' => $userData[ 'id' ] ],
-				1
-			);
-
-			# Lol don't know why need set cookie after using dbQuery class
-			if ( $updateSuccess )
-			setcookie( $this->NknConfig::NKNck, $cookieValue, time()+60*60*24*7, '/' );
-
-			else
-			log_message( 'error', "{$userData[ 'id' ]} Logged, but update failed remember-me" );
+			$this->setRememberMe( $userData );
 		}
-		else
+		else if ( false === $this->loggedInUpdate( $userData[ 'id' ] ) )
 		{
-			$updateSuccess = $this->builder->update(
-				$updateData,
-				[ 'id' => $userData[ 'id' ] ],
-				1
-			);
-
-			if ( ! $updateSuccess )
-			log_message( 'error', "{$userData[ 'id' ]} Logged, but update failed" );
+			log_message( 'error', "{$userData[ 'id' ]} Logged-in, but update failed" );
 		}
 
 		# --- Cleanup throttle
@@ -510,36 +440,108 @@ class NknAuth
 		->withRequest( Services::request() )
 		->setRules( $this->rules[ $validate_group ] );
 
-		if ( false === Services::Validation()->run() ) {
-			die( 'not passed' );
-			$this->response[ 'attemps' ] = $this->modelLogin->throttle() + 1;
-			$this->response[ 'load_view' ] = true;
-			$this->response[ 'wrong' ] = true;
+		if ( false === Services::Validation()->run() ) return $this->incorrectInfo();
 
-			return $this->response;
-		}
-
-		// die( 'passed' );
-		$find_user = $this->builder
-		->select( 'username' )
-		->where( [
+		$whereQuery = [
 			'username' => Services::request()->getPostGet( 'username' ),
 			'email' => Services::request()->getPostGet( 'email' )
-		] )
-		->get();
+		];
 
-		if ( ! $user = $find_user->getRowArray() )
-		{
-			$this->response[ 'attemps' ] = $this->modelLogin->throttle() + 1;
-			$this->response[ 'load_view' ] = true;
-			$this->response[ 'wrong' ] = true;
-		}
-		else
-		{
-			$this->response[ 'success' ] = true;
-		}
+		$find_user = $this->builder
+		->select( 'username' )
+		->where( $whereQuery )
+		->get()
+		->getRowArray();
+
+		if ( null === $find_user ) return $this->incorrectInfo();
+
+		$this->response[ 'success' ] = true;
 
 		return $this->response;
+	}
+
+	private function incorrectInfo ( bool $throttle = true ) : array
+	{
+		false === $throttle ?: $this->response[ 'attemps' ] = $this->modelLogin->throttle();
+		$this->response[ 'load_view' ] = true;
+		$this->response[ 'wrong' ] = true;
+
+		return $this->response;
+	}
+
+	private function denyStatus (string $status, bool $throttle = true ) : array
+	{
+		false === $throttle ?: $this->response[ 'attemps' ] = $this->modelLogin->throttle();
+		$this->response[ 'banned' ] = $status == 'banned' ? true : false;
+		$this->response[ 'inactive' ] = $status == 'inactive' ? true : false;
+
+		return $this->response;
+	}
+
+	private function setRememberMe ( array $userData ) : void
+	{
+		$randomKey = Encryption::createKey(8);
+		$idHex = bin2hex( $userData[ 'id' ] );
+		$keyHex = bin2hex( $randomKey );
+		$keyHash = password_hash( $keyHex, PASSWORD_DEFAULT );
+		$cookieValue = "{$keyHash}-{$idHex}";
+
+		$updateSuccess = $this->loggedInUpdate(
+			$userData[ 'id' ], [ 'cookie_token' => $keyHex ]
+		);
+
+		# Lol don't know why need set cookie after using dbQuery class
+		if ( true === $updateSuccess )
+		setcookie( $this->NknConfig::NKNck, $cookieValue, time()+60*60*24*7, '/' );
+
+		else
+		log_message( 'error', "{$userData[ 'id' ]} Logged::remember-me, but update failed" );
+	}
+
+	/**
+	 * @return boolean|throw
+	 */
+	private function loggedInUpdate ( int $userId, array $data = [] )
+	{
+		if ( $userId <= 0 ) {
+			$errArg = [ 'field' => 'user_id', 'param' => $userId ];
+			throw new \Exception( lang( 'Validation.greater_than', $errArg ), 500 );
+		}
+
+		helper( 'array' );
+
+		if ( ! empty( $data ) && false === isAssoc( $data ) ) {
+			throw new \Exception( 'Data must be associative array', 500 );
+		}
+
+		$updateData = [
+			'last_login' => Services::request()->getIPAddress(),
+			'last_activity' => date( 'Y-m-d H:i:s' )
+		];
+
+		$updateData = $updateData + $data;
+
+		return $this->builder->update( $updateData, [ 'id' => $userId ], 1 );
+	}
+
+	private function loginColumns ( array $add = [] ) : array
+	{
+		$colum = [
+			# user
+			'user.id',
+			'user.password',
+			'user.email',
+			'user.status',
+			'user.created_at',
+			'user.updated_at',
+			# user_group
+			'user_group.id as group_id',
+			'user_group.name as group_name',
+			'user_group.permission',
+			...$add
+		];
+
+		return $colum;
 	}
 
 	private function _sentMail ()

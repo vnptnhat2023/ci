@@ -22,7 +22,11 @@ class Login extends Model
   private int $login_timeout = 30;
 
   protected $table = 'throttle';
-  protected $tempReturnType = 'object';
+	protected $tempReturnType = 'object';
+
+	protected $dateFormat = 'datetime';
+	protected $useTimestamps = true;
+	protected $createdField = 'created_at';
 
   public function __construct()
   {
@@ -44,7 +48,8 @@ class Login extends Model
 			'type' => $type
 		];
 
-		$row = $this->builder()
+		$row = $this
+		->builder()
 		->selectCount( $this->primaryKey, 'count' )
 		->getWhere( $whereQuery )
 		->getRow();
@@ -60,21 +65,21 @@ class Login extends Model
 
   public function was_limited_one()
   {
-    if ( $this->login_attempts > $this->login_limit_one ) return true;
-
-    return false;
+    return $this->login_attempts > $this->login_limit_one ? true : false;
   }
 
   public function was_limited()
   {
-    if ($this->login_attempts >= $this->login_limit) return $this->login_timeout;
+		if ( $this->login_attempts >= $this->login_limit )
+		return $this->login_timeout;
 
+		else
     return false;
 	}
 
   /**
    * throttle multiple connections attempts to prevent abuse
-   * @param int $type type of throttle to perform.
+   * @return int attempts
    */
   public function throttle()
   {
@@ -83,7 +88,7 @@ class Login extends Model
 		$data = [
 			'ip' => Services::request() ->getIPAddress(),
 			'type' => $this->login_type,
-			'created_at' => date('Y/m/d H:i:s', time())
+			'created_at' => date( 'Y/m/d H:i:s', time() )
 		];
 
     $this->builder()->insert( $data );
@@ -93,17 +98,14 @@ class Login extends Model
 
   public function throttle_cleanup()
   {
-		$formatted_current_time = date(
-			"Y-m-d H:i:s",
-			strtotime('-' . (int) $this->timeout . ' minutes')
-		);
+		$time = strtotime( '-' . (int) $this->timeout . ' minutes' );
+		$formatted_current_time = date( 'Y-m-d H:i:s', $time );
 
-    $modifier = "DELETE FROM `{$this->table}`
-		WHERE created_at
-		BETWEEN '1970-00-00 00:00:00'
-		AND '{$formatted_current_time}'
-		AND `type` = ':type:'";
+		$whereQuery = [
+			'created_at' => " BETWEEN 1970-00-00 00:00:00 AND {$formatted_current_time}",
+			'type' => $this->login_type
+		];
 
-    return $this->db->query( $modifier, [ 'type' => $this->login_type ] );
+		$this->builder() ->delete( $whereQuery, 100 );
   }
 }
