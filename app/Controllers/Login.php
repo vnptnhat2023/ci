@@ -1,89 +1,92 @@
-<?php namespace App\Controllers;
+<?php
 
-class Login extends BaseController {
+namespace App\Controllers;
 
+class Login extends BaseController
+{
 	private $NknAuth;
 
-	public function __construct()
+	public function __construct ()
 	{
-		$this->NknAuth = new \App\Libraries\NknAuth;
-		helper(['form', 'array']);
+		helper( [ 'form', 'array' ] );
+
+		$this->NknAuth = new \App\Libraries\NknAuth();
 	}
 
-	public function index()
+	public function index ()
 	{
-		$data = $this->NknAuth->login()->as_array();
+		$data = $this->NknAuth ->login() ->asArray();
 
-		if ( $data['load_view'] )
+		if ( true === $data[ 'load_view' ] )
 		{
-			if ( $data['wrong'] ) {
-				$data['error'][] = 'Tên đăng nhập hoặc mật khẩu không chính xác';
+			if ( true === $data[ 'wrong' ] ) {
+				$data[ 'error' ][ ] = lang( 'NknAuth.errorIncorrectInformation' );
 			}
-			return view('login/login', $data);
+
+			return view( 'login/login', $data );
 		}
-		else if( $data['banned'] OR $data['inactive'] )
+
+		if ( true === $data[ 'banned' ] || true === $data[ 'inactive' ] )
 		{
-			echo 'Tải khoản hiện tại đang ở trạng thái '. ($data['banned'] ? '"khóa".' : '"chưa kích hoạt".');
+			$status = $data[ 'banned' ] ? lang( 'NknAuth.banned' ) : lang( 'NknAuth.inActive' );
+
+			echo lang( 'NknAuth.errorNotReadyYet', [ $status ] );
 		}
-		else if ( $data['success'] )
+		else if ( true === $data[ 'success' ] )
 		{
-			$user = $this->NknAuth->get_userdata();
+			$user = $this->NknAuth->getUserData();
+
 			$update = [
 				'last_login' => $this->request->getIPAddress(),
 				'last_activity' => date('Y-m-d')
 			];
-			# set last login
-			$this->NknAuth->builder->update( $update, [ 'id' => $user['id'] ], 1 );
-			echo anchor(base_url(), 'Back to Homepage');
-		}
-		else if ( $data['was_limited'] )
-		{
-			echo "Bạn hãy thử đăng nhập lại sau 30 phút";
-		}
 
-		// d( session('oknkn') );
+			$this->NknAuth->builder->update( $update, [ 'id' => $user[ 'id' ] ], 1 );
+
+			echo anchor( base_url(), lang( 'NknAuth.successLogged' ) );
+		}
+		else if ( true === $data[ 'was_limited' ] )
+		{
+			$errArgs = [ $this->NknAuth->throttle_config[ 'timeout' ] ];
+
+			echo lang( 'NknAuth.errorThrottleLimitedTime', $errArgs );
+		}
 	}
 
-	public function forgot()
+	public function forgot ()
 	{
-		$data = $this->NknAuth->forgot_password()->as_array();
+		$data = $this->NknAuth ->forgetPass() ->asArray();
 
-		if ( $data['load_view'] )
+		if ( true === $data[ 'load_view' ] )
 		{
-			if ($data['wrong']) {
-				$data['error'][] = '<strong>Tên</strong> hoặc <strong>Email</strong> không khớp';
+			if ( true === $data[ 'wrong' ] ) {
+				$data[ 'error' ][ ] = lang( 'NknAuth.errorIncorrectInformation' );
 			}
 
-			return view('login/forgot', $data);
+			return view( 'login/forgot', $data );
 		}
-		else if ( $data['success'] )
+
+		if ( true === $data[ 'success' ] )
 		{
-			echo 'Sent mail at here';
+			echo lang( 'NknAuth.successResetPassword' );
 		}
-		else if ( $data['forgot_password_denny'] )
+		else if ( true === $data[ 'forgot_password_denny' ] )
 		{
-			echo 'Bạn đang đăng nhập, nên không được phép sử dụng chức năng này.';
+			echo lang( 'NknAuth.noteDenyRequestPassword' );
 		}
-		else if ( $data['was_limited'] )
-		{# Mặc định timeout là 30;
-			echo 'Bạn hãy thử khôi phục lại mật khẩu sau 30 phút';
+		else if ( true === $data[ 'was_limited' ] )
+		{
+			$errArgs = [ $this->NknAuth->throttle_config[ 'timeout' ] ];
+
+			echo lang( 'NknAuth.errorThrottleLimitedTime', $errArgs );
 		}
 	}
 
-	public function logout()
+	public function logout ()
 	{
 		$this->NknAuth->logout();
-		echo anchor( base_url(), 'Back to homepage' );
-		// return redirect('App\Controllers\Blog::index');
-	}
 
-	private function redirect_to()
-	{
-		// if ( $this->request->getGet('r') ) {
-		// 	redirect( base64_decode( $this->request->getGet('r') ) );
-		// }
-		return redirect('App\Controllers\Blog::index');
-		exit(0);
+		echo anchor( base_url(), lang( 'NknAuth.successLogout' ) );
 	}
 
 }

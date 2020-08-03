@@ -28,7 +28,7 @@ class Crud extends Entity
 
 		$this->attributes[ 'general_relation' ] ??= [];
 		$this->attributes[ 'media_relation' ] ??= [];
-		$this->attributes[ 'user_id' ] = service('NknAuth') ->get_userdata( 'id' );
+		$this->attributes[ 'user_id' ] = service('NknAuth') ->getUserdata( 'id' );
 
     return $this;
   }

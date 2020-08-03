@@ -3,6 +3,7 @@
 namespace BAPI\Models\User;
 
 use CodeIgniter\Model;
+use Config\Services;
 
 class Crud extends Model
 {
@@ -40,12 +41,7 @@ class Crud extends Model
 
   public function ruleCreate () : array
   {
-    $this->allowedFields = [
-			'username',
-			'email',
-			'password',
-			'status'
-		];
+    $this->allowedFields = [ 'username', 'email', 'password', 'status' ];
 
 		$configRules = config( '\BAPI\Config\User' ) ->getRules();
 
@@ -106,6 +102,7 @@ class Crud extends Model
 
 		$t = $this->table;
 		$pk = $this->primaryKey;
+
     # Sometime many data just need 1 rule ( key != value )
     foreach ($rules as $key => $value) {
 
@@ -148,8 +145,8 @@ class Crud extends Model
   {
 		$password = $data[ 'data' ][ 'password' ];
 
-		$data[ 'data' ][ 'password' ] = service( 'NknAuth' )
-		->get_password_hash( $password );
+		$data[ 'data' ][ 'password' ] = Services::NknAuth()
+		->getHashPass( $password );
 
 		$data[ 'data' ][ 'group_id' ] = config( '\BAPI\Config\User' )
 		->getSetting( 'db.option.default_group' );
@@ -157,13 +154,13 @@ class Crud extends Model
     return $data;
   }
 
-  protected function __beforeUpdate ( array $data ) :array
+  protected function __beforeUpdate ( array $data ) : array
   {
     if ( ! empty( $data[ 'data' ][ 'password' ] ) ) {
 			$password = $data[ 'data' ][ 'password' ];
 
-			$data[ 'data' ][ 'password' ] = service( 'NknAuth' )
-			->get_password_hash( $password );
+			$data[ 'data' ][ 'password' ] = Services::NknAuth()
+			->getHashPass( $password );
     }
 
     return $data;

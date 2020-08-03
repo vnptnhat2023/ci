@@ -8,6 +8,7 @@ use CodeIgniter\HTTP\Request;
 use CodeIgniter\Model;
 use CodeIgniter\Session\Session;
 use CodeIgniter\Validation\Validation;
+use Config\Services;
 
 /**
  * Created: nguyenkenhat@outlook.com
@@ -126,12 +127,12 @@ class NknAuth
 
 	public function __construct ()
 	{
-		$this->session = \Config\Services::session();
-		$this->request = \Config\Services::request();
+		$this->session = Services::session();
+		$this->request = Services::request();
 		$this->throttle = new \App\Models\Login();
 		$this->builder = db_connect()->table( 'User' );
 
-		helper( 'cookie' );
+		helper( [ 'array', 'cookie' ] );
 		$NknConfig = new \Config\Nkn();
 
 		# --- Adding config
@@ -145,7 +146,7 @@ class NknAuth
 	 */
 	public function login () : self
 	{
-		$this->check_type( 'login' );
+		$this->typeChecker( 'login' );
 
 		return $this;
 	}
@@ -153,55 +154,62 @@ class NknAuth
 	/**
 	 * @return self
 	 */
-	public function forgot_password () : self
+	public function forgetPass () : self
 	{
-		$this->check_type( 'forgot_password' );
+		$this->typeChecker( 'forgot_password' );
 
 		return $this;
 	}
 
+	# --- Todo: not using
 	public function in_group ( $menu = false )
 	{
-		$userdata = $this->get_userdata();
+		$userdata = $this->getUserdata();
+
 		if ( ! $userdata || ! isset( $userdata[ 'permission' ][0] )  ) return false;
 
 		if ( $menu )
 		{
 			if ( is_array( $menu ) && isset( $menu[0] ) )
 			{
+
 				if ( $userdata[ 'permission' ][0] == 'all' ) return $menu;
+
 				foreach ( $menu as $key => $val )
 				{
 					if ( in_array( $val[ 'url' ], $userdata[ 'permission' ] ) )
+
 					$response[ $key ] = $val;
 				}
+
 				return array_values( $response );
 			}
 			else if ( is_string( $menu ) )
 			{
 				if ( $userdata[ 'permission' ][0] == 'all' ) return true;
+
 				return in_array( $menu, $userdata[ 'permission' ] );
 			}
 			return false;
+
 		}
 		else
 		{
 			if ( $userdata[ 'permission' ][0] == 'all' ) return true;
+
 			return false;
-			// return in_array(
-			// 	strtolower( $this->CI->router->fetch_class()),
-			// 	$userdata[ 'permission' ]
-			// );
 		}
 	}
 
-	public function get_userdata ( string $key = null )
+	/**
+	 * @param string|null $key
+	 * @return mixed
+	 */
+	public function getUserdata ( string $key = null )
 	{
-		if ( ! $this->loged() )
-		{
-			return false;
-		}
-		else if ( empty( $key ) )
+		if ( false === $this->isLogged() ) return false;
+
+		if ( empty( $key ) )
 		{
 			return $this->session->get( $this->NKNss );
 		}
@@ -209,7 +217,7 @@ class NknAuth
 		{
 			$userData = $this->session->get( $this->NKNss );
 
-			return $userData[ $key ] ?? [];
+			return $userData[ $key ] ?? dot_array_search( $key, $userData );
 		}
 	}
 
@@ -220,53 +228,41 @@ class NknAuth
 	 */
 	public function hasPermission ( array $data ) : bool
 	{
-		$userPerm = $this->get_userdata( 'permission' );
+		$userPerm = $this->getUserdata( 'permission' );
 
-		if ( ( false === $userPerm ) || empty( $userPerm ) )
-		{
-			return false;
-		}
-		else if ( in_array( 'null', $userPerm, true ) )
-		{
-			return false;
-		}
-		else if ( in_array( 'all', $userPerm, true ) )
-		{
-			return true;
-		}
-		# --- 1st group only !
-		else if ( empty( $data ) )
-		{
-			return true;
-		}
-		else
-		{
-			# --- Permission config
-			$configPerm = config( '\BAPI\Config\User' ) ->setting( 'permission' );
-			$boolVar = true;
+		if ( ( false === $userPerm ) || empty( $userPerm ) ) return false;
 
-			foreach ( $data as $role ) {
+		if ( in_array( 'null', $userPerm, true ) ) return false;
 
-				$inCfPerm = in_array( $role, $configPerm, true );
-				$inUserPerm = in_array( $role, $userPerm, true );
+		if ( in_array( 'all', $userPerm, true ) ) return true;
 
-				if ( false === $inCfPerm || false === $inUserPerm ) {
-					$boolVar = false;
-					break;
-				}
+		# --- Administrator (1st) group !
+		if ( empty( $data ) ) return true;
+
+		# --- Permission config
+		$configPerm = config( '\BAPI\Config\User' ) ->setting( 'permission' );
+		$boolVar = true;
+
+		foreach ( $data as $role ) {
+			$inCfPerm = in_array( $role, $configPerm, true );
+			$inUserPerm = in_array( $role, $userPerm, true );
+
+			if ( false === $inCfPerm || false === $inUserPerm ) {
+				$boolVar = false;
+				break;
 			}
-
-			return $boolVar;
 		}
+
+		return $boolVar;
 	}
 
-	public function get_password_hash ( string $password, int $cost = 12 ) : string
+	public function getHashPass ( string $password, int $cost = 12 ) : string
   {
     $salt = password_hash( $password, PASSWORD_BCRYPT, [ 'cost' => $cost ] );
     return $salt;
   }
 
-  public function get_password_verify ( string $password, string $salt ) : bool
+  public function getVerifyPass ( string $password, string $salt ) : bool
   {
   	return password_verify( $password, $salt );
   }
@@ -281,7 +277,7 @@ class NknAuth
 	* Check cookie, session: if have cookie will set session
 	* @return boolean
 	*/
-	public function loged ( bool $checkCookie = false ) : bool
+	public function isLogged ( bool $checkCookie = false ) : bool
 	{
 		if ( ! get_cookie( $this->NKNck ) && ! $this->session->get( $this->NKNss ) )
 		{
@@ -351,56 +347,61 @@ class NknAuth
 		return true;
 	}
 
-	public function as_object () : object { return (object) $this->response; }
-	public function as_array () : array { return $this->response; }
+	public function asObject () : object
+	{
+		return (object) $this->response;
+	}
 
-	/** Check before validate */
-	private function check_type ( $type = 'login' )
+	public function asArray () : array
+	{
+		return $this->response;
+	}
+
+	/**
+	 * @param string $type login | forgot_password
+	 * @return void|throw
+	 */
+	private function typeChecker ( $type = 'login' )
 	{
 		if ( ! in_array( $type, [ 'login', 'forgot_password' ] ) ) {
-			return 'Type must be in "login" or "forgot_password"';
+			throw new \Exception( 'Type must be in [login or forgot_password]', 1 );
 		}
 
-		$rqType = $type == 'login' ? 'password' : 'email';
-		$havePost = ! is_null( $this->request->getPostGet( 'username' ) ) &&
-			! is_null( $this->request->getPostGet( $rqType ) );
+		$requestType = ( $type === 'login' ) ? 'password' : 'email';
+		$isNullUsername = is_null( $this->request->getPostGet( 'username' ) );
+		$isNullType = is_null( $this->request->getPostGet( $requestType ) );
 
-		if ( $this->loged(true) )# boolean
+		$hasRequest = ! $isNullUsername && ! $isNullType;
+
+		if ( true === $this->isLogged( true ) )
 		{
-			if ( $type == 'forgot_password' )
-			{
-				$this->response[ 'forgot_password_denny' ] = true;
-			}
-			else if ( $type == 'login' )
-			{
-				$this->response[ 'success' ] = true;
-			}
+			if ( $type === 'forgot_password' )
+			$this->response[ 'forgot_password_denny' ] = true;
+
+			else
+			$this->response[ 'success' ] = true;
 		}
-		else if ( $was_limited = $this->login_config() ->was_limited() )# boolean
+		else if ( $was_limited = $this->getConfig()->was_limited() )
 		{
 			$this->response[ 'was_limited' ] = $was_limited;
 		}
-		else if ( ! $havePost )# boolean
+		else if ( false === $hasRequest )
 		{
 			$this->response[ 'load_view' ] = true;
 		}
-		else# validate
+		else
 		{
 			$this->validation = service( 'validation' );
 
 			$this->response = ( $type === 'login' )
-			? $this->login_validate()
-			: $this->forgot_validate();
+			? $this->loginValidate()
+			: $this->forgetValidate();
 		}
 	}
 
-	/**
-	* Set throttle config and get was_limited_one return boolean method
-	*/
-	private function login_config () : Model
+	/** Set throttle config and get was_limited_one return boolean method */
+	private function getConfig () : Model
 	{
-		$cfgThrottle = $this->throttle_config;
-
 		$config = $this->throttle->config(
 			$this->throttle_config[ 'type' ],
 			$this->throttle_config[ 'limit_one' ],
@@ -414,7 +415,7 @@ class NknAuth
 	}
 
 	/** Validation form login and set session & cookie */
-	private function login_validate () : array
+	private function loginValidate () : array
 	{
 		$validate_group = $this->throttle->was_limited_one()
 		? 'login_with_captcha'
@@ -459,12 +460,12 @@ class NknAuth
 			return $this->response;
 		}
 
-		$getPwVerify = $this->get_password_verify(
+		$verifyPassword = $this->getVerifyPass(
 			$this->request->getPostGet( 'password' ),
 			$userData[ 'password' ]
 		);
 
-		if ( false === $getPwVerify ) {
+		if ( false === $verifyPassword ) {
 			$this->response[ 'attemps' ] = $this->throttle->throttle() + 1;
 			$this->response[ 'load_view' ] = true;
 			$this->response[ 'wrong' ] = true;
@@ -507,10 +508,8 @@ class NknAuth
 		return $this->response;
 	}
 
-	/**
-	* Validation form forgot password and send mail
-	*/
-	private function forgot_validate () : array
+	/** Validation form forgot password and send mail */
+	private function forgetValidate () : array
 	{
 		$validate_group = $this->throttle->was_limited_one()
 		? 'forgot_password_with_captcha'
@@ -520,43 +519,43 @@ class NknAuth
 		->withRequest( $this->request )
 		->setRules( $this->rules[ $validate_group ] );
 
-		if ( $this->validation->run() )
-		{
-			die( 'passed' );
-			$find_user = $this->builder
-				->select( 'username' )
-				->where([
-					'username' => $this->request->getPostGet( 'username' ),
-					'email' => $this->request->getPostGet( 'email' )
-				] )->get();
-			$user = $find_user->getRowArray();
-			if ( $user)
-			{
-				$this->response[ 'success' ] = true;
-			}
-			else
-			{
-				$this->response[ 'attemps' ] = $this->throttle->throttle() + 1;
-				$this->response[ 'load_view' ] = true;
-				$this->response[ 'wrong' ] = true;
-			}
-			return $this->response;
-		}
-		else
-		{
+		if ( false === $this->validation->run() ) {
 			die( 'not passed' );
 			$this->response[ 'attemps' ] = $this->throttle->throttle() + 1;
 			$this->response[ 'load_view' ] = true;
 			$this->response[ 'wrong' ] = true;
+
 			return $this->response;
 		}
+
+		// die( 'passed' );
+		$find_user = $this->builder
+		->select( 'username' )
+		->where( [
+			'username' => $this->request->getPostGet( 'username' ),
+			'email' => $this->request->getPostGet( 'email' )
+		] )
+		->get();
+
+		if ( ! $user = $find_user->getRowArray() )
+		{
+			$this->response[ 'attemps' ] = $this->throttle->throttle() + 1;
+			$this->response[ 'load_view' ] = true;
+			$this->response[ 'wrong' ] = true;
+		}
+		else
+		{
+			$this->response[ 'success' ] = true;
+		}
+
+		return $this->response;
 	}
 
 	private function _sentMail ()
 	{
-		$email = \Config\Services::email();
+		$email = Services::email();
     $config[ 'protocol' ] = 'smtp';
-    // $config[ 'mailPath' ] = '/usr/sbin/sendmail';
+    // $config[ 'mailPath' ] = '/usr/sBin/sendMail';
     $config[ 'SMTPHost' ] = "smtp.gmail.com";
     $config[ 'SMTPUser' ] = "user@gmail.com";
     $config[ 'SMTPPass' ] = "password";

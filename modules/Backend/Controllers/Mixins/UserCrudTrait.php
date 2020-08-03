@@ -109,7 +109,7 @@ trait UserCrudTrait
 
     if ( $data['method'] === 'put' )
     {
-			$currentUser = service('NknAuth')->get_userdata();
+			$currentUser = service('NknAuth')->getUserdata();
 
       if ( $id == 1 && ( 1 != $currentUser['id'] ) ) {
         return [ 'error' => lang('api.errorFirstMem') ];

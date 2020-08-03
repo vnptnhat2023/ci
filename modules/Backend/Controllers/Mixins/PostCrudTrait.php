@@ -192,7 +192,7 @@ trait PostCrudTrait
         $mediaRelationData[] = [
 					'media_id' => $i,
 					'post_id' => $id,
-					'user_id' => \Config\Services::NknAuth()->get_userdata( 'id' )
+					'user_id' => \Config\Services::NknAuth()->getUserdata( 'id' )
 				];
       }
 

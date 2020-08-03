@@ -51,7 +51,7 @@ class Profile extends ResourceController
   # __________________________________________________________
   private function __showRun(array $data)
   {
-		$userId = \Config\Services::NknAuth()->get_userdata('id');
+		$userId = \Config\Services::NknAuth()->getUserdata('id');
 
     if ( $data['id'] != $userId ) {
 			return [ 'error' => lang('api.errorViewMem') ];
@@ -95,7 +95,7 @@ class Profile extends ResourceController
   # __________________________________________________________
   private function __beforeUpdate(array $data) : array
   {
-		$userId = \Config\Services::NknAuth()->get_userdata('id');
+		$userId = \Config\Services::NknAuth()->getUserdata( 'id' );
 
     if ( $data['id'] != $userId ) {
 			return [ 'error' => lang('api.errorEditMem') ];

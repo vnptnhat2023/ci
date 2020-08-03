@@ -119,7 +119,7 @@ function generateMediaRelation (
 		$data[] = [
 			'media_id' => $mediaId,
 			$colName => $colValue,
-			'user_id' => service( 'NknAuth' )->get_userdata( 'id' )
+			'user_id' => service( 'NknAuth' )->getUserdata( 'id' )
 		];
 
 		$mediaIds[] = $mediaId;
@@ -157,7 +157,7 @@ function generateMediaRelationDecrement(
 		$data[] = [
 			'media_id' => $i,
 			$colName => $colValue,
-			'user_id' => service( 'NknAuth' )->get_userdata( 'id' )
+			'user_id' => service( 'NknAuth' )->getUserdata( 'id' )
 		];
 
 		$mediaIds[] = $i;
