@@ -114,7 +114,7 @@ class NknAuth
 		return $this;
 	}
 
-	public function logout ()
+	public function logout () : void
 	{
 		delete_cookie( $this->NknConfig::NKNck );
 		Services::session()->remove( $this->NknConfig::NKNss );
@@ -193,21 +193,19 @@ class NknAuth
 	{
 		if ( false === $this->isLogged() ) return false;
 
-		if ( empty( $key ) )
-		{
-			return Services::session()->get( $this->NknConfig::NKNss );
+		if ( empty( $key ) ) {
+			return Services::session() ->get( $this->NknConfig::NKNss );
 		}
-		else
-		{
-			$userData = Services::session()->get( $this->NknConfig::NKNss );
 
-			return $userData[ $key ] ?? dot_array_search( $key, $userData );
-		}
+		$userData = Services::session() ->get( $this->NknConfig::NKNss );
+
+		return $userData[ $key ] ?? dot_array_search( $key, $userData );
 	}
 
 	public function getHashPass ( string $password, int $cost = 12 ) : string
   {
-    $salt = password_hash( $password, PASSWORD_BCRYPT, [ 'cost' => $cost ] );
+		$salt = password_hash( $password, PASSWORD_BCRYPT, [ 'cost' => $cost ] );
+
     return $salt;
   }
 
@@ -255,72 +253,60 @@ class NknAuth
 	 * Check cookie, session: if have cookie will set session
 	 * @return boolean
 	 */
-	public function isLogged ( bool $checkCookie = false ) : bool
+	public function isLogged ( bool $withCookie = false ) : bool
 	{
-		if ( ! get_cookie( $this->NknConfig::NKNck ) && ! Services::session()->get( $this->NknConfig::NKNss ) )
-		{
+		$userSession = Services::session() ->get( $this->NknConfig::NKNss );
+
+		if ( empty( $userSession ) || ! is_array( $userSession ) ) return false;
+
+		return false === $withCookie ? $userSession : $this->cookieHandler();
+	}
+
+	private function cookieHandler () : bool
+	{
+		$incorrectCookie = function  () : bool {
+			delete_cookie( $this->NknConfig::NKNck );
 			return false;
-		}
-		else if ( Services::session()->get( $this->NknConfig::NKNss ) )
-		{
-			return true;
-		}
-		else if ( ! $checkCookie )
-		{
-			return false;
-		}
+		};
 
-		if ( ! $cookie = get_cookie( $this->NknConfig::NKNck ) ) return false;
+		$userCookie = get_cookie( $this->NknConfig::NKNck );
 
-		$exp = explode( '-', $cookie );
+		if ( empty( $userCookie ) || ! is_string( $userCookie ) ) return false;
 
-		if ( empty( $exp[0] ) || empty( $exp[1] ) ) return false;
+		$exp = explode( '-', $userCookie, 2 );
+		if ( empty( $exp[ 0 ] ) || empty( $exp[ 1 ] ) ) return $incorrectCookie();
 
-		$userID = hex2bin( $exp[1] );
+		$userId = hex2bin( $exp[ 1 ] );
+		if ( $userId === '0' || ! ctype_digit( $userId ) ) return $incorrectCookie();
 
 		$user = $this->builder
-		->select( 'cookie_token,status,last_login' )
-		->where( [ 'id' => $userID ] )
+		->select( 'cookie_token, status, last_login' )
+		->where( [ 'id' => $userId ] )
 		->get(1)
 		->getRowArray();
+		if ( null === $user ) return $incorrectCookie();
 
-		if ( ! $user ) return false;
+		$userToken = password_verify( $user[ 'cookie_token' ], $exp[ 0 ] );
+		$userIp = $user[ 'last_login' ] == Services::request() ->getIPAddress();
+		if ( false === $userToken || false === $userIp ) return $incorrectCookie();
 
+		# Checking user status
 		if ( in_array( $user[ 'status' ] , [ 'inactive', 'banned' ] ) ) {
-			$this->response[ 'banned' ] = $user[ 'status' ] == 'banned' ? true : false;
-			$this->response[ 'inactive' ] = $user[ 'status' ] == 'inactive' ? true : false;
+			$this->denyStatus( $user[ 'status' ], false, false );
 
-			return false;
+			return $incorrectCookie();
 		}
 
-		$cToken = password_verify( $user[ 'cookie_token' ], $exp[0] );
-		$cIP = $user[ 'last_login' ] == Services::request()->getIPAddress();
-
-		if ( false === $cToken || false === $cIP ) return false;
-
-		$selectQuery = [
-			'User.id',
-			'User.username',
-			'User.password',
-			'User.email',
-			'User.status',
-			'User.created_at',
-			'User.updated_at',
-			'user_group.id as group_id',
-			'user_group.name as group_name',
-			'user_group.permission'
-		];
-
 		$userData = $this->builder
-		->select( implode( ',', $selectQuery ) )
+		->select( implode( ',', $this->loginColumns() ) )
 		->join( 'user_group', 'user_group.id = User.group_id' )
-		->where( [ 'User.id' => $userID ] )
+		->where( [ 'user.id' => $userId ] )
 		->get(1)
 		->getRowArray();
 
 		$userData[ 'permission' ] = json_decode( $userData[ 'permission' ] );
 
-		Services::session()->set( $this->NknConfig::NKNss, $userData );
+		Services::session() ->set( $this->NknConfig::NKNss, $userData );
 
 		return true;
 	}
@@ -385,14 +371,13 @@ class NknAuth
 		->withRequest( Services::request() )
 		->setRules( $this->rules[ $type ] );
 
-		if ( false === Services::Validation() ->run() )
-		return $this->incorrectInfo();
+		if ( false === Services::Validation() ->run() ) return $this->incorrectInfo();
 
 		$userData = $this->builder
 		->select( implode( ',', $this->loginColumns() ) )
 		->join( 'user_group', 'user_group.id = user.group_id' )
 		->where( [ 'username' => Services::request()->getPostGet( 'username' ) ] )
-		->get()
+		->get(1)
 		->getRowArray();
 
 		if ( null === $userData ) return $this->incorrectInfo();
@@ -403,6 +388,7 @@ class NknAuth
 		);
 
 		if ( false === $verifyPassword ) return $this->incorrectInfo();
+
 		if ( 'active' !== $userData[ 'status' ] )
 		return $this->denyStatus( $userData['status'] );
 
@@ -469,13 +455,18 @@ class NknAuth
 		return $this->response;
 	}
 
-	private function denyStatus (string $status, bool $throttle = true ) : array
+	/**
+	 * @return array|void
+	 */
+	private function denyStatus (string $status, bool $throttle = true, $getReturn = true )
 	{
 		false === $throttle ?: $this->response[ 'attemps' ] = $this->modelLogin->throttle();
 		$this->response[ 'banned' ] = $status == 'banned' ? true : false;
 		$this->response[ 'inactive' ] = $status == 'inactive' ? true : false;
 
-		return $this->response;
+		if ( true === $getReturn ) {
+			return $this->response;
+		}
 	}
 
 	private function setRememberMe ( array $userData ) : void
@@ -505,6 +496,7 @@ class NknAuth
 	{
 		if ( $userId <= 0 ) {
 			$errArg = [ 'field' => 'user_id', 'param' => $userId ];
+
 			throw new \Exception( lang( 'Validation.greater_than', $errArg ), 500 );
 		}
 

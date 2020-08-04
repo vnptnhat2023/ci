@@ -10,17 +10,9 @@ class Test extends BaseController {
 
 	protected $helpers = ['array'];
 
-	public function datetime()
+	public function test()
 	{
-		helper( 'array' );
-
-		// var_dump( isAssoc( ['a', 'b'] ) );die;
-		// $a = function ( array $arg = [] ) { return [ 'a', ...$arg ]; };
-
-		$c = [];
-		$b = [ 'b' => 'B' ];
-
-		var_dump( $b + $c );
+		var_dump( empty( true ) );
 	}
 
 	public function createMediaRelation ()
@@ -345,8 +337,8 @@ class Test extends BaseController {
 
 	public function test_locator ()
 	{
-		$exts = \Config\Services::locator()->search('ShopTest/ShopTest');
-		var_dump($exts);
+		$ext = \Config\Services::locator()->search('ShopTest/ShopTest');
+		var_dump($ext);
 	}
 
 	public function index ( $params = [ 'a' => 'A', 'b' => 'B' ] )
