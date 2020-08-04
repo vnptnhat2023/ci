@@ -2,82 +2,67 @@
 
 namespace App\Controllers;
 
+use App\Libraries\NknAuth;
+
 class Login extends BaseController
 {
-	private $NknAuth;
+	private \App\Libraries\NknAuth $NknAuth;
 
 	public function __construct ()
 	{
 		helper( [ 'form', 'array' ] );
 
-		$this->NknAuth = new \App\Libraries\NknAuth();
+		$this->NknAuth = new NknAuth();
 	}
 
-	public function index ()
+	public function index()
 	{
-		$data = $this->NknAuth ->login() ->asArray();
+		$auth = $this->NknAuth->login( false );
 
-		if ( true === $data[ 'load_view' ] )
-		{
-			if ( true === $data[ 'wrong' ] ) {
-				$data[ 'error' ][ ] = lang( 'NknAuth.errorIncorrectInformation' );
+		return view( 'login/login', $auth->getMessage() );
+	}
+
+	public function forgot ()
+	{
+		$auth = $this->NknAuth->login( false );
+
+		return view( 'login/forgot', $auth->getMessage() );
+	}
+
+	public function logout ()
+	{
+		$auth = $this->NknAuth->logout( false );
+
+		return view( 'login/login', $auth->getMessage() );
+	}
+
+	private function index_old ()
+	{
+		$auth = $this->NknAuth->login();
+
+		if ( true === $auth->view ) {
+			if ( true === $auth->login_incorrect ) {
+				$data[ 'error' ][] = lang( 'NknAuth.errorIncorrectInformation' );
 			}
 
 			return view( 'login/login', $data );
 		}
 
-		if ( true === $data[ 'banned' ] || true === $data[ 'inactive' ] )
+		if ( true === $auth->banned || true === $auth->inactive )
 		{
-			$status = $data[ 'banned' ] ? lang( 'NknAuth.banned' ) : lang( 'NknAuth.inActive' );
+			$status = $auth->banned ? lang( 'NknAuth.banned' ) : lang( 'NknAuth.inActive' );
 
 			echo lang( 'NknAuth.errorNotReadyYet', [ $status ] );
 		}
-		else if ( true === $data[ 'success' ] )
+		else if ( true === $auth->success )
 		{
 			echo anchor( base_url(), lang( 'NknAuth.successLogged' ) );
 		}
-		else if ( true === $data[ 'was_limited' ] )
+		else if ( true === $auth->limit_max )
 		{
 			$errArgs = [ $this->NknAuth->throttle_config[ 'timeout' ] ];
 
 			echo lang( 'NknAuth.errorThrottleLimitedTime', $errArgs );
 		}
 	}
-
-	public function forgot ()
-	{
-		$data = $this->NknAuth ->forgetPass() ->asArray();
-
-		if ( true === $data[ 'load_view' ] )
-		{
-			if ( true === $data[ 'wrong' ] ) {
-				$data[ 'error' ][ ] = lang( 'NknAuth.errorIncorrectInformation' );
-			}
-
-			return view( 'login/forgot', $data );
-		}
-
-		if ( true === $data[ 'success' ] )
-		{
-			echo lang( 'NknAuth.successResetPassword' );
-		}
-		else if ( true === $data[ 'forgot_password_denny' ] )
-		{
-			echo lang( 'NknAuth.noteDenyRequestPassword' );
-		}
-		else if ( true === $data[ 'was_limited' ] )
-		{
-			$errArgs = [ $this->NknAuth->throttle_config[ 'timeout' ] ];
-
-			echo lang( 'NknAuth.errorThrottleLimitedTime', $errArgs );
-		}
-	}
-
-	public function logout ()
-	{
-		$this->NknAuth->logout();
-
-		echo anchor( base_url(), lang( 'NknAuth.successLogout' ) );
-	}
-
 }

@@ -10,9 +10,79 @@ class Test extends BaseController {
 
 	protected $helpers = ['array'];
 
+	protected object $anonymousClass;
+
+	public function anonymous_class()
+	{
+		$this->anonymousClass = new class {
+			public $lorem = 'lorem ip sum';
+		};
+
+		var_dump($this->anonymousClass->lorem);
+	}
+
 	public function test()
 	{
-		var_dump( empty( true ) );
+		$a = [ 'a' => 'a2', 'b' => 'b2' ];
+		$b = [ 'a' => 'A', 'b' => 'B' ];
+		$a += $b;
+		var_dump( $a );
+	}
+
+	public function ci_tl()
+	{
+		$cleanPath = function (string $file): string {
+			switch (true) {
+				case strpos($file, APPPATH) === 0:
+					$file = 'APPPATH' . DIRECTORY_SEPARATOR . substr($file, strlen(APPPATH));
+					break;
+				case strpos($file, SYSTEMPATH) === 0:
+					$file = 'SYSTEMPATH' . DIRECTORY_SEPARATOR . substr($file, strlen(SYSTEMPATH));
+					break;
+				case strpos($file, FCPATH) === 0:
+					$file = 'FCPATH' . DIRECTORY_SEPARATOR . substr($file, strlen(FCPATH));
+					break;
+				case defined('VENDORPATH') && strpos($file, VENDORPATH) === 0:
+					$file = 'VENDORPATH' . DIRECTORY_SEPARATOR . substr($file, strlen(VENDORPATH));
+					break;
+			}
+
+			return $file;
+		};
+
+		$rawFiles  = get_included_files();
+		$coreFiles = [];
+		$userFiles = [];
+
+		foreach ($rawFiles as $file)
+		{
+			$path = $cleanPath($file);
+
+			if (strpos($path, 'SYSTEMPATH') !== false)
+			{
+				$coreFiles[] = [
+					'name' => basename($file),
+					'path' => $path,
+				];
+			}
+			else
+			{
+				$userFiles[] = [
+					'name' => basename($file),
+					'path' => $path,
+				];
+			}
+		}
+
+		// sort($userFiles);
+		// sort($coreFiles);
+
+		// $data = [
+		// 	'coreFiles' => $coreFiles,
+		// 	'userFiles' => $userFiles,
+		// ];
+
+		d( $coreFiles );
 	}
 
 	public function createMediaRelation ()

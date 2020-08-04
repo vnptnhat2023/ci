@@ -1,9 +1,6 @@
 <?php
 
 return [
-	'banned' => 'Banned',
-	'inActive' => 'Inactive',
-
   'errorIncorrectInformation' => 'Incorrect information.',
 	'errorNotReadyYet' => 'The current account is in status [{0}] has not been activated yet.',
 	'errorThrottleLimitedTime' => 'Please try to login again after [{0}] minutes',
@@ -12,5 +9,10 @@ return [
 
 	'successLogged' => 'You are logged-in, back to Home ?',
 	'successLogout' => 'You have been logged out, back to home ?',
-	'successResetPassword' => 'Password reset successfully.'
+	'successResetPassword' => 'Password reset successfully.',
+
+	'labelUsername' => 'username',
+	'labelPassword' => 'password',
+	'labelEmail' => 'email',
+	'labelCaptcha' => 'captcha',
 ];

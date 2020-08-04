@@ -5,7 +5,7 @@
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<title>Title Page</title>
-		
+
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 
 		<script src="https://cdn.jsdelivr.net/npm/vue@2.6.11"></script>
@@ -68,34 +68,34 @@
 	<body>
 		<div class="container">
 			<div class="row">
-				<div class="col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3" 
+				<div class="col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3"
 				id="forget-password-page" v-cloak>
 					<?php echo form_open('', '@submit="submit($event)"') ?>
 					<div class="form-box">
 						<?php
-							if (isset($error[0]))
-							{
+							if ( isset( $message_success[0] ) ) {
 								echo '<div class="alert alert-warning">';
-								foreach ($error as $value) {
-									echo "<p>{$value}</p>";
-								}
+								foreach ($message_success as $errorMsg) { echo "<p>{$errorMsg}</p>"; }
+								echo '</div>';
+							}
+
+							if ( isset( $message_success[0] ) ) {
+								echo '<div class="alert alert-success">';
+								foreach ($message_success as $successMsg) { echo "<p>{$successMsg}</p>"; }
 								echo '</div>';
 							}
 						?>
-						<p class="text-success">
-							<?php echo isset($success) ? $success : null ?>
-						</p>
 
 						<div class="form-group" :class="{'has-warning': errors.has('username')}">
 							<label for="username">Tên đăng nhập</label>
 							<input type="text" class="form-control" maxlength="32"
 							v-validate="'required|min:5|max:32'" data-vv-as="Tên đăng nhập"
 							name="username" id="username" placeholder="Tên"
-							value="<?php echo set_value('username') ?>" 
+							value="<?php echo set_value('username') ?>"
 							autocomplete="off" spellcheck="false">
 							<span v-show="errors.has('username')" class="help-block">{{ errors.first('username') }}</span>
 						</div>
-					
+
 						<div class="form-group" :class="{'has-warning': errors.has('email')}">
 							<label for="email">Địa chỉ email</label>
 							<input type="email" class="form-control" maxlength="64"
@@ -122,7 +122,7 @@
 // EOF;
 // 							}
 						?>
-					
+
 						<div class="form-group">
 							<button type="submit" class="btn btn-primary"
 							:disabled="errors.has('username') || errors.has('email')">Đồng ý</button>

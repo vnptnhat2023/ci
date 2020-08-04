@@ -22,7 +22,7 @@
 	        padding: 0px;
 	        min-height: 100vh;
         }
-        
+
         .form-box {
           background: rgba(0,0,0,.8);
 			    opacity: .9;
@@ -55,20 +55,23 @@
 		<![endif]-->
 	</head>
 	<body>
-		
+
 		<div class="container">
 			<div class="row">
-				<div class="col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3" 
+				<div class="col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3"
 				id="login-page" v-cloak>
 					<?php echo form_open() ?>
 					<div class="form-box">
 						<?php
-							if (isset($error[0]))
-							{
+							if ( isset( $message_errors[0] ) ) {
 								echo '<div class="alert alert-warning">';
-								foreach ($error as $value) {
-									echo "<p>{$value}</p>";
-								}
+								foreach ($message_errors as $errorMsg) { echo "<p>{$errorMsg}</p>"; }
+								echo '</div>';
+							}
+
+							if ( isset( $message_success[0] ) ) {
+								echo '<div class="alert alert-success">';
+								foreach ($message_success as $successMsg) { echo "<p>{$successMsg}</p>"; }
 								echo '</div>';
 							}
 						?>
@@ -81,12 +84,12 @@
 							value="<?php echo set_value('username') ?>" autocomplete="off" spellcheck="false">
 							<span v-show="errors.has('username')" class="help-block">{{ errors.first('username') }}</span>
 						</div>
-					
+
 						<div class="form-group" :class="{'has-warning': errors.has('password')}">
 							<label for="password">Mật khẩu</label>
-							<input type="password" class="form-control" maxlength="32" 
+							<input type="password" class="form-control" maxlength="32"
 							v-validate="'required|min:5|max:64'" data-vv-as="Mật khẩu"
-							name="password" id="password" placeholder="Mật khẩu" autocomplete="off" spellcheck="false" 
+							name="password" id="password" placeholder="Mật khẩu" autocomplete="off" spellcheck="false"
 							value="<?php echo set_value('password') ?>">
 							<span v-show="errors.has('password')" class="help-block">{{ errors.first('password') }}</span>
 						</div>
@@ -112,15 +115,15 @@
 						<div class="form-group">
 							<div class="checkbox">
 								<label>
-									<input type="checkbox" name="remember_me" 
+									<input type="checkbox" name="remember_me"
 									value="1" <?php echo set_checkbox('remember_me', '1'); ?>>
 									<span>Ghi nhớ tôi</span>
 								</label>
 							</div>
 						</div>
-					
+
 						<div class="form-group">
-							<button type="submit" class="btn btn-primary" style="border-radius: none;" 
+							<button type="submit" class="btn btn-primary" style="border-radius: none;"
 							:disabled="errors.has('username') || errors.has('password')">Đăng nhập</button>
 							<button type="reset" class="btn btn-default" style="border-radius: none;" >Reset</button>
 						</div>
@@ -140,7 +143,7 @@
 						</div>
 					</div>
 					<?php echo form_close() ?>
-					
+
 				</div>
 			</div>
 		</div>

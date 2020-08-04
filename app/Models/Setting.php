@@ -4,7 +4,7 @@ use \CodeIgniter\Model;
 
 class Setting extends Model
 {
-	protected $table = 'setting';
+	protected $table = 'general_setting';
 
   protected $primaryKey = 'setting_name';
   protected $returnType = '\App\Entities\Setting'; // protected $returnType = 'object';

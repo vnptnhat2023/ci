@@ -48,7 +48,7 @@ $routes->group( 'backend', $bapiOptions, function ( $routes )
 			'only' => [ 'index', 'create', 'delete', 'update' ]
 		] );
 
-		$routes->resource( 'general_setting', [
+		$routes->resource( 'setting', [
 			'placeholder' => '(:dashAlpha)',
 			'only' => [ 'index', 'create', 'update', 'delete' ]
 		] );

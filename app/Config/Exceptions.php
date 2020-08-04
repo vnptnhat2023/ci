@@ -18,7 +18,7 @@ class Exceptions extends BaseConfig
 	 |
 	 | Default: true
 	 */
-	public $log = true;
+	public $log = false;
 
 	/*
 	 |--------------------------------------------------------------------------
