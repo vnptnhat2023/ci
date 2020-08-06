@@ -51,6 +51,27 @@ class NknAuth
 	 */
 	public BaseBuilder $user;
 
+	protected array $rules = [
+		'login' => [
+			'username',
+			'password'
+		],
+		'login_captcha' => [
+			'username',
+			'password',
+			'captcha'
+		],
+		'forget' => [
+			'username',
+			'email'
+		],
+		'forget_captcha' => [
+			'username',
+			'email',
+			'captcha'
+			]
+	];
+
 	public function __construct ()
 	{
 		$this->model = new \App\Models\Login();
@@ -62,68 +83,48 @@ class NknAuth
 		$this->NknConfig = new \Config\Nkn();
 	}
 
-	public function rules( string $key )
+	public function rules( $needed )
 	{
-		$rules = [
-			'login' => [
-				'username' => [
-					// 'label' => lang( 'NKnAuth.labelUsername' ),
-					'label' => lang( 'NKnAuth.labelUserOrEmail' ),
-					// 'rules' => 'trim|min_length[5]|max_length[32]|alpha_dash',
-					'rules' => 'trim|min_length[5]|max_length[128]|valid_email'
-				],
-				'password' => [
-					'label' => lang( 'NKnAuth.labelPassword' ),
-					'rules' => 'trim|min_length[5]|max_length[32]|alpha_numeric_punct'
-				]
+		$generalRules = [
+
+			'username' => [
+				'label' => lang( 'NKnAuth.labelUsername' ),
+				'rules' => 'trim|required|min_length[5]|max_length[32]|alpha_dash'
 			],
-			'login_with_captcha' => [
-				'username' => [
-					// 'label' => lang( 'NKnAuth.labelUsername' ),
-					'label' => lang( 'NKnAuth.labelUserOrEmail' ),
-					// 'rules' => 'trim|min_length[5]|max_length[32]|alpha_dash',
-					'rules' => 'trim|min_length[5]|max_length[128]|valid_email'
-				],
-				'password' => [
-					'label' => lang( 'NKnAuth.labelPassword' ),
-					'rules' => 'trim|min_length[5]|max_length[32]|alpha_numeric_punct'
-				],
-				'ci_captcha' => [
-					'label' => lang( 'NKnAuth.labelCaptcha' ),
-					'rules' => 'required|trim|max_length[10]|captcha_ci'
-				]
+
+			'password' => [
+				'label' => lang( 'NKnAuth.labelPassword' ),
+				'rules' => 'trim|required|min_length[5]|max_length[32]|alpha_numeric_punct'
 			],
-			'forgot_password' => [
-				'username' => [
-					'label' => lang( 'NKnAuth.labelUsername' ),
-					'rules' => 'trim|min_length[5]|max_length[32]alpha_dash'
-				],
-				'email' => [
-					'label' => lang( 'NKnAuth.labelEmail' ),
-					'rules' => 'trim|min_length[5]|max_length[128]|valid_email'
-				]
+
+			'email' => [
+				'label' => lang( 'NKnAuth.labelEmail' ),
+				'rules' => 'trim|required|min_length[5]|max_length[128]|valid_email'
 			],
-			'forgot_password_with_captcha' => [
-				'username' => [
-					'label' => lang( 'NKnAuth.labelUsername' ),
-					'rules' => 'trim|min_length[5]|max_length[32]alpha_dash'
-				],
-				'email' => [
-					'label' => lang( 'NKnAuth.labelEmail' ),
-					'rules' => 'trim|min_length[5]|max_length[128]|valid_email'
-				],
-				'ci_captcha' => [
-					'label' => lang( 'NKnAuth.labelCaptcha' ),
-					'rules' => 'required|trim|max_length[10]|captcha_ci'
-				]
+
+			'captcha' => [
+				'label' => lang( 'NKnAuth.labelCaptcha' ),
+				'rules' => 'trim|required|max_length[10]|captcha_ci'
 			]
+
 		];
 
-		if ( empty( $rules[ $key ] ) ) {
-			throw new \Exception( "Error rule: [ {$key} ] not found", 1 );
+		if ( is_string( $needed ) ) {
+			$result = dot_array_search( $needed, $generalRules );
 		}
 
-		return $rules[ $key ];
+		if ( is_array( $needed ) ) {
+			$result = [];
+
+			foreach ( $needed as $need ) {
+				if ( isset( $generalRules[ $need ] ) )
+				$result[ $need ] = $generalRules[ $need ];
+			}
+		}
+
+		if ( empty( $result ) ) throw new \Exception( "Error rule not found", 1 );
+
+		return $result;
 	}
 
 	/**
@@ -160,7 +161,7 @@ class NknAuth
 	/** @read_more login */
 	public function forgetPass ( bool $returnType = true ) : self
 	{
-		$this->typeChecker( 'forgot_password' );
+		$this->typeChecker( 'forget' );
 
 		static::$returnType = true === $returnType ? 'object' : 'array';
 
@@ -390,14 +391,14 @@ class NknAuth
 	}
 
 	/**
-	 * @param string $type login | forgot_password
+	 * @param string $type login | forget
 	 * @throws \Exception
 	 * @return array|object|void
 	 */
 	private function typeChecker ( $type = 'login' )
 	{
-		if ( ! in_array( $type, [ 'login', 'forgot_password' ] ) ) {
-			throw new \Exception( 'Type must be in [login or forgot_password]', 1 );
+		if ( ! in_array( $type, [ 'login', 'forget' ] ) ) {
+			throw new \Exception( 'Type must be in [login or forget]', 1 );
 		}
 
 		$requestType = ( $type === 'login' ) ? 'password' : 'email';
@@ -408,7 +409,7 @@ class NknAuth
 
 		if ( true === $this->isLogged( true ) ) {
 
-			if ( $type === 'forgot_password' )
+			if ( $type === 'forget' )
 			{
 				$this->response[ 'reset_incorrect' ] = true;
 			}
@@ -441,20 +442,26 @@ class NknAuth
 	 */
 	private function loginValidate ()
 	{
-		$type = $this->model->was_limited_one()
-		? 'login_with_captcha' : 'login';
+		$validation = Services::Validation() ->withRequest( Services::request() );
+		$incorrectInfo = false;
 
-		Services::Validation()
-		->withRequest( Services::request() )
-		->setRules( $this->rules( $type ) );
+		$ruleUsername = [ 'username' => $this->rules( 'username' ) ];
 
-		if ( false === Services::Validation() ->run() )
-		return $this->incorrectInfo( true, Services::Validation() ->getErrors() );
+		if ( false === $validation->setRules( $ruleUsername )->run() ) {
+			Services::Validation() ->reset();
+
+			$ruleEmail = [ 'username' => $this->rules( 'email' ) ];
+			$validation = Services::Validation() ->withRequest( Services::request() );
+			$incorrectInfo = ! $validation->setRules( $ruleEmail ) ->run();
+		}
+
+		if ( true === $incorrectInfo ) return $this->incorrectInfo( true );
 
 		$userData = $this->user
 		->select( implode( ',', $this->loginColumns() ) )
 		->join( 'user_group', 'user_group.id = user.group_id' )
-		->where( [ 'username' => Services::request() ->getPostGet( 'username' ) ] )
+		->where( [ 'user.username' => Services::request() ->getPostGet( 'username' ) ] )
+		->orWhere( [ 'user.email' => Services::request() ->getPostGet( 'username' ) ] )
 		->get(1)
 		->getRowArray();
 
@@ -497,13 +504,11 @@ class NknAuth
 	 */
 	private function forgetValidate ()
 	{
-		$validate_group = $this->model->was_limited_one()
-		? 'forgot_password_with_captcha'
-		: 'forgot_password';
+		$group = $this->model->was_limited_one() ? 'forget_captcha' : 'forget';
 
 		Services::Validation()
 		->withRequest( Services::request() )
-		->setRules( $this->rules( $validate_group ) );
+		->setRules( $this->rules( $this->rules[ $group ] ) );
 
 		if ( false === Services::Validation() ->run() ) return $this->incorrectInfo();
 
@@ -530,8 +535,9 @@ class NknAuth
 		false === $throttle ?: $this->response[ 'attemps' ] = $this->model->throttle();
 		$this->response[ 'view' ] = true;
 		$this->response[ 'login_incorrect' ] = true;
-		$this->messageErrors[] = lang( 'NknAuth.errorIncorrectInformation' );
-		$this->messageErrors += $addMore;
+
+		$errors[] = lang( 'NknAuth.errorIncorrectInformation' );
+		$this->messageErrors = [ ...$errors, ...$addMore ];
 
 		return $this->getMessage();
 	}

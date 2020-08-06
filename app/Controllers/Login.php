@@ -27,15 +27,15 @@ class Login extends BaseController
 
 	public function forgot ()
 	{
-		$auth = $this->NknAuth->login( false );
+		$auth = $this->NknAuth->login();
 
-		return view( 'login/forgot', $auth->getMessage() );
+		return view( 'login/forgot', (array) $auth->getMessage() );
 	}
 
 	public function logout ()
 	{
-		$auth = $this->NknAuth->logout( false );
+		$auth = $this->NknAuth->logout();
 
-		return view( 'login/login', $auth->getMessage() );
+		return view( 'login/login', (array) $auth->getMessage() );
 	}
 }

@@ -2,6 +2,7 @@
 
 // use App\Database\Migrations\GeneralRelation;
 use App\Libraries\DesignPattern as StateGyPattern;
+use CodeIgniter\Config\Services;
 // use CodeIgniter\Autoloader\FileLocator;
 use CodeIgniter\Events\Events;
 use CodeIgniter\I18n\Time;
@@ -23,10 +24,11 @@ class Test extends BaseController {
 
 	public function test2()
 	{
-		// \Config\Services::session()->remove('oknkn');
-		$auth = new \App\Libraries\NknAuth();
+		$a = false;
 
-		$auth->cookieHandler();
+		$b = ! $a;
+
+		var_dump($b);
 	}
 
 	public function test()

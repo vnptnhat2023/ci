@@ -75,7 +75,8 @@ $i18BtnClear = ucfirst(lang('NknAuth.LabelBtnClear'));
 				<div class="col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3"
 				id="login-page" v-cloak>
 
-					<?php echo form_open() ?>
+					<?= form_open( base_url( 'login' ) ) ?>
+
 					<div class="form-box">
 
 						<?php

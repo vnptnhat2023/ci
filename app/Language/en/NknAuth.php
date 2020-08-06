@@ -7,9 +7,9 @@ return [
 
 	'noteDenyRequestPassword' => 'You are logged in, so you are not authorized to use this function.',
 
-	'successLogged' => 'You are logged-in, back to Home ?',
-	'successLogout' => 'You have been logged out, back to home ?',
-	'successResetPassword' => 'Password reset successfully.',
+	'successLogged' => 'You are logged in.',
+	'successLogout' => 'You have been logged out.',
+	'successResetPassword' => 'Your password has been successfully reset.',
 
 	'labelUsername' => 'name',
 	'labelUserOrEmail' => 'name or email',

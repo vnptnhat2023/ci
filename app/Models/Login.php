@@ -99,10 +99,11 @@ class Login extends Model
   public function throttle_cleanup()
   {
 		$time = strtotime( '-' . (int) $this->login_timeout . ' minutes' );
-		$formatted_current_time = date( 'Y-m-d H:i:s', $time );
+		$from = date('Y-00-00 00:00:00');
+		$to = date( 'Y-m-d H:i:s', $time );
 
 		$this->builder()
-		->where( "created_at BETWEEN '2020-00-00 00:00:00' AND '{$formatted_current_time}'")
+		->where( "created_at BETWEEN '{$from}' AND '{$to}'")
 		->delete( [ 'type' => $this->login_type ], 100 );
   }
 }

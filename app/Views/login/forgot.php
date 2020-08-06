@@ -86,7 +86,9 @@ $i18BtnClear = ucfirst(lang('NknAuth.LabelBtnClear'));
 			<div class="row">
 				<div class="col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3"
 				id="forget-password-page" v-cloak>
-					<?php echo form_open('', '@submit="submit($event)"') ?>
+
+					<?= form_open(  base_url( 'login/forgot' ) , '@submit="submit($event)"' ) ?>
+
 					<div class="form-box">
 						<?php
 							if ( isset( $success[0] ) ) {
