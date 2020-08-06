@@ -11,8 +11,15 @@ return [
 	'successLogout' => 'You have been logged out, back to home ?',
 	'successResetPassword' => 'Password reset successfully.',
 
-	'labelUsername' => 'username',
+	'labelUsername' => 'name',
+	'labelUserOrEmail' => 'name or email',
 	'labelPassword' => 'password',
 	'labelEmail' => 'email',
 	'labelCaptcha' => 'captcha',
+	'labelRememberMe' => 'remember me',
+	'labelHomePage' => 'home',
+	'labelResetPasswordPage' => 'reset password',
+	'LabelBtnLoginSubmit' => 'log in',
+	'LabelBtnResetSubmit' => 'Reset',
+	'LabelBtnClear' => 'clear',
 ];

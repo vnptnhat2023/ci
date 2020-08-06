@@ -17,6 +17,7 @@ class Nkn extends BaseConfig
 
 	/** NknAuth cookie-name */
 	public const NKNck = 'konkn';
+	public const NKNckTtl = WEEK;
 
   public const throttle = [
   	'type' => 1,

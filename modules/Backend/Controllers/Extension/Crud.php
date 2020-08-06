@@ -1,6 +1,7 @@
 <?php
 namespace BAPI\Controllers\Extension;
 
+// use BAPI\Controllers\BaseController;
 use \CodeIgniter\RESTful\ResourceController;
 use \BAPI\Controllers\Mixins\BAPITrait;
 
@@ -27,8 +28,9 @@ class Crud extends ResourceController
 	private string $entityExtension = '\BAPI\Entities\Extension\Crud';
 
 	# ==========================================================
-	public function __construct()
+	public function __construct ()
 	{
+		// $this->returnTrait = 'array';
 		$config = ( new \BAPI\Config\Extension() )->getSetting('db');
 
 		$this->maximumCreate = $config[ 'create' ][ 'maximum_rows' ];
@@ -38,7 +40,7 @@ class Crud extends ResourceController
 	}
 
 	# ==========================================================
-  public function index()
+  public function index ()
   {
 		# --- Example: ?id[]=1&id[]=2&author[]=<administrator"&author[]=tester
 		# --- When need search with other methods:
@@ -48,11 +50,14 @@ class Crud extends ResourceController
 
 		$this->indexRun[] = '__indexRun';
 
-		return $this->indexTrait( true, [], 'whereIn', [], false );
+		$data = $this->indexTrait( true, [], 'whereIn', [], false );
+
+		return $data;
+		// echo '<pre>', json_encode( $data, JSON_PRETTY_PRINT );
   }
 
 	# ==========================================================
-  public function create()
+  public function create ()
   {
 		$this->ruleCreate[] = 'ruleCreate';
 
@@ -64,7 +69,7 @@ class Crud extends ResourceController
 	}
 
 	# ==========================================================
-	public function update($id = null)
+	public function update ( $id = null )
   {
 		$this->rulePatch[] = 'rulePatch';
 
@@ -75,7 +80,7 @@ class Crud extends ResourceController
 	}
 
 	# ==========================================================
-	public function delete($id = null)
+	public function delete ( $id = null )
   {
 		$this->afterDelete[] = '__afterDelete';
 
@@ -87,7 +92,7 @@ class Crud extends ResourceController
 
 	# --- Todo: Not using now; Need more to code
 	# ==========================================================
-	public function scan(string $name)
+	public function scan ( string $name )
   {
 		helper('filesystem_helper');
 		$file = get_file_info( set_realpath( EXTPATH . "{$name}/{$name}.php" ), 'date' );
@@ -101,7 +106,7 @@ class Crud extends ResourceController
 		return password_verify( '1594660675', $extHashed ); # Arg1 = post[hashedFile]
   }
 
-  private function __indexRun(array $data) : array
+  private function __indexRun ( array $data ) : array
   {
     $option = config('\BAPI\Config\Extension')->getSetting('db.fetch');
 
@@ -125,7 +130,7 @@ class Crud extends ResourceController
 	 * 1. Check for duplicates and limit event names
 	 * 2. Ensure data entity before validation
 	 */
-	private function __beforeCreate(array $data) : array
+	private function __beforeCreate ( array $data ) : array
 	{
 		$events = $data[ 'data' ][ 'events' ] ?? [];
 
@@ -158,7 +163,7 @@ class Crud extends ResourceController
 	/**
 	 * Check file exists and hashing
 	 */
-	private function __afterValidateCreate(array $data) : array
+	private function __afterValidateCreate ( array $data ) : array
 	{
 		helper( [ 'filesystem_helper', 'text' ] );
 
@@ -186,7 +191,7 @@ class Crud extends ResourceController
 	/**
 	 * Add the extensions "event and relation" to the database
 	 */
-  private function __afterCreate(array $data) : array
+  private function __afterCreate ( array $data ) : array
   {
 		$id = $data['id'];
 
@@ -243,7 +248,7 @@ class Crud extends ResourceController
 	 * 3. Deletes all "files" contained in the supplied directory path
 	 * 4. Delete the "event extension" stored in the cache named in: "extStore" event
 	 */
-  private function __afterDelete(array $data) : array
+  private function __afterDelete ( array $data ) : array
   {
 		$ids = $data['id'];
 		$idsString = implode( ',', $ids );
@@ -312,7 +317,7 @@ class Crud extends ResourceController
 	/**
 	 * Protected primary-extension changes
 	 */
-	private function __beforeUpdate(array $data) : array
+	private function __beforeUpdate ( array $data ) : array
 	{
 		$ids = $data['id'];
 
@@ -326,7 +331,7 @@ class Crud extends ResourceController
 	/**
 	 * Delete the cache files
 	 */
-	private function __afterUpdate(array $data): array
+	private function __afterUpdate ( array $data ): array
 	{
 		model('\App\Models\Extension')->_deleteCache(
 			config('\BAPI\Config\Extension')->getSetting('cache.name')

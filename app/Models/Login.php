@@ -88,7 +88,7 @@ class Login extends Model
 		$data = [
 			'ip' => Services::request() ->getIPAddress(),
 			'type' => $this->login_type,
-			'created_at' => date( 'Y/m/d H:i:s', time() )
+			'created_at' => date( 'Y-m-d H:i:s', time() )
 		];
 
     $this->builder()->insert( $data );
@@ -98,14 +98,11 @@ class Login extends Model
 
   public function throttle_cleanup()
   {
-		$time = strtotime( '-' . (int) $this->timeout . ' minutes' );
+		$time = strtotime( '-' . (int) $this->login_timeout . ' minutes' );
 		$formatted_current_time = date( 'Y-m-d H:i:s', $time );
 
-		$whereQuery = [
-			'created_at' => " BETWEEN 1970-00-00 00:00:00 AND {$formatted_current_time}",
-			'type' => $this->login_type
-		];
-
-		$this->builder() ->delete( $whereQuery, 100 );
+		$this->builder()
+		->where( "created_at BETWEEN '2020-00-00 00:00:00' AND '{$formatted_current_time}'")
+		->delete( [ 'type' => $this->login_type ], 100 );
   }
 }

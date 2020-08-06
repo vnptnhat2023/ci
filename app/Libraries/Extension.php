@@ -108,19 +108,19 @@ final class Extension {
 
 	public function __set ( string $key, $value = null ) : self
 	{
-    $key = strCamelCase( $key );
+    $upperKey = strCamelCase( $key );
 
-    if ( array_key_exists( $key, self::$loaded ) )
+    if ( array_key_exists( $upperKey, self::$loaded ) )
     {
       if ( $this->withSetter === true ) {
-        self::$loaded[ $key ] = $value;
+        self::$loaded[ $upperKey ] = $value;
       }
 
 			return $this;
     }
-    else if ( method_exists( $this, $key ) )
+    else if ( method_exists( $this, $upperKey ) )
 		{
-			$this->$key( $value );
+			$this->$upperKey( $value );
 
 			return $this;
 		}

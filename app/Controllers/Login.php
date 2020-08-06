@@ -17,9 +17,12 @@ class Login extends BaseController
 
 	public function index()
 	{
-		$auth = $this->NknAuth->login( false );
+		$message = $this->NknAuth->login()->getMessage();
 
-		return view( 'login/login', $auth->getMessage() );
+		if ( false === $message->result->success )
+		return view( 'login/login', (array) $message );
+
+		return anchor( base_url(), implode( ', ', $message->success ) );
 	}
 
 	public function forgot ()
@@ -34,35 +37,5 @@ class Login extends BaseController
 		$auth = $this->NknAuth->logout( false );
 
 		return view( 'login/login', $auth->getMessage() );
-	}
-
-	private function index_old ()
-	{
-		$auth = $this->NknAuth->login();
-
-		if ( true === $auth->view ) {
-			if ( true === $auth->login_incorrect ) {
-				$data[ 'error' ][] = lang( 'NknAuth.errorIncorrectInformation' );
-			}
-
-			return view( 'login/login', $data );
-		}
-
-		if ( true === $auth->banned || true === $auth->inactive )
-		{
-			$status = $auth->banned ? lang( 'NknAuth.banned' ) : lang( 'NknAuth.inActive' );
-
-			echo lang( 'NknAuth.errorNotReadyYet', [ $status ] );
-		}
-		else if ( true === $auth->success )
-		{
-			echo anchor( base_url(), lang( 'NknAuth.successLogged' ) );
-		}
-		else if ( true === $auth->limit_max )
-		{
-			$errArgs = [ $this->NknAuth->throttle_config[ 'timeout' ] ];
-
-			echo lang( 'NknAuth.errorThrottleLimitedTime', $errArgs );
-		}
 	}
 }

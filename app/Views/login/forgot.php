@@ -1,10 +1,26 @@
+<?php
+
+$i18UserOrEmail = ucfirst(lang('NknAuth.labelUserOrEmail'));
+$i18Password = ucfirst(lang('NknAuth.labelPassword'));
+$i18Username = ucfirst(lang('NknAuth.labelUsername'));
+$i18Email = ucfirst(lang('NknAuth.labelEmail'));
+$i18Captcha = ucfirst(lang('NknAuth.labelCaptcha'));
+$i18RememberMe = ucfirst(lang('NknAuth.labelRememberMe'));
+$i18HomePage = ucfirst(lang('NknAuth.labelHomePage'));
+$i18ResetPasswordPage = ucfirst(lang('NknAuth.labelResetPasswordPage'));
+$i18BtnResetSubmit = ucfirst(lang('NknAuth.LabelBtnResetSubmit'));
+$i18BtnLoginSubmit = ucfirst(lang('NknAuth.LabelBtnLoginSubmit'));
+$i18BtnClear = ucfirst(lang('NknAuth.LabelBtnClear'));
+
+?>
+
 <!DOCTYPE html>
 <html lang="">
 	<head>
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title>Title Page</title>
+		<title><?= $i18BtnResetSubmit ?></title>
 
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 
@@ -13,7 +29,7 @@
 		<style>
 			[v-cloak] { display:none; }
 	 		body {
-      	background-image: url(https://source.unsplash.com/random);
+      	/* background-image: url(https://source.unsplash.com/random); */
       	background-repeat: no-repeat;
         background-position: center center;
         background-size: cover;
@@ -73,65 +89,88 @@
 					<?php echo form_open('', '@submit="submit($event)"') ?>
 					<div class="form-box">
 						<?php
-							if ( isset( $message_success[0] ) ) {
+							if ( isset( $success[0] ) ) {
 								echo '<div class="alert alert-warning">';
-								foreach ($message_success as $errorMsg) { echo "<p>{$errorMsg}</p>"; }
+								foreach ($success as $error) { echo "<p>{$error}</p>"; }
 								echo '</div>';
 							}
 
-							if ( isset( $message_success[0] ) ) {
+							if ( isset( $success[0] ) ) {
 								echo '<div class="alert alert-success">';
-								foreach ($message_success as $successMsg) { echo "<p>{$successMsg}</p>"; }
+								foreach ($success as $success) { echo "<p>{$success}</p>"; }
 								echo '</div>';
 							}
 						?>
 
 						<div class="form-group" :class="{'has-warning': errors.has('username')}">
-							<label for="username">Tên đăng nhập</label>
-							<input type="text" class="form-control" maxlength="32"
-							v-validate="'required|min:5|max:32'" data-vv-as="Tên đăng nhập"
-							name="username" id="username" placeholder="Tên"
+							<label for="username"><?= $i18Username ?></label>
+
+							<input
+							type="text"
+							class="form-control"
+							maxlength="32"
+							v-validate="'required|min:5|max:32'"
+							data-vv-as="<?= $i18Username ?>"
+							name="username"
+							id="username"
+							placeholder="<?= $i18Username ?>"
 							value="<?php echo set_value('username') ?>"
 							autocomplete="off" spellcheck="false">
+
 							<span v-show="errors.has('username')" class="help-block">{{ errors.first('username') }}</span>
 						</div>
 
 						<div class="form-group" :class="{'has-warning': errors.has('email')}">
-							<label for="email">Địa chỉ email</label>
-							<input type="email" class="form-control" maxlength="64"
-							v-validate="'required|min:5|max:64|email'" data-vv-as="Mật khẩu"
-							name="email" id="email" placeholder="Email" value="<?php echo set_value('email') ?>"
+
+							<label for="email"><?= $i18Email ?></label>
+
+							<input type="email"
+							class="form-control"
+							maxlength="64"
+							v-validate="'required|min:5|max:64|email'"
+							data-vv-as="<?= $i18Email ?>"
+							name="email"
+							id="email"
+							placeholder="<?= $i18Email ?>"
+							value="<?php echo set_value('email') ?>"
 							autocomplete="off" spellcheck="false">
+
 							<span v-show="errors.has('email')" class="help-block">{{ errors.first('email') }}</span>
+
 						</div>
 
 						<?php
-// 							if ($show_captcha)
-// 							{
-// 								$show_captcha = captcha_ci(5, 115);
-// 								$captcha_ci_err = form_error('ci_captcha', '<p class="text-danger small">', '</p>');
-// 								echo <<< EOF
-// 						<div class="form-group">
-// 							<label for="captcha">Captcha</label>
-// 							<div class="input-group">
-// 						    <span class="input-group-addon" style="margin: 0; padding: 0;">{$show_captcha}</span>
-// 						    <input type="text" class="form-control" id="captcha" name="ci_captcha" placeholder="Mã kiểm tra">
-// 						  </div>
-// 						  {$captcha_ci_err}
-// 					  </div>
-// EOF;
-// 							}
+						/*
+							if ($show_captcha)
+							{
+								$show_captcha = captcha_ci(5, 115);
+								$captcha_ci_err = form_error('ci_captcha', '<p class="text-danger small">', '</p>');
+								echo <<< EOF
+						<div class="form-group">
+							<label for="captcha"><?= $i18Captcha ?></label>
+							<div class="input-group">
+						    <span class="input-group-addon" style="margin: 0; padding: 0;">{$show_captcha}</span>
+						    <input type="text" class="form-control" id="captcha" name="ci_captcha" placeholder="<?= $i18Captcha ?>">
+						  </div>
+						  {$captcha_ci_err}
+					  </div>
+EOF;
+							}
+*/
 						?>
 
 						<div class="form-group">
-							<button type="submit" class="btn btn-primary"
-							:disabled="errors.has('username') || errors.has('email')">Đồng ý</button>
-							<button type="reset" class="btn btn-default">Reset</button>
+							<button
+							type="submit"
+							class="btn btn-primary"
+							:disabled="errors.has('username') || errors.has('email')"><?= $i18BtnResetSubmit ?></button>
+							<button type="reset" class="btn btn-default"><?= $i18BtnClear ?></button>
 						</div>
+
 						<div class="form-group">
 							<a href="<?php echo base_url('login') ?>">
 								<span class="glyphicon glyphicon-arrow-left"></span>&nbsp;
-								<span>Quay lại trang đăng nhập</span>
+								<span><?= $i18BtnLoginSubmit ?></span>
 							</a>
 						</div>
 					</div>

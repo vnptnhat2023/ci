@@ -21,6 +21,14 @@ class Test extends BaseController {
 		var_dump($this->anonymousClass->lorem);
 	}
 
+	public function test2()
+	{
+		// \Config\Services::session()->remove('oknkn');
+		$auth = new \App\Libraries\NknAuth();
+
+		$auth->cookieHandler();
+	}
+
 	public function test()
 	{
 		$a = [ 'a' => 'a2', 'b' => 'b2' ];
