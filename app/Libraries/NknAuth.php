@@ -32,7 +32,7 @@ class NknAuth
 		'captcha' => false,
 		'limit_max' => false,
 		# --- Times to show captcha, should change to: limited_level
-		'was_limited_one' => false,
+		// 'was_limited_one' => false,
 		'attemps' => null,
 		'banned' => false,
 		'inactive' => false
@@ -233,6 +233,7 @@ class NknAuth
 	private function model () : \App\Models\Login
 	{
 		$throttle = $this->getConfig()->throttle;
+
 		$model = $this->model->config(
 			$throttle->type,
 			$throttle->limit_one,
@@ -460,6 +461,7 @@ class NknAuth
 
 		$ruleUsername = [ 'username' => $this->rules( 'username' ) ];
 
+		# --- Todo: add more captcha rule
 		if ( false === $validation->setRules( $ruleUsername )->run() ) {
 			Services::Validation() ->reset();
 
@@ -546,7 +548,9 @@ class NknAuth
 	/** @read_more getMessage */
 	private function incorrectInfo ( bool $throttle = true, array $addMore = [] )
 	{
+		// d( $this->response[ 'attemps' ] );
 		false === $throttle ?: $this->response[ 'attemps' ] = $this->model->throttle();
+		d( $this->response[ 'attemps' ] );
 		$this->response[ 'view' ] = true;
 		$this->response[ 'login_incorrect' ] = true;
 

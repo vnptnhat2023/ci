@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use CodeIgniter\Config\BaseConfig;
 use CodeIgniter\Exceptions\ModelException;
 use CodeIgniter\Model;
 use Config\Services;
@@ -19,7 +20,10 @@ class Login extends Model
   private int $login_type = 1;
   private int $login_limit_one = 5;
   private int $login_limit = 10;
-  private int $login_timeout = 30;
+	private int $login_timeout = 1800;
+
+	private BaseConfig $cacheConfig;
+	private string $cacheName;
 
   protected $table = 'throttle';
 	protected $tempReturnType = 'object';
@@ -28,23 +32,38 @@ class Login extends Model
 	protected $useTimestamps = true;
 	protected $createdField = 'created_at';
 
-  public function __construct()
+  public function __construct ()
   {
-    $this->db = db_connect();
+		$config = config( 'Cache', false );
+		$config->storePath .= 'NknAuth';
+		$cacheName = str_replace(
+			[ ':', '.', ' ' ],
+			'-',
+			Services::request()->getIPAddress()
+		);
 
-    // clean up login attempts older than specified time
-    // $this->throttle_cleanup();
+		$this->cacheName = $cacheName;
+		$this->cacheConfig = $config;
+    $this->db = db_connect();
   }
 
-  public function config ( int $type = 1, int $limit_one = 5, int $limit = 10, int $timeout = 30 )
-  {
+  public function config ( int $type, int $limit_one, int $limit, int $timeout ) : self
+	{
 		$this->login_type = $type;
-		$this->login_limit_one = ( $limit_one - 1 );
-		$this->login_limit = ( $limit - 1 );
+		$this->login_limit_one = $limit_one;
+		$this->login_limit = $limit;
 		$this->login_timeout = $timeout;
 
+		$cacheService = Services::cache( $this->cacheConfig, false );
+
+		if ( $cacheData = $cacheService->get( $this->cacheName ) ) {
+			$this->login_attempts = $cacheData[ 'login_attempts' ];
+
+			return $this;
+		}
+
 		$whereQuery = [
-			'ip' => Services::request()->getIPAddress(),
+			'ip' => Services::request() ->getIPAddress(),
 			'type' => $type
 		];
 
@@ -55,7 +74,7 @@ class Login extends Model
 		->getRow();
 
 		if ( null === $row ) {
-			throw new ModelException('Number of rows cannot be empty');
+			throw new ModelException('The number of row cannot be empty');
 		}
 
 		$this->login_attempts = $row->count;
@@ -63,12 +82,12 @@ class Login extends Model
     return $this;
   }
 
-  public function was_limited_one()
+  public function was_limited_one () : bool
   {
     return $this->login_attempts > $this->login_limit_one ? true : false;
   }
 
-  public function was_limited()
+  public function was_limited ()
   {
 		if ( $this->login_attempts >= $this->login_limit )
 		return $this->login_timeout;
@@ -78,32 +97,69 @@ class Login extends Model
 	}
 
   /**
-   * throttle multiple connections attempts to prevent abuse
+   * Throttle multiple connections attempts to prevent abuse
    * @return int attempts
    */
-  public function throttle()
+  public function throttle () : int
   {
-    if ( $this->was_limited() ) return $this->was_limited();
+		if ( $this->was_limited() ) return $this->was_limited();
 
-		$data = [
-			'ip' => Services::request() ->getIPAddress(),
-			'type' => $this->login_type,
-			'created_at' => date( 'Y-m-d H:i:s', time() )
-		];
+		$ipAddress = Services::request() ->getIPAddress();
 
-    $this->builder()->insert( $data );
+		if ( Services::cache( $this->cacheConfig, false ) ->isSupported() ) {
+			return $this->throttle_cache( $ipAddress );
+		}
 
-    return $this->login_attempts;
+		return $this->throttle_db( $ipAddress );
   }
 
-  public function throttle_cleanup()
+  public function throttle_cleanup ()
   {
 		$time = strtotime( '-' . (int) $this->login_timeout . ' minutes' );
-		$from = date('Y-00-00 00:00:00');
+		$from = date( 'Y-00-00 00:00:00' );
 		$to = date( 'Y-m-d H:i:s', $time );
 
 		$this->builder()
 		->where( "created_at BETWEEN '{$from}' AND '{$to}'")
+		->where( 'ip', Services::request() ->getIPAddress() )
 		->delete( [ 'type' => $this->login_type ], 100 );
-  }
+	}
+
+	private function throttle_db ( string $ipAddress )
+	{
+		$data = [
+			'ip' => $ipAddress,
+			'type' => $this->login_type,
+			'created_at' => date( 'Y-m-d H:i:s', time() )
+		];
+
+    $this->builder() ->insert( $data );
+
+    return $this->login_attempts;
+	}
+
+	private function throttle_cache ( string $ipAddress ) : int
+	{
+		$data = [];
+
+		$oldData = Services::cache( $this->cacheConfig, false )
+		->get( $this->cacheName );
+
+		if ( ! empty( $oldData ) )
+		{
+			$data[ 'login_attempts' ] = ++ $oldData[ 'login_attempts' ];
+			unset( $oldData );
+		}
+		else
+		{
+			$data[ 'login_attempts' ] = 1;
+		}
+
+		$this->login_attempts = $data[ 'login_attempts' ];
+
+		Services::cache( $this->cacheConfig, false )
+		->save( $this->cacheName, $data, $this->login_timeout );
+
+		return $this->login_attempts;
+	}
 }

@@ -9,22 +9,20 @@ class Login extends BaseController
 
 	public function __construct()
 	{
+		helper( 'form' );
 		// dd( Services::NknAuth()->getConfig() );
 	}
 
 	public function index()
 	{
-		helper( 'form' );
-
 		$message = Services::NknAuth()->login()->getMessage();
+		d($message);
 
 		return view( 'login/login', (array) $message );
 	}
 
 	public function forgot ()
 	{
-		helper( 'form' );
-
 		$auth = Services::NknAuth()->login();
 
 		return view( 'login/forgot', (array) $auth->getMessage() );

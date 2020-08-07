@@ -24,11 +24,27 @@ class Test extends BaseController {
 
 	public function test2()
 	{
-		$a = false;
+		// $model = new \App\Models\Login;
+		// dd( $model->throttle() );
 
-		$b = ! $a;
+		$data = [
+			'throttle' => 2,
+			'ipAddress' => '::1'
+		];
 
-		var_dump($b);
+		$c = config( 'Cache', false );
+		$c->storePath .= 'NknAuth';
+
+		$cacheSer = Services::cache( $c, false );
+		dd( $cacheSer->getMetaData('--1') );
+
+		$ipAddress = Services::request()->getIPAddress();
+		$ipAddress = str_replace( [ ':', '.', ' ' ], '-', $ipAddress );
+
+		$cacheSer->save( $ipAddress, $data, MINUTE * 60 );
+
+		$getCache = $cacheSer->get( $ipAddress );
+		d( $getCache );
 	}
 
 	public function test()

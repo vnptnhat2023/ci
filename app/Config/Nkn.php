@@ -21,9 +21,9 @@ class Nkn extends BaseConfig
 
   public const throttle = [
   	'type' => 1,
-  	'limit_one' => 4,
+  	'limit_one' => 5,
   	'limit' => 10,
-  	'timeout' => 30
+  	'timeout' => 1800
 	];
 
 	private static object $userConfig;
