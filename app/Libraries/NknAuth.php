@@ -2,7 +2,7 @@
 
 namespace App\Libraries;
 
-use CodeIgniter\Config\BaseConfig;
+// use CodeIgniter\Config\BaseConfig;
 use CodeIgniter\Database\BaseBuilder;
 use CodeIgniter\Database\Exceptions\DataException;
 use CodeIgniter\Encryption\Encryption;
@@ -215,14 +215,18 @@ class NknAuth
 		}
 	}
 
+	/**
+	 * @var \Config\Nkn::getConfig $NknConfig
+	 */
 	public function getConfig () : object
 	{
 		return $this->NknConfig->getConfig();
 	}
 
+	# --- Todo: maybe not use it
 	private function setConfig (array $data) : object
 	{
-		return $this->NknConfig->setConfig($data);
+		return $this->NknConfig->setConfig( $data );
 	}
 
 	/** Set throttle config and get was_limited_one */
@@ -434,7 +438,7 @@ class NknAuth
 		if ( $wasLimited = $this->model() ->was_limited() ) {
 			$this->response[ 'limit_max' ] = $wasLimited;
 
-			$errArg = [ $this->NknConfig::throttle[ 'timeout' ] ];
+			$errArg = [ $this->getConfig()->throttle->timeout ];
 			$this->messageErrors[] = lang( 'NknAuth.errorThrottleLimitedTime', $errArg );
 
 			return $this->messageErrors;
@@ -488,7 +492,7 @@ class NknAuth
 
 		$userData[ 'permission' ] = json_decode( $userData[ 'permission' ] );
 
-		# --- Set success to true
+		# --- Set true response success
 		$this->setLoggedInSuccess( $userData );
 
 		# --- Set user session
@@ -498,11 +502,12 @@ class NknAuth
 		{
 			$this->setCookie( $userData );
 		}
-		else if ( false === $this->loggedInUpdateLog( $userData[ 'id' ] ) )
+		else if ( false === $this->loggedInUpdateUserData( $userData[ 'id' ] ) )
 		{
 			log_message( 'error', "{$userData[ 'id' ]} Logged-in, but update failed" );
 		}
 
+		# --- Todo: add an event for clean throttle, update after login
 		# --- Cleanup throttle
 		$this->model->throttle_cleanup();
 	}
@@ -572,7 +577,7 @@ class NknAuth
 		$keyHash = password_hash( $keyHex, PASSWORD_DEFAULT );
 		$cookieValue = "{$keyHash}-{$idHex}";
 
-		$updateSuccess = $this->loggedInUpdateLog(
+		$updateSuccess = $this->loggedInUpdateUserData(
 			$userData[ 'id' ], [ 'cookie_token' => $keyHex ]
 		);
 
@@ -601,7 +606,7 @@ class NknAuth
 	 * @throws \Exception
 	 * @return boolean
 	 */
-	private function loggedInUpdateLog ( int $userId, array $data = [] )
+	private function loggedInUpdateUserData ( int $userId, array $data = [] )
 	{
 		if ( $userId <= 0 ) {
 			$errArg = [ 'field' => 'user_id', 'param' => $userId ];

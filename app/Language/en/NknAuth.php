@@ -1,6 +1,6 @@
 <?php
 
-$homeLink = anchor( base_url(), 'Click here go to home.' );
+$homeLink = anchor( base_url(), 'Back to home.' );
 
 return [
   'errorIncorrectInformation' => 'Incorrect information.',

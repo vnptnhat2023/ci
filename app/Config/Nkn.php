@@ -53,10 +53,25 @@ class Nkn extends BaseConfig
 		}
 	}
 
-	public function getConfig () : object
+	/**
+	 * @param bool Received default config
+	 * @return Nkn::$userConfig
+	 */
+	public function getConfig ( bool $default = false ) : object
 	{
-		if ( empty( self::$userConfig ) ) {
-			$this->makeUserConfig();
+		if ( empty( self::$userConfig ) ) $this->makeUserConfig();
+
+		if ( true === $default ) {
+			$this->setConfig([
+				'session' => self::NKNss,
+				'cookie' => self::NKNck,
+				'cookie_ttl' => self::NKNckTtl,
+
+				'throttle_type' => self::throttle['type'],
+				'throttle_limit' => self::throttle['limit'],
+				'throttle_limit_one' => self::throttle['limit_one'],
+				'throttle_timeout' => self::throttle['timeout'],
+			]);
 		}
 
 		return self::$userConfig;
@@ -68,14 +83,14 @@ class Nkn extends BaseConfig
 			$this->makeUserConfig();
 		}
 
-		self::$userConfig->sessionName = $data[ 'session' ] ?? Nkn::NKNss;
-		self::$userConfig->cookieName = $data[ 'cookie' ] ?? Nkn::NKNck;
-		self::$userConfig->cookieTTL = $data[ 'cookie_ttl' ] ?? Nkn::NKNckTtl;
+		self::$userConfig->sessionName ??= $data[ 'session' ];
+		self::$userConfig->cookieName ??= $data[ 'cookie' ];
+		self::$userConfig->cookieTTL ??= $data[ 'cookie_ttl' ];
 
-		self::$userConfig->throttle->type = $data[ 'throttle_type '] ?? Nkn::throttle['type'];
-		self::$userConfig->throttle->limit = $data[ 'throttle_limit '] ?? Nkn::throttle['limit'];
-		self::$userConfig->throttle->limit_one = $data[ 'throttle_limit_one '] ?? Nkn::throttle['limit_one'];
-		self::$userConfig->throttle->timeout = $data[ 'throttle_timeout '] ?? Nkn::throttle['timeout'];
+		self::$userConfig->throttle->type ??= $data[ 'throttle_type '];
+		self::$userConfig->throttle->limit ??= $data[ 'throttle_limit '];
+		self::$userConfig->throttle->limit_one ??= $data[ 'throttle_limit_one '];
+		self::$userConfig->throttle->timeout ??= $data[ 'throttle_timeout '];
 
 		return self::$userConfig;
 	}
