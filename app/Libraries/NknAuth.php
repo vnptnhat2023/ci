@@ -2,7 +2,9 @@
 
 namespace App\Libraries;
 
+use CodeIgniter\Config\BaseConfig;
 use CodeIgniter\Database\BaseBuilder;
+use CodeIgniter\Database\Exceptions\DataException;
 use CodeIgniter\Encryption\Encryption;
 use Config\Services;
 
@@ -72,7 +74,7 @@ class NknAuth
 			]
 	];
 
-	public function __construct ()
+	public function __construct ( /*BaseConfig $config*/ )
 	{
 		$this->model = new \App\Models\Login();
 
@@ -80,9 +82,14 @@ class NknAuth
 
 		helper( [ 'array', 'cookie' ] );
 
+		# Will move to auth config folder
 		$this->NknConfig = new \Config\Nkn();
+		// $this->setConfig( $config )
 	}
 
+	/**
+	 * @param string|array $needed
+	 */
 	public function rules( $needed )
 	{
 		$generalRules = [
@@ -147,10 +154,10 @@ class NknAuth
 	{
 		static::$returnType = $returnType ? 'object' : 'array';
 
-		delete_cookie( $this->NknConfig::NKNck );
+		delete_cookie( $this->getConfig()->cookieName );
 
-		if ( Services::session() ->has( $this->NknConfig::NKNss ) ) {
-			Services::session() ->remove( $this->NknConfig::NKNss );
+		if ( Services::session() ->has( $this->getConfig()->sessionName ) ) {
+			Services::session() ->remove( $this->getConfig()->sessionName );
 
 			$this->messageSuccess[] = lang( 'NknAuth.successLogout' );
 		}
@@ -210,23 +217,23 @@ class NknAuth
 
 	public function getConfig () : object
 	{
-		$data = [
-			'session_name' => $this->NknConfig::NKNss,
-			'cookie_name' => $this->NknConfig::NKNck,
-			'throttle' => $this->NknConfig::throttle,
-		];
+		return $this->NknConfig->getConfig();
+	}
 
-		return (object) $data;
+	private function setConfig (array $data) : object
+	{
+		return $this->NknConfig->setConfig($data);
 	}
 
 	/** Set throttle config and get was_limited_one */
 	private function model () : \App\Models\Login
 	{
+		$throttle = $this->getConfig()->throttle;
 		$model = $this->model->config(
-			$this->NknConfig::throttle[ 'type' ],
-			$this->NknConfig::throttle[ 'limit_one' ],
-			$this->NknConfig::throttle[ 'limit' ],
-			$this->NknConfig::throttle[ 'timeout' ]
+			$throttle->type,
+			$throttle->limit_one,
+			$throttle->limit,
+			$throttle->timeout
 		);
 
 		$this->response[ 'captcha' ] = $this->model->was_limited_one();
@@ -243,10 +250,10 @@ class NknAuth
 		if ( false === $this->isLogged() ) return false;
 
 		if ( empty( $key ) ) {
-			return Services::session() ->get( $this->NknConfig::NKNss );
+			return Services::session() ->get( $this->getConfig()->sessionName );
 		}
 
-		$userData = Services::session() ->get( $this->NknConfig::NKNss );
+		$userData = Services::session() ->get( $this->getConfig()->sessionName );
 
 		return $userData[ $key ] ?? dot_array_search( $key, $userData );
 	}
@@ -272,6 +279,7 @@ class NknAuth
 	}
 
 	/**
+	 * Receive all types of messages in this class
 	 * @return object|array Depend on property $returnType
 	 */
 	public function getMessage ( array $addMore = [] )
@@ -288,8 +296,9 @@ class NknAuth
 	}
 
 	/**
-	 * Check in current User Session first, will be to $data
-	 * @param array $data when empty = 1st group = administrator
+	 * The first check the current user session,
+	 * the next will be $data parameter
+	 * @param array $data empty = 1st group = administrator
 	 * @return boolean
 	 */
 	public function hasPermission ( array $data ) : bool
@@ -328,20 +337,20 @@ class NknAuth
 	 */
 	public function isLogged ( bool $withCookie = false ) : bool
 	{
-		if ( true === Services::session() ->has( $this->NknConfig::NKNss ) ) return true;
+		if ( true === Services::session() ->has( $this->getConfig()->sessionName ) ) return true;
 
 		return false === $withCookie ? false : $this->cookieHandler();
 	}
 
 	public function cookieHandler () : bool
 	{
-		$userCookie = get_cookie( $this->NknConfig::NKNck );
+		$userCookie = get_cookie( $this->getConfig()->cookieName );
 		if ( empty( $userCookie ) || ! is_string( $userCookie ) ) return false;
 
 		$exp = explode( '-', $userCookie, 2 );
 
 		$incorrectCookie = function  () : bool {
-			delete_cookie( $this->NknConfig::NKNck );
+			delete_cookie( $this->getConfig()->cookieName );
 			return false;
 		};
 
@@ -377,7 +386,7 @@ class NknAuth
 
 		# --- Already exist checked, no need do it again
 		$userData = $this->user
-		->select( implode( ',', $this->loginColumns() ) )
+		->select( implode( ',', $this->columnData() ) )
 		->join( 'user_group', 'user_group.id = User.group_id' )
 		->where( [ 'user.id' => $userId ] )
 		->get(1)
@@ -385,7 +394,7 @@ class NknAuth
 
 		$userData[ 'permission' ] = json_decode( $userData[ 'permission' ] );
 
-		Services::session() ->set( $this->NknConfig::NKNss, $userData );
+		Services::session() ->set( $this->getConfig()->sessionName, $userData );
 
 		return true;
 	}
@@ -415,7 +424,7 @@ class NknAuth
 			}
 			else
 			{
-				$this->setLoggedInSuccess();
+				$this->setLoggedInSuccess( $this->getUserdata() );
 			}
 
 			return true;
@@ -458,7 +467,7 @@ class NknAuth
 		if ( true === $incorrectInfo ) return $this->incorrectInfo( true );
 
 		$userData = $this->user
-		->select( implode( ',', $this->loginColumns() ) )
+		->select( implode( ',', $this->columnData() ) )
 		->join( 'user_group', 'user_group.id = user.group_id' )
 		->where( [ 'user.username' => Services::request() ->getPostGet( 'username' ) ] )
 		->orWhere( [ 'user.email' => Services::request() ->getPostGet( 'username' ) ] )
@@ -480,10 +489,10 @@ class NknAuth
 		$userData[ 'permission' ] = json_decode( $userData[ 'permission' ] );
 
 		# --- Set success to true
-		$this->setLoggedInSuccess();
+		$this->setLoggedInSuccess( $userData );
 
 		# --- Set user session
-		Services::session() ->set( $this->NknConfig::NKNss, $userData );
+		Services::session() ->set( $this->getConfig()->sessionName, $userData );
 
 		if ( Services::request() ->getPostGet( 'remember_me' ) )
 		{
@@ -570,9 +579,9 @@ class NknAuth
 		# Lol don't know why need set cookie after using dbQuery class
 		if ( true === $updateSuccess )
 		{
-			$ttl = time() + $this->NknConfig::NKNckTtl;
-			// set_cookie( $this->NknConfig::NKNck, $cookieValue, (string) $ttl, '/' );
-			setcookie( $this->NknConfig::NKNck, $cookieValue, $ttl, '/' );
+			$ttl = time() + $this->getConfig()->cookieTTL;
+			// set_cookie( $this->getConfig()->cookieName, $cookieValue, (string) $ttl, '/' );
+			setcookie( $this->getConfig()->cookieName, $cookieValue, $ttl, '/' );
 		}
 		else
 		{
@@ -581,11 +590,11 @@ class NknAuth
 		}
 	}
 
-	private function setLoggedInSuccess() : void
+	private function setLoggedInSuccess( array $userData ) : void
 	{
 		# --- Set success to true
 		$this->response[ 'success' ] = true;
-		$this->messageSuccess[] = lang( 'NknAuth.successLogged' );
+		$this->messageSuccess[] = lang( 'NknAuth.successLoggedWithUsername', [ $userData[ 'username' ] ] );
 	}
 
 	/**
@@ -616,7 +625,7 @@ class NknAuth
 		return $this->user->update( $updateData, [ 'id' => $userId ], 1 );
 	}
 
-	private function loginColumns ( array $add = [] ) : array
+	private function columnData ( array $add = [] ) : array
 	{
 		$colum = [
 			# user
@@ -625,6 +634,8 @@ class NknAuth
 			'user.password',
 			'user.email',
 			'user.status',
+			'user.last_activity',
+			'user.last_login',
 			'user.created_at',
 			'user.updated_at',
 			# user_group
@@ -636,6 +647,22 @@ class NknAuth
 
 		return $colum;
 	}
+
+	private function trigger ( string $event, array $eventData )
+	{
+		if ( ! isset( $this->{$event} ) || empty( $this->{$event} ) ) return $eventData;
+
+		foreach ( $this->{$event} as $callback )
+		{
+			if ( ! method_exists( $this, $callback ) ) {
+				throw DataException::forInvalidMethodTriggered($callback);
+			}
+
+			$eventData = $this->{$callback}( $eventData );
+		}
+
+		return $eventData;
+  }
 
 	private function _sentMail ()
 	{

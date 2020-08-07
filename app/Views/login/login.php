@@ -97,6 +97,8 @@ $i18BtnClear = ucfirst(lang('NknAuth.LabelBtnClear'));
 							}
 						?>
 
+						<?php if ( false === $result->success ) : ?>
+
 						<div class="form-group" :class="{'has-warning': errors.has('username')}">
 							<label for="username"><?= $i18UserOrEmail ?></label>
 
@@ -189,6 +191,9 @@ EOF;
 								</a>
 							</span>
 						</div>
+
+						<?php endif; ?>
+
 					</div>
 					<?php echo form_close() ?>
 				</div>

@@ -1,5 +1,7 @@
 <?php
 
+$homeLink = anchor( base_url(), 'Click here go to home.' );
+
 return [
   'errorIncorrectInformation' => 'Incorrect information.',
 	'errorNotReadyYet' => 'The current account is in status [{0}] has not been activated yet.',
@@ -7,8 +9,10 @@ return [
 
 	'noteDenyRequestPassword' => 'You are logged in, so you are not authorized to use this function.',
 
-	'successLogged' => 'You are logged in.',
-	'successLogout' => 'You have been logged out.',
+	'successLogged' => 'You are already logged in. ' . $homeLink,
+	'successLoggedWithUsername' => 'Hello {0}, you are already logged in. ' . $homeLink,
+	'successLogoutWithUsername' => 'Bye {0} you have been logged out. ' . $homeLink,
+	'successLogout' => 'You have been logged out. ' . $homeLink,
 	'successResetPassword' => 'Your password has been successfully reset.',
 
 	'labelUsername' => 'name',

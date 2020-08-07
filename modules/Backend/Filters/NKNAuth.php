@@ -6,13 +6,14 @@ use CodeIgniter\Filters\FilterInterface;
 
 use CodeIgniter\HTTP\RequestInterface as req;
 use CodeIgniter\HTTP\ResponseInterface as res;
+use Config\Services;
 
 class NknAuth implements FilterInterface
 {
 
   public function before( req $request, $arguments = null )
   {
-    if ( ! \Config\Services::NknAuth()->hasPermission( $arguments ?: [] ) ) {
+    if ( ! Services::NknAuth()->hasPermission( $arguments ?: [] ) ) {
       throw PageNotFoundException::forPageNotFound();
     }
   }

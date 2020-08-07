@@ -21,19 +21,21 @@ class Services extends CoreServices
 	/**
 	 * @return \App\Libraries\NknAuth
 	 */
-	public static function NknAuth(bool $getShared = true)
+	public static function NknAuth ( bool $getShared = true )
 	{
 		if ( $getShared === true ) {
-			return static::getSharedInstance( 'nknAuth' );
+			return static::getSharedInstance( 'NknAuth' );
 		}
 
+		# Make a ci config passing down to construct
+		# Auth config check type hint ci config
 		return new \App\Libraries\NknAuth();
 	}
 
 	/**
 	 * @return \App\Libraries\Extension
 	 */
-	public static function Extension(bool $getShared = true)
+	public static function Extension ( bool $getShared = true )
 	{
 		if ( $getShared === true ) {
 			return static::getSharedInstance( 'extension' );
