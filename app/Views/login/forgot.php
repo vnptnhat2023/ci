@@ -26,10 +26,11 @@ $i18BtnClear = ucfirst(lang('NknAuth.LabelBtnClear'));
 
 		<script src="https://cdn.jsdelivr.net/npm/vue@2.6.11"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/vee-validate/2.2.15/vee-validate.min.js"></script>
+
 		<style>
-			[v-cloak] { display:none; }
 	 		body {
-      	/* background-image: url(https://source.unsplash.com/random); */
+				font-family: cursive, monospace, sans-serif;
+      	background-image: url(https://source.unsplash.com/random);
       	background-repeat: no-repeat;
         background-position: center center;
         background-size: cover;

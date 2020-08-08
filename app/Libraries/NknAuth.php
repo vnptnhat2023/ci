@@ -57,7 +57,7 @@ class NknAuth
 		'login_captcha' => [
 			'username',
 			'password',
-			'captcha'
+			'reCaptcha3'
 		],
 		'forget' => [
 			'username',
@@ -66,7 +66,7 @@ class NknAuth
 		'forget_captcha' => [
 			'username',
 			'email',
-			'captcha'
+			'reCaptcha3'
 			]
 	];
 
@@ -105,11 +105,10 @@ class NknAuth
 				'rules' => 'trim|required|min_length[5]|max_length[128]|valid_email'
 			],
 
-			'captcha' => [
+			'ci_captcha' => [
 				'label' => lang( 'NKnAuth.labelCaptcha' ),
-				'rules' => 'trim|required|max_length[10]|captcha_ci'
+				'rules' => 'trim|required|max_length[10]|ci_captcha'
 			]
-
 		];
 
 		if ( is_string( $needed ) ) {
@@ -454,6 +453,15 @@ class NknAuth
 	private function loginValidate ()
 	{
 		$validation = Services::Validation() ->withRequest( Services::request() );
+
+		if ( true === $this->response[ 'captcha' ] ) {
+			$ruleCaptcha = [ 'ci_captcha' => $this->rules( 'ci_captcha' ) ];
+
+			if ( false === $validation->setRules( $ruleCaptcha )->run() ) {
+				return $this->incorrectInfo( true, [ $validation->getError('ci_captcha') ] );
+			}
+		}
+
 		$incorrectInfo = false;
 
 		$ruleUsername = [ 'username' => $this->rules( 'username' ) ];

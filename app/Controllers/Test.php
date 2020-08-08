@@ -6,10 +6,28 @@ use CodeIgniter\Config\Services;
 // use CodeIgniter\Autoloader\FileLocator;
 use CodeIgniter\Events\Events;
 use CodeIgniter\I18n\Time;
+use LogicException;
+
+class customException extends \Exception
+{
+	public function errorMessage() {
+		$errorMsg = $this->getMessage().' is not a valid E-Mail address.';
+
+		return $errorMsg;
+	}
+}
+
 
 class Test extends BaseController {
 
-	protected $helpers = ['array'];
+	public function ci_captcha ()
+	{
+		helper( 'captcha' );
+
+		echo ci_captcha();
+
+		d( Services::session()->getFlashdata('ci_captcha') );
+	}
 
 	protected object $anonymousClass;
 
@@ -24,27 +42,11 @@ class Test extends BaseController {
 
 	public function test2()
 	{
-		// $model = new \App\Models\Login;
-		// dd( $model->throttle() );
+		$data = [ 'qwe', '1924.254.72.4' ];
 
-		$data = [
-			'throttle' => 2,
-			'ipAddress' => '::1'
-		];
-
-		$c = config( 'Cache', false );
-		$c->storePath .= 'NknAuth';
-
-		$cacheSer = Services::cache( $c, false );
-		dd( $cacheSer->getMetaData('--1') );
-
-		$ipAddress = Services::request()->getIPAddress();
-		$ipAddress = str_replace( [ ':', '.', ' ' ], '-', $ipAddress );
-
-		$cacheSer->save( $ipAddress, $data, MINUTE * 60 );
-
-		$getCache = $cacheSer->get( $ipAddress );
-		d( $getCache );
+		[ $throttle, $ipAddress ] = $data;
+		echo $throttle . PHP_EOL;
+		echo $ipAddress;
 	}
 
 	public function test()

@@ -9,13 +9,13 @@ class Login extends BaseController
 
 	public function __construct()
 	{
-		helper( 'form' );
+		helper( [ 'form', 'form_recaptcha' ] );
 		// dd( Services::NknAuth()->getConfig() );
 	}
 
 	public function index()
 	{
-		$message = Services::NknAuth()->login()->getMessage();
+		$message = Services::NknAuth() ->login() ->getMessage();
 		d($message);
 
 		return view( 'login/login', (array) $message );
@@ -23,14 +23,15 @@ class Login extends BaseController
 
 	public function forgot ()
 	{
-		$auth = Services::NknAuth()->login();
+		$auth = Services::NknAuth() ->login();
 
 		return view( 'login/forgot', (array) $auth->getMessage() );
 	}
 
 	public function logout ()
 	{
-		$auth = Services::NknAuth()->logout();
+		$auth = Services::NknAuth() ->logout();
+
 		return view( 'login/login', (array) $auth->getMessage() );
 	}
 }

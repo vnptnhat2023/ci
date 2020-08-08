@@ -1,14 +1,18 @@
 <?php
 
-$i18UserOrEmail = ucfirst(lang('NknAuth.labelUserOrEmail'));
-$i18Password = ucfirst(lang('NknAuth.labelPassword'));
-$i18Email = ucfirst(lang('NknAuth.labelEmail'));
-$i18Captcha = ucfirst(lang('NknAuth.labelCaptcha'));
-$i18RememberMe = ucfirst(lang('NknAuth.labelRememberMe'));
-$i18HomePage = ucfirst(lang('NknAuth.labelHomePage'));
-$i18ResetPasswordPage = ucfirst(lang('NknAuth.labelResetPasswordPage'));
-$i18BtnLoginSubmit = ucfirst(lang('NknAuth.LabelBtnLoginSubmit'));
-$i18BtnClear = ucfirst(lang('NknAuth.LabelBtnClear'));
+$i18UserOrEmail = ucwords( lang( 'NknAuth.labelUserOrEmail' ) );
+$i18placeholderUserOrEmail = lang( 'NknAuth.placeholderUserOrEmail' );
+$i18Password = ucwords( lang( 'NknAuth.labelPassword' ) );
+$i18placeholderPassword = lang( 'NknAuth.placeholderPassword' );
+$i18Email = ucwords( lang( 'NknAuth.labelEmail' ) );
+$i18placeholderEmail = lang( 'NknAuth.placeholderEmail' );
+$i18Captcha = ucwords( lang( 'NknAuth.labelCaptcha' ) );
+$i18placeholderCaptcha = lang( 'NknAuth.placeholderCaptcha' );
+$i18RememberMe = ucwords( lang( 'NknAuth.labelRememberMe' ) );
+$i18HomePage = ucwords( lang( 'NknAuth.labelHomePage' ) );
+$i18ResetPasswordPage = ucwords( lang( 'NknAuth.labelResetPasswordPage' ) );
+$i18BtnLoginSubmit = ucwords( lang( 'NknAuth.LabelBtnLoginSubmit' ) );
+$i18BtnClear = ucwords( lang( 'NknAuth.LabelBtnClear' ) );
 
 ?>
 
@@ -28,7 +32,8 @@ $i18BtnClear = ucfirst(lang('NknAuth.LabelBtnClear'));
 		<style>
 			[v-cloak] { display:none; }
 		 		body {
-        	/* background-image: url(https://source.unsplash.com/random); */
+					font-family: cursive, monospace, sans-serif;
+        	background-image: url(https://source.unsplash.com/random);
         	background-repeat: no-repeat;
 	        background-position: center center;
 	        background-size: cover;
@@ -99,7 +104,7 @@ $i18BtnClear = ucfirst(lang('NknAuth.LabelBtnClear'));
 
 						<?php if ( false === $result->success ) : ?>
 
-						<div class="form-group" :class="{'has-warning': errors.has('username')}">
+						<div class="form-group" :class="{'has-warning': errors.has( 'username' )}">
 							<label for="username"><?= $i18UserOrEmail ?></label>
 
 							<input type="text" class="form-control"
@@ -107,16 +112,16 @@ $i18BtnClear = ucfirst(lang('NknAuth.LabelBtnClear'));
 							data-vv-as="<?= $i18UserOrEmail ?>"
 							name="username"
 							id="username"
-							placeholder="<?= $i18UserOrEmail ?>"
+							placeholder="<?= $i18placeholderUserOrEmail ?>"
 							maxlength="128"
-							value="<?php echo set_value('username') ?>"
+							value="<?php echo set_value( 'username' ) ?>"
 							autocomplete="off"
 							spellcheck="false">
 
-							<span v-show="errors.has('username')" class="help-block">{{ errors.first('username') }}</span>
+							<span v-show="errors.has( 'username' )" class="help-block">{{ errors.first( 'username' ) }}</span>
 						</div>
 
-						<div class="form-group" :class="{'has-warning': errors.has('password')}">
+						<div class="form-group" :class="{'has-warning': errors.has( 'password' )}">
 							<label for="password"><?= $i18Password ?></label>
 
 							<input type="password"
@@ -126,33 +131,34 @@ $i18BtnClear = ucfirst(lang('NknAuth.LabelBtnClear'));
 							data-vv-as="<?= $i18Password ?>"
 							name="password"
 							id="password"
-							placeholder="<?= $i18Password ?>"
+							placeholder="<?= $i18placeholderPassword ?>"
 							autocomplete="off"
 							spellcheck="false"
-							value="<?php echo set_value('password') ?>">
+							value="<?php echo set_value( 'password' ) ?>">
 
-							<span v-show="errors.has('password')" class="help-block">{{ errors.first('password') }}</span>
+							<span v-show="errors.has( 'password' )" class="help-block">{{ errors.first( 'password' ) }}</span>
 						</div>
 
-						<?php
-						/*
-							if ($show_captcha)
-							{
-								$show_captcha = captcha_ci(5, 115);
-								$captcha_ci_err = form_error('ci_captcha', '<p class="text-danger small">', '</p>');
-								echo <<< EOF
+						<?php if ( true === $result->captcha ) : helper( 'captcha' ); ?>
+
 						<div class="form-group">
-							<label for="captcha"><?= $i18RememberMe?></label>
+							<label for="captcha"><?= $i18Captcha ?></label>
+
 							<div class="input-group">
-						    <span class="input-group-addon" style="margin: 0; padding: 0;">{$show_captcha}</span>
-						    <input type="text" class="form-control" id="captcha" name="ci_captcha" placeholder="<?= $i18RememberMe?>">
+								<input type="text"
+								class="form-control"
+								id="ci_captcha"
+								name="ci_captcha"
+								placeholder="<?= $i18placeholderCaptcha ?>">
+
+								<span class="input-group-addon"
+								style="margin: 0; padding: 0;">
+									<?= ci_captcha() ?>
+								</span>
 						  </div>
-						  {$captcha_ci_err}
-					  </div>
-EOF;
-							}
-							*/
-						?>
+						</div>
+
+						<?php endif ?>
 
 						<div class="form-group">
 							<div class="checkbox">
@@ -160,7 +166,7 @@ EOF;
 									<input
 									type="checkbox"
 									name="remember_me"
-									value="1" <?php echo set_checkbox('remember_me', '1'); ?>>
+									value="1" <?php echo set_checkbox( 'remember_me', '1' ); ?>>
 									<span><?= $i18RememberMe ?></span>
 								</label>
 							</div>
@@ -171,14 +177,14 @@ EOF;
 							type="submit"
 							class="btn btn-primary"
 							style="border-radius: none;"
-							:disabled="errors.has('username') || errors.has('password')"><?= $i18BtnLoginSubmit ?></button>
+							:disabled="errors.has( 'username' ) || errors.has( 'password' )"><?= $i18BtnLoginSubmit ?></button>
 
 							<button type="reset" class="btn btn-default" style="border-radius: none;" ><?= $i18BtnClear ?></button>
 						</div>
 
 						<div class="form-group">
 							<span class="pull-right">
-								<a href="<?php echo base_url('login/forgot') ?>">
+								<a href="<?php echo base_url( 'login/forgot' ) ?>">
 									<span><?= $i18ResetPasswordPage ?></span>&nbsp;
 									<span class="glyphicon glyphicon-arrow-right"></span>
 								</a>

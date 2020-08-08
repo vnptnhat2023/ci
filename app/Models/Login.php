@@ -89,7 +89,7 @@ class Login extends Model
 
   public function was_limited_one () : bool
   {
-    return $this->login_attempts > $this->login_limit_one ? true : false;
+    return $this->login_attempts >= $this->login_limit_one ? true : false;
   }
 
   public function was_limited ()
