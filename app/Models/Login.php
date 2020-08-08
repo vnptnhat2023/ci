@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use CodeIgniter\Cache\CacheInterface;
 use CodeIgniter\Config\BaseConfig;
 use CodeIgniter\Exceptions\ModelException;
 use CodeIgniter\Model;
@@ -16,14 +17,14 @@ class Login extends Model
 {
   protected $db;
 
-  private int $login_attempts;
+  private int $login_attempts = 0;
   private int $login_type = 1;
   private int $login_limit_one = 5;
   private int $login_limit = 10;
 	private int $login_timeout = 1800;
 
 	private BaseConfig $cacheConfig;
-	private string $cacheName;
+	private string $cacheName = '';
 
   protected $table = 'throttle';
 	protected $tempReturnType = 'object';
@@ -39,7 +40,7 @@ class Login extends Model
 		$cacheName = str_replace(
 			[ ':', '.', ' ' ],
 			'-',
-			Services::request()->getIPAddress()
+			Services::request() ->getIPAddress()
 		);
 
 		$this->cacheName = $cacheName;
@@ -54,33 +55,37 @@ class Login extends Model
 		$this->login_limit = $limit;
 		$this->login_timeout = $timeout;
 
-		$cacheService = Services::cache( $this->cacheConfig, false );
-
-		if ( $cacheData = $cacheService->get( $this->cacheName ) ) {
+		if ( $this->cache() ->isSupported() )
+		{
+			if ( $cacheData = $this->cache() ->get( $this->cacheName ) )
 			$this->login_attempts = $cacheData[ 'login_attempts' ];
+		}
+		else
+		{
+			$whereQuery = [
+				'ip' => Services::request() ->getIPAddress(),
+				'type' => $type
+			];
 
-			return $this;
+			$row = $this ->builder()
+			->selectCount( $this->primaryKey, 'count' )
+			->getWhere( $whereQuery )
+			->getRow();
+
+			if ( null === $row ) {
+				throw new ModelException('The number of row cannot be empty' );
+			}
+
+			$this->login_attempts = $row->count;
 		}
 
-		$whereQuery = [
-			'ip' => Services::request() ->getIPAddress(),
-			'type' => $type
-		];
+		return $this;
+	}
 
-		$row = $this
-		->builder()
-		->selectCount( $this->primaryKey, 'count' )
-		->getWhere( $whereQuery )
-		->getRow();
-
-		if ( null === $row ) {
-			throw new ModelException('The number of row cannot be empty');
-		}
-
-		$this->login_attempts = $row->count;
-
-    return $this;
-  }
+	public function getAttempts() : int
+	{
+		return $this->login_attempts;
+	}
 
   public function was_limited_one () : bool
   {
@@ -104,31 +109,34 @@ class Login extends Model
   {
 		if ( $this->was_limited() ) return $this->was_limited();
 
-		$ipAddress = Services::request() ->getIPAddress();
+		if ( $this->cache() ->isSupported() ) return $this->throttle_cache();
 
-		if ( Services::cache( $this->cacheConfig, false ) ->isSupported() ) {
-			return $this->throttle_cache( $ipAddress );
-		}
-
-		return $this->throttle_db( $ipAddress );
+		return $this->throttle_db();
   }
 
-  public function throttle_cleanup ()
+  public function throttle_cleanup () : void
   {
-		$time = strtotime( '-' . (int) $this->login_timeout . ' minutes' );
-		$from = date( 'Y-00-00 00:00:00' );
-		$to = date( 'Y-m-d H:i:s', $time );
+		if ( $this->cache() ->isSupported() )
+		{
+			$this->cache() ->delete( $this->cacheName );
+		}
+		else
+		{
+			$time = strtotime( '-' . (int) $this->login_timeout . ' minutes' );
+			$from = date( 'Y-00-00 00:00:00' );
+			$to = date( 'Y-m-d H:i:s', $time );
 
-		$this->builder()
-		->where( "created_at BETWEEN '{$from}' AND '{$to}'")
-		->where( 'ip', Services::request() ->getIPAddress() )
-		->delete( [ 'type' => $this->login_type ], 100 );
+			$this->builder()
+			->where( "created_at BETWEEN '{$from}' AND '{$to}'")
+			->where( 'ip', Services::request() ->getIPAddress() )
+			->delete( [ 'type' => $this->login_type ], 100 );
+		}
 	}
 
-	private function throttle_db ( string $ipAddress )
+	private function throttle_db () : int
 	{
 		$data = [
-			'ip' => $ipAddress,
+			'ip' => Services::request() ->getIPAddress(),
 			'type' => $this->login_type,
 			'created_at' => date( 'Y-m-d H:i:s', time() )
 		];
@@ -138,12 +146,11 @@ class Login extends Model
     return $this->login_attempts;
 	}
 
-	private function throttle_cache ( string $ipAddress ) : int
+	private function throttle_cache () : int
 	{
 		$data = [];
 
-		$oldData = Services::cache( $this->cacheConfig, false )
-		->get( $this->cacheName );
+		$oldData = $this->cache() ->get( $this->cacheName );
 
 		if ( ! empty( $oldData ) )
 		{
@@ -157,9 +164,16 @@ class Login extends Model
 
 		$this->login_attempts = $data[ 'login_attempts' ];
 
-		Services::cache( $this->cacheConfig, false )
-		->save( $this->cacheName, $data, $this->login_timeout );
+		$this->cache() ->save( $this->cacheName, $data, $this->login_timeout );
 
 		return $this->login_attempts;
+	}
+
+	/**
+	 * @return CacheInterface with custom config
+	 */
+	private function cache () : CacheInterface
+	{
+		return Services::cache( $this->cacheConfig, false );
 	}
 }

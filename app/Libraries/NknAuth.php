@@ -2,7 +2,6 @@
 
 namespace App\Libraries;
 
-// use CodeIgniter\Config\BaseConfig;
 use CodeIgniter\Database\BaseBuilder;
 use CodeIgniter\Database\Exceptions\DataException;
 use CodeIgniter\Encryption\Encryption;
@@ -20,9 +19,6 @@ class NknAuth
 {
 	private \Config\Nkn $NknConfig;
 
-	# --- Todo: write more
-	// private array $config = [];
-
 	protected array $response = [
 		# --- When logged-in but request forget password
 		'reset_incorrect' => false,
@@ -33,7 +29,7 @@ class NknAuth
 		'limit_max' => false,
 		# --- Times to show captcha, should change to: limited_level
 		// 'was_limited_one' => false,
-		'attemps' => null,
+		'attemps' => 0,
 		'banned' => false,
 		'inactive' => false
 	];
@@ -241,9 +237,56 @@ class NknAuth
 			$throttle->timeout
 		);
 
+		$this->response[ 'attemps' ] = $this->model->getAttempts();
 		$this->response[ 'captcha' ] = $this->model->was_limited_one();
 
 		return $model;
+	}
+
+	/**
+	 * @param string $type login | forget
+	 * @throws \Exception
+	 * @return array|object|void
+	 */
+	private function typeChecker ( $type = 'login' )
+	{
+		if ( ! in_array( $type, [ 'login', 'forget' ] ) ) {
+			throw new \Exception( 'Type must be in [login or forget]', 1 );
+		}
+
+		$requestType = ( $type === 'login' ) ? 'password' : 'email';
+		$isNullUsername = is_null( Services::request() ->getPostGet( 'username' ) );
+		$isNullType = is_null( Services::request() ->getPostGet( $requestType ) );
+
+		$hasRequest = ! $isNullUsername && ! $isNullType;
+
+		if ( true === $this->isLogged( true ) ) {
+
+			if ( $type === 'forget' )
+			{
+				$this->response[ 'reset_incorrect' ] = true;
+			}
+			else
+			{
+				$this->setLoggedInSuccess( $this->getUserdata() );
+			}
+
+			return true;
+		}
+
+		# --- Todo: Loss was_limited_one: show captcha here !
+		if ( $wasLimited = $this->model() ->was_limited() ) {
+			$this->response[ 'limit_max' ] = $wasLimited;
+
+			$errArg = [ $this->getConfig()->throttle->timeout ];
+			$this->messageErrors[] = lang( 'NknAuth.errorThrottleLimitedTime', $errArg );
+
+			return $this->messageErrors;
+		}
+
+		if ( false === $hasRequest ) return $this->response[ 'view' ] = true;
+
+		return ( $type === 'login' ) ? $this->loginValidate() : $this->forgetValidate();
 	}
 
 	/**
@@ -405,52 +448,6 @@ class NknAuth
 	}
 
 	/**
-	 * @param string $type login | forget
-	 * @throws \Exception
-	 * @return array|object|void
-	 */
-	private function typeChecker ( $type = 'login' )
-	{
-		if ( ! in_array( $type, [ 'login', 'forget' ] ) ) {
-			throw new \Exception( 'Type must be in [login or forget]', 1 );
-		}
-
-		$requestType = ( $type === 'login' ) ? 'password' : 'email';
-		$isNullUsername = is_null( Services::request() ->getPostGet( 'username' ) );
-		$isNullType = is_null( Services::request() ->getPostGet( $requestType ) );
-
-		$hasRequest = ! $isNullUsername && ! $isNullType;
-
-		if ( true === $this->isLogged( true ) ) {
-
-			if ( $type === 'forget' )
-			{
-				$this->response[ 'reset_incorrect' ] = true;
-			}
-			else
-			{
-				$this->setLoggedInSuccess( $this->getUserdata() );
-			}
-
-			return true;
-		}
-
-		# --- Todo: Loss was_limited_one: show captcha here !
-		if ( $wasLimited = $this->model() ->was_limited() ) {
-			$this->response[ 'limit_max' ] = $wasLimited;
-
-			$errArg = [ $this->getConfig()->throttle->timeout ];
-			$this->messageErrors[] = lang( 'NknAuth.errorThrottleLimitedTime', $errArg );
-
-			return $this->messageErrors;
-		}
-
-		if ( false === $hasRequest ) return $this->response[ 'view' ] = true;
-
-		return ( $type === 'login' ) ? $this->loginValidate() : $this->forgetValidate();
-	}
-
-	/**
 	 * Validation form login and set session & cookie
 	 * @return array|object|void
 	 */
@@ -472,11 +469,12 @@ class NknAuth
 
 		if ( true === $incorrectInfo ) return $this->incorrectInfo( true );
 
+		$userEmail = Services::request() ->getPostGet( 'username' );
 		$userData = $this->user
 		->select( implode( ',', $this->columnData() ) )
 		->join( 'user_group', 'user_group.id = user.group_id' )
-		->where( [ 'user.username' => Services::request() ->getPostGet( 'username' ) ] )
-		->orWhere( [ 'user.email' => Services::request() ->getPostGet( 'username' ) ] )
+		->where( [ 'user.username' => $userEmail ] )
+		->orWhere( [ 'user.email' => $userEmail ] )
 		->get(1)
 		->getRowArray();
 
@@ -548,9 +546,7 @@ class NknAuth
 	/** @read_more getMessage */
 	private function incorrectInfo ( bool $throttle = true, array $addMore = [] )
 	{
-		// d( $this->response[ 'attemps' ] );
 		false === $throttle ?: $this->response[ 'attemps' ] = $this->model->throttle();
-		d( $this->response[ 'attemps' ] );
 		$this->response[ 'view' ] = true;
 		$this->response[ 'login_incorrect' ] = true;
 
@@ -585,10 +581,10 @@ class NknAuth
 			$userData[ 'id' ], [ 'cookie_token' => $keyHex ]
 		);
 
-		# Lol don't know why need set cookie after using dbQuery class
-		if ( true === $updateSuccess )
+ 		if ( true === $updateSuccess )
 		{
 			$ttl = time() + $this->getConfig()->cookieTTL;
+			# Lol don't know why need set cookie after using dbQuery class
 			// set_cookie( $this->getConfig()->cookieName, $cookieValue, (string) $ttl, '/' );
 			setcookie( $this->getConfig()->cookieName, $cookieValue, $ttl, '/' );
 		}
