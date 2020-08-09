@@ -16,7 +16,7 @@ class Login extends BaseController
 	public function index()
 	{
 		$message = Services::NknAuth() ->login() ->getMessage();
-		d($message);
+		// d($message);
 
 		return view( 'login/login', (array) $message );
 	}

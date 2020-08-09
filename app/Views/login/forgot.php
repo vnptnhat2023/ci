@@ -1,16 +1,13 @@
 <?php
 
-$i18UserOrEmail = ucfirst(lang('NknAuth.labelUserOrEmail'));
-$i18Password = ucfirst(lang('NknAuth.labelPassword'));
-$i18Username = ucfirst(lang('NknAuth.labelUsername'));
-$i18Email = ucfirst(lang('NknAuth.labelEmail'));
-$i18Captcha = ucfirst(lang('NknAuth.labelCaptcha'));
-$i18RememberMe = ucfirst(lang('NknAuth.labelRememberMe'));
-$i18HomePage = ucfirst(lang('NknAuth.labelHomePage'));
-$i18ResetPasswordPage = ucfirst(lang('NknAuth.labelResetPasswordPage'));
-$i18BtnResetSubmit = ucfirst(lang('NknAuth.LabelBtnResetSubmit'));
-$i18BtnLoginSubmit = ucfirst(lang('NknAuth.LabelBtnLoginSubmit'));
-$i18BtnClear = ucfirst(lang('NknAuth.LabelBtnClear'));
+if ( ! function_exists( 'NknI18' ) )
+{
+	function NknI18 ( string $field, bool $w = true ) : string {
+		$str = lang( "NknAuth.{$field}" );
+
+		return true === $w ? ucwords( $str ) : ucfirst( $str );
+	}
+}
 
 ?>
 
@@ -20,7 +17,7 @@ $i18BtnClear = ucfirst(lang('NknAuth.LabelBtnClear'));
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title><?= $i18BtnResetSubmit ?></title>
+		<title><?= ucfirst(lang('NknAuth.LabelBtnResetSubmit')) ?></title>
 
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 
@@ -38,6 +35,12 @@ $i18BtnClear = ucfirst(lang('NknAuth.LabelBtnClear'));
         padding: 0px;
         min-height: 100vh;
       }
+			.form-box-title {
+				transform-origin: 0 0;
+				transform: rotate(90deg);
+				text-align: right;
+				position: absolute;
+			}
       .form-box {
         background: rgba(0,0,0,.8);
         background-repeat: no-repeat;
@@ -45,7 +48,7 @@ $i18BtnClear = ucfirst(lang('NknAuth.LabelBtnClear'));
 		    opacity: .9;
 		    margin-top: 80px;
 		    padding: 40px;
-		    border-radius: 10px;
+		    border-radius: 3.5px;
       }
       /*.form-box {
         top: 50%;
@@ -86,11 +89,13 @@ $i18BtnClear = ucfirst(lang('NknAuth.LabelBtnClear'));
 		<div class="container">
 			<div class="row">
 				<div class="col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3"
-				id="forget-password-page" v-cloak>
+				id="forget-password-page">
 
 					<?= form_open(  base_url( 'login/forgot' ) , '@submit="submit($event)"' ) ?>
 
 					<div class="form-box">
+
+						<h2 class="form-box-title"><?= NknI18( 'labelResetPasswordPage' ) ?></h2>
 						<?php
 							if ( isset( $success[0] ) ) {
 								echo '<div class="alert alert-warning">';
@@ -106,17 +111,17 @@ $i18BtnClear = ucfirst(lang('NknAuth.LabelBtnClear'));
 						?>
 
 						<div class="form-group" :class="{'has-warning': errors.has('username')}">
-							<label for="username"><?= $i18Username ?></label>
+							<label for="username"><?= NknI18( 'labelUsername', false ) ?></label>
 
 							<input
 							type="text"
 							class="form-control"
 							maxlength="32"
 							v-validate="'required|min:5|max:32'"
-							data-vv-as="<?= $i18Username ?>"
+							data-vv-as="<?= NknI18( 'labelUsername', false ) ?>"
 							name="username"
 							id="username"
-							placeholder="<?= $i18Username ?>"
+							placeholder="<?= NknI18( 'labelUsername', false ) ?>"
 							value="<?php echo set_value('username') ?>"
 							autocomplete="off" spellcheck="false">
 
@@ -125,16 +130,16 @@ $i18BtnClear = ucfirst(lang('NknAuth.LabelBtnClear'));
 
 						<div class="form-group" :class="{'has-warning': errors.has('email')}">
 
-							<label for="email"><?= $i18Email ?></label>
+							<label for="email"><?= NknI18( 'labelEmail', false ) ?></label>
 
 							<input type="email"
 							class="form-control"
 							maxlength="64"
 							v-validate="'required|min:5|max:64|email'"
-							data-vv-as="<?= $i18Email ?>"
+							data-vv-as="<?= NknI18( 'labelEmail', false ) ?>"
 							name="email"
 							id="email"
-							placeholder="<?= $i18Email ?>"
+							placeholder="<?= NknI18( 'labelEmail', false ) ?>"
 							value="<?php echo set_value('email') ?>"
 							autocomplete="off" spellcheck="false">
 
@@ -142,38 +147,39 @@ $i18BtnClear = ucfirst(lang('NknAuth.LabelBtnClear'));
 
 						</div>
 
-						<?php
-						/*
-							if ($show_captcha)
-							{
-								$show_captcha = captcha_ci(5, 115);
-								$captcha_ci_err = form_error('ci_captcha', '<p class="text-danger small">', '</p>');
-								echo <<< EOF
+						<?php if ( true === $result->captcha ) : helper( 'captcha' ); ?>
+
 						<div class="form-group">
-							<label for="captcha"><?= $i18Captcha ?></label>
+							<label for="captcha"><?= NknI18( 'labelCaptcha', false ) ?></label>
+
 							<div class="input-group">
-						    <span class="input-group-addon" style="margin: 0; padding: 0;">{$show_captcha}</span>
-						    <input type="text" class="form-control" id="captcha" name="ci_captcha" placeholder="<?= $i18Captcha ?>">
+								<input type="text"
+								class="form-control"
+								id="ci_captcha"
+								name="ci_captcha"
+								placeholder="<?= $i18placeholderCaptcha ?>">
+
+								<span class="input-group-addon"
+								style="margin: 0; padding: 0;">
+									<?= ci_captcha() ?>
+								</span>
 						  </div>
-						  {$captcha_ci_err}
-					  </div>
-EOF;
-							}
-*/
-						?>
+						</div>
+
+						<?php endif ?>
 
 						<div class="form-group">
 							<button
 							type="submit"
 							class="btn btn-primary"
-							:disabled="errors.has('username') || errors.has('email')"><?= $i18BtnResetSubmit ?></button>
-							<button type="reset" class="btn btn-default"><?= $i18BtnClear ?></button>
+							:disabled="errors.has('username') || errors.has('email')"><?= NknI18( 'LabelBtnResetSubmit' ) ?></button>
+							<button type="reset" class="btn btn-default"><?= NknI18( 'LabelBtnClear') ?></button>
 						</div>
 
-						<div class="form-group">
+						<div>
 							<a href="<?php echo base_url('login') ?>">
 								<span class="glyphicon glyphicon-arrow-left"></span>&nbsp;
-								<span><?= $i18BtnLoginSubmit ?></span>
+								<span><?= NknI18( 'LabelBtnLoginSubmit' ) ?></span>
 							</a>
 						</div>
 					</div>
