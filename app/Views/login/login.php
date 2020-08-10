@@ -78,13 +78,13 @@ if ( ! function_exists( 'NknI18' ) )
 		<div class="container">
 			<div class="row">
 				<div class="col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3"
-				id="login-page" v-cloak>
+				id="login-page">
 
 					<?= form_open( base_url( 'login' ) ) ?>
 
 					<div class="form-box">
 
-						<h2 class="form-box-title"><?= NknI18( 'LabelBtnLoginSubmit' ) ?></h2>
+						<h3 class="form-box-title"><?= NknI18( 'LabelBtnLoginSubmit' ) ?></h3>
 
 						<?php
 							if ( isset( $errors[ 0 ] ) ) {

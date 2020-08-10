@@ -152,7 +152,7 @@ class NknAuth
 		delete_cookie( $this->getConfig()->cookieName );
 
 		if ( Services::session() ->has( $this->getConfig()->sessionName ) ) {
-			Services::session() ->remove( $this->getConfig()->sessionName );
+			Services::session() ->destroy();
 
 			$this->messageSuccess[] = lang( 'NknAuth.successLogout' );
 		}
@@ -398,6 +398,7 @@ class NknAuth
 
 		$incorrectCookie = function  () : bool {
 			delete_cookie( $this->getConfig()->cookieName );
+
 			return false;
 		};
 
@@ -431,7 +432,14 @@ class NknAuth
 			return $incorrectCookie();
 		}
 
-		# --- Already exist checked, no need do it again
+		if ( false === $this->loggedInUpdateUserData( $userId ) ) {
+			$errLogStr = "Cookie logged-in success but: Cannot update userId: {$userId}";
+			log_message( 'error', $errLogStr );
+			$this->logout();
+
+			return false;
+		}
+
 		$userData = $this->user
 		->select( implode( ',', $this->columnData() ) )
 		->join( 'user_group', 'user_group.id = User.group_id' )
@@ -621,8 +629,6 @@ class NknAuth
 
 			throw new \Exception( lang( 'Validation.greater_than', $errArg ), 500 );
 		}
-
-		helper( 'array' );
 
 		if ( ! empty( $data ) && false === isAssoc( $data ) ) {
 			throw new \Exception( 'Data must be an associative array', 500 );

@@ -20,13 +20,12 @@ class customException extends \Exception
 
 class Test extends BaseController {
 
-	public function ci_captcha ()
+	public function ci_ss ()
 	{
-		helper( 'captcha' );
-
-		echo ci_captcha();
-
-		d( Services::session()->getFlashdata('ci_captcha') );
+		// dd( Services::session() );
+		// $ss = Services::session();
+		echo session_id() . PHP_EOL;
+		// echo date('d-m-Y H:i:s', '1596996174');
 	}
 
 	protected object $anonymousClass;
