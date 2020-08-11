@@ -20,7 +20,8 @@ use CodeIgniter\Exceptions\FrameworkException;
  *      Events::on('create', [$myInstance, 'myMethod']);
  */
 
-Events::on('pre_system', function () {
+Events::on( 'pre_system', function ()
+{
 	if (ENVIRONMENT !== 'testing')
 	{
 		if (ini_get('zlib.output_compression'))
@@ -67,14 +68,16 @@ Events::on('pre_system', function () {
 	email Called after an email sent successfully from CodeIgniter\Email\Email.
 	Receives an array of the Email class’s properties as a parameter.
 	*/
-});
+} );
+
 
 Events::on( 'extStore', function(
 	string $Name = null,
 	$params = null,
 	callable $Callable = null,
 	bool $overrideParam = true
-) {
+)
+{
 
 	# --- Cache all enabled extensions
 	if ( $storeData = model('\App\Models\Extension')->enabled() ) {
@@ -149,6 +152,15 @@ Events::on( 'extStore', function(
 	}
 } );
 
-Events::on( 'NknAuthRegenerate', function( $userData ) {
-	d( $userData );
+
+Events::on( 'NknAuthRegenerate', function( $userData )
+{
+	$whereQuery = [ 'id' => $userData[ 'id' ] ];
+	$setDataQuery = [ 'session_id' => session_id() ];
+
+	$updateStatus = Services::NknAuth()->user->update( $setDataQuery, $whereQuery, 1 );
+
+	if ( false === $updateStatus ) {
+		log_message( 'error', "The session_id of {$userData[ 'id' ]} update failed" );
+	}
 } );

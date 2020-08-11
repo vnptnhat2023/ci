@@ -68,7 +68,7 @@ class NknAuth
 
 		$this->user = db_connect() ->table( 'user' );
 
-		helper( [ 'array', 'cookie' ] );
+		helper( 'cookie' );
 
 		# Will move to auth config folder
 		$this->NknConfig = new \Config\Nkn();
@@ -281,7 +281,7 @@ class NknAuth
 
 		if ( false === $hasRequest ) return $this->response[ 'view' ] = true;
 
-		return ( $type === 'login' ) ? $this->loginValidate() : $this->forgetValidate();
+		return ( $type === 'login' ) ? $this->loginHandler() : $this->forgotHandler();
 	}
 
 	/**
@@ -444,7 +444,7 @@ class NknAuth
 	 * Validation form login and set session & cookie
 	 * @return array|object|void
 	 */
-	private function loginValidate ()
+	private function loginHandler ()
 	{
 		$validation = Services::Validation() ->withRequest( Services::request() );
 
@@ -518,7 +518,7 @@ class NknAuth
 	 * Validation form forgot password and send mail
 	 * @return array|object|void
 	 */
-	private function forgetValidate ()
+	private function forgotHandler ()
 	{
 		$group = $this->model->was_limited_one() ? 'forget_captcha' : 'forget';
 
@@ -571,7 +571,7 @@ class NknAuth
 		if ( true === $getReturn ) return $this->getMessage();
 	}
 
-	private function setCookie ( int $userId, array $data = [], string $error = null ) : void
+	private function setCookie ( int $userId, array $data = [], string $logError = null ) : void
 	{
 		if ( $userId <= 0 ) {
 			$errArg = [ 'field' => 'user_id', 'param' => $userId ];
@@ -598,7 +598,7 @@ class NknAuth
 		}
 		else
 		{
-			$logErr = $error ?: "{$userId} Logged::remember-me, but update failed";
+			$logErr = $logError ?: "{$userId} LoggedIn with remember-me, but update failed";
 			log_message( 'error', $logErr );
 		}
 	}
@@ -628,7 +628,8 @@ class NknAuth
 
 		$updateData = [
 			'last_login' => Services::request() ->getIPAddress(),
-			'last_activity' => date( 'Y-m-d H:i:s' )
+			'last_activity' => date( 'Y-m-d H:i:s' ),
+			'session_id' => session_id()
 		];
 
 		$updateData += $data;

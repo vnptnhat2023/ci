@@ -40,7 +40,7 @@ class Toolbar extends BaseConfig
 	| 0 (zero) to not have any history stored, or -1 for unlimited history.
 	|
 	*/
-	public $maxHistory = 20;
+	public $maxHistory = 10;
 
 	/*
 	|--------------------------------------------------------------------------
@@ -64,5 +64,5 @@ class Toolbar extends BaseConfig
 	| $maxQueries defines the maximum amount of queries that will be stored.
 	|
 	*/
-	public $maxQueries = 50;
+	public $maxQueries = 20;
 }
