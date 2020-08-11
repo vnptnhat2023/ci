@@ -75,6 +75,13 @@ class User extends Migration
         'default' => null
 			],
 
+			'session_id' => [
+				'type' => 'VARCHAR',
+				'constraint' => 40,
+        'null' => true,
+        'default' => null
+			],
+
       'created_at'=> [
         'type' => 'DATE',
         'null' => true,

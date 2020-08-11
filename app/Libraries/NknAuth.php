@@ -7,14 +7,6 @@ use CodeIgniter\Database\Exceptions\DataException;
 use CodeIgniter\Encryption\Encryption;
 use Config\Services;
 
-/**
- * Created: nguyenkenhat@outlook.com
- * Rewrite 30/06/2020 21:49:00
- * Date 19/03/2017 12:04:28
- * Contain plugins
- * Throttle https://github.com/joeylevy/CI_throttle/blob/master/library/Throttle
- * cookie fix at https://github.com/codeigniter4/CodeIgniter4/pull/2709
- */
 class NknAuth
 {
 	private \Config\Nkn $NknConfig;
@@ -147,6 +139,7 @@ class NknAuth
 	/** @read_more login */
 	public function logout ( bool $returnType = true ) : self
 	{
+		# --- Todo: move to config
 		static::$returnType = $returnType ? 'object' : 'array';
 
 		delete_cookie( $this->getConfig()->cookieName );
@@ -157,12 +150,15 @@ class NknAuth
 			$this->messageSuccess[] = lang( 'NknAuth.successLogout' );
 		}
 
+		$this->response['success'] = true;
+
 		return $this;
 	}
 
 	/** @read_more login */
 	public function forgetPass ( bool $returnType = true ) : self
 	{
+		# --- Todo: move to config
 		$this->typeChecker( 'forget' );
 
 		static::$returnType = true === $returnType ? 'object' : 'array';

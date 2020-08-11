@@ -2,7 +2,7 @@
 
 // use App\Database\Migrations\GeneralRelation;
 use App\Libraries\DesignPattern as StateGyPattern;
-use CodeIgniter\Config\Services;
+use \Config\Services;
 // use CodeIgniter\Autoloader\FileLocator;
 use CodeIgniter\Events\Events;
 use CodeIgniter\I18n\Time;
@@ -22,7 +22,7 @@ class Test extends BaseController {
 
 	public function ci_ss ()
 	{
-		// dd( Services::session() );
+		// $z = Services::NknAuthSession()->regenerate();
 		// $ss = Services::session();
 		echo session_id() . PHP_EOL;
 		// echo date('d-m-Y H:i:s', '1596996174');
