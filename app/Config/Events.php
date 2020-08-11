@@ -149,6 +149,6 @@ Events::on( 'extStore', function(
 	}
 } );
 
-Events::on( 'NknAuthRegenerate', function() {
-	d( session_id() );
+Events::on( 'NknAuthRegenerate', function( $userData ) {
+	d( $userData );
 } );

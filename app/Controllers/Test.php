@@ -110,6 +110,7 @@ class Test extends BaseController {
 		// ];
 
 		d( $coreFiles );
+		d( $userFiles );
 	}
 
 	public function createMediaRelation ()

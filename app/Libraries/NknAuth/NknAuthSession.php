@@ -4,11 +4,10 @@ namespace App\Libraries\NknAuth;
 
 use CodeIgniter\Events\Events;
 use CodeIgniter\Session\Session;
-use SessionHandlerInterface;
 
 class NknAuthSession extends Session
 {
-	public function __construct ( SessionHandlerInterface $driver, $config )
+	public function __construct ( \SessionHandlerInterface $driver, $config )
 	{
 		parent::__construct( $driver, $config );
 	}
@@ -18,6 +17,9 @@ class NknAuthSession extends Session
 		$_SESSION['__ci_last_regenerate'] = time();
 		session_regenerate_id( $destroy );
 
-		Events::trigger( 'Regenerate' );
+		$auth = \Config\Services::NknAuth();
+		if ( $auth->isLogged() ) {
+			Events::trigger( 'NknAuthRegenerate', $auth->getUserdata() );
+		}
 	}
 }

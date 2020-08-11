@@ -285,7 +285,7 @@ class NknAuth
 	}
 
 	/**
-	 * @param string|null $key
+	 * @param string|null $key null return array user-session
 	 * @return mixed
 	 */
 	public function getUserdata ( string $key = null )
@@ -394,48 +394,38 @@ class NknAuth
 
 		$incorrectCookie = function  () : bool {
 			delete_cookie( $this->getConfig()->cookieName );
-
 			return false;
 		};
 
-		if ( empty( $exp[ 0 ] ) || empty( $exp[ 1 ] ) ) {
-			return $incorrectCookie();
-		}
+		if ( empty( $exp[ 0 ] ) || empty( $exp[ 1 ] ) ) return $incorrectCookie();
 
 		$userId = hex2bin( $exp[ 1 ] );
-		if ( $userId === '0' || ! ctype_digit( $userId ) ) {
-			return $incorrectCookie();
-		}
+		if ( $userId === '0' || ! ctype_digit( $userId ) ) return $incorrectCookie();
 
+		# Check token
 		$user = $this->user
 		->select( 'cookie_token, status, last_login' )
 		->where( [ 'id' => $userId ] )
 		->get(1)
 		->getRowArray();
-
-		if ( null === $user ) { return $incorrectCookie(); }
+		if ( null === $user ) return $incorrectCookie();
 
 		$userToken = password_verify( $user[ 'cookie_token' ], $exp[ 0 ] );
 		$userIp = $user[ 'last_login' ] == Services::request() ->getIPAddress();
-		if ( false === $userToken || false === $userIp ) {
-			return $incorrectCookie();
-		}
 
-		# Checking user status
+		if ( false === $userToken || false === $userIp ) return $incorrectCookie();
+
+		# Check status
 		if ( in_array( $user[ 'status' ] , [ 'inactive', 'banned' ] ) ) {
 			$this->denyStatus( $user[ 'status' ], false, false );
-
 			return $incorrectCookie();
 		}
 
-		if ( false === $this->loggedInUpdateUserData( $userId ) ) {
-			$errLogStr = "Cookie logged-in success but: Cannot update userId: {$userId}";
-			log_message( 'error', $errLogStr );
-			$this->logout();
+		# --- Update cookie
+		$logErr = "Cookie success checked, but error when update data: {$userId}";
+		$this->setCookie( $userId, [], $logErr );
 
-			return false;
-		}
-
+		# --- Create new session
 		$userData = $this->user
 		->select( implode( ',', $this->columnData() ) )
 		->join( 'user_group', 'user_group.id = User.group_id' )
@@ -512,9 +502,9 @@ class NknAuth
 
 		if ( Services::request() ->getPostGet( 'remember_me' ) )
 		{
-			$this->setCookie( $userData );
+			$this->setCookie( $userData[ 'id' ] );
 		}
-		else if ( false === $this->loggedInUpdateUserData( $userData[ 'id' ] ) )
+		else if ( false === $this->loggedInUpdateData( $userData[ 'id' ] ) )
 		{
 			log_message( 'error', "{$userData[ 'id' ]} Logged-in, but update failed" );
 		}
@@ -581,28 +571,34 @@ class NknAuth
 		if ( true === $getReturn ) return $this->getMessage();
 	}
 
-	private function setCookie ( array $userData ) : void
+	private function setCookie ( int $userId, array $data = [], string $error = null ) : void
 	{
+		if ( $userId <= 0 ) {
+			$errArg = [ 'field' => 'user_id', 'param' => $userId ];
+			throw new \Exception( lang( 'Validation.greater_than', $errArg ), 1 );
+		}
+
+		if ( ! empty( $data ) && false === isAssoc( $data ) ) {
+			throw new \Exception( lang( 'NknAuth.isAssoc' ), 1 );
+		}
+
 		$randomKey = Encryption::createKey( 8 );
-		$idHex = bin2hex( $userData[ 'id' ] );
+		$idHex = bin2hex( $userId );
 		$keyHex = bin2hex( $randomKey );
 		$keyHash = password_hash( $keyHex, PASSWORD_DEFAULT );
 		$cookieValue = "{$keyHash}-{$idHex}";
 
-		$updateSuccess = $this->loggedInUpdateUserData(
-			$userData[ 'id' ], [ 'cookie_token' => $keyHex ]
-		);
+		$updateData = [ 'cookie_token' => $keyHex ];
+		$updateData += $data;
 
- 		if ( true === $updateSuccess )
+ 		if ( true === $this->loggedInUpdateData( $userId, $updateData ) )
 		{
 			$ttl = time() + $this->getConfig()->cookieTTL;
-			# Lol don't know why need set cookie after using dbQuery class
-			// set_cookie( $this->getConfig()->cookieName, $cookieValue, (string) $ttl, '/' );
 			setcookie( $this->getConfig()->cookieName, $cookieValue, $ttl, '/' );
 		}
 		else
 		{
-			$logErr = "{$userData[ 'id' ]} Logged::remember-me, but update failed";
+			$logErr = $error ?: "{$userId} Logged::remember-me, but update failed";
 			log_message( 'error', $logErr );
 		}
 	}
@@ -618,16 +614,16 @@ class NknAuth
 	 * @throws \Exception
 	 * @return boolean
 	 */
-	private function loggedInUpdateUserData ( int $userId, array $data = [] )
+	private function loggedInUpdateData ( int $userId, array $data = [] )
 	{
 		if ( $userId <= 0 ) {
 			$errArg = [ 'field' => 'user_id', 'param' => $userId ];
 
-			throw new \Exception( lang( 'Validation.greater_than', $errArg ), 500 );
+			throw new \Exception( lang( 'Validation.greater_than', $errArg ), 1 );
 		}
 
 		if ( ! empty( $data ) && false === isAssoc( $data ) ) {
-			throw new \Exception( 'Data must be an associative array', 500 );
+			throw new \Exception( lang( 'NknAuth.isAssoc' ), 1 );
 		}
 
 		$updateData = [
@@ -635,7 +631,7 @@ class NknAuth
 			'last_activity' => date( 'Y-m-d H:i:s' )
 		];
 
-		$updateData = $updateData + $data;
+		$updateData += $data;
 
 		return $this->user->update( $updateData, [ 'id' => $userId ], 1 );
 	}

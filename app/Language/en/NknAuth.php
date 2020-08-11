@@ -31,4 +31,6 @@ return [
 	'placeholderUserOrEmail' => 'username or email',
 	'placeholderPassword' => 'password',
 	'placeholderCaptcha' => 'captcha code',
+
+	'isAssoc' => 'Data must be an associative array'
 ];
