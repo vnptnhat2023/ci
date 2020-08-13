@@ -16,7 +16,7 @@ class Login extends BaseController
 	public function index()
 	{
 		$message = Services::NknAuth() ->login() ->getMessage();
-		// d($message);
+		d($message);
 
 		return view( 'login/login', (array) $message );
 	}
@@ -24,6 +24,7 @@ class Login extends BaseController
 	public function forgot ()
 	{
 		$auth = Services::NknAuth() ->login();
+		d($auth->getMessage());
 
 		return view( 'login/forgot', (array) $auth->getMessage() );
 	}
@@ -31,6 +32,7 @@ class Login extends BaseController
 	public function logout ()
 	{
 		$auth = Services::NknAuth() ->logout();
+		d($auth->getMessage());
 
 		return view( 'login/login', (array) $auth->getMessage() );
 	}

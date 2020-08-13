@@ -1,12 +1,8 @@
 <?php namespace App\Controllers;
 
-// use App\Database\Migrations\GeneralRelation;
 use App\Libraries\DesignPattern as StateGyPattern;
 use \Config\Services;
-// use CodeIgniter\Autoloader\FileLocator;
 use CodeIgniter\Events\Events;
-use CodeIgniter\I18n\Time;
-use LogicException;
 
 class customException extends \Exception
 {
@@ -39,21 +35,57 @@ class Test extends BaseController {
 		var_dump($this->anonymousClass->lorem);
 	}
 
-	public function test2()
-	{
-		$data = [ 'qwe', '1924.254.72.4' ];
+	public function formatTimelineData()
+ {
+		$data = [];
+		$benchmark = Services::timer(true);
+		$rows = $benchmark->getTimers(6);
 
-		[ $throttle, $ipAddress ] = $data;
-		echo $throttle . PHP_EOL;
-		echo $ipAddress;
+		foreach ($rows as $name => $info) {
+			if ($name == 'total_execution') {
+				continue;
+			}
+			$data[] = ['name' => ucwords(str_replace('_', ' ', $name)), 'component' => 'Timer', 'start' => $info['start'], 'duration' => $info['end'] - $info['start']];
+		}
+		d( $data );
+ }
+
+	public function test2 ( $ssId = 'rt2men4ot0uqfkpnnfoe9c235o203qo5' )
+	{
+		$config = config( '\Config\App' );
+		$pathFile = $config->sessionSavePath;
+		$pathFile .= '/' . $config->sessionCookieName . $ssId;
+
+		helper( 'filesystem' );
+
+		if ( empty( $date = get_file_info( $pathFile, 'date' ) ) ) {
+			return true;
+		}
+
+		if ( $hash = get_cookie( $config->sessionCookieName . '_test' ) ) {
+			return password_verify( $ssId, $hash );
+		}
+
+		$time = ( time() - $date[ 'date' ] );
+		$sessionExp = (int) $config->sessionExpiration;
+
+		if ( $sessionExp > 0 )
+		{
+			return $time < $sessionExp ? false : true;
+		}
+		elseif ( $sessionExp === 0 )
+		{
+			return $time < $config->sessionTimeToUpdate ? false : true;
+		}
+		else
+		{
+			return false;
+		}
 	}
 
 	public function test()
 	{
-		$a = [ 'a' => 'a2', 'b' => 'b2' ];
-		$b = [ 'a' => 'A', 'b' => 'B' ];
-		$a += $b;
-		var_dump( $a );
+		Services::session()->remove('oknkn');
 	}
 
 	public function ci_tl()

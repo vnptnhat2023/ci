@@ -21,7 +21,7 @@ class App extends BaseConfig
 	| environments.
 	|
 	*/
-	public $baseURL = 'http://localhost/ci/';
+	public $baseURL = 'http://localhost:8080/';
 
 	/*
 	|--------------------------------------------------------------------------
@@ -99,7 +99,8 @@ class App extends BaseConfig
 	| dates with the date helper, and can be retrieved through app_timezone()
 	|
 	*/
-	public $appTimezone = 'America/Chicago';
+	// public $appTimezone = 'America/Chicago';
+	public $appTimezone = 'Asia/Ho_Chi_Minh';
 
 	/*
 	|--------------------------------------------------------------------------
@@ -184,11 +185,11 @@ class App extends BaseConfig
 	// public $sessionDriver            = 'CodeIgniter\Session\Handlers\FileHandler';
 	public $sessionDriver            = '\App\Libraries\NknAuth\NknFileHandler';
 	public $sessionCookieName        = 'ci_session';
-	public $sessionExpiration        = 0; # 7200
+	public $sessionExpiration        = 3600;
 	public $sessionSavePath          = WRITEPATH . 'session';
-	public $sessionMatchIP           = false; # true
+	public $sessionMatchIP           = false;
 	public $sessionTimeToUpdate      = 300;
-	public $sessionRegenerateDestroy = true; # false
+	public $sessionRegenerateDestroy = true;
 
 	/*
 	|--------------------------------------------------------------------------

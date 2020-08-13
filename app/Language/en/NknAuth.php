@@ -3,11 +3,14 @@
 $homeLink = anchor( base_url(), 'Back to home.' );
 
 return [
+	'homeLink' => $homeLink,
+
   'errorIncorrectInformation' => 'Incorrect information.',
 	'errorNotReadyYet' => 'The current account is in status [{0}] has not been activated yet.',
 	'errorThrottleLimitedTime' => 'Please try to login again after [{0}] minutes',
 
 	'noteDenyRequestPassword' => 'You are logged in, so you are not authorized to use this function.',
+	'noteLoggedInAnotherPlatform' => 'Your account has been logged-in with another platform.',
 
 	'successLogged' => 'You are already logged in. ' . $homeLink,
 	'successLoggedWithUsername' => 'Hello {0}, you are already logged in. ' . $homeLink,

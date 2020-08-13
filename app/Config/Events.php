@@ -155,12 +155,24 @@ Events::on( 'extStore', function(
 
 Events::on( 'NknAuthRegenerate', function( $userData )
 {
+	$ssId = session_id();
 	$whereQuery = [ 'id' => $userData[ 'id' ] ];
-	$setDataQuery = [ 'session_id' => session_id() ];
+	$setDataQuery = [ 'session_id' => $ssId ];
 
 	$updateStatus = Services::NknAuth()->user->update( $setDataQuery, $whereQuery, 1 );
 
-	if ( false === $updateStatus ) {
+	if ( false === $updateStatus )
+	{
 		log_message( 'error', "The session_id of {$userData[ 'id' ]} update failed" );
+	}
+	else
+	{
+		Services::NknAuth()->setTestCookie();
+		// $config = config( '\Config\App' );
+		// $cookieValue = password_hash( $ssId, PASSWORD_DEFAULT );
+		// $ttl = $config->sessionTimeToUpdate;
+		// $cookieName = $config->sessionCookieName;
+
+		// set_cookie( $cookieName . '_test', $cookieValue, $ttl );// setcookie( $cookieName . '_test', $cookieValue, $ttl, '/' );
 	}
 } );

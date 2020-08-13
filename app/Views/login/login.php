@@ -27,7 +27,7 @@ if ( ! function_exists( 'NknI18' ) )
 		<style>
 			body {
 				font-family: cursive, monospace, sans-serif;
-				background-image: url(https://source.unsplash.com/random);
+				/* background-image: url(https://source.unsplash.com/random); */
 				background-repeat: no-repeat;
 				background-position: center center;
 				background-size: cover;
@@ -37,10 +37,11 @@ if ( ! function_exists( 'NknI18' ) )
 			}
 
 			.form-box-title {
+				position: absolute;
+				top: 65px;
 				transform-origin: 0 0;
 				transform: rotate(90deg);
 				text-align: right;
-				position: absolute;
 			}
 			.form-box {
 				background: rgba(0,0,0,.8);

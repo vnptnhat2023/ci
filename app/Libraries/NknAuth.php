@@ -143,14 +143,17 @@ class NknAuth
 		static::$returnType = $returnType ? 'object' : 'array';
 
 		delete_cookie( $this->getConfig()->cookieName );
+		$this->response[ 'success' ] = true;
 
 		if ( Services::session() ->has( $this->getConfig()->sessionName ) ) {
 			Services::session() ->destroy();
 
 			$this->messageSuccess[] = lang( 'NknAuth.successLogout' );
+
+			return $this;
 		}
 
-		$this->response['success'] = true;
+		$this->messageErrors[] = 'You have not login. ' .  lang( 'NknAuth.homeLink');
 
 		return $this;
 	}
@@ -256,15 +259,9 @@ class NknAuth
 		$hasRequest = ! $isNullUsername && ! $isNullType;
 
 		if ( true === $this->isLogged( true ) ) {
-
-			if ( $type === 'forget' )
-			{
-				$this->response[ 'reset_incorrect' ] = true;
-			}
-			else
-			{
-				$this->setLoggedInSuccess( $this->getUserdata() );
-			}
+			( $type === 'forget' )
+			? $this->response[ 'reset_incorrect' ] = true
+			: $this->setLoggedInSuccess( $this->getUserdata() );
 
 			return true;
 		}
@@ -272,16 +269,23 @@ class NknAuth
 		# --- Todo: Loss was_limited_one: show captcha here !
 		if ( $wasLimited = $this->model() ->was_limited() ) {
 			$this->response[ 'limit_max' ] = $wasLimited;
-
 			$errArg = [ $this->getConfig()->throttle->timeout ];
-			$this->messageErrors[] = lang( 'NknAuth.errorThrottleLimitedTime', $errArg );
+
+			$this->messageErrors[] = lang(
+				'NknAuth.errorThrottleLimitedTime', $errArg
+			);
 
 			return $this->messageErrors;
 		}
 
-		if ( false === $hasRequest ) return $this->response[ 'view' ] = true;
+		if ( false === $hasRequest ) {
+			// Services::session()->destroy();
+			return $this->response[ 'view' ] = true;
+		}
 
-		return ( $type === 'login' ) ? $this->loginHandler() : $this->forgotHandler();
+		return ( $type === 'login' )
+		? $this->loginHandler()
+		: $this->forgotHandler();
 	}
 
 	/**
@@ -404,7 +408,7 @@ class NknAuth
 
 		# Check token
 		$user = $this->user
-		->select( 'cookie_token, status, last_login' )
+		->select( 'cookie_token, status, last_login, session_id' )
 		->where( [ 'id' => $userId ] )
 		->get(1)
 		->getRowArray();
@@ -419,6 +423,12 @@ class NknAuth
 		if ( in_array( $user[ 'status' ] , [ 'inactive', 'banned' ] ) ) {
 			$this->denyStatus( $user[ 'status' ], false, false );
 			return $incorrectCookie();
+		}
+
+		if ( false === $this->isMultiLogin( $user[ 'session_id' ] ) ) {
+			$this->denyMultiLogin( true, [], false );
+			// return $incorrectCookie();
+			return false;
 		}
 
 		# --- Update cookie
@@ -436,6 +446,8 @@ class NknAuth
 		$userData[ 'permission' ] = json_decode( $userData[ 'permission' ] );
 
 		Services::session() ->set( $this->getConfig()->sessionName, $userData );
+
+		$this->setTestCookie();
 
 		return true;
 	}
@@ -473,7 +485,7 @@ class NknAuth
 
 		$userEmail = Services::request() ->getPostGet( 'username' );
 		$userData = $this->user
-		->select( implode( ',', $this->columnData() ) )
+		->select( implode( ',', $this->columnData( [ 'password' ] ) ) )
 		->join( 'user_group', 'user_group.id = user.group_id' )
 		->where( [ 'user.username' => $userEmail ] )
 		->orWhere( [ 'user.email' => $userEmail ] )
@@ -492,7 +504,13 @@ class NknAuth
 		if ( 'active' !== $userData[ 'status' ] )
 		return $this->denyStatus( $userData['status'] );
 
+		if ( false === $this->isMultiLogin( $userData[ 'session_id' ] ) ) {
+			return false;
+			// return $this->denyMultiLogin();
+		}
+
 		$userData[ 'permission' ] = json_decode( $userData[ 'permission' ] );
+		unset( $userData[ 'password' ] );
 
 		# --- Set true response success
 		$this->setLoggedInSuccess( $userData );
@@ -503,11 +521,16 @@ class NknAuth
 		if ( Services::request() ->getPostGet( 'remember_me' ) )
 		{
 			$this->setCookie( $userData[ 'id' ] );
+			# Todo: Watching
+			$this->setTestCookie();
 		}
 		else if ( false === $this->loggedInUpdateData( $userData[ 'id' ] ) )
 		{
 			log_message( 'error', "{$userData[ 'id' ]} Logged-in, but update failed" );
 		}
+
+		# Todo: Watching
+		$this->setTestCookie();
 
 		# --- Todo: add an event for clean throttle, update after login
 		# --- Cleanup throttle
@@ -545,6 +568,61 @@ class NknAuth
 		$this->messageSuccess[] = lang( 'NknAuth.successResetPassword' );
 	}
 
+	private function isMultiLogin( string $session_id ) : bool
+	{
+		$config = config( '\Config\App' );
+		$pathFile = $config->sessionSavePath;
+		$pathFile .= '/' . $config->sessionCookieName . $session_id;
+
+		helper( 'filesystem' );
+
+		if ( empty( $date = get_file_info( $pathFile, 'date' ) ) ) {
+			return true;
+		}
+
+		$cookieName = $config->sessionCookieName . '_test';
+
+		if ( $hash = get_cookie( $cookieName ) ) {
+			if ( password_verify( $session_id, $hash ) ) {
+				return true;
+			}
+
+			$this->messageErrors[] = "password_verify {$session_id} - {$hash}";
+			delete_cookie( $cookieName );
+
+			return false;
+		}
+
+		$time = ( time() - $date[ 'date' ] );
+		$sessionExp = (int) $config->sessionExpiration;
+
+		if ( $sessionExp > 0 ) {
+			$this->messageErrors[] = "{$time} < {$sessionExp}";
+			return $time < $sessionExp ? false : true;
+		}
+
+		if ( $sessionExp === 0 ) {
+			$this->messageErrors[] = "{$time} < $config->sessionTimeToUpdate";
+			return $time < $config->sessionTimeToUpdate ? false : true;
+		}
+
+		$this->messageErrors[] = "else";
+		return false;
+	}
+
+	/** @read_more getMessage */
+	private function denyMultiLogin ( bool $throttle = true, array $addMore = [], $getReturn = true )
+	{
+		false === $throttle ?: $this->response[ 'attemps' ] = $this->model->throttle();
+		$this->response[ 'view' ] = true;
+		$this->response[ 'login_incorrect' ] = true;
+
+		$errors[] = lang( 'NknAuth.noteLoggedInAnotherPlatform' );
+		$this->messageErrors = [ ...$errors, ...$addMore ];
+
+		if ( true === $getReturn ) return $this->getMessage();
+	}
+
 	/** @read_more getMessage */
 	private function incorrectInfo ( bool $throttle = true, array $addMore = [] )
 	{
@@ -561,7 +639,7 @@ class NknAuth
 	/**
 	 * @return object|array|void
 	 */
-	private function denyStatus (string $status, bool $throttle = true, $getReturn = true )
+	private function denyStatus ( string $status, bool $throttle = true, $getReturn = true )
 	{
 		false === $throttle ?: $this->response[ 'attemps' ] = $this->model->throttle();
 		$this->response[ 'banned' ] = $status === 'banned';
@@ -626,10 +704,11 @@ class NknAuth
 			throw new \Exception( lang( 'NknAuth.isAssoc' ), 1 );
 		}
 
+		$ssId = session_id();
 		$updateData = [
 			'last_login' => Services::request() ->getIPAddress(),
 			'last_activity' => date( 'Y-m-d H:i:s' ),
-			'session_id' => session_id()
+			'session_id' => $ssId
 		];
 
 		$updateData += $data;
@@ -637,24 +716,36 @@ class NknAuth
 		return $this->user->update( $updateData, [ 'id' => $userId ], 1 );
 	}
 
-	private function columnData ( array $add = [] ) : array
+	public function setTestCookie() : void
+	{
+		$config = config( '\Config\App' );
+		$cookieValue = password_hash( session_id(), PASSWORD_DEFAULT );
+		$ttl = $config->sessionTimeToUpdate;
+		$cookieName = $config->sessionCookieName;
+
+		// setcookie( $cookieName . '_test', $cookieValue, $ttl, '/' );
+		set_cookie( $cookieName . '_test', $cookieValue, $ttl );
+	}
+
+	private function columnData ( array $addMore = [] ) : array
 	{
 		$colum = [
 			# user
 			'user.id',
 			'user.username',
-			'user.password',
+			// 'user.password',
 			'user.email',
 			'user.status',
 			'user.last_activity',
 			'user.last_login',
 			'user.created_at',
 			'user.updated_at',
+			'user.session_id',
 			# user_group
 			'user_group.id as group_id',
 			'user_group.name as group_name',
 			'user_group.permission',
-			...$add
+			...$addMore
 		];
 
 		return $colum;
