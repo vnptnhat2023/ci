@@ -51,7 +51,7 @@ class Test extends BaseController {
 		d( $data );
  }
 
-	public function test2 ( $ssId = 'rt2men4ot0uqfkpnnfoe9c235o203qo5' )
+	public function test2 ( $ssId = '' )
 	{
 		$config = config( '\Config\App' );
 		$pathFile = $config->sessionSavePath;

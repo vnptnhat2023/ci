@@ -2,6 +2,7 @@
 
 namespace App\Libraries;
 
+use CodeIgniter\Config\BaseConfig;
 use CodeIgniter\Database\BaseBuilder;
 use CodeIgniter\Database\Exceptions\DataException;
 use CodeIgniter\Encryption\Encryption;
@@ -9,7 +10,7 @@ use Config\Services;
 
 class NknAuth
 {
-	private \Config\Nkn $NknConfig;
+	private NknAuth\Config $config;
 
 	protected array $response = [
 		# --- When logged-in but request forget password
@@ -62,7 +63,7 @@ class NknAuth
 			]
 	];
 
-	public function __construct ( /*BaseConfig $config*/ )
+	public function __construct ( BaseConfig $config = null )
 	{
 		$this->model = new \App\Models\Login();
 
@@ -70,9 +71,7 @@ class NknAuth
 
 		helper( 'cookie' );
 
-		# Will move to auth config folder
-		$this->NknConfig = new \Config\Nkn();
-		// $this->setConfig( $config )
+		$this->config = null !== $config ? $config : new NknAuth\Config();
 	}
 
 	/**
@@ -210,17 +209,17 @@ class NknAuth
 	}
 
 	/**
-	 * @var \Config\Nkn::getConfig $NknConfig
+	 * @var \Config\Nkn::getConfig $config
 	 */
 	public function getConfig () : object
 	{
-		return $this->NknConfig->getConfig();
+		return $this->config->getConfig();
 	}
 
 	# --- Todo: maybe not use it
 	private function setConfig (array $data) : object
 	{
-		return $this->NknConfig->setConfig( $data );
+		return $this->config->setConfig( $data );
 	}
 
 	/** Set throttle config and get was_limited_one */
@@ -266,7 +265,6 @@ class NknAuth
 			return true;
 		}
 
-		# --- Todo: Loss was_limited_one: show captcha here !
 		if ( $wasLimited = $this->model() ->was_limited() ) {
 			$this->response[ 'limit_max' ] = $wasLimited;
 			$errArg = [ $this->getConfig()->throttle->timeout ];
@@ -468,7 +466,6 @@ class NknAuth
 
 		$ruleUsername = [ 'username' => $this->rules( 'username' ) ];
 
-		# --- Todo: add more captcha rule
 		if ( false === $validation->setRules( $ruleUsername )->run() ) {
 			Services::Validation() ->reset();
 
@@ -554,7 +551,6 @@ class NknAuth
 
 		$this->setTestCookie();
 
-		# --- Todo: add an event for clean throttle, update after login
 		$this->model->throttle_cleanup();
 	}
 
