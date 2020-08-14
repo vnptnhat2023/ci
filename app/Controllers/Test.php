@@ -3,6 +3,7 @@
 use App\Libraries\DesignPattern as StateGyPattern;
 use \Config\Services;
 use CodeIgniter\Events\Events;
+use CodeIgniter\HTTP\UserAgent;
 
 class customException extends \Exception
 {
@@ -85,7 +86,8 @@ class Test extends BaseController {
 
 	public function test()
 	{
-		Services::session()->remove('oknkn');
+		$ua = new UserAgent();
+		d( $ua );
 	}
 
 	public function ci_tl()

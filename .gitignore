@@ -48,6 +48,8 @@ Vagrantfile
 #-------------------------
 # Temporary Files
 #-------------------------
+public/assets/*
+
 writable/cache/*
 !writable/cache/index.html
 
@@ -116,7 +118,6 @@ nb-configuration.xml
 *.sublime-workspace
 *.sublime-project
 .phpintel
-/api/
 
 # Visual Studio Code
 .vscode/

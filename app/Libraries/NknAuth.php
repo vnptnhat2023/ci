@@ -452,11 +452,7 @@ class NknAuth
 		return true;
 	}
 
-	/**
-	 * Validation form login and set session & cookie
-	 * @return array|object|void
-	 */
-	private function loginHandler ()
+	private function loginInvalid()
 	{
 		$validation = Services::Validation() ->withRequest( Services::request() );
 
@@ -464,7 +460,7 @@ class NknAuth
 			$ruleCaptcha = [ 'ci_captcha' => $this->rules( 'ci_captcha' ) ];
 
 			if ( false === $validation->setRules( $ruleCaptcha )->run() ) {
-				return $this->incorrectInfo( true, [ $validation->getError('ci_captcha') ] );
+				return $this->incorrectInfo( true, [ $validation->getError( 'ci_captcha' ) ] );
 			}
 		}
 
@@ -481,36 +477,65 @@ class NknAuth
 			$incorrectInfo = ! $validation->setRules( $ruleEmail ) ->run();
 		}
 
-		if ( true === $incorrectInfo ) return $this->incorrectInfo( true );
+		false === $incorrectInfo ?: $this->incorrectInfo( true );
 
-		$userEmail = Services::request() ->getPostGet( 'username' );
+		return $incorrectInfo;
+	}
+
+	private function loginAfterValidation() : array
+	{
+		$rawEmail = Services::request() ->getPostGet( 'username' );
+
 		$userData = $this->user
 		->select( implode( ',', $this->columnData( [ 'password' ] ) ) )
 		->join( 'user_group', 'user_group.id = user.group_id' )
-		->where( [ 'user.username' => $userEmail ] )
-		->orWhere( [ 'user.email' => $userEmail ] )
-		->get(1)
+		->where( [ 'user.username' => $rawEmail ] )
+		->orWhere( [ 'user.email' => $rawEmail ] )
+		->get( 1 )
 		->getRowArray();
 
-		if ( null === $userData ) return $this->incorrectInfo();
-
-		$verifyPassword = $this->getVerifyPass(
-			Services::request() ->getPostGet( 'password' ),
-			$userData[ 'password' ]
-		);
-
-		if ( false === $verifyPassword ) return $this->incorrectInfo();
-
-		if ( 'active' !== $userData[ 'status' ] )
-		return $this->denyStatus( $userData['status'] );
-
-		if ( false === $this->isMultiLogin( $userData[ 'session_id' ] ) ) {
-			return false;
-			// return $this->denyMultiLogin();
+		if ( null === $userData ) {
+			return [ 'error' => $this->incorrectInfo() ];
 		}
 
-		$userData[ 'permission' ] = json_decode( $userData[ 'permission' ] );
+		$rawPassword = Services::request() ->getPostGet( 'password' );
+		$verifyPassword = $this->getVerifyPass( $rawPassword, $userData[ 'password' ] );
+
+		if ( false === $verifyPassword ) {
+			return [ 'error' => $this->incorrectInfo() ];
+		}
+
+		if ( 'active' !== $userData[ 'status' ] ) {
+			return [ 'error' => $this->denyStatus( $userData['status'] ) ];
+		}
+
+		if ( false === $this->isMultiLogin( $userData[ 'session_id' ] ) ) {
+			$this->denyMultiLogin( true, [], false );
+
+			return [ 'error' => false ];
+		}
+
 		unset( $userData[ 'password' ] );
+		$userData[ 'permission' ] = json_decode( $userData[ 'permission' ] );
+
+		return $userData;
+	}
+
+	/**
+	 * Validation form login and set session & cookie
+	 * @return array|object|void
+	 */
+	private function loginHandler ()
+	{
+		if ( false !== ( $invalid = $this->loginInvalid() ) ) {
+			return $invalid;
+		}
+
+		$userData = $this->loginAfterValidation();
+
+		if ( array_key_exists( 'error', $userData ) ) {
+			return $userData[ 'error' ] ?? $userData;
+		}
 
 		# --- Set true response success
 		$this->setLoggedInSuccess( $userData );
@@ -521,19 +546,15 @@ class NknAuth
 		if ( Services::request() ->getPostGet( 'remember_me' ) )
 		{
 			$this->setCookie( $userData[ 'id' ] );
-			# Todo: Watching
-			$this->setTestCookie();
 		}
 		else if ( false === $this->loggedInUpdateData( $userData[ 'id' ] ) )
 		{
 			log_message( 'error', "{$userData[ 'id' ]} Logged-in, but update failed" );
 		}
 
-		# Todo: Watching
 		$this->setTestCookie();
 
 		# --- Todo: add an event for clean throttle, update after login
-		# --- Cleanup throttle
 		$this->model->throttle_cleanup();
 	}
 
@@ -581,15 +602,13 @@ class NknAuth
 		}
 
 		$cookieName = $config->sessionCookieName . '_test';
-
 		if ( $hash = get_cookie( $cookieName ) ) {
+
 			if ( password_verify( $session_id, $hash ) ) {
 				return true;
 			}
 
-			$this->messageErrors[] = "password_verify {$session_id} - {$hash}";
 			delete_cookie( $cookieName );
-
 			return false;
 		}
 
@@ -597,12 +616,10 @@ class NknAuth
 		$sessionExp = (int) $config->sessionExpiration;
 
 		if ( $sessionExp > 0 ) {
-			$this->messageErrors[] = "{$time} < {$sessionExp}";
 			return $time < $sessionExp ? false : true;
 		}
 
 		if ( $sessionExp === 0 ) {
-			$this->messageErrors[] = "{$time} < $config->sessionTimeToUpdate";
 			return $time < $config->sessionTimeToUpdate ? false : true;
 		}
 

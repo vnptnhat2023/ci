@@ -17,10 +17,9 @@ if ( ! function_exists( 'ci_captcha' ) )
 
 		$path = 'public/assets/captcha/';
 		$string = strtolower( random_string( 'alnum', $chars_length ) );
-
 		$data = [
 			'word' => $string,
-			'img_path' => FCPATH . $path,
+			'img_path' => ROOTPATH . $path,
 			'img_url' => base_url( $path ),
 			// 'font_path' => BASEPATH . '/fonts/texb.ttf',
 			'font_size' => 16,
