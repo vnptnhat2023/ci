@@ -29,9 +29,9 @@ class Config extends BaseConfig
 	{
 		if ( empty( self::$userConfig ) ) {
 			self::$userConfig = new class {
-				public string $sessionName = Config::NKNss;
-				public string $cookieName = Config::NKNck;
-				public int $cookieTTL = Config::NKNckTtl;
+				public string $session = Config::NKNss;
+				public string $cookie = Config::NKNck;
+				public int $ttl = Config::NKNckTtl;
 				public object $throttle;
 
 				public function __construct()
@@ -77,9 +77,9 @@ class Config extends BaseConfig
 			$this->makeUserConfig();
 		}
 
-		self::$userConfig->sessionName ??= $data[ 'session' ];
-		self::$userConfig->cookieName ??= $data[ 'cookie' ];
-		self::$userConfig->cookieTTL ??= $data[ 'cookie_ttl' ];
+		self::$userConfig->session ??= $data[ 'session' ];
+		self::$userConfig->cookie ??= $data[ 'cookie' ];
+		self::$userConfig->ttl ??= $data[ 'ttl' ];
 
 		self::$userConfig->throttle->type ??= $data[ 'throttle_type '];
 		self::$userConfig->throttle->limit ??= $data[ 'throttle_limit '];

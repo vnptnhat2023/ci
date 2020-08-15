@@ -86,8 +86,8 @@ class Test extends BaseController {
 
 	public function test()
 	{
-		$ua = new UserAgent();
-		d( $ua );
+		// echo date('m', 3000);
+		echo gmdate( "i", 3000 );
 	}
 
 	public function ci_tl()

@@ -1,5 +1,6 @@
 <?php
 
+# --- Todo: Move current file to [Auth-folder]
 namespace App\Controllers;
 
 use Config\Services;
@@ -16,17 +17,18 @@ class Login extends BaseController
 	public function index()
 	{
 		$message = Services::NknAuth() ->login() ->getMessage();
-		d($message);
+		// d( Services::NknAuth()->getConfig() );
+		d( $message );
 
 		return view( 'login/login', (array) $message );
 	}
 
 	public function forgot ()
 	{
-		$auth = Services::NknAuth() ->login();
-		d($auth->getMessage());
+		$message = Services::NknAuth() ->forgetPass() ->getMessage();
+		d( $message );
 
-		return view( 'login/forgot', (array) $auth->getMessage() );
+		return view( 'login/forgot', (array) $message );
 	}
 
 	public function logout ()

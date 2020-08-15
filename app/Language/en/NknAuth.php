@@ -6,8 +6,8 @@ return [
 	'homeLink' => $homeLink,
 
   'errorIncorrectInformation' => 'Incorrect information.',
-	'errorNotReadyYet' => 'The current account is in status [{0}] has not been activated yet.',
-	'errorThrottleLimitedTime' => 'Please try to login again after [{0}] minutes',
+	'errorNotReadyYet' => 'The current account is in status `{0}` has not been activated yet.',
+	'errorThrottleLimitedTime' => 'Please try to login again after {num} {type}',
 
 	'noteDenyRequestPassword' => 'You are logged in, so you are not authorized to use this function.',
 	'noteLoggedInAnotherPlatform' => 'Your account has been logged-in with another platform.',

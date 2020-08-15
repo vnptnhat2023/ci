@@ -27,7 +27,7 @@ if ( ! function_exists( 'NknI18' ) )
 		<style>
 	 		body {
 				font-family: cursive, monospace, sans-serif;
-      	background-image: url(https://source.unsplash.com/random);
+      	/* background-image: url(https://source.unsplash.com/random); */
       	background-repeat: no-repeat;
         background-position: center center;
         background-size: cover;
@@ -97,10 +97,11 @@ if ( ! function_exists( 'NknI18' ) )
 					<div class="form-box">
 
 						<h2 class="form-box-title"><?= NknI18( 'labelResetPasswordPage' ) ?></h2>
+
 						<?php
-							if ( isset( $success[0] ) ) {
+							if ( isset( $errors[0] ) ) {
 								echo '<div class="alert alert-warning">';
-								foreach ($success as $error) { echo "<p>{$error}</p>"; }
+								foreach ($errors as $error) { echo "<p>{$error}</p>"; }
 								echo '</div>';
 							}
 
@@ -151,14 +152,14 @@ if ( ! function_exists( 'NknI18' ) )
 						<?php if ( true === $result->captcha ) : helper( 'captcha' ); ?>
 
 						<div class="form-group">
-							<label for="captcha"><?= NknI18( 'labelCaptcha', false ) ?></label>
+							<label for="ci_captcha"><?= NknI18( 'labelCaptcha', false ) ?></label>
 
 							<div class="input-group">
 								<input type="text"
 								class="form-control"
 								id="ci_captcha"
 								name="ci_captcha"
-								placeholder="<?= $i18placeholderCaptcha ?>">
+								placeholder="<?= NknI18( 'placeholderCaptcha', false ) ?>">
 
 								<span class="input-group-addon"
 								style="margin: 0; padding: 0;">

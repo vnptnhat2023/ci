@@ -6,6 +6,12 @@ use CodeIgniter\Config\BaseConfig;
 
 class Nkn extends BaseConfig
 {
+
+}
+
+
+class deleteSoon extends BaseConfig
+{
 	# --- Default PAGE?
 	# --- Default PAGE TYPE? "extension needed multiple pages and subPage"
 	# --- Page TYPE, title, slug, id?
