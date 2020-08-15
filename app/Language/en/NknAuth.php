@@ -18,7 +18,7 @@ return [
 	'successLogout' => 'You have been logged out. ' . $homeLink,
 	'successResetPassword' => 'Your password has been successfully reset.',
 
-	'labelUsername' => 'name',
+	'labelUsername' => 'username',
 	'labelUserOrEmail' => 'account name',
 	'labelPassword' => 'account password',
 	'labelEmail' => 'email address',

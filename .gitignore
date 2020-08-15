@@ -49,6 +49,7 @@ Vagrantfile
 # Temporary Files
 #-------------------------
 public/assets/*
+modules/Design Database Relation/*
 
 writable/cache/*
 !writable/cache/index.html

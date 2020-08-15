@@ -431,7 +431,6 @@ class NknAuth
 
 		if ( false === $this->isMultiLogin( $user[ 'session_id' ] ) ) {
 			$this->denyMultiLogin( true, [], false );
-			// return $incorrectCookie();
 			return false;
 		}
 
@@ -572,7 +571,9 @@ class NknAuth
 		->withRequest( Services::request() )
 		->setRules( $this->rules( $this->rules[ $group ] ) );
 
-		if ( false === Services::Validation() ->run() ) return $this->incorrectInfo();
+		if ( false === Services::Validation() ->run() ) {
+			return $this->incorrectInfo( true, Services::Validation() ->getErrors() );
+		}
 
 		$whereQuery = [
 			'username' => Services::request() ->getPostGet( 'username' ),
@@ -585,7 +586,33 @@ class NknAuth
 		->get()
 		->getRowArray();
 
-		if ( null === $find_user ) return $this->incorrectInfo();
+		if ( null === $find_user ) {
+			return $this->incorrectInfo();
+		}
+
+		helper('text');
+		$randomPw = random_string();
+		$hashPw = Services::NknAuth()->getHashPass( $randomPw );
+
+		$updatePassword = $this->user ->update(
+			[ 'password' => $hashPw ],
+			[ 'username' => $find_user[ 'username' ] ]
+		);
+
+		$error = 'The system is busy, please come back later';
+
+		if ( ! $updatePassword ) {
+			$this->messageErrors[] = $error;
+
+			return false;
+		}
+
+		if ( ! $this->mailSender( $randomPw ) ) {
+			$this->messageErrors[] = $error;
+			log_message( 'error' , "Cannot sent email: {$find_user[ 'username' ]}" );
+
+			return false;
+		}
 
 		$this->response[ 'success' ] = true;
 		$this->messageSuccess[] = lang( 'NknAuth.successResetPassword' );
@@ -785,30 +812,31 @@ class NknAuth
 		}
 
 		return $eventData;
-  }
+	}
 
-	private function _sentMail ()
+	private function mailSender ( string $randomPw ) : bool
 	{
+		/**
+		 * @var \CodeIgniter\Email\Email
+		 */
 		$email = Services::email();
-    $config[ 'protocol' ] = 'smtp';
-    // $config[ 'mailPath' ] = '/usr/sBin/sendMail';
-    $config[ 'SMTPHost' ] = "smtp.gmail.com";
-    $config[ 'SMTPUser' ] = "user@gmail.com";
-    $config[ 'SMTPPass' ] = "password";
-    $config[ 'SMTPPort' ] = 587;
-    $config[ 'SMTPCrypto' ] = "tls";
-    $config[ 'mailType' ] = "text";
-    $config[ 'validation' ] = false;
-    $config[ 'newline' ] = "\r\n";
-    $email->initialize( $config);
-    $email->setFrom("noreply@host.com", "Test User");
-    $email->setTo( 'asdadsd@receiverEmail.org' );
-    $email->setSubject( 'This is a test' );
-    $email->setMessage( 'Testing the email class.' );
-    if ( $email->send()) {
-        return true;
-    } else {
-        return $email->printDebugger();
-    }
+
+		$email
+		->setFrom ( 'localhost@example.com', 'Administrator' )
+		->setTo ( 'cukikt0302@gmail.com' )
+		->setCC ( 'another@another-example.com' )
+		->setBCC ( 'them@their-example.com' )
+		->setSubject ( 'Email Test' )
+		->setMessage ( 'your password has been reset to: ' . $randomPw );
+
+		if ( ! $email->send() ) {
+			ENVIRONMENT ==! 'production'
+			? d( $email->printDebugger() )
+			: log_message( 'error', $email->printDebugger() );
+
+			return false;
+		}
+
+		return true;
 	}
 }
