@@ -119,6 +119,11 @@ class Test extends BaseController {
 		{
 			$path = $cleanPath($file);
 
+			$originalFiles[] = [
+				'name' => basename($file),
+				'path' => $path,
+			];
+
 			if (strpos($path, 'SYSTEMPATH') !== false)
 			{
 				$coreFiles[] = [
@@ -143,6 +148,7 @@ class Test extends BaseController {
 		// 	'userFiles' => $userFiles,
 		// ];
 
+		d( $originalFiles );
 		d( $coreFiles );
 		d( $userFiles );
 	}

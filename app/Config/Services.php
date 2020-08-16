@@ -1,6 +1,14 @@
-<?php namespace Config;
+<?php
 
-use App\Libraries\NknAuth\{ Config as AuthConfig, NknAuthSession as AuthSession };
+namespace Config;
+
+use App\Libraries\DesignPattern\Registry;
+
+use App\Libraries\NknAuth\{
+	Config as AuthConfig,
+	NknAuthSession as AuthSession
+};
+
 use CodeIgniter\Config\Services as CoreServices;
 
 class Services extends CoreServices
@@ -32,6 +40,18 @@ class Services extends CoreServices
 		}
 
 		return new \App\Libraries\Extension();
+	}
+
+	/**
+	 * @return Registry
+	 */
+	public static function Registry ( $getShared = true ) : Registry
+	{
+		if ( $getShared === true ) {
+			return static::getSharedInstance( 'registry' );
+		}
+
+		return new \App\Libraries\DesignPattern\Registry();
 	}
 
 	/**

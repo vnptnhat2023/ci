@@ -25,7 +25,7 @@ class Modules extends CoreModules
 	 | If true, then auto-discovery will happen across all namespaces loaded
 	 | by Composer, as well as the namespaces configured locally.
 	 */
-	public $discoverInComposer = true;
+	public $discoverInComposer = false;
 
 	/*
 	|--------------------------------------------------------------------------

@@ -2,94 +2,59 @@
 
 namespace App\Libraries\NknAuth;
 
-use CodeIgniter\Config\BaseConfig;
-
-class Config extends BaseConfig
+class Config
 {
-	/** NknAuth session-name */
-	public const NKNss = 'oknkn';
-
-	/** NknAuth cookie-name */
-	public const NKNck = 'konkn';
-	public const NKNckTtl = WEEK;
-
-  public const throttle = [
+	private const SESSION_NAME = 'oknkn';
+	private const COOKIE_NAME = 'konkn';
+	private const TIME_TO_LIFE = WEEK;
+  private const THROTTLE = [
   	'type' => 1,
   	'limit_one' => 5,
   	'limit' => 10,
   	'timeout' => 1800
 	];
 
-	private static object $userConfig;
+	private \stdClass $config;
 
-	/**
-	 * Make an anonymous config property class
-	 */
-	private function makeUserConfig() : void
+	public function __construct()
 	{
-		if ( empty( self::$userConfig ) )
-		{
-			self::$userConfig = new class
-			{
-				public string $session = Config::NKNss;
-				public string $cookie = Config::NKNck;
-				public int $ttl = Config::NKNckTtl;
-				public object $throttle;
-
-				public function __construct()
-				{
-					$this->throttle = new class
-					{
-						public int $type = Config::throttle[ 'type' ];
-						public int $limit = Config::throttle[ 'limit' ];
-						public int $limit_one = Config::throttle[ 'limit_one' ];
-						public int $timeout = Config::throttle[ 'timeout' ];
-					};
-				}
-
-			};
-		}
+		if ( empty( $this->config ) ) $this->makeConfig();
 	}
 
-	/**
-	 * @param bool Received default config
-	 * @return Nkn::$userConfig
-	 */
-	public function getConfig ( bool $default = false ) : object
+	private function makeConfig () : void
 	{
-		if ( empty( self::$userConfig ) ) $this->makeUserConfig();
+		$data = [
+			'session' => Config::SESSION_NAME,
+			'cookie' => Config::COOKIE_NAME,
+			'ttl' => Config::TIME_TO_LIFE,
+			'throttle' => (object) Config::THROTTLE
+		];
 
-		if ( true === $default ) {
-			$this->setConfig([
-				'session' => self::NKNss,
-				'cookie' => self::NKNck,
-				'cookie_ttl' => self::NKNckTtl,
-
-				'throttle_type' => self::throttle['type'],
-				'throttle_limit' => self::throttle['limit'],
-				'throttle_limit_one' => self::throttle['limit_one'],
-				'throttle_timeout' => self::throttle['timeout'],
-			]);
-		}
-
-		return self::$userConfig;
+		$this->config = (object) $data;
 	}
 
-	public function setConfig ( array $data ) : object
+	public function getConfig ( bool $reset = false ) : \stdClass
 	{
-		if ( empty( self::$userConfig ) ) {
-			$this->makeUserConfig();
-		}
+		if ( true === $reset ) { $this->makeConfig(); }
 
-		self::$userConfig->session ??= $data[ 'session' ];
-		self::$userConfig->cookie ??= $data[ 'cookie' ];
-		self::$userConfig->ttl ??= $data[ 'ttl' ];
+		return $this->config;
+	}
 
-		self::$userConfig->throttle->type ??= $data[ 'throttle_type '];
-		self::$userConfig->throttle->limit ??= $data[ 'throttle_limit '];
-		self::$userConfig->throttle->limit_one ??= $data[ 'throttle_limit_one '];
-		self::$userConfig->throttle->timeout ??= $data[ 'throttle_timeout '];
+	public function setConfig ( array $data ) : \stdClass
+	{
+		$cfg = $this->config;
 
-		return self::$userConfig;
+		$cfg ->session ??= $data[ 'session' ];
+		$cfg ->cookie ??= $data[ 'cookie' ];
+		$cfg ->ttl ??= $data[ 'ttl' ];
+
+		$cfg ->throttle ->type ??= $data[ 'throttle_type '];
+		$cfg ->throttle ->limit ??= $data[ 'throttle_limit '];
+		$cfg ->throttle ->limit_one ??= $data[ 'throttle_limit_one '];
+		$cfg ->throttle ->timeout ??= $data[ 'throttle_timeout '];
+
+		$this->config = $cfg;
+
+		return $this->getConfig();
 	}
 }

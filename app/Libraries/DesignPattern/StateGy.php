@@ -1,4 +1,6 @@
-<?php namespace App\Libraries\DesignPattern;
+<?php
+
+namespace App\Libraries\DesignPattern;
 
 class StateGy {
 

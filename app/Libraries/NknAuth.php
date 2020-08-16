@@ -2,7 +2,6 @@
 
 namespace App\Libraries;
 
-use CodeIgniter\Config\BaseConfig;
 use CodeIgniter\Database\BaseBuilder;
 use CodeIgniter\Database\Exceptions\DataException;
 use CodeIgniter\Encryption\Encryption;
@@ -13,7 +12,7 @@ class NknAuth
 	/**
 	 * @var NknAuth\Config
 	 */
-	private BaseConfig $config;
+	private NknAuth\Config $config;
 
 	protected array $response = [
 		# --- When logged-in but request forget password
@@ -57,7 +56,7 @@ class NknAuth
 
 	];
 
-	public function __construct ( BaseConfig $config  = null )
+	public function __construct ( NknAuth\Config $config  = null )
 	{
 		$this->model = model( '\App\Models\Login' );
 		$this->user = db_connect() ->table( 'user' );
@@ -480,8 +479,7 @@ class NknAuth
 
 	private function loginInvalid()
 	{
-		$validation = Services::Validation()
-		->withRequest( Services::request() );
+		$validation = Services::Validation() ->withRequest( Services::request() );
 
 		if ( true === $this->response[ 'captcha' ] )
 		{
@@ -502,10 +500,7 @@ class NknAuth
 			Services::Validation() ->reset();
 
 			$ruleEmail = [ 'username' => $this->rules( 'email' ) ];
-
-			$validation = Services::Validation()
-			->withRequest( Services::request() );
-
+			$validation = Services::Validation() ->withRequest( Services::request() );
 			$incorrectInfo = ! $validation->setRules( $ruleEmail ) ->run();
 		}
 
