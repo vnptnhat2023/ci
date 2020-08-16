@@ -27,8 +27,10 @@ class Config extends BaseConfig
 	 */
 	private function makeUserConfig() : void
 	{
-		if ( empty( self::$userConfig ) ) {
-			self::$userConfig = new class {
+		if ( empty( self::$userConfig ) )
+		{
+			self::$userConfig = new class
+			{
 				public string $session = Config::NKNss;
 				public string $cookie = Config::NKNck;
 				public int $ttl = Config::NKNckTtl;
@@ -36,13 +38,15 @@ class Config extends BaseConfig
 
 				public function __construct()
 				{
-					$this->throttle = new class {
+					$this->throttle = new class
+					{
 						public int $type = Config::throttle[ 'type' ];
 						public int $limit = Config::throttle[ 'limit' ];
 						public int $limit_one = Config::throttle[ 'limit_one' ];
 						public int $timeout = Config::throttle[ 'timeout' ];
 					};
 				}
+
 			};
 		}
 	}

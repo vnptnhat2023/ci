@@ -37,18 +37,23 @@ class Login extends Model
   {
 		$config = config( 'Cache', false );
 		$config->storePath .= 'NknAuth';
-		$cacheName = str_replace(
-			[ ':', '.', ' ' ],
+
+		$this->cacheConfig = $config;
+		$this->db = db_connect();
+
+		$this->cacheName = str_replace(
+			[ ':', '.', ' ', '_' ],
 			'-',
 			Services::request() ->getIPAddress()
 		);
-
-		$this->cacheName = $cacheName;
-		$this->cacheConfig = $config;
-    $this->db = db_connect();
   }
 
-  public function config ( int $type, int $limit_one, int $limit, int $timeout ) : self
+  public function config (
+		int $type,
+		int $limit_one,
+		int $limit,
+		int $timeout
+	) : self
 	{
 		$this->login_type = $type;
 		$this->login_limit_one = $limit_one;
@@ -67,7 +72,8 @@ class Login extends Model
 				'type' => $type
 			];
 
-			$row = $this ->builder()
+			$row = $this
+			->builder()
 			->selectCount( $this->primaryKey, 'count' )
 			->getWhere( $whereQuery )
 			->getRow();
@@ -89,7 +95,7 @@ class Login extends Model
 
   public function was_limited_one () : bool
   {
-    return $this->login_attempts >= (--$this->login_limit_one) ? true : false;
+		return $this->login_attempts >= --$this->login_limit_one;
   }
 
   public function was_limited ()
@@ -107,9 +113,11 @@ class Login extends Model
    */
   public function throttle () : int
   {
-		if ( $this->was_limited() ) return $this->was_limited();
+		if ( $this->was_limited() )
+		return $this->was_limited();
 
-		if ( $this->cache() ->isSupported() ) return $this->throttle_cache();
+		if ( $this->cache() ->isSupported() )
+		return $this->throttle_cache();
 
 		return $this->throttle_db();
   }
@@ -126,7 +134,8 @@ class Login extends Model
 			$from = date( 'Y-00-00 00:00:00' );
 			$to = date( 'Y-m-d H:i:s', $time );
 
-			$this->builder()
+			$this
+			->builder()
 			->where( "created_at BETWEEN '{$from}' AND '{$to}'")
 			->where( 'ip', Services::request() ->getIPAddress() )
 			->delete( [ 'type' => $this->login_type ], 100 );
@@ -149,7 +158,6 @@ class Login extends Model
 	private function throttle_cache () : int
 	{
 		$data = [];
-
 		$oldData = $this->cache() ->get( $this->cacheName );
 
 		if ( ! empty( $oldData ) )
@@ -163,14 +171,14 @@ class Login extends Model
 		}
 
 		$this->login_attempts = $data[ 'login_attempts' ];
-
 		$this->cache() ->save( $this->cacheName, $data, $this->login_timeout );
 
 		return $this->login_attempts;
 	}
 
 	/**
-	 * @return CacheInterface with custom config
+	 * Instance with custom config
+	 * @return CacheInterface
 	 */
 	private function cache () : CacheInterface
 	{
