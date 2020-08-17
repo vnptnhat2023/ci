@@ -78,7 +78,7 @@ Events::on( 'extStore', function(
 	bool $overrideParam = true
 )
 {
-
+	// $start = microtime( true );
 	# --- Cache all enabled extensions
 	if ( $storeData = model('\App\Models\Extension')->enabled() ) {
 		$store = $storeData['full'];
@@ -116,6 +116,15 @@ Events::on( 'extStore', function(
 				{
 					$extCreated[ $fileName ][ $methodName ] = null;
 					$extLoaded[ $fileName ] = null;
+
+					// if (CI_DEBUG)
+					// {
+					// 	static::$performanceLog[] = [
+					// 		'start' => $start,
+					// 		'end'   => microtime(true),
+					// 		'event' => 'extstore___' . strtolower( $fileName ),
+					// 	];
+					// }
 				}
 				# Saved not found
 				else
@@ -137,11 +146,16 @@ Events::on( 'extStore', function(
 				if ( ! empty( $params ) ) {
 					$service = service('extension');
 
-					foreach ( $extCreated as $extClassName => $methods ) {
+					foreach ( $extCreated as $extClassName => $methods )
+					{
 						if ( true === $overrideParam )
+						{
 							$service->$extClassName->setParameter( $params );
+						}
 						else
+						{
 							$service->$extClassName( $params );
+						}
 					}
 				}
 

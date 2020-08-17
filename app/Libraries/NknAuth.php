@@ -201,17 +201,11 @@ class NknAuth
 	}
 
 	/**
-	 * @var \Config\Nkn::getConfig $config
+	 * @var NknAuth\Config
 	 */
-	public function getConfig () : object
+	public function getConfig () : NknAuth\Config
 	{
-		return $this->config->getConfig();
-	}
-
-	# --- Todo: maybe not use it
-	private function setConfig (array $data) : object
-	{
-		return $this->config->setConfig( $data );
+		return $this->config;
 	}
 
 	/** Set throttle config and get was_limited_one */

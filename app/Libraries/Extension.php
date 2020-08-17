@@ -31,7 +31,8 @@ final class Extension {
   {
     if ( ! empty( $classes ) ) {
 
-      foreach ( $classes as $key => $value ) {
+			foreach ( $classes as $key => $value )
+			{
         $key = strCamelCase( $key );
 
         if ( ! array_key_exists( $key, self::$loaded ) )
@@ -40,12 +41,14 @@ final class Extension {
         }
         else
         {
-          foreach ( $value as $sKey => $itNull ) {
+					foreach ( $value as $sKey => $itNull )
+					{
             if ( ! array_key_exists( $sKey, self::$loaded[ $key ] ) ) {
               self::$loaded[ $key ][ $sKey ] = $itNull;
             }
           }
-        }
+				}
+
       }
     }
   }

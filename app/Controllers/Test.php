@@ -86,8 +86,9 @@ class Test extends BaseController {
 
 	public function test()
 	{
-		// echo date('m', 3000);
-		echo gmdate( "i", 3000 );
+		$cf = new \App\Libraries\NknAuth\Config;
+
+		var_dump($cf);
 	}
 
 	public function ci_tl()

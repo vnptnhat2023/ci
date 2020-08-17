@@ -1,15 +1,18 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace Config;
 
 use App\Libraries\DesignPattern\Registry;
-
+use App\Libraries\Extension;
 use App\Libraries\NknAuth\{
 	Config as AuthConfig,
 	NknAuthSession as AuthSession
 };
 
 use CodeIgniter\Config\Services as CoreServices;
+use CodeIgniter\Session\Session;
 
 class Services extends CoreServices
 {
@@ -30,10 +33,7 @@ class Services extends CoreServices
 		return new \App\Libraries\NknAuth( $config );
 	}
 
-	/**
-	 * @return \App\Libraries\Extension
-	 */
-	public static function Extension ( bool $getShared = true )
+	public static function Extension ( bool $getShared = true ) : Extension
 	{
 		if ( $getShared === true ) {
 			return static::getSharedInstance( 'extension' );
@@ -42,9 +42,6 @@ class Services extends CoreServices
 		return new \App\Libraries\Extension();
 	}
 
-	/**
-	 * @return Registry
-	 */
 	public static function Registry ( $getShared = true ) : Registry
 	{
 		if ( $getShared === true ) {
@@ -54,10 +51,7 @@ class Services extends CoreServices
 		return new \App\Libraries\DesignPattern\Registry();
 	}
 
-	/**
-	 * @return \CodeIgniter\Session\Session
-	 */
-	public static function session( App $config = null, bool $getShared = true )
+	public static function session( App $config = null, bool $getShared = true ) : Session
 	{
 		if ( $getShared ) return static::getSharedInstance( 'session', $config );
 
