@@ -13,8 +13,7 @@ class GeneralRelation extends Migration
 		$fields = [
 
       'id' => [
-        'type' => 'INT',
-        'constraint' => 11,
+        'type' => 'BIGINT',
         'unsigned' => true,
         'auto_increment' => true
 			],
@@ -28,8 +27,7 @@ class GeneralRelation extends Migration
 			],
 
 			'name_id' => [
-				'type' => 'INT',
-				'constraint' => 11,
+				'type' => 'BIGINT',
 				'unsigned' => true,
 				'null' => false,
 				'default' => 0,
@@ -37,8 +35,7 @@ class GeneralRelation extends Migration
 			],
 
       'ggid' => [
-        'type' => 'INT',
-        'constraint' => 11,
+        'type' => 'BIGINT',
 				'unsigned' => true,
 				'null' => false,
         'default' => 0,
@@ -46,8 +43,7 @@ class GeneralRelation extends Migration
 			],
 
       'giid' => [# item_id
-        'type' => 'INT',
-        'constraint' => 11,
+        'type' => 'BIGINT',
 				'unsigned' => true,
 				'null' => false,
         'default' => 0,

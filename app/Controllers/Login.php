@@ -15,6 +15,7 @@ class Login extends BaseController
 
 	public function index()
 	{
+		d( $this->auth->config );
 		return view( 'login/login', $this->auth->login() );
 	}
 

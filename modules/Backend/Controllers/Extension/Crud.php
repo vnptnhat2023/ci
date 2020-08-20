@@ -52,6 +52,8 @@ class Crud extends ResourceController
 
 		$data = $this->indexTrait( true, [], 'whereIn', [], false );
 
+		// echo $this->model->getLastQuery();
+
 		return $data;
 		// echo '<pre>', json_encode( $data, JSON_PRETTY_PRINT );
   }

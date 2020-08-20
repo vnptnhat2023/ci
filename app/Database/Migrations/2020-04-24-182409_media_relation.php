@@ -12,47 +12,41 @@ class MediaRelation extends Migration
 		$fields = [
 
       'id' => [
-        'type' => 'INT',
-        'constraint' => 11,
+        'type' => 'BIGINT',
         'unsigned' => true,
         'auto_increment' => true
 			],
 
       'category_id' => [
-        'type' => 'INT',
-				'constraint' => 11,
+        'type' => 'BIGINT',
 				'unsigned' => true,
 				'null' => false,
         'default' => 0
 			],
 
       'page_id' => [
-        'type' => 'INT',
-				'constraint' => 11,
+        'type' => 'BIGINT',
 				'unsigned' => true,
 				'null' => false,
         'default' => 0
 			],
 
       'post_id' => [
-        'type' => 'INT',
-				'constraint' => 11,
+        'type' => 'BIGINT',
 				'unsigned' => true,
 				'null' => false,
         'default' => 0
 			],
 
       'media_id' => [
-        'type' => 'INT',
-				'constraint' => 11,
+        'type' => 'BIGINT',
 				'unsigned' => true,
 				'null' => false,
 				'default' => 0
 			],
 
 			'user_id' => [
-        'type' => 'INT',
-				'constraint' => 11,
+        'type' => 'BIGINT',
 				'unsigned' => true,
 				'null' => false,
 				'default' => 0

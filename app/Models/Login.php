@@ -93,12 +93,12 @@ class Login extends Model
 		return $this->login_attempts;
 	}
 
-  public function was_limited_one () : bool
+  public function showCaptcha () : bool
   {
 		return $this->login_attempts >= --$this->login_limit_one;
   }
 
-  public function was_limited ()
+  public function limited ()
   {
 		if ( $this->login_attempts >= $this->login_limit )
 		return $this->login_timeout;
@@ -113,8 +113,8 @@ class Login extends Model
    */
   public function throttle () : int
   {
-		if ( $this->was_limited() )
-		return $this->was_limited();
+		if ( $this->limited() )
+		return $this->limited();
 
 		if ( $this->cache() ->isSupported() )
 		return $this->throttle_cache();

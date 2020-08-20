@@ -12,8 +12,7 @@ class Page extends Migration
 
 		$fields = [
       'id' => [
-        'type' => 'INT',
-        'constraint' => 11,
+        'type' => 'BIGINT',
         'unsigned' => true,
         'auto_increment' => true
 			],
@@ -58,7 +57,7 @@ class Page extends Migration
 			],
 
       'parent_id' => [
-        'type' => 'INT',
+        'type' => 'BIGINT',
 				'unsigned' => true,
 				'null' => false,
         'default' => 0

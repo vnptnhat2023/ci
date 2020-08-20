@@ -12,7 +12,7 @@ class NknAuth
 	/**
 	 * @var NknAuth\Config
 	 */
-	private NknAuth\Config $config;
+	public NknAuth\Config $config;
 
 	protected array $response = [
 		# --- When logged-in but request forget password
@@ -69,7 +69,7 @@ class NknAuth
 	/**
 	 * @param string|array $needed
 	 */
-	public function rules( $needed )
+	public function rules ( $needed )
 	{
 		$generalRules = [
 
@@ -137,9 +137,9 @@ class NknAuth
 		static::$returnType = $returnType ? 'object' : 'array';
 		$this->response[ 'success' ] = true;
 
-		delete_cookie( $this->getConfig()->cookie );
+		delete_cookie( $this->config->cookie );
 
-		if ( Services::session() ->has( $this->getConfig()->session ) )
+		if ( Services::session() ->has( $this->config->session ) )
 		{
 			Services::session() ->destroy();
 			$this->messageSuccess[] = lang( 'NknAuth.successLogout' );
@@ -200,28 +200,20 @@ class NknAuth
 		return $perm === 'all';
 	}
 
-	/**
-	 * @var NknAuth\Config
-	 */
-	public function getConfig () : NknAuth\Config
+	/** Set throttle config and get showCaptcha */
+	private function throttleModel () : \App\Models\Login
 	{
-		return $this->config;
-	}
-
-	/** Set throttle config and get was_limited_one */
-	private function model () : \App\Models\Login
-	{
-		$model = $this->model;
-		$cfg = $this->getConfig()->throttle;
-
-		$model->config(
-			$cfg->type, $cfg->limit_one, $cfg->limit, $cfg->timeout
+		$this->model->config(
+			$this->config->throttle->type,
+			$this->config->throttle->limit_one,
+			$this->config->throttle->limit,
+			$this->config->throttle->timeout
 		);
 
-		$this->response[ 'attemps' ] = $model->getAttempts();
-		$this->response[ 'captcha' ] = $model->was_limited_one();
+		$this->response[ 'attemps' ] = $this->model->getAttempts();
+		$this->response[ 'captcha' ] = $this->model->showCaptcha();
 
-		return $model;
+		return $this->model;
 	}
 
 	/**
@@ -253,10 +245,10 @@ class NknAuth
 			return true;
 		}
 
-		if ( $wasLimited = $this->model() ->was_limited() )
+		if ( $wasLimited = $this->throttleModel() ->limited() )
 		{
 			$this->response[ 'limit_max' ] = $wasLimited;
-			$timeout = $this->getConfig()->throttle->timeout;
+			$timeout = $this->config->throttle->timeout;
 			$errArg = [
 				'num' => gmdate( 'i', $timeout ),
 				'type' => 'minutes'
@@ -288,7 +280,7 @@ class NknAuth
 	{
 		if ( false === $this->isLogged() ) return false;
 
-		$ssName = $this->getConfig()->session;
+		$ssName = $this->config->session;
 
 		if ( empty( $key ) )
 		return Services::session() ->get( $ssName );
@@ -387,7 +379,7 @@ class NknAuth
 	 */
 	public function isLogged ( bool $withCookie = false ) : bool
 	{
-		$ssName = $this->getConfig()->session;
+		$ssName = $this->config->session;
 		if ( true === Services::session() ->has( $ssName ) )
 		return true;
 
@@ -398,14 +390,14 @@ class NknAuth
 
 	public function cookieHandler () : bool
 	{
-		$userCookie = get_cookie( $this->getConfig()->cookie );
+		$userCookie = get_cookie( $this->config->cookie );
 		if ( empty( $userCookie ) || ! is_string( $userCookie ) )
 		return false;
 
 		$exp = explode( '-', $userCookie, 2 );
 		$incorrectCookie = function  () : bool
 		{
-			delete_cookie( $this->getConfig()->cookie );
+			delete_cookie( $this->config->cookie );
 			return false;
 		};
 
@@ -463,7 +455,7 @@ class NknAuth
 		$userData[ 'permission' ] = json_decode( $userData[ 'permission' ] );
 
 		Services::session() ->set(
-			$this->getConfig()->session, $userData
+			$this->config->session, $userData
 		);
 
 		$this->setTestCookie();
@@ -471,7 +463,7 @@ class NknAuth
 		return true;
 	}
 
-	private function loginInvalid()
+	private function loginInvalid ()
 	{
 		$validation = Services::Validation() ->withRequest( Services::request() );
 
@@ -503,7 +495,7 @@ class NknAuth
 		return $incorrectInfo;
 	}
 
-	private function loginAfterValidation() : array
+	private function loginAfterValidation () : array
 	{
 		$rawEmail = Services::request() ->getPostGet( 'username' );
 
@@ -558,7 +550,7 @@ class NknAuth
 		# --- Set true response success
 		$this->setLoggedInSuccess( $userData );
 		# --- Set user session
-		Services::session() ->set( $this->getConfig()->session, $userData );
+		Services::session() ->set( $this->config->session, $userData );
 
 		$userId = $userData[ 'id' ];
 		if ( Services::request() ->getPostGet( 'remember_me' ) )
@@ -580,7 +572,7 @@ class NknAuth
 	 */
 	private function forgotHandler ()
 	{
-		$group = $this->model->was_limited_one()
+		$group = $this->model->showCaptcha()
 		? 'forget_captcha'
 		: 'forget';
 
@@ -640,7 +632,7 @@ class NknAuth
 		$this->messageSuccess[] = lang( 'NknAuth.successResetPassword' );
 	}
 
-	private function isMultiLogin( string $session_id ) : bool
+	private function isMultiLogin ( string $session_id ) : bool
 	{
 		$config = config( '\Config\App' );
 		$pathFile = $config->sessionSavePath;
@@ -752,8 +744,8 @@ class NknAuth
 
  		if ( true === $this->loggedInUpdateData( $userId, $updateData ) )
 		{
-			$ttl = time() + $this->getConfig()->ttl;
-			setcookie( $this->getConfig()->cookie, $cookieValue, $ttl, '/' );
+			$ttl = time() + $this->config->ttl;
+			setcookie( $this->config->cookie, $cookieValue, $ttl, '/' );
 		}
 		else
 		{
@@ -762,7 +754,7 @@ class NknAuth
 		}
 	}
 
-	private function setLoggedInSuccess( array $userData ) : void
+	private function setLoggedInSuccess ( array $userData ) : void
 	{
 		# --- Set success to true
 		$this->response[ 'success' ] = true;
@@ -797,13 +789,13 @@ class NknAuth
 		return $this->user->update( $updateData, [ 'id' => $userId ], 1 );
 	}
 
-	public function setTestCookie() : void
+	public function setTestCookie () : void
 	{
 		$config = config( '\Config\App' );
 		$cookieValue = password_hash( session_id(), PASSWORD_DEFAULT );
 		$ttl = $config->sessionTimeToUpdate;
 		// $cookieName = $config->sessionCookieName;
-		$cookieName = $this->getConfig()->cookie;
+		$cookieName = $this->config->cookie;
 
 		// setcookie( $cookieName . '_test', $cookieValue, $ttl, '/' );
 		set_cookie( $cookieName . '_test', $cookieValue, $ttl );

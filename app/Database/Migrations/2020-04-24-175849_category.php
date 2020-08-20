@@ -13,8 +13,7 @@ class Category extends Migration
 		$fields = [
 
       'id' => [
-        'type' => 'INT',
-        'constraint' => 11,
+        'type' => 'BIGINT',
         'unsigned' => true,
         'auto_increment' => true
 			],
@@ -26,8 +25,7 @@ class Category extends Migration
 			],
 
 			'name_id' => [
-				'type' => 'INT',
-				'constraint' => 11,
+				'type' => 'BIGINT',
 				'unsigned' => true,
 				'null' => false,
         'default' => 0
@@ -62,8 +60,7 @@ class Category extends Migration
 			],
 
       'parent_id' => [
-				'type' => 'INT',
-				'constraint' => 11,
+				'type' => 'BIGINT',
 				'unsigned' => true,
 				'null' => false,
         'default' => 0
@@ -76,8 +73,7 @@ class Category extends Migration
 			],
 
       'sort' => [
-				'type' => 'INT',
-				'constraint' => 11,
+				'type' => 'BIGINT',
 				'unsigned' => true,
 				'null' => false,
         'default' => 0

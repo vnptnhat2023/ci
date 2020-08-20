@@ -13,15 +13,13 @@ class UserDetail extends Migration
 		$fields = [
 
 			'id' => [
-				'type' => 'INT',
-				'constraint' => 11,
+				'type' => 'BIGINT',
 				'unsigned' => true,
 				'auto_increment' => true
 			],
 
 			'user_id' => [
-				'type' => 'INT',
-				'constraint' => 11,
+				'type' => 'BIGINT',
 				'unsigned' => true,
 				'null' => false,
 				'default' => 0

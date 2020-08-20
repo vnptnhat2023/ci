@@ -13,8 +13,7 @@ class GeneralItem extends Migration
 		$fields = [
 
       'id' => [
-        'type' => 'INT',
-        'constraint' => 11,
+        'type' => 'BIGINT',
         'unsigned' => true,
         'auto_increment' => true
 			],

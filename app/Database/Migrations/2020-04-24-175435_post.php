@@ -13,8 +13,7 @@ class Post extends Migration
 		$fields = [
 
 			'id' => [
-				'type' => 'INT',
-				'constraint' => 11,
+				'type' => 'BIGINT',
 				'unsigned' => true,
 				'auto_increment' => true
 			],
@@ -54,24 +53,21 @@ class Post extends Migration
 			],
 
 			'name_id' => [
-				'type' => 'INT',
-				'constraint' => 11,
+				'type' => 'BIGINT',
 				'unsigned' => true,
 				'null' => false,
 				'default' => 0
 			],
 
 			'user_id' => [
-				'type' => 'INT',
-				'constraint' => 11,
+				'type' => 'BIGINT',
 				'unsigned' => true,
 				'null' => false,
 				'default' => 0
 			],
 
 			'media_relation_id' => [
-				'type' => 'INT',
-				'constraint' => 11,
+				'type' => 'BIGINT',
 				'unsigned' => true,
 				'null' => false,
 				'default' => 0
