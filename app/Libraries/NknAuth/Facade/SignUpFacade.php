@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 
 namespace App\Libraries\NknAuth\Facade;
 
-use App\Libraries\NknAuth\Validation\CiValidationAdapter;
+use App\Libraries\NknAuth\Validation\CodeIgniterValidationAdapter as CiValidateAdapter;
 
 /**
  * Facade pattern class
@@ -50,9 +50,9 @@ class SignUpFacade
 
 }
 # --- New instanced ValidationInterface, with any other constructor
-$CiValidation = new CiValidationAdapter( service( 'validation' ), service( 'request' ) );
+$CiValidate = new CiValidateAdapter( service( 'validation' ), service( 'request' ) );
 // Create instance of classes
-$validate = new Validate( $CiValidation );
+$validate = new Validate( $CiValidate );
 
 
 $user = new User();
