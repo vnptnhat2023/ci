@@ -4,11 +4,34 @@ declare( strict_types = 1 );
 
 namespace App\Libraries\NknAuth\Facade;
 
+use App\Libraries\NknAuth\Adapter\ValidationInterface;
+
+/**
+ * Validation adapter class
+ *
+ * ---
+ *
+ * ```
+ * new CodeigniterValidation( config( 'validation' ), config( 'request' ) )
+ * ```
+ */
 class Validate implements ValidateInterface
 {
-	public function isValid ( array $data ) : bool
+	protected ValidationInterface $validationAdapter;
+
+	public function __construct ( ValidationInterface $validationAdapter )
 	{
-		return true;
+		$this->validationAdapter = $validationAdapter;
+	}
+
+	public function isValid ( array $data, array $rules ) : bool
+	{
+		return $this->validationAdapter->isValid( $data, $rules );
+	}
+
+	public function getErrors ( string $field = null ) : array
+	{
+		return $this->validationAdapter->getErrors( $field );
 	}
 }
 

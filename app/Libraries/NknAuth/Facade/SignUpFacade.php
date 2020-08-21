@@ -4,6 +4,8 @@ declare( strict_types = 1 );
 
 namespace App\Libraries\NknAuth\Facade;
 
+use App\Libraries\NknAuth\Validation\CiValidationAdapter;
+
 /**
  * Facade pattern class
  * @author <altayalp@gmail.com>
@@ -12,10 +14,10 @@ namespace App\Libraries\NknAuth\Facade;
 class SignUpFacade
 {
 
-	private $validate;
-	private $user;
-	private $auth;
-	private $mail;
+	private ValidateInterface $validate;
+	private UserInterface $user;
+	private AuthInterface $auth;
+	private MailInterface $mail;
 
 	public function __construct(
 		ValidateInterface $validate,
@@ -38,18 +40,21 @@ class SignUpFacade
 			'mail' => $userMail
 		];
 
-		if ( $this->validate->isValid( $data ) )
+		if ( $this->validate->isValid( $data, [] ) )
 		{
-			$this->user->create( $data );
-			$this->auth->login( $userName, $userPass );
+			$this->user ->create( $data );
+			$this->auth ->login( $userName, $userPass );
 			$this->mail ->to( $userMail ) ->subject( 'Welcome' ) ->send();
 		}
 	}
 
 }
-
+# --- New instanced ValidationInterface, with any other constructor
+$CiValidation = new CiValidationAdapter( service( 'validation' ), service( 'request' ) );
 // Create instance of classes
-$validate = new Validate();
+$validate = new Validate( $CiValidation );
+
+
 $user = new User();
 $auth = new Auth();
 $mail = new Mail();
