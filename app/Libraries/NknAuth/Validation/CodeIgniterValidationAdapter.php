@@ -2,7 +2,7 @@
 declare( strict_types = 1 );
 namespace App\Libraries\NknAuth\Validation;
 
-use App\Libraries\NknAuth\Adapter\ValidationInterface;
+use App\Libraries\NknAuth\Validation\ValidationInterface;
 use CodeIgniter\HTTP\request;
 use CodeIgniter\Validation\ValidationInterface as validate;
 

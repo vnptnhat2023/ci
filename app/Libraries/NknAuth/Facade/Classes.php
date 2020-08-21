@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 
 namespace App\Libraries\NknAuth\Facade;
 
-use App\Libraries\NknAuth\Adapter\ValidationInterface;
+use App\Libraries\NknAuth\Validation\ValidationInterface;
 
 /**
  * Validation adapter class

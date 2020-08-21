@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Libraries\NknAuth\Adapter;
+namespace App\Libraries\NknAuth\Validation;
 
 interface ValidationInterface
 {
