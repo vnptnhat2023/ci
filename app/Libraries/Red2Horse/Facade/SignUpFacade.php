@@ -2,9 +2,9 @@
 
 declare( strict_types = 1 );
 
-namespace App\Libraries\NknAuth\Facade;
+namespace App\Libraries\Red2Horse\Facade;
 
-use App\Libraries\NknAuth\Validation\CodeIgniterValidationAdapter as CiValidateAdapter;
+use App\Libraries\Red2Horse\Validation\CodeIgniterValidationAdapter as CiValidateAdapter;
 
 /**
  * Facade pattern class

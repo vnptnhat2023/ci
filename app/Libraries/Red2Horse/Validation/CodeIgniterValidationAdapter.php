@@ -1,8 +1,8 @@
 <?php
 declare( strict_types = 1 );
-namespace App\Libraries\NknAuth\Validation;
+namespace App\Libraries\Red2Horse\Validation;
 
-use App\Libraries\NknAuth\Validation\ValidationInterface;
+use App\Libraries\Red2Horse\Validation\ValidationInterface;
 use CodeIgniter\HTTP\request;
 use CodeIgniter\Validation\ValidationInterface as validate;
 

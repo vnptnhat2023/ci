@@ -1,7 +1,11 @@
 <?php
 
-namespace App\Libraries\NknAuth\Validation;
+namespace App\Libraries\Red2Horse\Validation;
 
+/**
+ * @package SimpleCiAuth
+ * @author Red2ndHorse
+ */
 interface ValidationInterface
 {
 	public function isValid ( array $data, array $rules ) : bool;

@@ -7,7 +7,7 @@ use CodeIgniter\Database\Exceptions\DataException;
 use CodeIgniter\Encryption\Encryption;
 use Config\Services;
 
-class NknAuth
+class Red2Horse
 {
 	/**
 	 * @var NknAuth\Config

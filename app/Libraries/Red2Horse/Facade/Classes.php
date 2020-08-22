@@ -2,9 +2,9 @@
 
 declare( strict_types = 1 );
 
-namespace App\Libraries\NknAuth\Facade;
+namespace App\Libraries\Red2Horse\Facade;
 
-use App\Libraries\NknAuth\Validation\ValidationInterface;
+use App\Libraries\Red2Horse\Validation\ValidationInterface;
 
 /**
  * Validation adapter class
@@ -37,7 +37,11 @@ class Validate implements ValidateInterface
 
 class Auth implements AuthInterface
 {
-	public function login ( $username, $password ) : bool
+	public function login (
+		string $username = null,
+		string $password,
+		string $email = null
+	) : bool
 	{
 		return true;
 	}
