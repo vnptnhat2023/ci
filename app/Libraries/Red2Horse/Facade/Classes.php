@@ -52,10 +52,57 @@ class Auth implements AuthInterface
 	public function login (
 		string $username = null,
 		string $password,
-		string $email = null
+		bool $rememberMe = false
 	) : bool
 	{
-		return true;
+		return $this->auth->login( $username, $password, $rememberMe );
+	}
+
+	public function requestPassword (
+		string $username,
+		string $email,
+		bool $returnType = true
+	) : bool
+	{
+		return $this->auth->requestPassword( $username, $email, $returnType );
+	}
+
+	public function logout ( bool $returnType = true ) : bool
+	{
+		return $this->auth->logout( $returnType );
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public function getUserdata ( string $key = null )
+	{
+		return $this->auth->getUserdata( $key );
+	}
+
+	public function isLoggedIn ( bool $withCookie = false ) : bool
+	{
+		return $this->auth->isLoggedIn( $withCookie );
+	}
+
+	public function getPasswordHash ( string $pass, int $cost = 12 ) : string
+	{
+		return $this->auth->getPasswordHash( $pass, $cost );
+	}
+
+	public function getMessage ( array $addMore = [] ) : array
+	{
+		return $this->auth->getMessage( $addMore );
+	}
+
+	public function withPermission ( array $data ) : bool
+	{
+		return $this->auth->withPermission( $data );
+	}
+
+	public function regenerateCookie () : void
+	{
+		$this->auth->regenerateCookie();
 	}
 }
 

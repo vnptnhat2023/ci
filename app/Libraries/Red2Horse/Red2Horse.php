@@ -135,14 +135,10 @@ class Red2Horse
 		$this->rememberMe = (bool) $rememberMe;
 		$this->captcha = $captcha;
 
-		# A little bit data here but ... just return self
 		return $this->typeChecker( 'login' );
-
-		// return $this->getMessage();
 	}
 
-	/** @read_more login */
-	public function logout ( bool $returnType = true ) : array
+	public function logout ( bool $returnType = true ) : bool
 	{
 		# --- Todo: move to config
 		static::$returnType = $returnType ? 'object' : 'array';
@@ -155,61 +151,28 @@ class Red2Horse
 			Services::session() ->destroy();
 			$this->messageSuccess[] = lang( 'NknAuth.successLogout' );
 
-			return $this->getMessage();
+			return true;
 		}
 
 		$errEl = 'You have not login. '.  lang( 'NknAuth.homeLink');
 		$this->messageErrors[] = $errEl;
 
-		return $this->getMessage();
+		return false;
 	}
 
-	/** @read_more login */
 	public function requestPassword (
 		string $username,
 		string $email,
+		string $captcha = null,
 		bool $returnType = true
 	) : bool
 	{
 		static::$returnType = true === $returnType ? 'object' : 'array';
+		$this->username = $username;
+		$this->password = $email;
+		$this->captcha = $captcha;
+
 		return $this->typeChecker( 'forget' );
-		// return $this->getMessage();
-	}
-
-	# --- Todo: not using
-	public function in_group ( $menu = false )
-	{
-		$userdata = $this->getUserdata();
-		$perm = $userdata[ 'permission' ][ 0 ] ?? null;
-
-		if ( ! $userdata || null === $perm ) return false;
-
-		if ( false !== $menu ) {
-
-			if ( ! empty( $menu ) && is_array( $menu ) )
-			{
-				if ( $perm == 'all' ) return $menu;
-
-				foreach ( $menu as $key => $val ) {
-					if ( in_array( $val[ 'url' ], $userdata[ 'permission' ] ) ) {
-						$response[ $key ] = $val;
-					}
-				}
-
-				return array_values( $response );
-			}
-
-			else if ( is_string( $menu ) )
-			{
-				return ( $perm === 'all' )
-				? true
-				: in_array( $menu, $userdata[ 'permission' ] );
-			}
-
-			return false;
-		}
-
-		return $perm === 'all';
 	}
 
 	/** Set throttle config and get showCaptcha */
@@ -275,8 +238,6 @@ class Red2Horse
 		}
 
 		if ( false === $hasRequest ) {
-			// Services::session()->destroy();
-			// return $this->response[ 'view' ] = true;
 			$this->response[ 'view' ] = true;
 			return false;
 		}
@@ -347,7 +308,7 @@ class Red2Horse
 	/**
 	 * The first check the current user session,
 	 * the next will be $data parameter
-	 * @param array $data empty = 1st group = administrator
+	 * @param array $data case empty array ( [] ) = 1st group = administrator
 	 * @return boolean
 	 */
 	public function hasPermission ( array $data ) : bool
@@ -594,7 +555,6 @@ class Red2Horse
 
 		if ( false === Services::Validation() ->run() ) {
 			$errors = Services::Validation() ->getErrors();
-			// return $this->incorrectInfo( true, array_values( $errors ) );
 			$this->incorrectInfo( true, array_values( $errors ) );
 
 			return false;
@@ -612,7 +572,6 @@ class Red2Horse
 		->getRowArray();
 
 		if ( null === $find_user ) {
-			// return $this->incorrectInfo();
 			$this->incorrectInfo();
 
 			return false;

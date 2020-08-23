@@ -8,11 +8,11 @@ use App\Libraries\Red2Horse\Red2Horse;
 
 class CiAuthAdapter implements AuthInterface
 {
-	protected Red2Horse $auth;
+	protected Red2Horse $CiAuth;
 
-	public function __construct ( Red2Horse $auth )
+	public function __construct ( Red2Horse $CiAuth )
 	{
-		$this->auth = $auth;
+		$this->CiAuth = $CiAuth;
 	}
 
 	public function login (
@@ -21,12 +21,12 @@ class CiAuthAdapter implements AuthInterface
 		bool $rememberMe = false
 	): bool
 	{
-		return $this->auth->login( $username, $password, $rememberMe );
+		return $this->CiAuth->login( $username, $password, $rememberMe );
 	}
 
-	public function logout () : array
+	public function logout ( bool $returnType = true ) : bool
 	{
-		return $this->auth->logout();
+		return $this->CiAuth->logout( $returnType );
 	}
 
 	public function requestPassword (
@@ -35,37 +35,37 @@ class CiAuthAdapter implements AuthInterface
 		bool $returnType = true
 	) : bool
 	{
-		return $this->auth->requestPassword( $username, $email );
+		return $this->CiAuth->requestPassword( $username, $email );
 	}
 
 	public function getUserdata ( string $key = null )
 	{
-		return $this->auth->getUserdata( $key );
+		return $this->CiAuth->getUserdata( $key );
 	}
 
 	public function isLoggedIn ( bool $withCookie = false ) : bool
 	{
-		return $this->auth->isLogged( $withCookie );
+		return $this->CiAuth->isLogged( $withCookie );
 	}
 
 	public function getPasswordHash ( string $pass, int $cost = 12 ) : string
 	{
-		return $this->auth->getHashPass( $pass, $cost );
+		return $this->CiAuth->getHashPass( $pass, $cost );
 	}
 
 	public function getMessage ( array $addMore = [] ) : array
 	{
-		return $this->auth->getMessage( $addMore );
+		return $this->CiAuth->getMessage( $addMore );
 	}
 
 	public function withPermission ( array $data ) : bool
 	{
-		return $this->auth->hasPermission( $data );
+		return $this->CiAuth->hasPermission( $data );
 	}
 
 	public function regenerateCookie () : void
 	{
-		$this->auth->setTestCookie();
+		$this->CiAuth->setTestCookie();
 	}
 
 }

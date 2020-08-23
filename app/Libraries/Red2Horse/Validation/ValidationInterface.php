@@ -3,7 +3,7 @@
 namespace App\Libraries\Red2Horse\Validation;
 
 /**
- * @package SimpleCiAuth
+ * @package Red2ndHorseAuth
  * @author Red2Horse
  */
 interface ValidationInterface

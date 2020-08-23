@@ -20,8 +20,28 @@ interface AuthInterface
 	public function login (
 		string $username = null,
 		string $password,
-		string $email = null
+		bool $rememberMe = false
 	) : bool;
+
+	public function logout ( bool $returnType = true ) : bool;
+
+	public function requestPassword (
+		string $username,
+		string $email,
+		bool $returnType = true
+	) : bool;
+
+	public function getUserdata ( string $key = null );
+
+	public function getPasswordHash ( string $pass, int $cost = 12 ) : string;
+
+	public function getMessage ( array $addMore = [] ) : array;
+
+	public function withPermission ( array $data ) : bool;
+
+	public function isLoggedIn ( bool $withCookie = false ) : bool;
+
+	public function regenerateCookie () : void;
 }
 
 interface UserInterface

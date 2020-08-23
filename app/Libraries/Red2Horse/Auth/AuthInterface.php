@@ -3,8 +3,8 @@
 namespace App\Libraries\Red2Horse\Auth;
 
 /**
- * @package SimpleCiAuth
- * @author Red2ndHorse
+ * @package Red2HorseAuth
+ * @author Red2Horse
  */
 interface AuthInterface
 {
@@ -22,7 +22,7 @@ interface AuthInterface
 	) : bool;
 
 	/** @read_more login */
-	public function logout ( bool $returnType = true ) : array;
+	public function logout ( bool $returnType = true ) : bool;
 
 	/** @read_more login */
 	public function requestPassword (
