@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Libraries;
+namespace App\Libraries\Red2Horse;
 
 use CodeIgniter\Database\BaseBuilder;
 use CodeIgniter\Database\Exceptions\DataException;
@@ -12,7 +12,7 @@ class Red2Horse
 	/**
 	 * @var NknAuth\Config
 	 */
-	public NknAuth\Config $config;
+	public Config $config;
 
 	protected array $response = [
 		# --- When logged-in but request forget password
@@ -31,6 +31,12 @@ class Red2Horse
 
 	protected array $messageErrors = [];
 	protected array $messageSuccess = [];
+
+	private string $username;
+	private string $email;
+	private string $password;
+	private string $captcha;
+	private bool $rememberMe = false;
 
 	protected static string $returnType = 'object';
 
@@ -56,7 +62,7 @@ class Red2Horse
 
 	];
 
-	public function __construct ( NknAuth\Config $config  = null )
+	public function __construct ( Config $config  = null )
 	{
 		$this->model = model( '\App\Models\Login' );
 		$this->user = db_connect() ->table( 'user' );
@@ -113,21 +119,26 @@ class Red2Horse
 	}
 
 	/**
-	 * @param boolean $returnType
-	 *
-	 * @param true $returnType get result as object
-	 * @param false $returnType get result as array
-	 *
-	 * @return array
+	 * @param boolean $returnType true: object, false array
 	 */
-	public function login ( bool $returnType = true ) : array
+	public function login (
+		string $userNameEmail,
+		string $password,
+		bool $rememberMe = false,
+		string $captcha = null,
+		bool $returnType = true
+	) : bool
 	{
 		static::$returnType = $returnType ? 'object' : 'array';
+		$this->username = $userNameEmail;
+		$this->password = $password;
+		$this->rememberMe = (bool) $rememberMe;
+		$this->captcha = $captcha;
 
 		# A little bit data here but ... just return self
-		$this->typeChecker( 'login' );
+		return $this->typeChecker( 'login' );
 
-		return $this->getMessage();
+		// return $this->getMessage();
 	}
 
 	/** @read_more login */
@@ -154,14 +165,15 @@ class Red2Horse
 	}
 
 	/** @read_more login */
-	public function requestPassword ( bool $returnType = true ) : array
+	public function requestPassword (
+		string $username,
+		string $email,
+		bool $returnType = true
+	) : bool
 	{
-		# --- Todo: move to config
-		$this->typeChecker( 'forget' );
-
 		static::$returnType = true === $returnType ? 'object' : 'array';
-
-		return $this->getMessage();
+		return $this->typeChecker( 'forget' );
+		// return $this->getMessage();
 	}
 
 	# --- Todo: not using
@@ -219,9 +231,8 @@ class Red2Horse
 	/**
 	 * @param string $type login | forget
 	 * @throws \Exception
-	 * @return array|object|void
 	 */
-	private function typeChecker ( $type = 'login' )
+	private function typeChecker ( $type = 'login' ) : bool
 	{
 		if ( ! in_array( $type, [ 'login', 'forget' ] ) )
 		{
@@ -259,12 +270,15 @@ class Red2Horse
 				$errArg
 			);
 
-			return $this->messageErrors;
+			// return $this->messageErrors;
+			return false;
 		}
 
 		if ( false === $hasRequest ) {
 			// Services::session()->destroy();
-			return $this->response[ 'view' ] = true;
+			// return $this->response[ 'view' ] = true;
+			$this->response[ 'view' ] = true;
+			return false;
 		}
 
 		return ( $type === 'login' )
@@ -497,13 +511,13 @@ class Red2Horse
 
 	private function loginAfterValidation () : array
 	{
-		$rawEmail = Services::request() ->getPostGet( 'username' );
-
 		$userData = $this->user
 		->select( implode( ',', $this->columnData( [ 'password' ] ) ) )
+
 		->join( 'user_group', 'user_group.id = user.group_id' )
-		->where( [ 'user.username' => $rawEmail ] )
-		->orWhere( [ 'user.email' => $rawEmail ] )
+		->where( [ 'user.username' => $this->username ] )
+		->orWhere( [ 'user.email' => $this->username ] )
+
 		->get( 1 )
 		->getRowArray();
 
@@ -511,8 +525,7 @@ class Red2Horse
 			return [ 'error' => $this->incorrectInfo() ];
 		}
 
-		$rawPassword = Services::request() ->getPostGet( 'password' );
-		$verifyPassword = $this->getVerifyPass( $rawPassword, $userData[ 'password' ] );
+		$verifyPassword = $this->getVerifyPass( $this->password, $userData[ 'password' ] );
 
 		if ( false === $verifyPassword ) {
 			return [ 'error' => $this->incorrectInfo() ];
@@ -536,16 +549,14 @@ class Red2Horse
 
 	/**
 	 * Validation form login and set session & cookie
-	 * @return array|object|void
 	 */
-	private function loginHandler ()
+	private function loginHandler () : bool
 	{
-		if ( false !== ( $invalid = $this->loginInvalid() ) )
-		return $invalid;
+		if ( false !== $this->loginInvalid() ) return false;
 
 		$userData = $this->loginAfterValidation();
-		if ( array_key_exists( 'error', $userData ) )
-		return $userData[ 'error' ] ?? $userData;
+		if ( array_key_exists( 'error', $userData ) ) return false;
+		// return $userData[ 'error' ] ?? $userData;
 
 		# --- Set true response success
 		$this->setLoggedInSuccess( $userData );
@@ -553,7 +564,7 @@ class Red2Horse
 		Services::session() ->set( $this->config->session, $userData );
 
 		$userId = $userData[ 'id' ];
-		if ( Services::request() ->getPostGet( 'remember_me' ) )
+		if ( true === $this->rememberMe )
 		{
 			$this->setCookie( $userId );
 		}
@@ -564,13 +575,14 @@ class Red2Horse
 
 		$this->setTestCookie();
 		$this->model->throttle_cleanup();
+
+		return true;
 	}
 
 	/**
 	 * Validation form forgot password and send mail
-	 * @return array|object|void
 	 */
-	private function forgotHandler ()
+	private function forgotHandler () : bool
 	{
 		$group = $this->model->showCaptcha()
 		? 'forget_captcha'
@@ -582,7 +594,10 @@ class Red2Horse
 
 		if ( false === Services::Validation() ->run() ) {
 			$errors = Services::Validation() ->getErrors();
-			return $this->incorrectInfo( true, array_values( $errors ) );
+			// return $this->incorrectInfo( true, array_values( $errors ) );
+			$this->incorrectInfo( true, array_values( $errors ) );
+
+			return false;
 		}
 
 		$whereQuery = [
@@ -597,12 +612,15 @@ class Red2Horse
 		->getRowArray();
 
 		if ( null === $find_user ) {
-			return $this->incorrectInfo();
+			// return $this->incorrectInfo();
+			$this->incorrectInfo();
+
+			return false;
 		}
 
 		helper( 'text' );
 		$randomPw = random_string();
-		$hashPw = Services::NknAuth()->getHashPass( $randomPw );
+		$hashPw = $this->getHashPass( $randomPw );
 
 		$updatePassword = $this->user ->update(
 			[ 'password' => $hashPw ],
@@ -630,6 +648,8 @@ class Red2Horse
 
 		$this->response[ 'success' ] = true;
 		$this->messageSuccess[] = lang( 'NknAuth.successResetPassword' );
+
+		return true;
 	}
 
 	private function isMultiLogin ( string $session_id ) : bool

@@ -15,35 +15,43 @@ interface AuthInterface
 	 *
 	 * @return array
 	 */
-	public function login () : array;
+	public function login (
+		string $username = null,
+		string $password,
+		bool $rememberMe = false
+	) : bool;
 
 	/** @read_more login */
-	// public function logout ( bool $returnType = true ) : array;
+	public function logout ( bool $returnType = true ) : array;
 
 	/** @read_more login */
-	// public function requestPassword ( bool $returnType = true ) : array;
+	public function requestPassword (
+		string $username,
+		string $email,
+		bool $returnType = true
+	) : bool;
 
 	/**
 	 * @param string|null $key
 	 * @return mixed
 	 */
-	// public function getUserdata ( string $key = null );
+	public function getUserdata ( string $key = null );
 
-	// public function getPasswordHash ( string $pass, int $cost = 12 ) : string;
+	public function getPasswordHash ( string $pass, int $cost = 12 ) : string;
 
-	// public function getMessage ( array $addMore = [] ) : array;
+	public function getMessage ( array $addMore = [] ) : array;
 
 	/**
 	 * @param array $data empty = ( 1st group === administrator group )
 	 * @return boolean
 	 */
-	// public function withPermission ( array $data ) : bool;
+	public function withPermission ( array $data ) : bool;
 
 	/**
 	 * Check cookie & session: when have cookie will set session
 	 * @return boolean
 	 */
-	// public function isLoggedIn ( bool $withCookie = false ) : bool;
+	public function isLoggedIn ( bool $withCookie = false ) : bool;
 
-	// public function regenerateCookie () : void;
+	public function regenerateCookie () : void;
 }

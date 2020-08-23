@@ -1,12 +1,14 @@
 <?php
+
 declare( strict_types = 1 );
+
 namespace App\Libraries\Red2Horse\Validation;
 
 use App\Libraries\Red2Horse\Validation\ValidationInterface;
 use CodeIgniter\HTTP\request;
 use CodeIgniter\Validation\ValidationInterface as validate;
 
-class CodeIgniterValidationAdapter implements ValidationInterface
+class CiValidationAdapter implements ValidationInterface
 {
 	protected validate $validate;
 
