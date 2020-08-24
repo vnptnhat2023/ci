@@ -2,44 +2,12 @@
 
 declare( strict_types = 1 );
 
-namespace App\Libraries\Red2Horse\Facade;
+namespace App\Libraries\Red2Horse;
 
-use App\Libraries\Red2Horse\Facade\AuthInterface;
-use App\Libraries\Red2Horse\Auth\AuthInterface as AuthAdapterInterface;
-use App\Libraries\Red2Horse\Validation\ValidationInterface;
+use App\Libraries\Red2Horse\AuthInterface;
+use App\Libraries\Red2Horse\Auth\AuthAdapterInterface;
 
-/**
- * Validation adapter class
- *
- * ---
- *
- * ```
- * new CodeigniterValidation( config( 'validation' ), config( 'request' ) )
- * ```
- */
-class Validate implements ValidateInterface
-{
-
-	protected ValidationInterface $validationAdapter;
-
-	public function __construct ( ValidationInterface $validate )
-	{
-		$this->validationAdapter = $validate;
-	}
-
-	public function isValid ( array $data, array $rules ) : bool
-	{
-		return $this->validate->isValid( $data, $rules );
-	}
-
-	public function getErrors ( string $field = null ) : array
-	{
-		return $this->validate->getErrors( $field );
-	}
-}
-
-
-class Auth implements AuthInterface
+class Red2HorseAuth implements AuthInterface
 {
 
 	protected AuthAdapterInterface $auth;
@@ -51,7 +19,7 @@ class Auth implements AuthInterface
 
 	public function login (
 		string $username = null,
-		string $password,
+		string $password = null,
 		bool $rememberMe = false,
 		string $captcha = null
 	) : bool
@@ -104,33 +72,5 @@ class Auth implements AuthInterface
 	public function regenerateCookie () : void
 	{
 		$this->auth->regenerateCookie();
-	}
-}
-
-
-class User implements UserInterface
-{
-	public function create ( array $data ) : bool
-	{
-		return true;
-	}
-}
-
-
-class Mail implements MailInterface
-{
-	public function to ( $to ) : self
-	{
-		return $this;
-	}
-
-	public function subject ( $subject ) : self
-	{
-		return $this;
-	}
-
-	public function send () : bool
-	{
-		return true;
 	}
 }

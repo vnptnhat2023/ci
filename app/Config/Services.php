@@ -4,13 +4,15 @@ declare( strict_types = 1 );
 
 namespace Config;
 
+use App\Libraries\Red2Horse;
+
 use App\Libraries\DesignPattern\Registry;
 use App\Libraries\Extension;
 use App\Libraries\NknAuth\{
 	Config as AuthConfig,
 	NknAuthSession as AuthSession
 };
-
+use App\Libraries\Red2Horse\Auth\CiAuthAdapter;
 use CodeIgniter\Config\Services as CoreServices;
 use CodeIgniter\Session\Session;
 
@@ -31,6 +33,23 @@ class Services extends CoreServices
 		}
 
 		return new \App\Libraries\NknAuth( $config );
+	}
+
+	/**
+	 * @return \App\Libraries\Red2Horse\Red2HorseAuth
+	 */
+	public static function Red2HorseAuth ( Red2Horse\Config $config = null, bool $getShared = true )
+	{
+		if ( $getShared === true ) {
+			return static::getSharedInstance( 'Red2HorseAuth', $config );
+		}
+
+		if ( ! is_object( $config ) ) {
+			$config = config( Red2Horse\Config::class );
+		}
+
+		$ciAuth = new CiAuthAdapter ( new Red2Horse\Red2Horse( $config ) );
+		return new \App\Libraries\Red2Horse\Red2HorseAuth( $ciAuth );
 	}
 
 	public static function Extension ( bool $getShared = true ) : Extension

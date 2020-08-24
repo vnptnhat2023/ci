@@ -6,7 +6,7 @@ namespace App\Libraries\Red2Horse\Auth;
 
 use App\Libraries\Red2Horse\Red2Horse;
 
-class CiAuthAdapter implements AuthInterface
+class CiAuthAdapter implements AuthAdapterInterface
 {
 	protected Red2Horse $CiAuth;
 
@@ -17,11 +17,12 @@ class CiAuthAdapter implements AuthInterface
 
 	public function login (
 		string $username = null,
-		string $password,
-		bool $rememberMe = false
+		string $password = null,
+		bool $rememberMe = false,
+		string $captcha = null
 	): bool
 	{
-		return $this->CiAuth->login( $username, $password, $rememberMe );
+		return $this->CiAuth->login( $username, $password, $rememberMe, $captcha );
 	}
 
 	public function logout ( bool $returnType = true ) : bool

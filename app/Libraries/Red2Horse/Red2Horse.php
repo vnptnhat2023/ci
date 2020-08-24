@@ -9,10 +9,7 @@ use Config\Services;
 
 class Red2Horse
 {
-	/**
-	 * @var NknAuth\Config
-	 */
-	public Config $config;
+	public \App\Libraries\Red2Horse\Config $config;
 
 	protected array $response = [
 		# --- When logged-in but request forget password
@@ -32,10 +29,10 @@ class Red2Horse
 	protected array $messageErrors = [];
 	protected array $messageSuccess = [];
 
-	private string $username;
-	private string $email;
-	private string $password;
-	private string $captcha;
+	private ?string $username;
+	private ?string $email;
+	private ?string $password;
+	private ?string $captcha;
 	private bool $rememberMe = false;
 
 	protected static string $returnType = 'object';
@@ -62,12 +59,12 @@ class Red2Horse
 
 	];
 
-	public function __construct ( Config $config  = null )
+	public function __construct ( \App\Libraries\Red2Horse\Config $config  = null )
 	{
 		$this->model = model( '\App\Models\Login' );
 		$this->user = db_connect() ->table( 'user' );
 
-		$this->config = $config ?: config( NknAuth\Config::class ) ;
+		$this->config = $config ?: config( \App\Libraries\Red2Horse\Config::class ) ;
 
 		helper( 'cookie' );
 	}
@@ -122,8 +119,8 @@ class Red2Horse
 	 * @param boolean $returnType true: object, false array
 	 */
 	public function login (
-		string $userNameEmail,
-		string $password,
+		string $userNameEmail = null,
+		string $password = null,
 		bool $rememberMe = false,
 		string $captcha = null,
 		bool $returnType = true
