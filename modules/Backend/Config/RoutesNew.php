@@ -25,7 +25,7 @@ $bapiPermStr = implode( ',', $bapiPermData );
 
 $bapiOptions = [
 	'namespace' => '\BAPI\Controllers',
-	'filter' => "NknAuth:{$bapiPermStr}"
+	'filter' => "R2hAuth:{$bapiPermStr}"
 ];
 
 $routeData = [
@@ -34,7 +34,7 @@ $routeData = [
 		'user',
 		[
 			'namespace' => '\BAPI\Controllers\User',
-			'filter' => 'NknAuth:all'
+			'filter' => 'R2hAuth:all'
 		],
 		function( $routes )
 		{
@@ -66,7 +66,7 @@ $routeData = [
 		'post',
 		[
 			'namespace' => '\BAPI\Controllers\Post',
-			'filter' => 'NknAuth:post'
+			'filter' => 'R2hAuth:post'
 		],
 		function( $routes )
 		{
@@ -91,7 +91,7 @@ $routeData = [
 		'page',
 		[
 			'namespace' => '\BAPI\Controllers\Page',
-			'filter' => 'NknAuth:page'
+			'filter' => 'R2hAuth:page'
 		],
 		function( $routes )
 		{
@@ -107,7 +107,7 @@ $routeData = [
 		'category',
 		[
 			'namespace' => '\BAPI\Controllers\Category',
-			'filter' => 'NknAuth:category'
+			'filter' => 'R2hAuth:category'
 		],
 		function( $routes )
 		{
@@ -123,7 +123,7 @@ $routeData = [
 		'general_group',
 		[
 			'namespace' => '\BAPI\Controllers\GeneralGroup',
-			'filter' => 'NknAuth:general_group'
+			'filter' => 'R2hAuth:general_group'
 		],
 		function( $routes )
 		{
@@ -139,7 +139,7 @@ $routeData = [
 		'general_item',
 		[
 			'namespace' => '\BAPI\Controllers\GeneralItem',
-			'filter' => 'NknAuth:general_item'
+			'filter' => 'R2hAuth:general_item'
 		],
 		function( $routes )
 		{
@@ -155,7 +155,7 @@ $routeData = [
 		'general_relation',
 		[
 			'namespace' => '\BAPI\Controllers\GeneralRelation',
-			'filter' => 'NknAuth:general_relation'
+			'filter' => 'R2hAuth:general_relation'
 		],
 		function( $routes )
 		{
@@ -167,7 +167,7 @@ $routeData = [
 		'general_theme',
 		[
 			'namespace' => '\BAPI\Controllers\Theme',
-			'filter' => 'NknAuth:general_theme'
+			'filter' => 'R2hAuth:general_theme'
 		],
 		function( $routes )
 		{
@@ -179,7 +179,7 @@ $routeData = [
 		'extension',
 		[
 			'namespace' => '\BAPI\Controllers\Extension',
-			'filter' => 'NknAuth:extension'
+			'filter' => 'R2hAuth:extension'
 		],
 		function( $routes )
 		{

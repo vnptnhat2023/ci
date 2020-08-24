@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Libraries\Red2Horse\Auth;
+namespace App\Libraries\Red2Horse\Adapter\CodeIgniter\Auth;
 
 /**
  * @package Red2HorseAuth
  * @author Red2Horse
  */
-interface AuthAdapterInterface
+interface AdapterInterface
 {
 
 	/**

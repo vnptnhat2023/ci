@@ -2,20 +2,19 @@
 
 declare( strict_types = 1 );
 
-namespace App\Libraries\Red2Horse\Validation;
+namespace App\Libraries\Red2Horse\Adapter\Codeigniter\Validation;
 
-use App\Libraries\Red2Horse\Validation\ValidationInterface;
 use CodeIgniter\HTTP\request;
-use CodeIgniter\Validation\ValidationInterface as validate;
+use CodeIgniter\Validation\ValidationInterface;
 
-class CiValidationAdapter implements ValidationInterface
+class Adapter implements AdapterInterface
 {
-	protected validate $validate;
+	protected ValidationInterface $validate;
 
 	protected request $request;
 
 
-	public function __construct ( validate $validate, request $request )
+	public function __construct ( ValidationInterface $validate, request $request )
 	{
 		$this->validate = $validate;
 		$this->request = $request;

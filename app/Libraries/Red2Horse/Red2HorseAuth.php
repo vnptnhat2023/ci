@@ -5,14 +5,14 @@ declare( strict_types = 1 );
 namespace App\Libraries\Red2Horse;
 
 use App\Libraries\Red2Horse\AuthInterface;
-use App\Libraries\Red2Horse\Auth\AuthAdapterInterface;
+use App\Libraries\Red2Horse\Adapter\CodeIgniter\Auth\AdapterInterface;
 
 class Red2HorseAuth implements AuthInterface
 {
 
-	protected AuthAdapterInterface $auth;
+	protected AdapterInterface $auth;
 
-	public function __construct ( AuthAdapterInterface $auth )
+	public function __construct ( AdapterInterface $auth )
 	{
 		$this->auth = $auth;
 	}

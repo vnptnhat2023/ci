@@ -8,12 +8,12 @@ use CodeIgniter\HTTP\RequestInterface as req;
 use CodeIgniter\HTTP\ResponseInterface as res;
 use Config\Services;
 
-class NknAuth implements FilterInterface
+class Red2HorseAuth implements FilterInterface
 {
 
   public function before( req $request, $arguments = null )
   {
-    if ( ! Services::NknAuth()->hasPermission( $arguments ?: [] ) ) {
+    if ( ! Services::Red2HorseAuth()->withPermission( $arguments ?: [] ) ) {
       throw PageNotFoundException::forPageNotFound();
     }
   }

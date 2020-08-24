@@ -1,12 +1,12 @@
 <?php
 
-namespace App\Libraries\Red2Horse\Validation;
+namespace App\Libraries\Red2Horse\Adapter\Codeigniter\Validation;
 
 /**
  * @package Red2ndHorseAuth
  * @author Red2Horse
  */
-interface ValidationInterface
+interface AdapterInterface
 {
 	public function isValid ( array $data, array $rules ) : bool;
 

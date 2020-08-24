@@ -18,7 +18,6 @@ class Validation
 		\CodeIgniter\Validation\FileRules::class,
 		\CodeIgniter\Validation\CreditCardRules::class,
 		\BAPI\Validation\BAPIRules::class,
-		// \App\Libraries\NknAuth\ValidCap::class,
 		\App\Libraries\Red2Horse\Sys\ValidCap::class
 	];
 

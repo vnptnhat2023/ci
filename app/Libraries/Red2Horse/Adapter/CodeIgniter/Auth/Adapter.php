@@ -2,11 +2,11 @@
 
 declare( strict_types = 1 );
 
-namespace App\Libraries\Red2Horse\Auth;
+namespace App\Libraries\Red2Horse\Adapter\Codeigniter\Auth;
 
 use App\Libraries\Red2Horse\Red2Horse;
 
-class CiAuthAdapter implements AuthAdapterInterface
+class Adapter implements AdapterInterface
 {
 	protected Red2Horse $CiAuth;
 

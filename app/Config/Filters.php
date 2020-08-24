@@ -10,7 +10,7 @@ class Filters extends BaseConfig
 		'csrf'     => \CodeIgniter\Filters\CSRF::class,
 		'toolbar'  => \CodeIgniter\Filters\DebugToolbar::class,
 		'honeypot' => \CodeIgniter\Filters\Honeypot::class,
-		'NknAuth' => \BAPI\Filters\NknAuth::class,
+		'R2hAuth' => \BAPI\Filters\Red2HorseAuth::class,
 		'throttle' => \App\Filters\Throttle::class
 	];
 
@@ -40,6 +40,6 @@ class Filters extends BaseConfig
 	// that they should run on, like:
 	//    'isLoggedIn' => ['before' => ['account/*', 'profiles/*']],
 	public $filters = [
-		// 'NknAuth' => ['before' => ['bapi/*']]
+		// 'R2hAuth' => ['before' => ['bapi/*']]
 	];
 }
