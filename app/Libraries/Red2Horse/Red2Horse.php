@@ -9,7 +9,7 @@ use Config\Services;
 
 class Red2Horse
 {
-	public \App\Libraries\Red2Horse\Config $config;
+	public Config $config;
 
 	protected array $response = [
 		# --- When logged-in but request forget password
@@ -45,26 +45,21 @@ class Red2Horse
 	/**
 	 * @var \CodeIgniter\Database\BaseBuilder $user
 	 */
-	public BaseBuilder $user;
+	protected BaseBuilder $user;
 
 	protected array $rules = [
-
 		'login' => [ 'username', 'password' ],
-
 		'login_captcha' => [ 'username', 'password', 'ci_captcha' ],
-
 		'forget' => [ 'username', 'email' ],
-
 		'forget_captcha' => [ 'username', 'email', 'ci_captcha' ]
-
 	];
 
-	public function __construct ( \App\Libraries\Red2Horse\Config $config  = null )
+	public function __construct ( Config $config = null )
 	{
 		$this->model = model( '\App\Models\Login' );
 		$this->user = db_connect() ->table( 'user' );
 
-		$this->config = $config ?: config( \App\Libraries\Red2Horse\Config::class ) ;
+		$this->config = $config ?: new Config;
 
 		helper( 'cookie' );
 	}

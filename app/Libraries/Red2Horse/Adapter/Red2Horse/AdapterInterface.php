@@ -2,9 +2,9 @@
 
 declare( strict_types = 1 );
 
-namespace App\Libraries\Red2Horse;
+namespace App\Libraries\Red2Horse\Adapter\Red2Horse;
 
-interface AuthInterface
+interface AdapterInterface
 {
 	public function login (
 		string $username = null,

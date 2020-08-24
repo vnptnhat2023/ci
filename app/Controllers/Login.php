@@ -3,11 +3,11 @@
 # --- Todo: Move current file to [Auth-folder]
 namespace App\Controllers;
 
-use \App\Libraries\Red2Horse\AuthInterface;
+use \App\Libraries\Red2Horse\Adapter\Red2Horse\AdapterInterface;
 
 class Login extends BaseController
 {
-	private AuthInterface $auth;
+	private AdapterInterface $auth;
 
 	public function __construct()
 	{

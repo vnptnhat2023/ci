@@ -2,17 +2,17 @@
 
 declare( strict_types = 1 );
 
-namespace App\Libraries\Red2Horse;
+namespace App\Libraries\Red2Horse\Adapter\Red2Horse;
 
-use App\Libraries\Red2Horse\AuthInterface;
-use App\Libraries\Red2Horse\Adapter\CodeIgniter\Auth\AdapterInterface;
+use App\Libraries\Red2Horse\Adapter\CodeIgniter\Auth\{
+	AdapterInterface as CiAdapterInterface
+};
 
-class Red2HorseAuth implements AuthInterface
+class Adapter implements AdapterInterface
 {
+	protected CiAdapterInterface $auth;
 
-	protected AdapterInterface $auth;
-
-	public function __construct ( AdapterInterface $auth )
+	public function __construct ( CiAdapterInterface $auth )
 	{
 		$this->auth = $auth;
 	}

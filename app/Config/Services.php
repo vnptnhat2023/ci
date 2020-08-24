@@ -4,7 +4,8 @@ declare( strict_types = 1 );
 
 namespace Config;
 
-use App\Libraries\Red2Horse\Adapter\CodeIgniter\Auth\Adapter as CodeIgniterAdapter;
+use App\Libraries\Red2Horse\Adapter\CodeIgniter\Auth\Adapter as CiAdapter;
+use App\Libraries\Red2Horse\Adapter\Red2Horse\Adapter as R2hAdapter;
 use App\Libraries\Red2Horse;
 use App\Libraries\Red2Horse\Sys\Red2HorseSession;
 
@@ -51,8 +52,8 @@ class Services extends CoreServices
 			$config = config( Red2Horse\Config::class );
 		}
 
-		$auth = new CodeIgniterAdapter ( new Red2Horse\Red2Horse( $config ) );
-		return new \App\Libraries\Red2Horse\Red2HorseAuth( $auth );
+		$CiAuth = new CiAdapter ( new Red2Horse\Red2Horse( $config ) );
+		return new R2hAdapter( $CiAuth );
 	}
 
 	public static function Extension ( bool $getShared = true ) : Extension

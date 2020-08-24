@@ -7,11 +7,8 @@ namespace App\Libraries\Red2Horse;
 class Config
 {
 	private const SESSION_NAME = 'r2h';
-
 	private const COOKIE_NAME = 'r2h';
-
-	private const TIME_TO_LIFE = WEEK;
-
+	private const TIME_TO_LIFE = 604800;
   private const THROTTLE = [
   	'type' => 1,
   	'limit_one' => 5,
@@ -20,11 +17,8 @@ class Config
 	];
 
 	public string $session = self::SESSION_NAME;
-
 	public string $cookie = self::COOKIE_NAME;
-
 	public int $ttl = self::TIME_TO_LIFE;
-
 	public object $throttle;
 
 	public function __construct ()
