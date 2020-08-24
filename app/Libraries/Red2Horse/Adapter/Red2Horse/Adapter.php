@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 
 namespace App\Libraries\Red2Horse\Adapter\Red2Horse;
 
-use App\Libraries\Red2Horse\Adapter\CodeIgniter\Auth\{
+use App\Libraries\Red2Horse\Adapter\Auth\{
 	AdapterInterface as CiAdapterInterface
 };
 

@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 
 namespace Config;
 
-use App\Libraries\Red2Horse\Adapter\CodeIgniter\Auth\Adapter as CiAdapter;
+use App\Libraries\Red2Horse\Adapter\Auth\Adapter as CiAdapter;
 use App\Libraries\Red2Horse\Adapter\Red2Horse\Adapter as R2hAdapter;
 use App\Libraries\Red2Horse;
 use App\Libraries\Red2Horse\Sys\Red2HorseSession;

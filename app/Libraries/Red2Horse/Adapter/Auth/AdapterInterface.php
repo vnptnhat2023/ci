@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Libraries\Red2Horse\Adapter\CodeIgniter\Auth;
+namespace App\Libraries\Red2Horse\Adapter\Auth;
 
 /**
  * @package Red2HorseAuth

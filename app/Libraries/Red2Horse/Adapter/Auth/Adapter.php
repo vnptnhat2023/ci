@@ -2,17 +2,17 @@
 
 declare( strict_types = 1 );
 
-namespace App\Libraries\Red2Horse\Adapter\Codeigniter\Auth;
+namespace App\Libraries\Red2Horse\Adapter\Auth;
 
 use App\Libraries\Red2Horse\Red2Horse;
 
 class Adapter implements AdapterInterface
 {
-	protected Red2Horse $CiAuth;
+	protected Red2Horse $auth;
 
-	public function __construct ( Red2Horse $CiAuth )
+	public function __construct ( Red2Horse $auth )
 	{
-		$this->CiAuth = $CiAuth;
+		$this->auth = $auth;
 	}
 
 	public function login (
@@ -22,12 +22,12 @@ class Adapter implements AdapterInterface
 		string $captcha = null
 	): bool
 	{
-		return $this->CiAuth->login( $username, $password, $rememberMe, $captcha );
+		return $this->auth->login( $username, $password, $rememberMe, $captcha );
 	}
 
 	public function logout () : bool
 	{
-		return $this->CiAuth->logout();
+		return $this->auth->logout();
 	}
 
 	public function requestPassword (
@@ -36,42 +36,42 @@ class Adapter implements AdapterInterface
 		string $captcha = null
 	) : bool
 	{
-		return $this->CiAuth->requestPassword( $username, $email );
+		return $this->auth->requestPassword( $username, $email );
 	}
 
 	public function getUserdata ( string $key = null )
 	{
-		return $this->CiAuth->getUserdata( $key );
+		return $this->auth->getUserdata( $key );
 	}
 
 	public function isLoggedIn ( bool $withCookie = false ) : bool
 	{
-		return $this->CiAuth->isLogged( $withCookie );
+		return $this->auth->isLogged( $withCookie );
 	}
 
 	public function getPasswordHash ( string $pass, int $cost = 12 ) : string
 	{
-		return $this->CiAuth->getHashPass( $pass, $cost );
+		return $this->auth->getHashPass( $pass, $cost );
 	}
 
 	public function getMessage ( array $addMore = [] ) : array
 	{
-		return $this->CiAuth->getMessage( $addMore );
+		return $this->auth->getMessage( $addMore );
 	}
 
 	public function withPermission ( array $data ) : bool
 	{
-		return $this->CiAuth->hasPermission( $data );
+		return $this->auth->hasPermission( $data );
 	}
 
 	public function regenerateCookie () : void
 	{
-		$this->CiAuth->regenerateCookie();
+		$this->auth->regenerateCookie();
 	}
 
 	public function regenerateSession ( array $userData ) : bool
 	{
-		return $this->CiAuth->regenerateSession( $userData );
+		return $this->auth->regenerateSession( $userData );
 	}
 
 }
