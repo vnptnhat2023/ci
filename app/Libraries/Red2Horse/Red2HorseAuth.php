@@ -28,17 +28,17 @@ class Red2HorseAuth implements AuthInterface
 	}
 
 	public function requestPassword (
-		string $username,
-		string $email,
-		bool $returnType = true
+		string $username = null,
+		string $email = null,
+		string $captcha = null
 	) : bool
 	{
-		return $this->auth->requestPassword( $username, $email, $returnType );
+		return $this->auth->requestPassword( $username, $email, $captcha );
 	}
 
-	public function logout ( bool $returnType = true ) : bool
+	public function logout () : bool
 	{
-		return $this->auth->logout( $returnType );
+		return $this->auth->logout();
 	}
 
 	/**
@@ -72,5 +72,10 @@ class Red2HorseAuth implements AuthInterface
 	public function regenerateCookie () : void
 	{
 		$this->auth->regenerateCookie();
+	}
+
+	public function regenerateSession ( array $userData ) : bool
+	{
+		return $this->auth->regenerateSession( $userData );
 	}
 }

@@ -25,15 +25,15 @@ class CiAuthAdapter implements AuthAdapterInterface
 		return $this->CiAuth->login( $username, $password, $rememberMe, $captcha );
 	}
 
-	public function logout ( bool $returnType = true ) : bool
+	public function logout () : bool
 	{
-		return $this->CiAuth->logout( $returnType );
+		return $this->CiAuth->logout();
 	}
 
 	public function requestPassword (
-		string $username,
-		string $email,
-		bool $returnType = true
+		string $username = null,
+		string $email = null,
+		string $captcha = null
 	) : bool
 	{
 		return $this->CiAuth->requestPassword( $username, $email );
@@ -66,7 +66,12 @@ class CiAuthAdapter implements AuthAdapterInterface
 
 	public function regenerateCookie () : void
 	{
-		$this->CiAuth->setTestCookie();
+		$this->CiAuth->regenerateCookie();
+	}
+
+	public function regenerateSession ( array $userData ) : bool
+	{
+		return $this->CiAuth->regenerateSession( $userData );
 	}
 
 }

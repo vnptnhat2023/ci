@@ -135,10 +135,8 @@ class Red2Horse
 		return $this->typeChecker( 'login' );
 	}
 
-	public function logout ( bool $returnType = true ) : bool
+	public function logout () : bool
 	{
-		# --- Todo: move to config
-		static::$returnType = $returnType ? 'object' : 'array';
 		$this->response[ 'success' ] = true;
 
 		delete_cookie( $this->config->cookie );
@@ -146,27 +144,25 @@ class Red2Horse
 		if ( Services::session() ->has( $this->config->session ) )
 		{
 			Services::session() ->destroy();
-			$this->messageSuccess[] = lang( 'NknAuth.successLogout' );
+			$this->messageSuccess[] = lang( 'Red2Horse.successLogout' );
 
 			return true;
 		}
 
-		$errEl = 'You have not login. '.  lang( 'NknAuth.homeLink');
+		$errEl = 'You have not login. '.  lang( 'Red2Horse.homeLink');
 		$this->messageErrors[] = $errEl;
 
 		return false;
 	}
 
 	public function requestPassword (
-		string $username,
-		string $email,
-		string $captcha = null,
-		bool $returnType = true
+		string $username = null,
+		string $email = null,
+		string $captcha = null
 	) : bool
 	{
-		static::$returnType = true === $returnType ? 'object' : 'array';
 		$this->username = $username;
-		$this->password = $email;
+		$this->email = $email;
 		$this->captcha = $captcha;
 
 		return $this->typeChecker( 'forget' );
@@ -194,21 +190,17 @@ class Red2Horse
 	 */
 	private function typeChecker ( $type = 'login' ) : bool
 	{
-		if ( ! in_array( $type, [ 'login', 'forget' ] ) )
-		{
-			throw new \Exception( 'Type must be in [login or forget]', 1 );
+		if ( ! in_array( $type, [ 'login', 'forget' ] ) ) {
+			throw new \Exception( 'Type must be in "login or forget"', 1 );
 		}
 
-		$req = Services::request();
 		$requestType = ( $type === 'login' ) ? 'password' : 'email';
-
-		$isNullUsername = is_null( $req->getPostGet( 'username' ) );
-		$isNullType = is_null( $req->getPostGet( $requestType ) );
+		$isNullUsername = is_null( $this->username );
+		$isNullType = is_null( $this->{$requestType} );
 
 		$hasRequest = ! $isNullUsername && ! $isNullType;
 
-		if ( true === $this->isLogged( true ) )
-		{
+		if ( true === $this->isLogged( true ) ) {
 			( $type === 'forget' )
 			? $this->response[ 'reset_incorrect' ] = true
 			: $this->setLoggedInSuccess( $this->getUserdata() );
@@ -216,21 +208,13 @@ class Red2Horse
 			return true;
 		}
 
-		if ( $wasLimited = $this->throttleModel() ->limited() )
-		{
+		if ( $wasLimited = $this->throttleModel() ->limited() ) {
 			$this->response[ 'limit_max' ] = $wasLimited;
 			$timeout = $this->config->throttle->timeout;
-			$errArg = [
-				'num' => gmdate( 'i', $timeout ),
-				'type' => 'minutes'
-			];
+			$errArg = [ 'num' => gmdate( 'i', $timeout ), 'type' => 'minutes' ];
 
-			$this->messageErrors[] = lang(
-				'NknAuth.errorThrottleLimitedTime',
-				$errArg
-			);
+			$this->messageErrors[] = lang( 'Red2Horse.errorThrottleLimitedTime', $errArg );
 
-			// return $this->messageErrors;
 			return false;
 		}
 
@@ -239,9 +223,7 @@ class Red2Horse
 			return false;
 		}
 
-		return ( $type === 'login' )
-		? $this->loginHandler()
-		: $this->forgotHandler();
+		return ( $type === 'login' ) ? $this->loginHandler() : $this->forgotHandler();
 	}
 
 	/**
@@ -360,25 +342,45 @@ class Red2Horse
 		: $this->cookieHandler();
 	}
 
+	public function regenerateSession ( array $userData ) : bool
+	{
+		if ( ! $this->isLogged() ) return false;
+
+		$ssId = session_id();
+		$whereQuery = [ 'id' => $userData[ 'id' ] ];
+		$setDataQuery = [ 'session_id' => $ssId ];
+
+		$updateStatus = $this->user->update( $setDataQuery, $whereQuery, 1 );
+
+		if ( false === $updateStatus )
+		{
+			log_message( 'error', "The session_id of {$userData[ 'id' ]} update failed" );
+			return false;
+		}
+		else
+		{
+			$this->regenerateCookie();
+			return true;
+		}
+	}
+
 	private function cookieHandler () : bool
 	{
 		$userCookie = get_cookie( $this->config->cookie );
-		if ( empty( $userCookie ) || ! is_string( $userCookie ) )
-		return false;
+		if ( empty( $userCookie ) || ! is_string( $userCookie ) ) return false;
 
 		$exp = explode( '-', $userCookie, 2 );
-		$incorrectCookie = function  () : bool
-		{
+
+		$incorrectCookie = function  () : bool {
 			delete_cookie( $this->config->cookie );
+
 			return false;
 		};
 
-		if ( empty( $exp[ 0 ] ) || empty( $exp[ 1 ] ) )
-		return $incorrectCookie();
+		if ( empty( $exp[ 0 ] ) || empty( $exp[ 1 ] ) ) return $incorrectCookie();
 
 		$userId = hex2bin( $exp[ 1 ] );
-		if ( $userId === '0' || ! ctype_digit( $userId ) )
-		return $incorrectCookie();
+		if ( $userId === '0' || ! ctype_digit( $userId ) ) return $incorrectCookie();
 
 		# Check token
 		$user = $this->user
@@ -388,32 +390,30 @@ class Red2Horse
 		->getRowArray();
 		if ( null === $user ) return $incorrectCookie();
 
-		$userToken = password_verify(
-			$user[ 'cookie_token' ],
-			$exp[ 0 ]
-		);
+		$userToken = password_verify( $user[ 'cookie_token' ], $exp[ 0 ] );
 
 		$ip = Services::request() ->getIPAddress();
 		$userIp = $user[ 'last_login' ] == $ip;
 
-		if ( false === $userToken || false === $userIp )
-		return $incorrectCookie();
+		if ( false === $userToken || false === $userIp ) return $incorrectCookie();
 
 		# Check status
-		if ( in_array( $user[ 'status' ] , [ 'inactive', 'banned' ] ) )
-		{
+		if ( in_array( $user[ 'status' ] , [ 'inactive', 'banned' ] ) ) {
 			$this->denyStatus( $user[ 'status' ], false, false );
+
 			return $incorrectCookie();
 		}
 
-		if ( false === $this->isMultiLogin( $user[ 'session_id' ] ) )
-		{
+		if ( false === $this->isMultiLogin( $user[ 'session_id' ] ) ) {
 			$this->denyMultiLogin( true, [], false );
+
 			return false;
 		}
 
 		# --- Update cookie
 		$logErr = "Cookie success checked, but error when update data: {$userId}";
+
+		# --- Set cookie
 		$this->setCookie( $userId, [], $logErr );
 
 		# --- Create new session
@@ -425,41 +425,40 @@ class Red2Horse
 		->getRowArray();
 
 		$userData[ 'permission' ] = json_decode( $userData[ 'permission' ] );
-
-		Services::session() ->set(
-			$this->config->session, $userData
-		);
-
-		$this->setTestCookie();
+		Services::session() ->set( $this->config->session, $userData );
+		$this->regenerateCookie();
 
 		return true;
 	}
 
 	private function loginInvalid ()
 	{
-		$validation = Services::Validation() ->withRequest( Services::request() );
+		$validation = Services::Validation();
 
-		if ( true === $this->response[ 'captcha' ] )
-		{
+		if ( true === $this->response[ 'captcha' ] ) {
 			$ruleCap = [ 'ci_captcha' => $this->rules( 'ci_captcha' ) ];
+			$data = [
+				'username' => $this->username,
+				'password' => $this->password,
+				'ci_captcha' => $this->captcha
+			];
 
-			if ( false === $validation ->setRules( $ruleCap ) ->run() )
-			{
+			if ( false === $validation ->setRules( $ruleCap ) ->run( $data ) ) {
 				$errStr = [ $validation->getError( 'ci_captcha' ) ];
+
 				return $this->incorrectInfo( true, $errStr );
 			}
 		}
 
 		$incorrectInfo = false;
 		$ruleUsername = [ 'username' => $this->rules( 'username' ) ];
+		$data = [ 'username' => $this->username ];
 
-		if ( false === $validation ->setRules( $ruleUsername ) ->run() )
-		{
-			Services::Validation() ->reset();
+		if ( false === $validation ->setRules( $ruleUsername ) ->run( $data ) ) {
+			$validation->reset();
 
 			$ruleEmail = [ 'username' => $this->rules( 'email' ) ];
-			$validation = Services::Validation() ->withRequest( Services::request() );
-			$incorrectInfo = ! $validation->setRules( $ruleEmail ) ->run();
+			$incorrectInfo = ! $validation->setRules( $ruleEmail ) ->run( $data );
 		}
 
 		false === $incorrectInfo ?: $this->incorrectInfo( true );
@@ -479,15 +478,11 @@ class Red2Horse
 		->get( 1 )
 		->getRowArray();
 
-		if ( null === $userData ) {
-			return [ 'error' => $this->incorrectInfo() ];
-		}
+		if ( null === $userData ) return [ 'error' => $this->incorrectInfo() ];
 
 		$verifyPassword = $this->getVerifyPass( $this->password, $userData[ 'password' ] );
 
-		if ( false === $verifyPassword ) {
-			return [ 'error' => $this->incorrectInfo() ];
-		}
+		if ( false === $verifyPassword ) return [ 'error' => $this->incorrectInfo() ];
 
 		if ( 'active' !== $userData[ 'status' ] ) {
 			return [ 'error' => $this->denyStatus( $userData['status'] ) ];
@@ -514,14 +509,16 @@ class Red2Horse
 
 		$userData = $this->loginAfterValidation();
 		if ( array_key_exists( 'error', $userData ) ) return false;
-		// return $userData[ 'error' ] ?? $userData;
+		# return $userData[ 'error' ] ?? $userData;
 
-		# --- Set true response success
+		# --- Set response success to true
 		$this->setLoggedInSuccess( $userData );
+
 		# --- Set user session
 		Services::session() ->set( $this->config->session, $userData );
 
 		$userId = $userData[ 'id' ];
+
 		if ( true === $this->rememberMe )
 		{
 			$this->setCookie( $userId );
@@ -531,7 +528,7 @@ class Red2Horse
 			log_message( 'error', "{$userId} Logged-in, but update failed" );
 		}
 
-		$this->setTestCookie();
+		$this->regenerateCookie();
 		$this->model->throttle_cleanup();
 
 		return true;
@@ -542,31 +539,19 @@ class Red2Horse
 	 */
 	private function forgotHandler () : bool
 	{
-		$group = $this->model->showCaptcha()
-		? 'forget_captcha'
-		: 'forget';
+		$group = $this->model->showCaptcha() ? 'forget_captcha' : 'forget';
 
-		Services::Validation()
-		->withRequest( Services::request() )
-		->setRules( $this->rules( $this->rules[ $group ] ) );
+		$validation = Services::Validation();
+		$rules = $this->rules( $this->rules[ $group ] );
+		$data = [ 'username' => $this->username, 'email' => $this->email ];
 
-		if ( false === Services::Validation() ->run() ) {
-			$errors = Services::Validation() ->getErrors();
-			$this->incorrectInfo( true, array_values( $errors ) );
+		if ( false === $validation->setRules( $rules ) ->run( $data ) ) {
+			$this->incorrectInfo( true, array_values( $validation->getErrors() ) );
 
 			return false;
 		}
 
-		$whereQuery = [
-			'username' => Services::request() ->getPostGet( 'username' ),
-			'email' => Services::request() ->getPostGet( 'email' )
-		];
-
-		$find_user = $this->user
-		->select( 'username' )
-		->where( $whereQuery )
-		->get()
-		->getRowArray();
+		$find_user = $this->user->select( 'username' ) ->where( $data ) ->get() ->getRowArray();
 
 		if ( null === $find_user ) {
 			$this->incorrectInfo();
@@ -603,7 +588,7 @@ class Red2Horse
 		}
 
 		$this->response[ 'success' ] = true;
-		$this->messageSuccess[] = lang( 'NknAuth.successResetPassword' );
+		$this->messageSuccess[] = lang( 'Red2Horse.successResetPassword' );
 
 		return true;
 	}
@@ -655,7 +640,7 @@ class Red2Horse
 		$this->response[ 'view' ] = true;
 		$this->response[ 'login_incorrect' ] = true;
 
-		$errors[] = lang( 'NknAuth.noteLoggedInAnotherPlatform' );
+		$errors[] = lang( 'Red2Horse.noteLoggedInAnotherPlatform' );
 		$this->messageErrors = [ ...$errors, ...$addMore ];
 
 		if ( true === $getReturn ) return $this->getMessage();
@@ -671,7 +656,7 @@ class Red2Horse
 		$this->response[ 'view' ] = true;
 		$this->response[ 'login_incorrect' ] = true;
 
-		$errors[] = lang( 'NknAuth.errorIncorrectInformation' );
+		$errors[] = lang( 'Red2Horse.errorIncorrectInformation' );
 		$this->messageErrors = [ ...$errors, ...$addMore ];
 
 		return $this->getMessage();
@@ -689,7 +674,7 @@ class Red2Horse
 		false === $throttle ?: $this->response[ 'attemps' ] = $this->model->throttle();
 		$this->response[ 'banned' ] = $status === 'banned';
 		$this->response[ 'inactive' ] = $status === 'inactive';
-		$this->messageErrors[] = lang( 'NknAuth.errorNotReadyYet', [ $status ] );
+		$this->messageErrors[] = lang( 'Red2Horse.errorNotReadyYet', [ $status ] );
 
 		if ( true === $getReturn ) return $this->getMessage();
 	}
@@ -706,7 +691,7 @@ class Red2Horse
 		}
 
 		if ( ! empty( $data ) && false === isAssoc( $data ) ) {
-			throw new \Exception( lang( 'NknAuth.isAssoc' ), 1 );
+			throw new \Exception( lang( 'Red2Horse.isAssoc' ), 1 );
 		}
 
 		$randomKey = Encryption::createKey( 8 );
@@ -734,7 +719,7 @@ class Red2Horse
 	{
 		# --- Set success to true
 		$this->response[ 'success' ] = true;
-		$this->messageSuccess[] = lang( 'NknAuth.successLoggedWithUsername', [ $userData[ 'username' ] ] );
+		$this->messageSuccess[] = lang( 'Red2Horse.successLoggedWithUsername', [ $userData[ 'username' ] ] );
 	}
 
 	/**
@@ -750,7 +735,7 @@ class Red2Horse
 		}
 
 		if ( ! empty( $data ) && false === isAssoc( $data ) ) {
-			throw new \Exception( lang( 'NknAuth.isAssoc' ), 1 );
+			throw new \Exception( lang( 'Red2Horse.isAssoc' ), 1 );
 		}
 
 		$ssId = session_id();
@@ -765,7 +750,7 @@ class Red2Horse
 		return $this->user->update( $updateData, [ 'id' => $userId ], 1 );
 	}
 
-	public function setTestCookie () : void
+	public function regenerateCookie () : void
 	{
 		$config = config( '\Config\App' );
 		$cookieValue = password_hash( session_id(), PASSWORD_DEFAULT );

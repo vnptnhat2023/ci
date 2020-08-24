@@ -13,12 +13,12 @@ interface AuthInterface
 		string $captcha = null
 	) : bool;
 
-	public function logout ( bool $returnType = true ) : bool;
+	public function logout () : bool;
 
 	public function requestPassword (
-		string $username,
-		string $email,
-		bool $returnType = true
+		string $username = null,
+		string $email = null,
+		string $captcha = null
 	) : bool;
 
 	public function getUserdata ( string $key = null );
@@ -32,4 +32,6 @@ interface AuthInterface
 	public function isLoggedIn ( bool $withCookie = false ) : bool;
 
 	public function regenerateCookie () : void;
+
+	public function regenerateSession ( array $userData ) : bool;
 }

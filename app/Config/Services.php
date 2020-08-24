@@ -4,15 +4,18 @@ declare( strict_types = 1 );
 
 namespace Config;
 
+use App\Libraries\Red2Horse\Auth\CiAuthAdapter;
 use App\Libraries\Red2Horse;
+use App\Libraries\Red2Horse\Sys\Red2HorseSession;
 
 use App\Libraries\DesignPattern\Registry;
 use App\Libraries\Extension;
-use App\Libraries\NknAuth\{
-	Config as AuthConfig,
-	NknAuthSession as AuthSession
-};
-use App\Libraries\Red2Horse\Auth\CiAuthAdapter;
+
+// use App\Libraries\NknAuth\{
+// 	Config as AuthConfig,
+// 	NknAuthSession as AuthSession
+// };
+
 use CodeIgniter\Config\Services as CoreServices;
 use CodeIgniter\Session\Session;
 
@@ -22,18 +25,18 @@ class Services extends CoreServices
 	/**
 	 * @return \App\Libraries\NknAuth
 	 */
-	public static function NknAuth ( AuthConfig $config = null, bool $getShared = true )
-	{
-		if ( $getShared === true ) {
-			return static::getSharedInstance( 'NknAuth', $config );
-		}
+	// public static function NknAuth ( AuthConfig $config = null, bool $getShared = true )
+	// {
+	// 	if ( $getShared === true ) {
+	// 		return static::getSharedInstance( 'NknAuth', $config );
+	// 	}
 
-		if ( ! is_object( $config ) ) {
-			$config = config( AuthConfig::class );
-		}
+	// 	if ( ! is_object( $config ) ) {
+	// 		$config = config( AuthConfig::class );
+	// 	}
 
-		return new \App\Libraries\NknAuth( $config );
-	}
+	// 	return new \App\Libraries\NknAuth( $config );
+	// }
 
 	/**
 	 * @return \App\Libraries\Red2Horse\Red2HorseAuth
@@ -82,7 +85,7 @@ class Services extends CoreServices
 		$driver = new $driverName( $config, static::request() ->getIPAddress() );
 		$driver->setLogger($logger);
 
-		$session = new AuthSession( $driver, $config );
+		$session = new Red2HorseSession( $driver, $config );
 		$session->setLogger( $logger );
 
 		if (session_status() === PHP_SESSION_NONE) { $session->start(); }

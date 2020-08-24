@@ -24,22 +24,28 @@ class Login extends BaseController
 
 		$username = $this->request->getPostGet( 'username' );
 		$password = $this->request->getPostGet( 'password' );
-		$rememberMe = null !== $this->request->getPostGet( 'remember_me' ) ? true : false;
+		$rememberMe = null !== $this->request->getPostGet( 'remember_me' );
 		$captcha = $this->request->getPostGet( 'ci_captcha' );
 
-		d( $this->auth->getMessage() );
 		$this->auth->login( $username, $password, $rememberMe, $captcha );
+		d( $this->auth->getMessage() );
 
 		return view( 'login/login', $this->auth->getMessage() );
 	}
 
 	public function forgot ()
 	{
-		// return view( 'login/forgot', $this->auth->requestPassword() );
+		$username = $this->request->getPostGet( 'username' );
+		$email = $this->request->getPostGet( 'email' );
+		$captcha = $this->request->getPostGet( 'ci_captcha' );
+
+		$this->auth->requestPassword( $username, $email, $captcha );
+		return view( 'login/forgot', $this->auth->getMessage() );
 	}
 
 	public function logout ()
 	{
-		// return view( 'login/login', $this->auth->logout() );
+		$this->auth->logout();
+		return view( 'login/login', $this->auth->getMessage() );
 	}
 }

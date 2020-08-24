@@ -193,18 +193,5 @@ Events::on( 'NknAuthRegenerate', function( $userData )
 
 Events::on( 'Red2HorseAuthRegenerate', function( $userData )
 {
-	$ssId = session_id();
-	$whereQuery = [ 'id' => $userData[ 'id' ] ];
-	$setDataQuery = [ 'session_id' => $ssId ];
-
-	$updateStatus = Services::Red2HorseAuth()->user->update( $setDataQuery, $whereQuery, 1 );
-
-	if ( false === $updateStatus )
-	{
-		log_message( 'error', "The session_id of {$userData[ 'id' ]} update failed" );
-	}
-	else
-	{
-		Services::Red2HorseAuth()->regenerateCookie();
-	}
+	Services::Red2HorseAuth()->regenerateSession( $userData );
 } );

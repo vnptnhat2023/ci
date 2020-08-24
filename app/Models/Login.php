@@ -36,7 +36,7 @@ class Login extends Model
   public function __construct ()
   {
 		$config = config( 'Cache', false );
-		$config->storePath .= 'NknAuth';
+		$config->storePath .= 'Red2HorseAuth';
 
 		$this->cacheConfig = $config;
 		$this->db = db_connect();
