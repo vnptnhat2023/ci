@@ -29,10 +29,10 @@ class Red2Horse
 	protected array $messageErrors = [];
 	protected array $messageSuccess = [];
 
-	private ?string $username;
-	private ?string $email;
-	private ?string $password;
-	private ?string $captcha;
+	private ?string $username = null;
+	private ?string $email = null;
+	private ?string $password = null;
+	private ?string $captcha = null;
 	private bool $rememberMe = false;
 
 	protected static string $returnType = 'object';
@@ -273,10 +273,20 @@ class Red2Horse
 	 */
 	public function getMessage ( array $addMore = [] ) : array
 	{
+		$sysCaptcha = \Config\Services::session() ->getFlashdata( 'ci_captcha' );
+
 		$message = [
 			'success' => $this->messageSuccess,
 			'errors' => $this->messageErrors,
-			'result' => $this->getResult()
+			'result' => $this->getResult(),
+			'form' => [
+				'username' => $this->username,
+				'email' => $this->email,
+				'password' => $this->password,
+				'captcha' => $this->captcha,
+				'flash_captcha' => $sysCaptcha[ 'word' ] ?? null,
+				'remember_me' => $this->rememberMe
+			]
 		];
 
 		empty( $addMore ) ?: $message += $addMore;
