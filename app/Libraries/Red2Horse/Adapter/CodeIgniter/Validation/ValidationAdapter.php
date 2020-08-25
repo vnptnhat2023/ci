@@ -4,7 +4,6 @@ declare( strict_types = 1 );
 
 namespace App\Libraries\Red2Horse\Adapter\Codeigniter\Validation;
 
-use CodeIgniter\HTTP\IncomingRequest;
 use CodeIgniter\Validation\ValidationInterface;
 
 /**
@@ -20,9 +19,12 @@ class ValidationAdapter implements ValidationAdapterInterface
 		$this->validate = $validate;
 	}
 
-	public function isValid ( array $data, array $rules, IncomingRequest $request ) : bool
+	public function isValid ( array $data, array $rules ) : bool
 	{
-		return $this->validate ->withRequest( $request ) ->setRules( $rules ) ->run( $data );
+		return $this->validate
+		->withRequest( \Config\Services::request() )
+		->setRules( $rules )
+		->run( $data );
 	}
 
 	public function getErrors( string $field = null ) : array

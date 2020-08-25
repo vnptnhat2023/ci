@@ -86,9 +86,11 @@ class Test extends BaseController {
 
 	public function test()
 	{
-		$cf = new \App\Libraries\NknAuth\Config;
+		$ciValidation = \Config\Services::validation();
+		$adapter = new \App\Libraries\Red2Horse\Adapter\Codeigniter\Validation\ValidationAdapter( $ciValidation );
+		$validationAdapter = new \App\Libraries\Red2Horse\Facade\Validation\ValidationFacade( $adapter );
 
-		var_dump($cf);
+		var_dump($validationAdapter);
 	}
 
 	public function ci_tl()

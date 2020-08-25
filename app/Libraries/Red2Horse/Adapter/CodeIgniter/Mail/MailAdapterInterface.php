@@ -18,5 +18,5 @@ interface MailAdapterInterface
 
 	public function message ( $message ) : Email;
 
-	public function send () : bool;
+	public function send ( bool $autoClear = true ) : bool;
 }

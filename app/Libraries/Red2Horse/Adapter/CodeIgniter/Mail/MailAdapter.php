@@ -34,7 +34,7 @@ class MailAdapter implements MailAdapterInterface
 		return $this->email->setMessage( $message );
 	}
 
-	public function send ( $autoClear = true ) : bool
+	public function send ( bool $autoClear = true ) : bool
 	{
 		return $this->email->send( $autoClear );
 	}

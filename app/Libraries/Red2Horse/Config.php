@@ -22,6 +22,10 @@ class Config
 	public object $throttle;
 
 	public string $authAdapter = '\App\Libraries\Red2Horse\Adapter\CodeIgniter\Auth\AuthAdapter';
+	public string $mailAdapter = '\App\Libraries\Red2Horse\Adapter\CodeIgniter\Mail\MailAdapter';
+	public string $validationAdapter = '\App\Libraries\Red2Horse\Adapter\CodeIgniter\Validation\ValidationAdapter';
+	public string $databaseAdapter = '\App\Libraries\Red2Horse\Adapter\CodeIgniter\Database\DatabaseAdapter';
+	public string $cacheAdapter = '\App\Libraries\Red2Horse\Adapter\CodeIgniter\Cache\CacheAdapter';
 
 	public function __construct ()
 	{

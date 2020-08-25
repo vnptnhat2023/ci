@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 
 namespace App\Libraries\Red2Horse\Facade\Validation;
 
-interface ValidateFacadeInterface
+interface ValidationFacadeInterface
 {
 	public function isValid ( array $data, array $rules) : bool;
 

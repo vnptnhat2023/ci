@@ -4,11 +4,13 @@ declare( strict_types = 1 );
 
 namespace App\Libraries\Red2Horse\Facade\Validation;
 
-class ValidationFacade implements ValidateFacadeInterface
-{
-	protected ValidateFacadeInterface $validationAdapter;
+// use App\Libraries\Red2Horse\Adapter\Codeigniter\Validation\ValidationAdapterInterface;
 
-	public function __construct ( ValidateFacadeInterface $validate )
+class ValidationFacade implements ValidationFacadeInterface
+{
+	protected ValidationFacadeInterface $validationAdapter;
+
+	public function __construct ( ValidationFacadeInterface $validate )
 	{
 		$this->validationAdapter = $validate;
 	}
