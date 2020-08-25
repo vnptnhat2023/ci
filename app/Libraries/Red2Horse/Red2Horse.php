@@ -279,8 +279,11 @@ class Red2Horse
 				'email' => $this->email,
 				'password' => $this->password,
 				'captcha' => $this->captcha,
-				'flash_captcha' => $sysCaptcha[ 'word' ] ?? null,
 				'remember_me' => $this->rememberMe
+			],
+			'r2h_auth' => [
+				'config' => $this->config,
+				'captcha' => $sysCaptcha[ 'word' ] ?? null
 			]
 		];
 

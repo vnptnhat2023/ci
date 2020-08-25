@@ -4,28 +4,25 @@ declare( strict_types = 1 );
 
 namespace App\Libraries\Red2Horse\Adapter\Codeigniter\Validation;
 
-use CodeIgniter\HTTP\request;
+use CodeIgniter\HTTP\IncomingRequest;
 use CodeIgniter\Validation\ValidationInterface;
 
-class Adapter implements AdapterInterface
+/**
+ * @package Red2ndHorseAuth
+ * @author Red2Horse
+ */
+class ValidationAdapter implements ValidationAdapterInterface
 {
 	protected ValidationInterface $validate;
 
-	protected request $request;
-
-
-	public function __construct ( ValidationInterface $validate, request $request )
+	public function __construct ( ValidationInterface $validate )
 	{
 		$this->validate = $validate;
-		$this->request = $request;
 	}
 
-	public function isValid ( array $data, array $rules ) : bool
+	public function isValid ( array $data, array $rules, IncomingRequest $request ) : bool
 	{
-		return $this->validate
-		->withRequest( $this->request )
-		->setRules( $rules )
-		->run( $data );
+		return $this->validate ->withRequest( $request ) ->setRules( $rules ) ->run( $data );
 	}
 
 	public function getErrors( string $field = null ) : array

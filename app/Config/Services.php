@@ -50,7 +50,8 @@ class Services extends CoreServices
 			$config = new Red2HorseConfig;
 		}
 
-		return new AuthAdapter( new AuthFacade ( new Red2Horse( $config ) ) );
+		$authFacade = new AuthFacade ( new Red2Horse( $config ) );
+		return new $config->authAdapter( $authFacade );
 	}
 
 	public static function Extension ( bool $getShared = true ) : Extension

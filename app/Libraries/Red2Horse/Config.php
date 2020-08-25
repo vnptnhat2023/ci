@@ -21,6 +21,8 @@ class Config
 	public int $ttl = self::TIME_TO_LIFE;
 	public object $throttle;
 
+	public string $authAdapter = '\App\Libraries\Red2Horse\Adapter\CodeIgniter\Auth\AuthAdapter';
+
 	public function __construct ()
 	{
 		$this->throttle = (object) self::THROTTLE;
