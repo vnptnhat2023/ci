@@ -2,15 +2,15 @@
 
 declare( strict_types = 1 );
 
-namespace App\Libraries\Red2Horse\Facade\Auth;
+namespace App\Libraries\Red2Horse\Adapter\Auth;
 
-use App\Libraries\Red2Horse\Red2Horse;
+use App\Libraries\Red2Horse\Facade\Auth\AuthFacadeInterface;
 
 class AuthAdapter implements AuthAdapterInterface
 {
-	protected Red2Horse $auth;
+	protected AuthFacadeInterface $auth;
 
-	public function __construct ( Red2Horse $auth )
+	public function __construct ( AuthFacadeInterface $auth )
 	{
 		$this->auth = $auth;
 	}
@@ -20,14 +20,9 @@ class AuthAdapter implements AuthAdapterInterface
 		string $password = null,
 		bool $rememberMe = false,
 		string $captcha = null
-	): bool
+	) : bool
 	{
 		return $this->auth->login( $username, $password, $rememberMe, $captcha );
-	}
-
-	public function logout () : bool
-	{
-		return $this->auth->logout();
 	}
 
 	public function requestPassword (
@@ -36,9 +31,17 @@ class AuthAdapter implements AuthAdapterInterface
 		string $captcha = null
 	) : bool
 	{
-		return $this->auth->requestPassword( $username, $email );
+		return $this->auth->requestPassword( $username, $email, $captcha );
 	}
 
+	public function logout () : bool
+	{
+		return $this->auth->logout();
+	}
+
+	/**
+	 * @return mixed
+	 */
 	public function getUserdata ( string $key = null )
 	{
 		return $this->auth->getUserdata( $key );
@@ -46,12 +49,12 @@ class AuthAdapter implements AuthAdapterInterface
 
 	public function isLoggedIn ( bool $withCookie = false ) : bool
 	{
-		return $this->auth->isLogged( $withCookie );
+		return $this->auth->isLoggedIn( $withCookie );
 	}
 
 	public function getPasswordHash ( string $pass, int $cost = 12 ) : string
 	{
-		return $this->auth->getHashPass( $pass, $cost );
+		return $this->auth->getPasswordHash( $pass, $cost );
 	}
 
 	public function getMessage ( array $addMore = [] ) : array
@@ -61,7 +64,7 @@ class AuthAdapter implements AuthAdapterInterface
 
 	public function withPermission ( array $data ) : bool
 	{
-		return $this->auth->hasPermission( $data );
+		return $this->auth->withPermission( $data );
 	}
 
 	public function regenerateCookie () : void
@@ -73,5 +76,4 @@ class AuthAdapter implements AuthAdapterInterface
 	{
 		return $this->auth->regenerateSession( $userData );
 	}
-
 }

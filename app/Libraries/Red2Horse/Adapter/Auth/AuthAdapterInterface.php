@@ -2,13 +2,13 @@
 
 declare( strict_types = 1 );
 
-namespace App\Libraries\Red2Horse\Adapter\Red2Horse;
+namespace App\Libraries\Red2Horse\Adapter\Auth;
 
 /**
  * @package Red2HorseAuth
  * @author Red2Horse
  */
-interface AdapterInterface
+interface AuthAdapterInterface
 {
 	public function login (
 		string $username = null,

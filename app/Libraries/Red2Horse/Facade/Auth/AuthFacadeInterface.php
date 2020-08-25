@@ -8,7 +8,7 @@ namespace App\Libraries\Red2Horse\Facade\Auth;
  * @package Red2HorseAuth
  * @author Red2Horse
  */
-interface AuthAdapterInterface
+interface AuthFacadeInterface
 {
 	public function login (
 		string $username = null,
