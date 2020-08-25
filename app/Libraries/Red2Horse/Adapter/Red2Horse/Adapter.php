@@ -4,15 +4,13 @@ declare( strict_types = 1 );
 
 namespace App\Libraries\Red2Horse\Adapter\Red2Horse;
 
-use App\Libraries\Red2Horse\Adapter\Auth\{
-	AdapterInterface as CiAdapterInterface
-};
+use App\Libraries\Red2Horse\Facade\Auth\AuthAdapterInterface;
 
 class Adapter implements AdapterInterface
 {
-	protected CiAdapterInterface $auth;
+	protected AuthAdapterInterface $auth;
 
-	public function __construct ( CiAdapterInterface $auth )
+	public function __construct ( AuthAdapterInterface $auth )
 	{
 		$this->auth = $auth;
 	}

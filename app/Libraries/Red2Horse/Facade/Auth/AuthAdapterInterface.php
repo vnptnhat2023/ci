@@ -1,20 +1,15 @@
 <?php
 
-namespace App\Libraries\Red2Horse\Adapter\Auth;
+declare( strict_types = 1 );
+
+namespace App\Libraries\Red2Horse\Facade\Auth;
 
 /**
  * @package Red2HorseAuth
  * @author Red2Horse
  */
-interface AdapterInterface
+interface AuthAdapterInterface
 {
-
-	/**
-	 * @param true $returnType get result as object
-	 * @param false $returnType get result as array
-	 *
-	 * @return array
-	 */
 	public function login (
 		string $username = null,
 		string $password = null,

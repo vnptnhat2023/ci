@@ -2,11 +2,11 @@
 
 declare( strict_types = 1 );
 
-namespace App\Libraries\Red2Horse\Adapter\Auth;
+namespace App\Libraries\Red2Horse\Facade\Auth;
 
 use App\Libraries\Red2Horse\Red2Horse;
 
-class Adapter implements AdapterInterface
+class AuthAdapter implements AuthAdapterInterface
 {
 	protected Red2Horse $auth;
 

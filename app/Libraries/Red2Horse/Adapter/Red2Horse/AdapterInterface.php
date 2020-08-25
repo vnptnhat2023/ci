@@ -4,6 +4,10 @@ declare( strict_types = 1 );
 
 namespace App\Libraries\Red2Horse\Adapter\Red2Horse;
 
+/**
+ * @package Red2HorseAuth
+ * @author Red2Horse
+ */
 interface AdapterInterface
 {
 	public function login (
