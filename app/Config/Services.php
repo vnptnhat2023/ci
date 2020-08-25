@@ -5,8 +5,7 @@ declare( strict_types = 1 );
 namespace Config;
 
 use App\Libraries\Red2Horse\Facade\Auth\AuthFacade;
-use App\Libraries\Red2Horse\Adapter\CodeIgniter\Auth\AuthAdapter;
-use App\Libraries\Red2Horse\Config as Red2HorseConfig;
+use App\Libraries\Red2Horse\Config as r2hConfig;
 use App\Libraries\Red2Horse\Sys\Red2HorseSession;
 use App\Libraries\Red2Horse\Red2Horse;
 
@@ -38,20 +37,20 @@ class Services extends CoreServices
 	}*/
 
 	/**
-	 * @return \App\Libraries\Red2Horse\Red2HorseAuth
+	 * @return AuthFacade
 	 */
-	public static function Red2HorseAuth ( Red2HorseConfig $config = null, bool $getShared = true )
+	public static function Red2HorseAuth ( r2hConfig $config = null, bool $getShared = true )
 	{
 		if ( $getShared === true ) {
 			return static::getSharedInstance( 'Red2HorseAuth', $config );
 		}
 
 		if ( ! is_object( $config ) ) {
-			$config = new Red2HorseConfig;
+			$config = new r2hConfig;
 		}
 
-		$authFacade = new AuthFacade ( new Red2Horse( $config ) );
-		return new $config->authAdapter( $authFacade );
+		$adapter = new $config->authAdapter ( new Red2Horse( $config ) );
+		return new AuthFacade( $adapter );
 	}
 
 	public static function Extension ( bool $getShared = true ) : Extension

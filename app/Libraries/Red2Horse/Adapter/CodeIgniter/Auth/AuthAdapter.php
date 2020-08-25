@@ -4,13 +4,15 @@ declare( strict_types = 1 );
 
 namespace App\Libraries\Red2Horse\Adapter\CodeIgniter\Auth;
 
-use App\Libraries\Red2Horse\Facade\Auth\AuthFacadeInterface;
+// use App\Libraries\Red2Horse\Facade\Auth\AuthFacadeInterface;
+
+use App\Libraries\Red2Horse\Red2Horse;
 
 class AuthAdapter implements AuthAdapterInterface
 {
-	protected AuthFacadeInterface $auth;
+	protected Red2Horse $auth;
 
-	public function __construct ( AuthFacadeInterface $auth )
+	public function __construct ( Red2Horse $auth )
 	{
 		$this->auth = $auth;
 	}
@@ -49,12 +51,12 @@ class AuthAdapter implements AuthAdapterInterface
 
 	public function isLoggedIn ( bool $withCookie = false ) : bool
 	{
-		return $this->auth->isLoggedIn( $withCookie );
+		return $this->auth->isLogged( $withCookie );
 	}
 
 	public function getPasswordHash ( string $pass, int $cost = 12 ) : string
 	{
-		return $this->auth->getPasswordHash( $pass, $cost );
+		return $this->auth->getHashPass( $pass, $cost );
 	}
 
 	public function getMessage ( array $addMore = [] ) : array
@@ -64,7 +66,7 @@ class AuthAdapter implements AuthAdapterInterface
 
 	public function withPermission ( array $data ) : bool
 	{
-		return $this->auth->withPermission( $data );
+		return $this->auth->hasPermission( $data );
 	}
 
 	public function regenerateCookie () : void

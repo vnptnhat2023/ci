@@ -3,11 +3,11 @@
 # --- Todo: Move current file to [Auth-folder]
 namespace App\Controllers;
 
-use \App\Libraries\Red2Horse\Adapter\CodeIgniter\Auth\AuthAdapterInterface;
+use \App\Libraries\Red2Horse\Facade\Auth\AuthFacadeInterface as r2hAuth;
 
 class Login extends BaseController
 {
-	private AuthAdapterInterface $auth;
+	private r2hAuth $auth;
 
 	public function __construct()
 	{
