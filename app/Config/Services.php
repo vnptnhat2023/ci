@@ -5,7 +5,7 @@ declare( strict_types = 1 );
 namespace Config;
 
 use App\Libraries\Red2Horse\Facade\Auth\AuthFacade;
-use App\Libraries\Red2Horse\Adapter\Auth\AuthAdapter;
+use App\Libraries\Red2Horse\Adapter\CodeIgniter\Auth\AuthAdapter;
 use App\Libraries\Red2Horse\Config as Red2HorseConfig;
 use App\Libraries\Red2Horse\Sys\Red2HorseSession;
 use App\Libraries\Red2Horse\Red2Horse;
@@ -47,7 +47,7 @@ class Services extends CoreServices
 		}
 
 		if ( ! is_object( $config ) ) {
-			$config = config( Red2HorseConfig::class );
+			$config = new Red2HorseConfig;
 		}
 
 		return new AuthAdapter( new AuthFacade ( new Red2Horse( $config ) ) );
