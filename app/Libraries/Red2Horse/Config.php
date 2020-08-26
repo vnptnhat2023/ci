@@ -16,16 +16,18 @@ class Config
   	'timeout' => 1800
 	];
 
+	private const DEFAULT_ADAPTER = 'CodeIgniter';
+
 	public string $session = self::SESSION_NAME;
 	public string $cookie = self::COOKIE_NAME;
 	public int $ttl = self::TIME_TO_LIFE;
 	public object $throttle;
 
-	public string $authAdapter = '\App\Libraries\Red2Horse\Adapter\CodeIgniter\Auth\AuthAdapter';
-	public string $mailAdapter = '\App\Libraries\Red2Horse\Adapter\CodeIgniter\Mail\MailAdapter';
-	public string $validationAdapter = '\App\Libraries\Red2Horse\Adapter\CodeIgniter\Validation\ValidationAdapter';
-	public string $databaseAdapter = '\App\Libraries\Red2Horse\Adapter\CodeIgniter\Database\DatabaseAdapter';
-	public string $cacheAdapter = '\App\Libraries\Red2Horse\Adapter\CodeIgniter\Cache\CacheAdapter';
+	public string $authAdapter = '\App\Libraries\Red2Horse\Adapter\\' . self::DEFAULT_ADAPTER . '\\Auth\AuthAdapter';
+	public string $mailAdapter = '\App\Libraries\Red2Horse\Adapter\\' . self::DEFAULT_ADAPTER . '\\Mail\MailAdapter';
+	public string $validationAdapter = '\App\Libraries\Red2Horse\Adapter\\' . self::DEFAULT_ADAPTER . '\\Validation\ValidationAdapter';
+	public string $databaseAdapter = '\App\Libraries\Red2Horse\Adapter\\' . self::DEFAULT_ADAPTER . '\\Database\DatabaseAdapter';
+	public string $cacheAdapter = '\App\Libraries\Red2Horse\Adapter\\' . self::DEFAULT_ADAPTER . '\\Cache\CacheAdapter';
 
 	public function __construct ()
 	{

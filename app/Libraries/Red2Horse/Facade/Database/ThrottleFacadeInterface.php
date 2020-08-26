@@ -19,5 +19,5 @@ interface ThrottleFacadeInterface
 
 	public function throttle () : int;
 
-	public function throttle_cleanup () : void;
+	public function cleanup () : void;
 }
