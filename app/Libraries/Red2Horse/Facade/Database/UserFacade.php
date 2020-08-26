@@ -4,9 +4,9 @@ declare( strict_types = 1 );
 
 namespace App\Libraries\Red2Horse\Facade\Database;
 
-class UserFacade
+class UserFacade implements UserFacadeInterface
 {
-	public function getUserById ( int $id, array $data ) : array
+	public function getUserById ( array $where ) : array
 	{
 		return [];
 	}

@@ -6,7 +6,7 @@ namespace App\Libraries\Red2Horse\Facade\Database;
 
 interface UserFacadeInterface
 {
-	public function getUserById ( int $id, array $data ) : array;
+	public function getUserById ( array $where ) : array;
 
 	public function updateUserById ( int $id, array $data ) : bool;
 }
