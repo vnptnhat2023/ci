@@ -1,19 +1,11 @@
-<?php namespace App\Controllers;
+<?php
+
+namespace App\Controllers;
 
 use App\Libraries\DesignPattern as StateGyPattern;
 use \Config\Services;
 use CodeIgniter\Events\Events;
-use CodeIgniter\HTTP\UserAgent;
-
-class customException extends \Exception
-{
-	public function errorMessage() {
-		$errorMsg = $this->getMessage().' is not a valid E-Mail address.';
-
-		return $errorMsg;
-	}
-}
-
+// use CodeIgniter\HTTP\UserAgent;
 
 class Test extends BaseController {
 
@@ -86,11 +78,19 @@ class Test extends BaseController {
 
 	public function test()
 	{
-		$ciValidation = \Config\Services::validation();
-		$adapter = new \App\Libraries\Red2Horse\Adapter\Codeigniter\Validation\ValidationAdapter( $ciValidation );
-		$validationAdapter = new \App\Libraries\Red2Horse\Facade\Validation\ValidationFacade( $adapter );
+		$model = new \App\Libraries\Red2Horse\Adapter\CodeIgniter\Database\ThrottleModelAdapter;
 
-		var_dump($validationAdapter);
+		$whereQuery = [
+			'ip' => Services::request() ->getIPAddress(),
+			'type' => 1
+		];
+
+		$row = $model
+		->select( "COUNT(id) as count", false )
+		->where( $whereQuery )
+		->first();
+
+		var_dump( $row );
 	}
 
 	public function ci_tl()

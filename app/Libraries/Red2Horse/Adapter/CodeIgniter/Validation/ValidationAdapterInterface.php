@@ -13,6 +13,4 @@ interface ValidationAdapterInterface extends ValidationFacadeInterface
 	public function isValid ( array $data, array $rules ) : bool;
 
 	public function getErrors( string $field = null ) : array;
-
-	# --- Extends because declare more method
 }

@@ -352,24 +352,19 @@ class Red2Horse
 
 	public function regenerateSession ( array $userData ) : bool
 	{
-		if ( ! $this->isLogged() ) return false;
+		if ( false === $this->isLogged() ) return false;
 
 		$ssId = session_id();
 		$whereQuery = [ 'id' => $userData[ 'id' ] ];
 		$setDataQuery = [ 'session_id' => $ssId ];
 
-		$updateStatus = $this->user->update( $setDataQuery, $whereQuery, 1 );
-
-		if ( false === $updateStatus )
-		{
+		if ( false === $this->user->update( $setDataQuery, $whereQuery, 1 ) ) {
 			log_message( 'error', "The session_id of {$userData[ 'id' ]} update failed" );
 			return false;
 		}
-		else
-		{
-			$this->regenerateCookie();
-			return true;
-		}
+
+		$this->regenerateCookie();
+		return true;
 	}
 
 	private function cookieHandler () : bool
