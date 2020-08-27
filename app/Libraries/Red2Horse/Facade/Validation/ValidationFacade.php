@@ -4,11 +4,9 @@ declare( strict_types = 1 );
 
 namespace App\Libraries\Red2Horse\Facade\Validation;
 
-// use App\Libraries\Red2Horse\Adapter\Codeigniter\Validation\ValidationAdapterInterface;
-
 class ValidationFacade implements ValidationFacadeInterface
 {
-	protected ValidationFacadeInterface $validationAdapter;
+	protected ValidationFacadeInterface $validate;
 
 	protected $rules = [
 		'login' => [ 'username', 'password' ],
@@ -19,7 +17,7 @@ class ValidationFacade implements ValidationFacadeInterface
 
 	public function __construct ( ValidationFacadeInterface $validate )
 	{
-		$this->validationAdapter = $validate;
+		$this->validate = $validate;
 	}
 
 	public function isValid ( array $data, array $rules ) : bool
@@ -32,27 +30,31 @@ class ValidationFacade implements ValidationFacadeInterface
 		return $this->validate->getErrors( $field );
 	}
 
-	public function rules ( $needed )
+	/**
+	 * @param string|array $needed
+	 * @return string|array
+	 */
+	public function getRules ( $needed )
 	{
 		$generalRules = [
 
 			'username' => [
-				'label' => lang( 'NKnAuth.labelUsername' ),
+				'label' => lang( 'Red2Horse.labelUsername' ),
 				'rules' => 'trim|required|min_length[5]|max_length[32]|alpha_dash'
 			],
 
 			'password' => [
-				'label' => lang( 'NKnAuth.labelPassword' ),
+				'label' => lang( 'Red2Horse.labelPassword' ),
 				'rules' => 'trim|required|min_length[5]|max_length[32]|alpha_numeric_punct'
 			],
 
 			'email' => [
-				'label' => lang( 'NKnAuth.labelEmail' ),
+				'label' => lang( 'Red2Horse.labelEmail' ),
 				'rules' => 'trim|required|min_length[5]|max_length[128]|valid_email'
 			],
 
 			'ci_captcha' => [
-				'label' => lang( 'NKnAuth.labelCaptcha' ),
+				'label' => lang( 'Red2Horse.labelCaptcha' ),
 				'rules' => 'trim|required|min_length[5]|ci_captcha'
 			]
 		];

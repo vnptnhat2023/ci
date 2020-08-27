@@ -4,14 +4,11 @@ declare( strict_types = 1 );
 
 namespace App\Libraries\Red2Horse\Facade\Auth;
 
-use App\Libraries\Red2Horse\Adapter\CodeIgniter\Auth\AuthAdapterInterface;
-// use App\Libraries\Red2Horse\Red2Horse;
-
 class AuthFacade implements AuthFacadeInterface
 {
-	protected AuthAdapterInterface $auth;
+	protected AuthFacadeInterface $auth;
 
-	public function __construct ( AuthAdapterInterface $auth )
+	public function __construct ( AuthFacadeInterface $auth )
 	{
 		$this->auth = $auth;
 	}

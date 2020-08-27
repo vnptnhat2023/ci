@@ -6,18 +6,29 @@ namespace App\Libraries\Red2Horse\Facade\Mail;
 
 class MailFacade implements MailFacadeInterface
 {
+	protected MailFacadeInterface $mail;
+
+	public function __construct( MailFacadeInterface $mail )
+	{
+		$this->mail = $mail;
+	}
+
 	public function to ( $to ) : self
 	{
+		$this->mail->to( $to );
+
 		return $this;
 	}
 
 	public function subject ( $subject ) : self
 	{
+		$this->mail->subject( $subject );
+
 		return $this;
 	}
 
 	public function send () : bool
 	{
-		return true;
+		return $this->mail->send();
 	}
 }
