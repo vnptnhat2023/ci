@@ -4,19 +4,12 @@ declare( strict_types = 1 );
 
 namespace App\Libraries\Red2Horse\Adapter\Codeigniter\Mail;
 
-use CodeIgniter\Email\Email;
+use App\Libraries\Red2Horse\Facade\Mail\MailFacadeInterface;
 
 /**
  * @package Red2ndHorseAuth
  * @author Red2Horse
  */
-interface MailAdapterInterface
+interface MailAdapterInterface extends MailFacadeInterface
 {
-	public function to ( $to ) : Email;
-
-	public function subject ( $subject ) : Email;
-
-	public function message ( $message ) : Email;
-
-	public function send ( bool $autoClear = true ) : bool;
 }

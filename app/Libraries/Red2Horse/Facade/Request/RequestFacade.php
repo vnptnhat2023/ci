@@ -13,13 +13,33 @@ class RequestFacade implements RequestFacadeInterface
 		$this->$request = $request;
 	}
 
-	public function get ( string $key )
+	public function post ( $index = null, $filter = null, $flags = null )
 	{
-		return $this->request->get( $key );
+		return $this->request->post( $index, $filter, $flags );
 	}
 
-	public function set ( string $key, $value, $timeToLife = 86400 )
+	public function get ( $index = null, $filter = null, $flags = null )
 	{
-		return $this->request->set( $key, $value, $timeToLife );
+		return $this->request->get( $index, $filter, $flags );
+	}
+
+	public function getAndPost ( $index = null, $filter = null, $flags = null )
+	{
+		return $this->request->getAndPost( $index, $filter, $flags );
+	}
+
+	public function postAndGet ( $index = null, $filter = null, $flags = null )
+	{
+		return $this->request->postAndGet( $index, $filter, $flags );
+	}
+
+	public function getRawInput ()
+	{
+		return $this->request->getRawInput();
+	}
+
+	public function getIPAddress () : string
+	{
+		return $this->request->getIPAddress();
 	}
 }

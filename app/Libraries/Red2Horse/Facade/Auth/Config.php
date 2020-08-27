@@ -18,6 +18,8 @@ class Config
 
 	private const ADAPTER = 'CodeIgniter';
 
+	public int $randomBytesLength = 8;
+
 	public string $session = self::SESSION_NAME;
 	public string $cookie = self::COOKIE_NAME;
 	public int $ttl = self::TIME_TO_LIFE;

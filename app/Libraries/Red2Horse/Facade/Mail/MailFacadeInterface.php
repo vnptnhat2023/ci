@@ -10,5 +10,9 @@ interface MailFacadeInterface
 
 	public function subject ( $subject ) : self;
 
+	public function message ( $subject ) : self;
+
 	public function send () : bool;
+
+	public function getErrors() : string;
 }

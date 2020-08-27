@@ -19,23 +19,34 @@ class MailAdapter implements MailAdapterInterface
 		$this->email = $email;
 	}
 
-	public function to ( $to ) : Email
+	public function to ( $to ) : self
 	{
-		return $this->email->setTo( $to );
+		$this->email->setTo( $to );
+
+		return $this;
 	}
 
-	public function subject ( $subject ) : Email
+	public function subject ( $subject ) : self
 	{
-		return $this->email->setSubject( $subject );
+		$this->email->setSubject( $subject );
+
+		return $this;
 	}
 
-	public function message( $message ): Email
+	public function message( $message ): self
 	{
-		return $this->email->setMessage( $message );
+		$this->email->setMessage( $message );
+
+		return $this;
 	}
 
 	public function send ( bool $autoClear = true ) : bool
 	{
 		return $this->email->send( $autoClear );
+	}
+
+	public function getErrors(): string
+	{
+		return $this->email->printDebugger();
 	}
 }

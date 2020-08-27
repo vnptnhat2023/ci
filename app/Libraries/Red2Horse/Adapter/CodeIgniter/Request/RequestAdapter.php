@@ -44,4 +44,8 @@ class RequestAdapter implements RequestAdapterInterface
 		return $this->request->getRawInput();
 	}
 
+	public function getIPAddress() : string
+	{
+		return $this->request->getIPAddress();
+	}
 }

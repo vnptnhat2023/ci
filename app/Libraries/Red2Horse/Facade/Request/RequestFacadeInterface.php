@@ -6,7 +6,15 @@ namespace App\Libraries\Red2Horse\Facade\Request;
 
 interface RequestFacadeInterface
 {
-	public function get ( string $key );
+	public function post ( $index = null, $filter = null, $flags = null );
 
-	public function set ( string $key, $value, $timeToLife = 86400 );
+	public function get ( $index = null, $filter = null, $flags = null );
+
+	public function getAndPost ( $index = null, $filter = null, $flags = null );
+
+	public function postAndGet ( $index = null, $filter = null, $flags = null );
+
+	public function getRawInput ();
+
+	public function getIPAddress() :string;
 }

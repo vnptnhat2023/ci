@@ -27,8 +27,20 @@ class MailFacade implements MailFacadeInterface
 		return $this;
 	}
 
+	public function message ( $subject ) : self
+	{
+		$this->mail->message( $subject );
+
+		return $this;
+	}
+
 	public function send () : bool
 	{
 		return $this->mail->send();
+	}
+
+	public function getErrors(): string
+	{
+		return $this->mail->getErrors();
 	}
 }
