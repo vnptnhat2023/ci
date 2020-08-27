@@ -6,6 +6,11 @@ use App\Libraries\DesignPattern as StateGyPattern;
 use \Config\Services;
 use CodeIgniter\Events\Events;
 // use CodeIgniter\HTTP\UserAgent;
+use App\Libraries\Red2Horse\Adapter\CodeIgniter\Database\{
+	ThrottleModelAdapter as AuthThrottleModel,
+	ThrottleAdapter as AuthThrottleAdapter
+};
+use App\Libraries\Red2Horse\Facade\Database\ThrottleFacade as AuthThrottleFacade;
 
 class Test extends BaseController {
 
@@ -78,19 +83,11 @@ class Test extends BaseController {
 
 	public function test()
 	{
-		$model = new \App\Libraries\Red2Horse\Adapter\CodeIgniter\Database\ThrottleModelAdapter;
+		$model = new AuthThrottleModel();
+		$adapter = new AuthThrottleAdapter( $model );
+		$throttle = new AuthThrottleFacade( $adapter );
 
-		$whereQuery = [
-			'ip' => Services::request() ->getIPAddress(),
-			'type' => 1
-		];
-
-		$row = $model
-		->select( "COUNT(id) as count", false )
-		->where( $whereQuery )
-		->first();
-
-		var_dump( $row );
+		var_dump( $throttle->throttle() );
 	}
 
 	public function ci_tl()

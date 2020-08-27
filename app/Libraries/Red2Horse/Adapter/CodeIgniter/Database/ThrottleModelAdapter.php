@@ -17,11 +17,11 @@ use Config\Services;
 
 class ThrottleModelAdapter extends Model
 {
-  private int $login_attempts = 0;
-  private int $login_type = 1;
-  private int $login_limit_one = 5;
-  private int $login_limit = 10;
-	private int $login_timeout = 1800;
+  private int $attempts = 0;
+  private int $type = 1;
+  private int $captchaAttempts = 5;
+  private int $maxAttempts = 10;
+	private int $timeoutAttempts = 1800;
 
 	private BaseConfig $cacheConfig;
 	private string $cacheName = '';
@@ -49,20 +49,21 @@ class ThrottleModelAdapter extends Model
 
   public function config (
 		int $type,
-		int $limit_one,
-		int $limit,
-		int $timeout
+		int $captchaAttempts,
+		int $maxAttempts,
+		int $timeoutAttempts
 	) : self
 	{
-		$this->login_type = $type;
-		$this->login_limit_one = $limit_one;
-		$this->login_limit = $limit;
-		$this->login_timeout = $timeout;
+		$this->type = $type;
+		$this->captchaAttempts = $captchaAttempts;
+		$this->maxAttempts = $maxAttempts;
+		$this->timeoutAttempts = $timeoutAttempts;
 
 		if ( $this->cache() ->isSupported() )
 		{
-			if ( $cacheData = $this->cache() ->get( $this->cacheName ) )
-			$this->login_attempts = $cacheData[ 'login_attempts' ];
+			if ( $cacheData = $this->cache() ->get( $this->cacheName ) ) {
+				$this->attempts = $cacheData[ 'login_attempts' ];
+			}
 		}
 		else
 		{
@@ -80,29 +81,25 @@ class ThrottleModelAdapter extends Model
 				throw new ModelException('The number of row cannot be empty' );
 			}
 
-			$this->login_attempts = $row->count;
+			$this->attempts = $row->count;
 		}
 
 		return $this;
 	}
 
-	public function getAttempts() : int
+	public function getAttempts()
 	{
-		return $this->login_attempts;
+		return $this->attempts;
 	}
 
   public function showCaptcha () : bool
   {
-		return $this->login_attempts >= --$this->login_limit_one;
+		return $this->attempts >= --$this->captchaAttempts;
   }
 
-  public function limited ()
+  public function limited () : bool
   {
-		if ( $this->login_attempts >= $this->login_limit )
-		return $this->login_timeout;
-
-		else
-    return false;
+		return $this->attempts >= $this->maxAttempts;
 	}
 
   /**
@@ -111,11 +108,9 @@ class ThrottleModelAdapter extends Model
    */
   public function throttle () : int
   {
-		if ( $this->limited() )
-		return $this->limited();
+		if ( $this->limited() ) return $this->maxAttempts;
 
-		if ( $this->cache() ->isSupported() )
-		return $this->throttle_cache();
+		if ( $this->cache() ->isSupported() ) return $this->throttle_cache();
 
 		return $this->throttle_db();
   }
@@ -128,18 +123,18 @@ class ThrottleModelAdapter extends Model
 		}
 		else
 		{
-			$time = strtotime( '-' . (int) $this->login_timeout . ' minutes' );
+			$time = strtotime( '-' . (int) $this->timeoutAttempts . ' minutes' );
 			$from = date( 'Y-00-00 00:00:00' );
 			$to = date( 'Y-m-d H:i:s', $time );
 
 			// $this ->builder()
 			// ->where( "created_at BETWEEN '{$from}' AND '{$to}'")
 			// ->where( 'ip', Services::request() ->getIPAddress() )
-			// ->delete( [ 'type' => $this->login_type ], 100 );
+			// ->delete( [ 'type' => $this->type ], 100 );
 			$this
 			->where( "created_at BETWEEN '{$from}' AND '{$to}'")
 			->where( 'ip', Services::request() ->getIPAddress() )
-			->where( [ 'type' => $this->login_type ] )
+			->where( [ 'type' => $this->type ] )
 			->delete( null , true );
 		}
 	}
@@ -148,7 +143,7 @@ class ThrottleModelAdapter extends Model
 	{
 		$data = [
 			'ip' => Services::request() ->getIPAddress(),
-			'type' => $this->login_type,
+			'type' => $this->type,
 			'created_at' => date( 'Y-m-d H:i:s', time() )
 		];
 
@@ -158,7 +153,7 @@ class ThrottleModelAdapter extends Model
 			log_message( 'error', implode( ',', $err ) );
 		}
 
-    return $this->login_attempts;
+    return $this->attempts;
 	}
 
 	private function throttle_cache () : int
@@ -176,14 +171,14 @@ class ThrottleModelAdapter extends Model
 			$data[ 'login_attempts' ] = 1;
 		}
 
-		$this->login_attempts = $data[ 'login_attempts' ];
-		$this->cache() ->save( $this->cacheName, $data, $this->login_timeout );
+		$this->attempts = $data[ 'login_attempts' ];
+		$this->cache() ->save( $this->cacheName, $data, $this->timeoutAttempts );
 
-		return $this->login_attempts;
+		return $this->attempts;
 	}
 
 	/**
-	 * Instance with custom config
+	 * Override default config
 	 * @return CacheInterface
 	 */
 	private function cache () : CacheInterface

@@ -15,7 +15,7 @@ class ThrottleAdapter implements ThrottleAdapterInterface
 
 	public function config ( int $type, int $limit_one, int $limit, int $timeout ) : self
 	{
-		$this->throttle->config( ...func_get_args() );
+		$this->throttle->config( $type, $limit_one, $limit, $timeout );
 
 		return $this;
 	}
@@ -30,17 +30,14 @@ class ThrottleAdapter implements ThrottleAdapterInterface
 		return $this->throttle->showCaptcha();
 	}
 
-	/**
-	 * @return int|false
-	 */
-	public function limited ()
+	public function limited (): bool
 	{
-		$this->throttle->limited();
+		return $this->throttle->limited();
 	}
 
 	public function throttle () : int
 	{
-		return $this->throttle();
+		return $this->throttle->throttle();
 	}
 
 	public function cleanup () : void

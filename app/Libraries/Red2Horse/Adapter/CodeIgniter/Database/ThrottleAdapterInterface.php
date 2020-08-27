@@ -9,9 +9,9 @@ interface ThrottleAdapterInterface extends ThrottleFacadeInterface
 {
 	public function config (
 		int $type,
-		int $limit_one,
-		int $limit,
-		int $timeout
+		int $captchaAttempts,
+		int $maxAttempts,
+		int $timeoutAttempts
 	) : self;
 
 	public function getAttempts() : int;
@@ -21,7 +21,7 @@ interface ThrottleAdapterInterface extends ThrottleFacadeInterface
 	/**
 	 * @return int|false
 	 */
-	public function limited ();
+	public function limited () : bool;
 
 	public function throttle () : int;
 

@@ -13,9 +13,21 @@ class ThrottleFacade implements ThrottleFacadeInterface
 		$this->throttle = $throttle;
 	}
 
-	public function config ( int $type, int $limit_one, int $limit, int $timeout ) : self
+	public function config (
+		int $type,
+		int $captchaAttempts,
+		int $maxAttempts,
+		int $timeoutAttempts
+	) : self
 	{
-		return $this->throttle->config( ...func_get_args() );
+		$this->throttle->config(
+			$type,
+			$captchaAttempts,
+			$maxAttempts,
+			$timeoutAttempts
+		);
+
+		return $this;
 	}
 
 	public function getAttempts() : int
@@ -28,12 +40,10 @@ class ThrottleFacade implements ThrottleFacadeInterface
 		return $this->throttle->showCaptcha();
 	}
 
-	/**
-	 * @return int|false
-	 */
-	public function limited ()
+
+	public function limited () : bool
 	{
-		$this->throttle->limited();
+		return $this->throttle->limited();
 	}
 
 	public function throttle () : int
