@@ -4,10 +4,8 @@ declare( strict_types = 1 );
 
 namespace App\Libraries\Red2Horse\Adapter\CodeIgniter\Auth;
 
-// use App\Libraries\Red2Horse\Facade\Auth\AuthFacadeInterface;
-
 use App\Libraries\Red2Horse\Red2Horse;
-
+# --- Todo: thinking more AuthR2hAdapter
 class AuthAdapter implements AuthAdapterInterface
 {
 	protected Red2Horse $auth;
@@ -41,9 +39,6 @@ class AuthAdapter implements AuthAdapterInterface
 		return $this->auth->logout();
 	}
 
-	/**
-	 * @return mixed
-	 */
 	public function getUserdata ( string $key = null )
 	{
 		return $this->auth->getUserdata( $key );
