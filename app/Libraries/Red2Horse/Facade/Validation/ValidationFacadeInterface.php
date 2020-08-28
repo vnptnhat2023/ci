@@ -18,7 +18,7 @@ interface ValidationFacadeInterface
 	 * @param $key string|array|null
 	 * @return mixed
 	 */
-	public function getRules( $needed );
+	public function getRules ( $needed );
 
-	public function reset() : void;
+	public function reset () : void;
 }

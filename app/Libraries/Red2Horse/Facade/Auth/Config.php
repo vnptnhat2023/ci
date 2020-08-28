@@ -46,6 +46,11 @@ class Config
 	public string $databaseAdapter = '\App\Libraries\Red2Horse\Adapter\\' . self::ADAPTER . '\\Database\DatabaseAdapter';
 	public string $cacheAdapter = '\App\Libraries\Red2Horse\Adapter\\' . self::ADAPTER . '\\Cache\CacheAdapter';
 
+	/*
+	|--------------------------------------------------------------------------
+	| constructor
+	|--------------------------------------------------------------------------
+	*/
 	public function __construct ()
 	{
 		$this->throttle = (object) self::THROTTLE;
@@ -60,12 +65,32 @@ class Config
 	public const PASSWORD = 'password';
 	public const EMAIL = 'email';
 	public const CAPTCHA = 'captcha';
+	# --- $ruleGroup key name
+	public const LOGIN = 'login';
+	public const LOGIN_WITH_CAPTCHA = 'login_captcha';
+	public const FORGET = 'forget';
+	public const FORGET_WITH_CAPTCHA = 'forget_captcha';
 
-	public array $rules = [
-		'login' => [ self::USERNAME, self::PASSWORD ],
-		'login_captcha' => [ self::USERNAME, self::PASSWORD, self::CAPTCHA ],
-		'forget' => [ self::USERNAME, self::EMAIL ],
-		'forget_captcha' => [ self::USERNAME, self::EMAIL, self::CAPTCHA ]
+	public array $ruleGroup = [
+		self::LOGIN => [
+			self::USERNAME,
+			self::PASSWORD
+		],
+		self::LOGIN_WITH_CAPTCHA => [
+			self::USERNAME,
+			self::PASSWORD,
+			self::CAPTCHA
+		],
+
+		self::FORGET => [
+			self::USERNAME,
+			self::EMAIL
+		],
+		self::FORGET_WITH_CAPTCHA => [
+			self::USERNAME,
+			self::EMAIL,
+			self::CAPTCHA
+		]
 	];
 
 	/*

@@ -21,18 +21,6 @@ class Red2HorseFacade
 	protected bool $incorrectResetPassword = false;
 	protected bool $incorrectLoggedIn = false;
 	protected bool $successfully = false;
-	/**
-	 * @var bool $showCaptcha receiver from model
-	 */
-	protected bool $showCaptcha = false;
-	/**
-	 * @var bool $limited receiver from model
-	 */
-	protected bool $limited = false;
-	/**
-	 * @var int $attempts receiver from model
-	 */
-	protected int $attempts = false;
 	protected bool $hasBanned = false;
 	protected bool $accountInactive = false;
 
@@ -99,9 +87,6 @@ class Red2HorseFacade
 			$this->config->throttle->limit,
 			$this->config->throttle->timeout
 		);
-
-		$this->attempts = $this->throttleModel->getAttempts();
-		$this->showCaptcha = $this->throttleModel->showCaptcha();
 	}
 
 	/**
@@ -181,13 +166,12 @@ class Red2HorseFacade
 			return true;
 		}
 
-		if ( $this->limited = $this->throttleModel->limited() )
+		if ( true === $this->throttleModel->limited() )
 		{
 			$errArg = [
 				'num' => gmdate( 'i', $this->config->throttle->timeout ),
 				'type' => 'minutes'
 			];
-
 			$this->errors[] = lang( 'Red2Horse.errorThrottleLimitedTime', $errArg );
 
 			return false;
@@ -195,7 +179,7 @@ class Red2HorseFacade
 
 		if ( false === $hasRequest ) return false;
 
-		return ( $type === 'login' ) ? $this->loginHandler() : $this->forgotHandler();
+		return ( $type === 'login' ) ? $this->loginHandler() : $this->forgetHandler();
 	}
 
 	/**
@@ -233,7 +217,13 @@ class Red2HorseFacade
 	 */
 	public function getResult ()
 	{
-		return $this->response;
+		return [
+			'incorrectResetPassword' => $this->incorrectResetPassword,
+			'incorrectLoggedIn' => $this->incorrectLoggedIn,
+			'successfully' => $this->successfully,
+			'hasBanned' => $this->hasBanned,
+			'accountInactive' => $this->accountInactive
+		];
 	}
 
 	/**
@@ -358,7 +348,7 @@ class Red2HorseFacade
 
 		# Check token
 		$user = $this->userModel->getUser( [ 'id' => $userId ] );
-		if ( null === $user ) return $incorrectCookie();
+		if ( empty( $user ) ) return $incorrectCookie();
 
 		$userToken = password_verify( $user[ 'cookie_token' ], $exp[ 0 ] );
 
@@ -400,10 +390,10 @@ class Red2HorseFacade
 		$validation = $this->validation;
 		$config = $this->config;
 
-		if ( true === $this->captcha )
+		if ( true === $this->throttleModel->showCaptcha() )
 		{
-			$ruleCap = [
-				$config::CAPTCHA => $this->validation->getRules( $config::CAPTCHA )
+			$ruleCaptcha = [
+				$config::CAPTCHA => $validation->getRules( $config::CAPTCHA )
 			];
 
 			$data = [
@@ -412,7 +402,7 @@ class Red2HorseFacade
 				$config::CAPTCHA => $this->captcha
 			];
 
-			if ( false === $validation->isValid( $data, $ruleCap ) ) {
+			if ( false === $validation->isValid( $data, $ruleCaptcha ) ) {
 				$errStr = [ $validation->getErrors( $config::CAPTCHA ) ];
 
 				return $this->incorrectInfo( true, $errStr );
@@ -421,7 +411,7 @@ class Red2HorseFacade
 
 		$incorrectInfo = false;
 		$ruleUsername = [
-			$config::USERNAME => $this->validation->getRules( 'username' )
+			$config::USERNAME => $validation->getRules( 'username' )
 		];
 		$data = [ $config::USERNAME => $this->username ];
 
@@ -430,7 +420,7 @@ class Red2HorseFacade
 			$validation->reset();
 
 			$ruleEmail = [
-				$config::USERNAME => $this->validation->getRules( 'email' )
+				$config::USERNAME => $validation->getRules( 'email' )
 			];
 
 			$incorrectInfo = ! $validation->isValid( $data, $ruleEmail );
@@ -447,12 +437,14 @@ class Red2HorseFacade
 			[ 'user.username' => $this->username ],
 			[ 'password' ]
 		);
-
-		if ( empty( $userData ) ) return [ 'error' => $this->incorrectInfo() ];
+		if ( empty( $userData ) ) {
+			return [ 'error' => $this->incorrectInfo() ];
+		}
 
 		$verifyPassword = $this->getVerifyPass( $this->password, $userData[ 'password' ] );
-
-		if ( false === $verifyPassword ) return [ 'error' => $this->incorrectInfo() ];
+		if ( false === $verifyPassword ) {
+			return [ 'error' => $this->incorrectInfo() ];
+		}
 
 		if ( 'active' !== $userData[ 'status' ] ) {
 			return [ 'error' => $this->denyStatus( $userData['status'] ) ];
@@ -470,22 +462,24 @@ class Red2HorseFacade
 		return $userData;
 	}
 
-	/**
-	 * Validation form login and set session & cookie
-	 */
 	private function loginHandler () : bool
 	{
-		if ( false !== $this->loginInvalid() ) return false;
+		if ( false !== $this->loginInvalid() ) {
+			return false;
+		}
 
 		$userData = $this->loginAfterValidation();
-		if ( array_key_exists( 'error', $userData ) ) return false;
+		if ( true === array_key_exists( 'error', $userData ) ) {
+			return false;
+		}
 		# return $userData[ 'error' ] ?? $userData;
 
 		# --- Set response success to true
 		$this->setLoggedInSuccess( $userData );
-		# --- Set user session
-		$this->session ->set( $this->config->session, $userData );
+		# --- Set session
+		$this->session->set( $this->config->session, $userData );
 
+		# --- Set cookie
 		$userId = $userData[ 'id' ];
 		if ( true === $this->rememberMe )
 		{
@@ -505,12 +499,15 @@ class Red2HorseFacade
 	/**
 	 * Validation form forgot password and send mail
 	 */
-	private function forgotHandler () : bool
+	private function forgetHandler () : bool
 	{
 		$validation = $this->validation;
 
-		$group = $this->throttleModel->showCaptcha() ? 'forget_captcha' : 'forget';
-		$rules = $validation->getRules( $this->config->rules[ $group ] );
+		$group = ( true === $this->throttleModel->showCaptcha() )
+		? $this->config::FORGET_WITH_CAPTCHA
+		: $this->config::FORGET;
+
+		$rules = $validation->getRules( $this->config->ruleGroup[ $group ] );
 
 		$data = [
 			$this->config::USERNAME => $this->username,
@@ -525,13 +522,12 @@ class Red2HorseFacade
 
 		$find_user = $this->userModel->getUser( $data );
 
-		if ( null === $find_user ) {
+		if ( empty( $find_user ) ) {
 			$this->incorrectInfo();
 
 			return false;
 		}
 
-		helper( 'text' );
 		$randomPw = random_string();
 		$hashPw = $this->getHashPass( $randomPw );
 
@@ -542,7 +538,7 @@ class Red2HorseFacade
 
 		$error = 'The system is busy, please come back later';
 
-		if ( ! $updatePassword ) {
+		if ( false === $updatePassword ) {
 			$this->errors[] = $error;
 
 			return false;
@@ -565,7 +561,7 @@ class Red2HorseFacade
 		return true;
 	}
 
-	# --- Todo: SESSION FRAMEWORK CONFIG
+	# --- Todo: SESSION FRAMEWORK CONFIG, helper( 'filesystem' )
 	private function isMultiLogin ( string $session_id ) : bool
 	{
 		$config = config( '\Config\App' );
@@ -609,7 +605,7 @@ class Red2HorseFacade
 		bool $throttle = true, array $addMore = [], $getReturn = true
 	)
 	{
-		false === $throttle ?: $this->attempts = $this->throttleModel->throttle();
+		false === $throttle ?: $this->throttleModel->throttle();
 		$this->incorrectLoggedIn = true;
 
 		$errors[] = lang( 'Red2Horse.noteLoggedInAnotherPlatform' );
@@ -621,7 +617,7 @@ class Red2HorseFacade
 	/** @read_more getMessage */
 	private function incorrectInfo ( bool $throttle = true, array $addMore = [] )
 	{
-		false === $throttle ?: $this->attempts = $this->throttleModel->throttle();
+		false === $throttle ?: $this->throttleModel->throttle();
 		$this->incorrectLoggedIn = true;
 
 		$errors[] = lang( 'Red2Horse.errorIncorrectInformation' );
@@ -639,7 +635,7 @@ class Red2HorseFacade
 		$getReturn = true
 	)
 	{
-		false === $throttle ?: $this->attempts = $this->throttleModel->throttle();
+		false === $throttle ?: $this->throttleModel->throttle();
 		$this->hasBanned = $status === 'banned';
 		$this->accountInactive = $status === 'inactive';
 		$this->errors[] = lang( 'Red2Horse.errorNotReadyYet', [ $status ] );
@@ -724,7 +720,7 @@ class Red2HorseFacade
 		$cookieName = $this->config->cookie;
 
 		// setcookie( $cookieName . '_test', $cookieValue, $ttl, '/' );
-		set_cookie( $cookieName . '_test', $cookieValue, $ttl );
+		$this->cookie->set_cookie( $cookieName . '_test', $cookieValue, $ttl );
 	}
 
 	private function trigger ( string $event, array $eventData )
