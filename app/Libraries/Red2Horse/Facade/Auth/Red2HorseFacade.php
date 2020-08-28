@@ -175,18 +175,16 @@ class Red2HorseFacade
 		if ( true === $this->isLogged( true ) )
 		{
 			( $type === 'forget' )
-			? $this->response[ 'reset_incorrect' ] = true
+			? $this->incorrectResetPassword = true
 			: $this->setLoggedInSuccess( $this->getUserdata() );
 
 			return true;
 		}
 
-		if ( $this->throttleModel->limited() )
+		if ( $this->limited = $this->throttleModel->limited() )
 		{
-			$this->limited = true;
-			$timeout = $this->config->throttle->timeout;
 			$errArg = [
-				'num' => gmdate( 'i', $timeout ),
+				'num' => gmdate( 'i', $this->config->throttle->timeout ),
 				'type' => 'minutes'
 			];
 
@@ -210,12 +208,11 @@ class Red2HorseFacade
 
 		$ssName = $this->config->session;
 
-		if ( empty( $key ) )
-		return $this->session ->get( $ssName );
+		if ( empty( $key ) ) return $this->session->get( $ssName );
 
-		$userData = $this->session ->get( $ssName );
+		$userData = $this->session->get( $ssName );
 
-		return $userData[ $key ]?? dot_array_search( $key, $userData );
+		return $userData[ $key ] ?? null;
 	}
 
 	public function getHashPass ( string $pass, int $cost = 12 ) : string
@@ -245,7 +242,7 @@ class Red2HorseFacade
 	 */
 	public function getMessage ( array $addMore = [] ) : array
 	{
-		$sysCaptcha = $this->session->getFlashdata( 'ci_captcha' );
+		$sysCaptcha = $this->session->getFlashdata( $this->config::CAPTCHA );
 
 		$message = [
 			'success' => $this->success,
@@ -327,11 +324,12 @@ class Red2HorseFacade
 	{
 		if ( false === $this->isLogged() ) return false;
 
-		$ssId = session_id();
-		$whereQuery = [ 'id' => $userData[ 'id' ] ];
-		$setDataQuery = [ 'session_id' => $ssId ];
+		$isUpdated = $this->userModel->updateUser(
+			$userData[ 'id' ],
+			[ 'session_id' => session_id() ]
+		);
 
-		if ( false === $this->user->update( $setDataQuery, $whereQuery, 1 ) ) {
+		if ( false === $isUpdated ) {
 			log_message( 'error', "The session_id of {$userData[ 'id' ]} update failed" );
 			return false;
 		}
@@ -359,11 +357,7 @@ class Red2HorseFacade
 		if ( $userId === '0' || ! ctype_digit( $userId ) ) return $incorrectCookie();
 
 		# Check token
-		$user = $this->user
-		->select( 'cookie_token, status, last_login, session_id' )
-		->where( [ 'id' => $userId ] )
-		->get(1)
-		->getRowArray();
+		$user = $this->userModel->getUser( [ 'id' => $userId ] );
 		if ( null === $user ) return $incorrectCookie();
 
 		$userToken = password_verify( $user[ 'cookie_token' ], $exp[ 0 ] );
@@ -393,13 +387,7 @@ class Red2HorseFacade
 		$this->setCookie( $userId, [], $logErr );
 
 		# --- Create new session
-		$userData = $this->user
-		->select( implode( ',', $this->columnData() ) )
-		->join( 'user_group', 'user_group.id = User.group_id' )
-		->where( [ 'user.id' => $userId ] )
-		->get(1)
-		->getRowArray();
-
+		$userData = $this->userModel->getUserWithGroup( [ 'user.id' => $userId ] );
 		$userData[ 'permission' ] = json_decode( $userData[ 'permission' ] );
 		$this->session ->set( $this->config->session, $userData );
 		$this->regenerateCookie();
@@ -410,30 +398,41 @@ class Red2HorseFacade
 	private function loginInvalid ()
 	{
 		$validation = $this->validation;
+		$config = $this->config;
 
-		if ( true === $this->response[ 'captcha' ] ) {
-			$ruleCap = [ 'ci_captcha' => $this->validation->getRules( 'ci_captcha' ) ];
+		if ( true === $this->captcha )
+		{
+			$ruleCap = [
+				$config::CAPTCHA => $this->validation->getRules( $config::CAPTCHA )
+			];
+
 			$data = [
-				'username' => $this->username,
-				'password' => $this->password,
-				'ci_captcha' => $this->captcha
+				$config::USERNAME => $this->username,
+				$config::PASSWORD => $this->password,
+				$config::CAPTCHA => $this->captcha
 			];
 
 			if ( false === $validation->isValid( $data, $ruleCap ) ) {
-				$errStr = [ $validation->getErrors( 'ci_captcha' ) ];
+				$errStr = [ $validation->getErrors( $config::CAPTCHA ) ];
 
 				return $this->incorrectInfo( true, $errStr );
 			}
 		}
 
 		$incorrectInfo = false;
-		$ruleUsername = [ 'username' => $this->validation->getRules( 'username' ) ];
-		$data = [ 'username' => $this->username ];
+		$ruleUsername = [
+			$config::USERNAME => $this->validation->getRules( 'username' )
+		];
+		$data = [ $config::USERNAME => $this->username ];
 
-		if ( false === $validation->isValid( $data, $ruleUsername )) {
+		if ( false === $validation->isValid( $data, $ruleUsername ) )
+		{
 			$validation->reset();
 
-			$ruleEmail = [ 'username' => $this->validation->getRules( 'email' ) ];
+			$ruleEmail = [
+				$config::USERNAME => $this->validation->getRules( 'email' )
+			];
+
 			$incorrectInfo = ! $validation->isValid( $data, $ruleEmail );
 		}
 
@@ -444,17 +443,12 @@ class Red2HorseFacade
 
 	private function loginAfterValidation () : array
 	{
-		$userData = $this->user
-		->select( implode( ',', $this->columnData( [ 'password' ] ) ) )
+		$userData = $this->userModel->getUserWithGroup(
+			[ 'user.username' => $this->username ],
+			[ 'password' ]
+		);
 
-		->join( 'user_group', 'user_group.id = user.group_id' )
-		->where( [ 'user.username' => $this->username ] )
-		->orWhere( [ 'user.email' => $this->username ] )
-
-		->get( 1 )
-		->getRowArray();
-
-		if ( null === $userData ) return [ 'error' => $this->incorrectInfo() ];
+		if ( empty( $userData ) ) return [ 'error' => $this->incorrectInfo() ];
 
 		$verifyPassword = $this->getVerifyPass( $this->password, $userData[ 'password' ] );
 
@@ -489,12 +483,10 @@ class Red2HorseFacade
 
 		# --- Set response success to true
 		$this->setLoggedInSuccess( $userData );
-
 		# --- Set user session
 		$this->session ->set( $this->config->session, $userData );
 
 		$userId = $userData[ 'id' ];
-
 		if ( true === $this->rememberMe )
 		{
 			$this->setCookie( $userId );
@@ -505,7 +497,7 @@ class Red2HorseFacade
 		}
 
 		$this->regenerateCookie();
-		$this->model->throttle_cleanup();
+		$this->throttleModel->cleanup();
 
 		return true;
 	}
@@ -515,11 +507,15 @@ class Red2HorseFacade
 	 */
 	private function forgotHandler () : bool
 	{
-		$group = $this->model->showCaptcha() ? 'forget_captcha' : 'forget';
-
 		$validation = $this->validation;
-		$rules = $this->validation->getRules( $this->rules[ $group ] );
-		$data = [ 'username' => $this->username, 'email' => $this->email ];
+
+		$group = $this->throttleModel->showCaptcha() ? 'forget_captcha' : 'forget';
+		$rules = $validation->getRules( $this->config->rules[ $group ] );
+
+		$data = [
+			$this->config::USERNAME => $this->username,
+			$this->config::EMAIL => $this->email
+		];
 
 		if ( false === $validation->isValid( $data, $rules ) ) {
 			$this->incorrectInfo( true, array_values( $validation->getErrors() ) );
@@ -527,7 +523,7 @@ class Red2HorseFacade
 			return false;
 		}
 
-		$find_user = $this->user->select( 'username' ) ->where( $data ) ->get() ->getRowArray();
+		$find_user = $this->userModel->getUser( $data );
 
 		if ( null === $find_user ) {
 			$this->incorrectInfo();
@@ -539,9 +535,9 @@ class Red2HorseFacade
 		$randomPw = random_string();
 		$hashPw = $this->getHashPass( $randomPw );
 
-		$updatePassword = $this->user ->update(
-			[ 'password' => $hashPw ],
-			[ 'username' => $find_user[ 'username' ] ]
+		$updatePassword = $this->userModel->updateUser(
+			[ 'username' => $find_user[ 'username' ] ],
+			[ 'password' => $hashPw ]
 		);
 
 		$error = 'The system is busy, please come back later';
@@ -569,6 +565,7 @@ class Red2HorseFacade
 		return true;
 	}
 
+	# --- Todo: SESSION FRAMEWORK CONFIG
 	private function isMultiLogin ( string $session_id ) : bool
 	{
 		$config = config( '\Config\App' );
@@ -612,9 +609,8 @@ class Red2HorseFacade
 		bool $throttle = true, array $addMore = [], $getReturn = true
 	)
 	{
-		false === $throttle ?: $this->response[ 'attemps' ] = $this->model->throttle();
-		$this->response[ 'view' ] = true;
-		$this->response[ 'login_incorrect' ] = true;
+		false === $throttle ?: $this->attempts = $this->throttleModel->throttle();
+		$this->incorrectLoggedIn = true;
 
 		$errors[] = lang( 'Red2Horse.noteLoggedInAnotherPlatform' );
 		$this->errors = [ ...$errors, ...$addMore ];
@@ -623,14 +619,10 @@ class Red2HorseFacade
 	}
 
 	/** @read_more getMessage */
-	private function incorrectInfo (
-		bool $throttle = true,
-		array $addMore = []
-	)
+	private function incorrectInfo ( bool $throttle = true, array $addMore = [] )
 	{
-		false === $throttle ?: $this->response[ 'attemps' ] = $this->model->throttle();
-		$this->response[ 'view' ] = true;
-		$this->response[ 'login_incorrect' ] = true;
+		false === $throttle ?: $this->attempts = $this->throttleModel->throttle();
+		$this->incorrectLoggedIn = true;
 
 		$errors[] = lang( 'Red2Horse.errorIncorrectInformation' );
 		$this->errors = [ ...$errors, ...$addMore ];
@@ -647,19 +639,17 @@ class Red2HorseFacade
 		$getReturn = true
 	)
 	{
-		false === $throttle ?: $this->response[ 'attemps' ] = $this->model->throttle();
-		$this->response[ 'banned' ] = $status === 'banned';
-		$this->response[ 'inactive' ] = $status === 'inactive';
+		false === $throttle ?: $this->attempts = $this->throttleModel->throttle();
+		$this->hasBanned = $status === 'banned';
+		$this->accountInactive = $status === 'inactive';
 		$this->errors[] = lang( 'Red2Horse.errorNotReadyYet', [ $status ] );
 
 		if ( true === $getReturn ) return $this->getMessage();
 	}
 
-	private function setCookie (
-		int $userId,
-		array $data = [],
-		string $logError = null
-	) : void
+	# --- Todo: read more about [lang, isAssoc, log_message] function
+	# --- Todo: and Exception
+	private function setCookie ( int $userId, array $data = [], string $logError = null ) : void
 	{
 		if ( $userId <= 0 ) {
 			$errArg = [ 'field' => 'user_id', 'param' => $userId ];
@@ -722,7 +712,7 @@ class Red2HorseFacade
 
 		$updateData += $data;
 
-		return $this->user->update( $updateData, [ 'id' => $userId ], 1 );
+		return $this->userModel->updateUser( $userId, $updateData );
 	}
 
 	public function regenerateCookie () : void
@@ -735,30 +725,6 @@ class Red2HorseFacade
 
 		// setcookie( $cookieName . '_test', $cookieValue, $ttl, '/' );
 		set_cookie( $cookieName . '_test', $cookieValue, $ttl );
-	}
-
-	private function columnData ( array $addMore = [] ) : array
-	{
-		$colum = [
-			# user
-			'user.id',
-			'user.username',
-			// 'user.password',
-			'user.email',
-			'user.status',
-			'user.last_activity',
-			'user.last_login',
-			'user.created_at',
-			'user.updated_at',
-			'user.session_id',
-			# user_group
-			'user_group.id as group_id',
-			'user_group.name as group_name',
-			'user_group.permission',
-			...$addMore
-		];
-
-		return $colum;
 	}
 
 	private function trigger ( string $event, array $eventData )

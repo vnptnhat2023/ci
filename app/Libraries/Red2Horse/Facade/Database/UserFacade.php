@@ -13,13 +13,23 @@ class UserFacade implements UserFacadeInterface
 		$this->user = $user;
 	}
 
-	public function getUserById ( array $where ) : array
+	public function getUser ( array $where ) : array
 	{
-		return $this->user->getUserById( $where );
+		return $this->user->getUser( $where );
 	}
 
-	public function updateUserById ( int $id, array $data ) : bool
+	public function getUserWithGroup ( array $where, array $moreColumns = [] ) : array
 	{
-		return $this->user->updateUserById( $id, $data );
+		return $this->getUserWithGroup( $where, $moreColumns = [] );
+	}
+
+	/**
+	 * @param integer|array|string $where
+	 * @param array $data
+	 * @return bool
+	 */
+	public function updateUser ( $where, array $data ) : bool
+	{
+		return $this->user->updateUser( $where, $data );
 	}
 }

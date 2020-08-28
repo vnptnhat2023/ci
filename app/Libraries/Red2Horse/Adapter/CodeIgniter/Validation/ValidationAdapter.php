@@ -5,7 +5,7 @@ declare( strict_types = 1 );
 namespace App\Libraries\Red2Horse\Adapter\Codeigniter\Validation;
 
 use CodeIgniter\Validation\ValidationInterface;
-
+use App\Libraries\Red2Horse\Facade\Auth\Config;
 /**
  * @package Red2ndHorseAuth
  * @author Red2Horse
@@ -13,17 +13,12 @@ use CodeIgniter\Validation\ValidationInterface;
 class ValidationAdapter implements ValidationAdapterInterface
 {
 	protected ValidationInterface $validate;
+	protected Config $config;
 
-	protected array $rules = [
-		'login' => [ 'username', 'password' ],
-		'login_captcha' => [ 'username', 'password', 'ci_captcha' ],
-		'forget' => [ 'username', 'email' ],
-		'forget_captcha' => [ 'username', 'email', 'ci_captcha' ]
-	];
-
-	public function __construct ( ValidationInterface $validate )
+	public function __construct ( ValidationInterface $validate, Config $config )
 	{
 		$this->validate = $validate;
+		$this->config = $config;
 	}
 
 	public function isValid ( array $data, array $rules ) : bool
@@ -52,28 +47,7 @@ class ValidationAdapter implements ValidationAdapterInterface
 	 */
 	public function getRules ( $needed )
 	{
-		$generalRules = [
-
-			'username' => [
-				'label' => lang( 'Red2Horse.labelUsername' ),
-				'rules' => 'trim|required|min_length[5]|max_length[32]|alpha_dash'
-			],
-
-			'password' => [
-				'label' => lang( 'Red2Horse.labelPassword' ),
-				'rules' => 'trim|required|min_length[5]|max_length[32]|alpha_numeric_punct'
-			],
-
-			'email' => [
-				'label' => lang( 'Red2Horse.labelEmail' ),
-				'rules' => 'trim|required|min_length[5]|max_length[128]|valid_email'
-			],
-
-			'ci_captcha' => [
-				'label' => lang( 'Red2Horse.labelCaptcha' ),
-				'rules' => 'trim|required|min_length[5]|ci_captcha'
-			]
-		];
+		$generalRules = $this->ruleStore();
 
 		if ( is_string( $needed ) ) {
 			$result = dot_array_search( $needed, $generalRules );
@@ -88,8 +62,36 @@ class ValidationAdapter implements ValidationAdapterInterface
 			}
 		}
 
-		if ( empty( $result ) ) throw new \Exception( "Error rule not found", 1 );
+		if ( empty( $result ) ) throw new \Exception( "Error the rule is required", 403 );
 
 		return $result;
+	}
+
+	public function ruleStore() : array
+	{
+		$generalRules = [
+
+			$this->config::USERNAME => [
+				'label' => lang( 'Red2Horse.labelUsername' ),
+				'rules' => 'trim|required|min_length[5]|max_length[32]|alpha_dash'
+			],
+
+			$this->config::PASSWORD => [
+				'label' => lang( 'Red2Horse.labelPassword' ),
+				'rules' => 'trim|required|min_length[5]|max_length[32]|alpha_numeric_punct'
+			],
+
+			$this->config::EMAIL => [
+				'label' => lang( 'Red2Horse.labelEmail' ),
+				'rules' => 'trim|required|min_length[5]|max_length[128]|valid_email'
+			],
+
+			$this->config::CAPTCHA => [
+				'label' => lang( 'Red2Horse.labelCaptcha' ),
+				'rules' => 'trim|required|min_length[5]|ci_captcha'
+			]
+		];
+
+		return $generalRules;
 	}
 }

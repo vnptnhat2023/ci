@@ -6,7 +6,17 @@ namespace App\Libraries\Red2Horse\Facade\Database;
 
 interface UserFacadeInterface
 {
-	public function getUserById ( array $where ) : array;
+	/**
+	 * Fetch a user row
+	 */
+	public function getUser ( array $where ) : array;
 
-	public function updateUserById ( int $id, array $data ) : bool;
+	public function getUserWithGroup ( array $where, array $moreColumns = [] ) : array;
+
+	/**
+	 * @param integer|array|string $where
+	 * @param array $data
+	 * @return bool
+	 */
+	public function updateUser ( $where, array $data ) : bool;
 }
