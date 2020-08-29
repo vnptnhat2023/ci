@@ -26,6 +26,8 @@ class Config
 	public int $ttl = self::TIME_TO_LIFE;
 	public object $throttle;
 
+	public string $sessionSavePath = '';
+
 	/*
 	|--------------------------------------------------------------------------
 	| Lengths of the random_bytes function
@@ -51,8 +53,12 @@ class Config
 	| constructor
 	|--------------------------------------------------------------------------
 	*/
-	public function __construct ()
+	public function __construct ( string $sessionSavePath = null )
 	{
+		$this->sessionSavePath = empty( $sessionSavePath )
+		? session_save_path()
+		: $sessionSavePath;
+
 		$this->throttle = (object) self::THROTTLE;
 	}
 

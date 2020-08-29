@@ -2,28 +2,30 @@
 
 namespace App\Libraries\Red2Horse\Facade\Auth;
 
-use App\Libraries\Red2Horse\Facade\Session\SessionFacadeInterface as session;
-use App\Libraries\Red2Horse\Facade\Cookie\CookieFacadeInterface as cookie;
-use App\Libraries\Red2Horse\Facade\Validation\ValidationFacadeInterface as validation;
-use App\Libraries\Red2Horse\Facade\Cache\CacheFacadeInterface as cache;
-use App\Libraries\Red2Horse\Facade\Mail\MailFacadeInterface as mail;
-use App\Libraries\Red2Horse\Facade\Request\RequestFacadeInterface as request;
-
-use App\Libraries\Red2Horse\Facade\Database\{
-	ThrottleFacadeInterface as throttleModel,
-	UserFacadeInterface as userModel
+use App\Libraries\Red2Horse\Facade\{
+	Session\SessionFacadeInterface as session,
+	Validation\ValidationFacadeInterface as validation,
+	Cookie\CookieFacadeInterface as cookie,
+	Cache\CacheFacadeInterface as cache,
+	Mail\MailFacadeInterface as mail,
+	Request\RequestFacadeInterface as request,
+	Database\ThrottleFacadeInterface as throttleModel,
+	Database\UserFacadeInterface as userModel,
+	Common\CommonFacadeInterface as common,
 };
 
 class Red2HorseFacade
 {
 	public Config $config;
 
+	# --- Result data
 	protected bool $incorrectResetPassword = false;
 	protected bool $incorrectLoggedIn = false;
 	protected bool $successfully = false;
 	protected bool $hasBanned = false;
 	protected bool $accountInactive = false;
 
+	# --- Form data
 	/**
 	 * @var string $username form-data
 	 */
@@ -45,6 +47,7 @@ class Red2HorseFacade
 	 */
 	private bool $rememberMe = false;
 
+	# --- Message data
 	protected array $errors = [];
 	protected array $success = [];
 
@@ -56,6 +59,7 @@ class Red2HorseFacade
 	protected cache $cache;
 	protected mail $mail;
 	protected request $request;
+	protected common $common;
 
 
 	public function __construct (
@@ -67,7 +71,8 @@ class Red2HorseFacade
 		validation $validation,
 		cache $cache,
 		mail $mail,
-		request $request
+		request $request,
+		common $common
 	)
 	{
 		$this->config = $config ?: new Config;
@@ -80,24 +85,21 @@ class Red2HorseFacade
 		$this->cache = $cache;
 		$this->mail = $mail;
 		$this->request = $request;
+		$this->common = $common;
 
 		$this->throttleModel->config(
-			$this->config->throttle->type,
-			$this->config->throttle->limit_one,
-			$this->config->throttle->limit,
-			$this->config->throttle->timeout
+			$config->throttle->type,
+			$config->throttle->limit_one,
+			$config->throttle->limit,
+			$config->throttle->timeout
 		);
 	}
 
-	/**
-	 * @param boolean $returnType true: object, false array
-	 */
 	public function login (
 		string $userNameEmail = null,
 		string $password = null,
 		bool $rememberMe = false,
-		string $captcha = null,
-		bool $returnType = true
+		string $captcha = null
 	) : bool
 	{
 		$this->username = $userNameEmail;
@@ -117,13 +119,13 @@ class Red2HorseFacade
 		if ( $this->session->has( $this->config->session ) )
 		{
 			$this->session->destroy();
-			$this->success[] = lang( 'Red2Horse.successLogout' );
+			$this->success[] = $this->common->lang( 'Red2Horse.successLogout' );
 
 			return true;
 		}
 
-		$errEl = 'You have not login. '.  lang( 'Red2Horse.homeLink');
-		$this->errors[] = $errEl;
+		$error = 'You have not login. '.  $this->common->lang( 'Red2Horse.homeLink');
+		$this->errors[] = $error;
 
 		return false;
 	}
@@ -172,7 +174,7 @@ class Red2HorseFacade
 				'num' => gmdate( 'i', $this->config->throttle->timeout ),
 				'type' => 'minutes'
 			];
-			$this->errors[] = lang( 'Red2Horse.errorThrottleLimitedTime', $errArg );
+			$this->errors[] = $this->common->lang( 'Red2Horse.errorThrottleLimitedTime', $errArg );
 
 			return false;
 		}
@@ -188,14 +190,13 @@ class Red2HorseFacade
 	 */
 	public function getUserdata ( string $key = null )
 	{
-		if ( false === $this->isLogged() ) return false;
+		if ( false === $this->isLogged() )
+		return false;
 
-		$ssName = $this->config->session;
+		if ( empty( $key ) )
+		return $this->session->get( $this->config->session );
 
-		if ( empty( $key ) ) return $this->session->get( $ssName );
-
-		$userData = $this->session->get( $ssName );
-
+		$userData = $this->session->get( $this->config->session );
 		return $userData[ $key ] ?? null;
 	}
 
@@ -257,8 +258,7 @@ class Red2HorseFacade
 	}
 
 	/**
-	 * The first check the current user session,
-	 * the next will be $data parameter
+	 * The first check the current user session, * the next will be $data parameter
 	 * @param array $data case empty array ( [] ) = 1st group = administrator
 	 * @return boolean
 	 */
@@ -276,12 +276,11 @@ class Red2HorseFacade
 		return true;
 
 		# --- Administrator (1st) group !
-		if ( empty( $data ) ) return true;
+		if ( empty( $data ) )
+		return true;
 
 		# --- Permission config
-		$configPerm = config( '\BAPI\Config\User' )
-		->setting( 'permission' );
-
+		$configPerm = config( '\BAPI\Config\User' )->setting( 'permission' );
 		$boolVar = true;
 
 		foreach ( $data as $role )
@@ -300,7 +299,7 @@ class Red2HorseFacade
 	}
 
 	/**
-	 * Check cookie, session: if have cookie will set session
+	 * Check cookie, session: when have cookie will set session
 	 * @return boolean
 	 */
 	public function isLogged ( bool $withCookie = false ) : bool
@@ -312,7 +311,8 @@ class Red2HorseFacade
 
 	public function regenerateSession ( array $userData ) : bool
 	{
-		if ( false === $this->isLogged() ) return false;
+		if ( false === $this->isLogged() )
+		return false;
 
 		$isUpdated = $this->userModel->updateUser(
 			$userData[ 'id' ],
@@ -320,7 +320,7 @@ class Red2HorseFacade
 		);
 
 		if ( false === $isUpdated ) {
-			log_message( 'error', "The session_id of {$userData[ 'id' ]} update failed" );
+			$this->common->log_message( 'error', "The session_id of {$userData[ 'id' ]} update failed" );
 			return false;
 		}
 
@@ -330,43 +330,46 @@ class Red2HorseFacade
 
 	private function cookieHandler () : bool
 	{
-		$userCookie = get_cookie( $this->config->cookie );
-		if ( empty( $userCookie ) || ! is_string( $userCookie ) ) return false;
+		$userCookie = $this->cookie->get_cookie( $this->config->cookie );
+
+		if ( empty( $userCookie ) || ! is_string( $userCookie ) )
+		return false;
 
 		$exp = explode( '-', $userCookie, 2 );
 
 		$incorrectCookie = function  () : bool {
-			delete_cookie( $this->config->cookie );
-
+			$this->cookie->delete_cookie( $this->config->cookie );
 			return false;
 		};
 
-		if ( empty( $exp[ 0 ] ) || empty( $exp[ 1 ] ) ) return $incorrectCookie();
+		if ( empty( $exp[ 0 ] ) || empty( $exp[ 1 ] ) )
+		return $incorrectCookie();
 
 		$userId = hex2bin( $exp[ 1 ] );
-		if ( $userId === '0' || ! ctype_digit( $userId ) ) return $incorrectCookie();
+		if ( $userId === '0' || ! ctype_digit( $userId ) )
+		return $incorrectCookie();
 
 		# Check token
 		$user = $this->userModel->getUser( [ 'id' => $userId ] );
-		if ( empty( $user ) ) return $incorrectCookie();
+		if ( empty( $user ) )
+		return $incorrectCookie();
 
 		$userToken = password_verify( $user[ 'cookie_token' ], $exp[ 0 ] );
 
 		$ip = $this->request->getIPAddress();
 		$userIp = $user[ 'last_login' ] == $ip;
 
-		if ( false === $userToken || false === $userIp ) return $incorrectCookie();
+		if ( false === $userToken || false === $userIp )
+		return $incorrectCookie();
 
 		# Check status
 		if ( in_array( $user[ 'status' ] , [ 'inactive', 'banned' ] ) ) {
 			$this->denyStatus( $user[ 'status' ], false, false );
-
 			return $incorrectCookie();
 		}
 
 		if ( false === $this->isMultiLogin( $user[ 'session_id' ] ) ) {
 			$this->denyMultiLogin( true, [], false );
-
 			return false;
 		}
 
@@ -379,7 +382,7 @@ class Red2HorseFacade
 		# --- Create new session
 		$userData = $this->userModel->getUserWithGroup( [ 'user.id' => $userId ] );
 		$userData[ 'permission' ] = json_decode( $userData[ 'permission' ] );
-		$this->session ->set( $this->config->session, $userData );
+		$this->session->set( $this->config->session, $userData );
 		$this->regenerateCookie();
 
 		return true;
@@ -487,7 +490,7 @@ class Red2HorseFacade
 		}
 		else if ( false === $this->loggedInUpdateData( $userId ) )
 		{
-			log_message( 'error', "{$userId} Logged-in, but update failed" );
+			$this->common->log_message( 'error', "{$userId} Logged-in, but update failed" );
 		}
 
 		$this->regenerateCookie();
@@ -547,7 +550,7 @@ class Red2HorseFacade
 		if ( ! $this->mailSender( $randomPw ) ) {
 
 			$this->errors[] = $error;
-			log_message(
+			$this->common->log_message(
 				'error' ,
 				"Cannot sent email: {$find_user[ 'username' ]}"
 			);
@@ -556,32 +559,31 @@ class Red2HorseFacade
 		}
 
 		$this->successfully = true;
-		$this->success[] = lang( 'Red2Horse.successResetPassword' );
+		$this->success[] = $this->common->lang( 'Red2Horse.successResetPassword' );
 
 		return true;
 	}
 
-	# --- Todo: SESSION FRAMEWORK CONFIG, helper( 'filesystem' )
+	# --- Todo: clone $config->sessionSavePath to r2hConfig ?
 	private function isMultiLogin ( string $session_id ) : bool
 	{
 		$config = config( '\Config\App' );
 		$pathFile = $config->sessionSavePath;
 		$pathFile .= '/' . $config->sessionCookieName . $session_id;
 
-		helper( 'filesystem' );
-
-		if ( empty( $date = get_file_info( $pathFile, 'date' ) ) ) {
+		$date = $this->common->get_file_info( $pathFile, 'date' );
+		if ( empty( $date ) ) {
 			return true;
 		}
 
 		$cookieName = $config->sessionCookieName . '_test';
-		if ( $hash = get_cookie( $cookieName ) ) {
+		if ( $hash = $this->cookie->get_cookie( $cookieName ) ) {
 
 			if ( password_verify( $session_id, $hash ) ) {
 				return true;
 			}
 
-			delete_cookie( $cookieName );
+			$this->cookie->delete_cookie( $cookieName );
 			return false;
 		}
 
@@ -608,7 +610,7 @@ class Red2HorseFacade
 		false === $throttle ?: $this->throttleModel->throttle();
 		$this->incorrectLoggedIn = true;
 
-		$errors[] = lang( 'Red2Horse.noteLoggedInAnotherPlatform' );
+		$errors[] = $this->common->lang( 'Red2Horse.noteLoggedInAnotherPlatform' );
 		$this->errors = [ ...$errors, ...$addMore ];
 
 		if ( true === $getReturn ) return $this->getMessage();
@@ -620,7 +622,7 @@ class Red2HorseFacade
 		false === $throttle ?: $this->throttleModel->throttle();
 		$this->incorrectLoggedIn = true;
 
-		$errors[] = lang( 'Red2Horse.errorIncorrectInformation' );
+		$errors[] = $this->common->lang( 'Red2Horse.errorIncorrectInformation' );
 		$this->errors = [ ...$errors, ...$addMore ];
 
 		return $this->getMessage();
@@ -638,22 +640,21 @@ class Red2HorseFacade
 		false === $throttle ?: $this->throttleModel->throttle();
 		$this->hasBanned = $status === 'banned';
 		$this->accountInactive = $status === 'inactive';
-		$this->errors[] = lang( 'Red2Horse.errorNotReadyYet', [ $status ] );
+		$this->errors[] = $this->common->lang( 'Red2Horse.errorNotReadyYet', [ $status ] );
 
 		if ( true === $getReturn ) return $this->getMessage();
 	}
 
-	# --- Todo: read more about [lang, isAssoc, log_message] function
 	# --- Todo: and Exception
 	private function setCookie ( int $userId, array $data = [], string $logError = null ) : void
 	{
 		if ( $userId <= 0 ) {
 			$errArg = [ 'field' => 'user_id', 'param' => $userId ];
-			throw new \Exception( lang( 'Validation.greater_than', $errArg ), 1 );
+			throw new \Exception( $this->common->lang( 'Validation.greater_than', $errArg ), 1 );
 		}
 
 		if ( ! empty( $data ) && false === isAssoc( $data ) ) {
-			throw new \Exception( lang( 'Red2Horse.isAssoc' ), 1 );
+			throw new \Exception( $this->common->lang( 'Red2Horse.isAssoc' ), 1 );
 		}
 
 		$randomKey = random_bytes( $this->config->randomBytesLength );
@@ -673,14 +674,14 @@ class Red2HorseFacade
 		else
 		{
 			$logErr = $logError ?: "{$userId} LoggedIn with remember-me, but update failed";
-			log_message( 'error', $logErr );
+			$this->common->log_message( 'error', $logErr );
 		}
 	}
 
 	private function setLoggedInSuccess ( array $userData ) : void
 	{
 		$this->successfully = true;
-		$this->success[] = lang( 'Red2Horse.successLoggedWithUsername', [ $userData[ 'username' ] ] );
+		$this->success[] = $this->common->lang( 'Red2Horse.successLoggedWithUsername', [ $userData[ 'username' ] ] );
 	}
 
 	/**
@@ -692,11 +693,11 @@ class Red2HorseFacade
 		if ( $userId <= 0 ) {
 			$errArg = [ 'field' => 'user_id', 'param' => $userId ];
 
-			throw new \Exception( lang( 'Validation.greater_than', $errArg ), 1 );
+			throw new \Exception( $this->common->lang( 'Validation.greater_than', $errArg ), 1 );
 		}
 
 		if ( ! empty( $data ) && false === isAssoc( $data ) ) {
-			throw new \Exception( lang( 'Red2Horse.isAssoc' ), 1 );
+			throw new \Exception( $this->common->lang( 'Red2Horse.isAssoc' ), 1 );
 		}
 
 		$ssId = session_id();
