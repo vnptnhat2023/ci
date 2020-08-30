@@ -75,7 +75,7 @@ class Red2HorseFacade
 		common $common
 	)
 	{
-		$this->config = $config ?: new Config;
+		$this->config = $config;# --- Todo: ?: new Config;
 
 		$this->throttleModel = $throttleModel;
 		$this->userModel = $userModel;
@@ -89,9 +89,9 @@ class Red2HorseFacade
 
 		$this->throttleModel->config(
 			$config->throttle->type,
-			$config->throttle->limit_one,
-			$config->throttle->limit,
-			$config->throttle->timeout
+			$config->throttle->captchaAttempts,
+			$config->throttle->maxAttempts,
+			$config->throttle->timeoutAttempts
 		);
 	}
 
@@ -171,7 +171,7 @@ class Red2HorseFacade
 		if ( true === $this->throttleModel->limited() )
 		{
 			$errArg = [
-				'num' => gmdate( 'i', $this->config->throttle->timeout ),
+				'num' => gmdate( 'i', $this->config->throttle->timeoutAttempts ),
 				'type' => 'minutes'
 			];
 			$this->errors[] = $this->common->lang( 'Red2Horse.errorThrottleLimitedTime', $errArg );

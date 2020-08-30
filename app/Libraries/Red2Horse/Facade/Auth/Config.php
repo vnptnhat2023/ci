@@ -4,6 +4,8 @@ declare( strict_types = 1 );
 
 namespace App\Libraries\Red2Horse\Facade\Auth;
 
+// use App\Libraries\Red2Horse\Facade\Config\ConfigFacadeInterface;
+
 class Config
 {
 	/*
@@ -16,9 +18,9 @@ class Config
 	private const TIME_TO_LIFE = 604800;
   private const THROTTLE = [
   	'type' => 1,
-  	'limit_one' => 5,
-  	'limit' => 10,
-  	'timeout' => 1800
+  	'captchaAttempts' => 5,
+  	'maxAttempts' => 10,
+  	'timeoutAttempts' => 1800
 	];
 
 	public string $session = self::SESSION_NAME;
@@ -27,6 +29,9 @@ class Config
 	public object $throttle;
 
 	public string $sessionSavePath = '';
+	public string $sessionCookieName = '';
+	public int $sessionExpiration = 0;
+	public int $sessionTimeToUpdate = 0;
 
 	/*
 	|--------------------------------------------------------------------------
@@ -42,22 +47,34 @@ class Config
 	*/
 	private const ADAPTER = 'CodeIgniter';
 
-	public string $authAdapter = '\App\Libraries\Red2Horse\Adapter\\' . self::ADAPTER . '\\Auth\AuthAdapter';
-	public string $mailAdapter = '\App\Libraries\Red2Horse\Adapter\\' . self::ADAPTER . '\\Mail\MailAdapter';
-	public string $validationAdapter = '\App\Libraries\Red2Horse\Adapter\\' . self::ADAPTER . '\\Validation\ValidationAdapter';
-	public string $databaseAdapter = '\App\Libraries\Red2Horse\Adapter\\' . self::ADAPTER . '\\Database\DatabaseAdapter';
-	public string $cacheAdapter = '\App\Libraries\Red2Horse\Adapter\\' . self::ADAPTER . '\\Cache\CacheAdapter';
+	public function adapter( string $name = 'Auth', ?string $different = null ) : string
+	{
+		$different = is_null( $different ) ? $name : $different;
+
+		return '\\App\\Libraries\\Red2Horse\Adapter\\'
+		. self::ADAPTER
+		. "\\{$name}\\{$different}Adapter";
+	}
+
+	# --- Todo: remove late
+	public string $authAdapter = '\App\Libraries\Red2Horse\Adapter\\'
+	. self::ADAPTER . '\\Auth\AuthAdapter';
 
 	/*
 	|--------------------------------------------------------------------------
 	| constructor
 	|--------------------------------------------------------------------------
 	*/
-	public function __construct ( string $sessionSavePath = null )
+	public function __construct ()
 	{
-		$this->sessionSavePath = empty( $sessionSavePath )
-		? session_save_path()
-		: $sessionSavePath;
+		$adapter = $this->adapter( 'Config' );
+		$config = new $adapter;
+
+		# --- Todo: add more ConfigFacade
+		$this->sessionSavePath = $config->sessionSavePath();
+		$this->sessionCookieName = $config->sessionCookieName();
+		$this->sessionExpiration = $config->sessionExpiration();
+		$this->sessionTimeToUpdate = $config->sessionTimeToUpdate();
 
 		$this->throttle = (object) self::THROTTLE;
 	}
@@ -67,16 +84,19 @@ class Config
 	| Rules of validation groups
 	|--------------------------------------------------------------------------
 	*/
+	# --- Form input name
 	public const USERNAME = 'username';
 	public const PASSWORD = 'password';
 	public const EMAIL = 'email';
 	public const CAPTCHA = 'captcha';
-	# --- $ruleGroup key name
+
+	# --- form input group
 	public const LOGIN = 'login';
 	public const LOGIN_WITH_CAPTCHA = 'login_captcha';
 	public const FORGET = 'forget';
 	public const FORGET_WITH_CAPTCHA = 'forget_captcha';
 
+	# --- rule groups
 	public array $ruleGroup = [
 		self::LOGIN => [
 			self::USERNAME,
@@ -108,9 +128,9 @@ class Config
 	{
 		$throttle = [
 			'type' => self::THROTTLE[ 'type' ],
-			'limit_one' => self::THROTTLE[ 'limit_one' ],
-			'limit' => self::THROTTLE[ 'limit' ],
-			'timeout' => self::THROTTLE[ 'timeout' ]
+			'captchaAttempts' => self::THROTTLE[ 'captchaAttempts' ],
+			'maxAttempts' => self::THROTTLE[ 'maxAttempts' ],
+			'timeoutAttempts' => self::THROTTLE[ 'timeoutAttempts' ]
 		];
 
 		$this->session = self::SESSION_NAME;

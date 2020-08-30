@@ -11,6 +11,7 @@ use App\Libraries\Red2Horse\Adapter\CodeIgniter\Database\{
 	ThrottleAdapter as AuthThrottleAdapter
 };
 use App\Libraries\Red2Horse\Facade\Database\ThrottleFacade as AuthThrottleFacade;
+use App\Libraries\Red2Horse\Facade\Auth\Config as TestConfig;
 
 class Test extends BaseController {
 
@@ -34,7 +35,7 @@ class Test extends BaseController {
 	}
 
 	public function formatTimelineData()
- {
+	{
 		$data = [];
 		$benchmark = Services::timer(true);
 		$rows = $benchmark->getTimers(6);
@@ -46,7 +47,7 @@ class Test extends BaseController {
 			$data[] = ['name' => ucwords(str_replace('_', ' ', $name)), 'component' => 'Timer', 'start' => $info['start'], 'duration' => $info['end'] - $info['start']];
 		}
 		d( $data );
- }
+	}
 
 	public function test2 ( $ssId = '' )
 	{
@@ -83,11 +84,13 @@ class Test extends BaseController {
 
 	public function test()
 	{
-		$model = new AuthThrottleModel();
-		$adapter = new AuthThrottleAdapter( $model );
-		$throttle = new AuthThrottleFacade( $adapter );
+		$testConfig = new TestConfig();
+		print_r( $testConfig );
+		// $model = new AuthThrottleModel();
+		// $adapter = new AuthThrottleAdapter( $model );
+		// $throttle = new AuthThrottleFacade( $adapter );
 
-		var_dump( $throttle->throttle() );
+		// var_dump( $throttle->throttle() );
 	}
 
 	public function ci_tl()

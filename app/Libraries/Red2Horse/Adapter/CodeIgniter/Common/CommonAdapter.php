@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 
 namespace App\Libraries\Red2Horse\Adapter\CodeIgniter\Common;
 
-class CommonFacade implements CommonAdapterInterface
+class CommonAdapter implements CommonAdapterInterface
 {
 	public function lang( string $line, array $args = [], string $locale = null )
 	{
