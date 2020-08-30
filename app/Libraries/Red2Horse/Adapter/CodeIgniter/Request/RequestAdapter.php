@@ -14,9 +14,9 @@ class RequestAdapter implements RequestAdapterInterface
 {
 	protected IncomingRequest $request;
 
-	public function __construct( IncomingRequest $request )
+	public function __construct()
 	{
-		$this->request = $request;
+		$this->request = \Config\Services::request();
 	}
 
 	public function post ( $index = null, $filter = null, $flags = null )

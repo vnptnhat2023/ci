@@ -14,9 +14,9 @@ class MailAdapter implements MailAdapterInterface
 {
 	protected Email $email;
 
-	public function __construct( Email $email)
+	public function __construct()
 	{
-		$this->email = $email;
+		$this->email = \Config\Services::email();
 	}
 
 	public function to ( $to ) : self

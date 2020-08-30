@@ -6,6 +6,11 @@ namespace App\Libraries\Red2Horse\Adapter\CodeIgniter\Common;
 
 class CommonAdapter implements CommonAdapterInterface
 {
+	public function cache( ?string $key = null )
+	{
+		return cache( $key );
+	}
+
 	public function lang( string $line, array $args = [], string $locale = null )
 	{
 		return lang( $line, $args, $locale );

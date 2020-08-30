@@ -10,9 +10,9 @@ class SessionAdapter implements SessionAdapterInterface
 {
 	protected SessionInterface $session;
 
-	public function __construct ( SessionInterface $session )
+	public function __construct ()
 	{
-		$this->session = $session;
+		$this->session = \Config\Services::session();
 	}
 
 	public function get ( string $key = null )

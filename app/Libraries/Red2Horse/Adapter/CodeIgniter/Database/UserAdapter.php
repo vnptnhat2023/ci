@@ -11,10 +11,10 @@ class UserAdapter implements UserAdapterInterface
 	protected UserModelAdapter $user;
 	protected Config $config;
 
-	public function __construct ( UserModelAdapter $user, Config $config )
+	public function __construct ()
 	{
-		$this->user = $user;
-		$this->config = $config;
+		$this->user = model( 'App\Libraries\Red2Horse\Adapter\CodeIgniter\Database\UserModelAdapter' );
+		$this->config = new Config();
 	}
 
 	public function getUser ( array $where ) : array

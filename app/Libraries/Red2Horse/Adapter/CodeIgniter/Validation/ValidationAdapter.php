@@ -15,10 +15,10 @@ class ValidationAdapter implements ValidationAdapterInterface
 	protected ValidationInterface $validate;
 	protected Config $config;
 
-	public function __construct ( ValidationInterface $validate, Config $config )
+	public function __construct ()
 	{
-		$this->validate = $validate;
-		$this->config = $config;
+		$this->validate = \Config\Services::validation();
+		$this->config = new Config();
 	}
 
 	public function isValid ( array $data, array $rules ) : bool

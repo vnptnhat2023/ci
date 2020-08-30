@@ -7,4 +7,5 @@ use App\Libraries\Red2Horse\Facade\Common\CommonFacadeInterface;
 
 interface CommonAdapterInterface extends CommonFacadeInterface
 {
+	public function cache( ?string $key = null );
 }

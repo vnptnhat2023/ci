@@ -11,7 +11,6 @@ use CodeIgniter\Model;
 use Config\Services;
 
 /**
- * @author Joey Levy
  * @source https://github.com/joeylevy/CI_throttle/blob/master/library/Throttle
  */
 
