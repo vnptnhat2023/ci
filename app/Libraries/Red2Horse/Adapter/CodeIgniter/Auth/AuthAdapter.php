@@ -4,13 +4,13 @@ declare( strict_types = 1 );
 
 namespace App\Libraries\Red2Horse\Adapter\CodeIgniter\Auth;
 
-use App\Libraries\Red2Horse\Red2Horse;
+use App\Libraries\Red2Horse\Facade\Auth\Red2HorseFacade;
 # --- Todo: thinking more AuthR2hAdapter
 class AuthAdapter implements AuthAdapterInterface
 {
-	protected Red2Horse $auth;
+	protected Red2HorseFacade $auth;
 
-	public function __construct ( Red2Horse $auth )
+	public function __construct ( Red2HorseFacade $auth )
 	{
 		$this->auth = $auth;
 	}
@@ -54,7 +54,7 @@ class AuthAdapter implements AuthAdapterInterface
 		return $this->auth->getHashPass( $pass, $cost );
 	}
 
-	public function getMessage ( array $addMore = [] ) : array
+	public function getMessage ( array $addMore = [], bool $asObject = true )
 	{
 		return $this->auth->getMessage( $addMore );
 	}

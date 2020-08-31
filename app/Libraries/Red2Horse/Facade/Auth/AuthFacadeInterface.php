@@ -35,7 +35,10 @@ interface AuthFacadeInterface
 
 	public function getPasswordHash ( string $pass, int $cost = 12 ) : string;
 
-	public function getMessage ( array $addMore = [] ) : array;
+	/**
+	 * @return object|array
+	 */
+	public function getMessage ( array $addMore = [], bool $asObject = true );
 
 	/**
 	 * @param array $data empty = ( 1st group === administrator group )

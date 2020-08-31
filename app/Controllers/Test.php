@@ -86,8 +86,11 @@ class Test extends BaseController {
 
 	public function test()
 	{
+		$timeS = microtime( true );
 		$auth = Services::Red2HorseAuth();
 		var_dump($auth);
+		var_dump( microtime( true ) - $timeS, memory_get_usage( true ) );
+
 		// $builder = AuthComponentBuilder::createBuilder( $cf )
 		// ->cache()
 		// ->common()

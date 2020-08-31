@@ -13,7 +13,9 @@ class UserAdapter implements UserAdapterInterface
 
 	public function __construct ()
 	{
-		$this->user = model( 'App\Libraries\Red2Horse\Adapter\CodeIgniter\Database\UserModelAdapter' );
+		$this->user = model(
+			'App\Libraries\Red2Horse\Adapter\CodeIgniter\Database\UserModelAdapter'
+		);
 		$this->config = new Config();
 	}
 
@@ -33,9 +35,8 @@ class UserAdapter implements UserAdapterInterface
 
 		return (array) $this->user
 		->select( $queryColumn )
-		->join( 'user_group', 'user_group.id = User.group_id' )
+		->join( 'user_group', 'user_group.id = user.group_id' )
 		->orWhere( $where )
-		->get(1)
 		->first();
 	}
 

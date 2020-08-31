@@ -32,6 +32,13 @@ class ThrottleModelAdapter extends Model
 	protected $useTimestamps = true;
 	protected $createdField = 'created_at';
 
+	protected $allowedFields = [
+		'ip',
+		'type',
+		'created_at',
+		'updated_at'
+	];
+
   public function __construct ()
   {
 		$config = config( 'Cache', false );

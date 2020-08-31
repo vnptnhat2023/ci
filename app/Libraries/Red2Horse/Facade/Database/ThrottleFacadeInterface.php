@@ -4,6 +4,9 @@ declare( strict_types = 1 );
 
 namespace App\Libraries\Red2Horse\Facade\Database;
 
+/**
+ * List **fields** need to allowed: 'ip', 'type', 'created_at', 'updated_at'
+ */
 interface ThrottleFacadeInterface
 {
 	public function config (

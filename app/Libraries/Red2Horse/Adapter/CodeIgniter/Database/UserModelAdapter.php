@@ -10,6 +10,12 @@ class UserModelAdapter extends Model
 {
 	protected $table = 'user';
 	protected $primaryKey = 'id';
-
 	protected $returnType = 'array';
+
+	protected $allowedFields = [
+		'last_activity',
+		'last_login',
+		'password',
+		'session_id'
+	];
 }

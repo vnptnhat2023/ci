@@ -105,7 +105,7 @@ if ( ! function_exists( 'NknI18' ) )
 							}
 						?>
 
-						<?php if ( false === $result->success ) : ?>
+						<?php if ( false === $result->successfully ) : ?>
 
 						<div class="form-group" :class="{'has-warning': errors.has( 'username' )}">
 							<label for="username"><?= NknI18( 'labelUserOrEmail' ) ?></label>
@@ -144,7 +144,7 @@ if ( ! function_exists( 'NknI18' ) )
 							</span>
 						</div>
 
-						<?php if ( true === $result->captcha ) : helper( 'captcha' ); ?>
+						<?php if ( true === $result->showCaptcha ) : helper( 'captcha' ); ?>
 
 						<div class="form-group">
 							<label for="ci_captcha"><?= NknI18( 'labelCaptcha' ) ?></label>

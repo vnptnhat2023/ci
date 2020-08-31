@@ -25,7 +25,7 @@ class Login extends BaseController
 		$this->auth->login( $username, $password, $rememberMe, $captcha );
 		d( $this->auth->getMessage() );
 
-		return view( 'login/login', $this->auth->getMessage() );
+		return view( 'login/login', (array) $this->auth->getMessage() );
 	}
 
 	public function forgot ()
@@ -35,12 +35,12 @@ class Login extends BaseController
 		$captcha = $this->request->getPostGet( 'ci_captcha' );
 
 		$this->auth->requestPassword( $username, $email, $captcha );
-		return view( 'login/forgot', $this->auth->getMessage() );
+		return view( 'login/forgot', (array) $this->auth->getMessage() );
 	}
 
 	public function logout ()
 	{
 		$this->auth->logout();
-		return view( 'login/login', $this->auth->getMessage() );
+		return view( 'login/login', (array) $this->auth->getMessage() );
 	}
 }

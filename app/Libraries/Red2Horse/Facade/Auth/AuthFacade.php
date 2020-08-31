@@ -52,7 +52,7 @@ class AuthFacade implements AuthFacadeInterface
 		return $this->auth->getPasswordHash( $pass, $cost );
 	}
 
-	public function getMessage ( array $addMore = [] ) : array
+	public function getMessage ( array $addMore = [], bool $asObject = true )
 	{
 		return $this->auth->getMessage( $addMore );
 	}

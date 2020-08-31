@@ -78,7 +78,7 @@ class AuthBuilder
 	public function build ()
 	{
 		unset( $this->config );
-		return new AuthComponentBuilder( $this->data );
+		return AuthComponentBuilder::getInstance()->build( $this->data );
 	}
 
 	public function __call ( $methodName, $arguments )

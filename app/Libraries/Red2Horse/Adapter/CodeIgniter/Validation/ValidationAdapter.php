@@ -32,8 +32,8 @@ class ValidationAdapter implements ValidationAdapterInterface
 	public function getErrors( string $field = null ) : array
 	{
 		return ! empty( $field )
-		? $this->validation->getErrors()
-		: [ $this->validation->getError( $field ) ];
+		? $this->validate->getErrors()
+		: [ $this->validate->getError( $field ) ];
 	}
 
 	public function reset(): void

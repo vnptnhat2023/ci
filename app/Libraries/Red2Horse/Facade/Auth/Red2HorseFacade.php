@@ -80,8 +80,10 @@ class Red2HorseFacade
 		->validation()
 		->build();
 
-		$this->throttleModel = $builder->throttleModel;
-		$this->userModel = $builder->userModel;
+		// die( var_dump( $builder ) );
+
+		$this->throttleModel = $builder->throttle;
+		$this->userModel = $builder->user;
 		$this->session = $builder->session;
 		$this->cookie = $builder->cookie;
 		$this->validation = $builder->validation;
@@ -226,15 +228,17 @@ class Red2HorseFacade
 			'incorrectLoggedIn' => $this->incorrectLoggedIn,
 			'successfully' => $this->successfully,
 			'hasBanned' => $this->hasBanned,
-			'accountInactive' => $this->accountInactive
+			'accountInactive' => $this->accountInactive,
+			'attempt' => $this->throttleModel->getAttempts(),
+			'showCaptcha' => $this->throttleModel->showCaptcha()
 		];
 	}
 
 	/**
 	 * Receive all types of messages in this class
-	 * @return array
+	 * @return array|object
 	 */
-	public function getMessage ( array $addMore = [] ) : array
+	public function getMessage ( array $addMore = [], bool $asObject = true )
 	{
 		$sysCaptcha = $this->session->getFlashdata( $this->config::CAPTCHA );
 
@@ -257,7 +261,9 @@ class Red2HorseFacade
 
 		empty( $addMore ) ?: $message += $addMore;
 
-		return $message;
+		return ( true === $asObject )
+		? json_decode( json_encode( $message ) )
+		: $message;
 	}
 
 	/**
@@ -409,9 +415,9 @@ class Red2HorseFacade
 			];
 
 			if ( false === $validation->isValid( $data, $ruleCaptcha ) ) {
-				$errStr = [ $validation->getErrors( $config::CAPTCHA ) ];
+				$errorCaptcha = $validation->getErrors( $config::CAPTCHA );
 
-				return $this->incorrectInfo( true, $errStr );
+				return $this->incorrectInfo( true, $errorCaptcha );
 			}
 		}
 
@@ -614,7 +620,7 @@ class Red2HorseFacade
 		$this->incorrectLoggedIn = true;
 
 		$errors[] = $this->common->lang( 'Red2Horse.noteLoggedInAnotherPlatform' );
-		$this->errors = [ ...$errors, ...$addMore ];
+		$this->errors = [ ...$errors, ...array_values( $addMore ) ];
 
 		if ( true === $getReturn ) return $this->getMessage();
 	}
@@ -626,7 +632,7 @@ class Red2HorseFacade
 		$this->incorrectLoggedIn = true;
 
 		$errors[] = $this->common->lang( 'Red2Horse.errorIncorrectInformation' );
-		$this->errors = [ ...$errors, ...$addMore ];
+		$this->errors = [ ...$errors, ...array_values( $addMore ) ];
 
 		return $this->getMessage();
 	}

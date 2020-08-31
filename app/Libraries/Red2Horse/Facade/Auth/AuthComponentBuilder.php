@@ -20,8 +20,10 @@ use App\Libraries\Red2Horse\Facade\Auth\Config;
 
 class AuthComponentBuilder
 {
-	public throttleModel $throttleModel;
-	public userModel $userModel;
+	private static self $getInstance;
+
+	public throttleModel $throttle;
+	public userModel $user;
 	public session $session;
 	public cookie $cookie;
 	public validation $validation;
@@ -35,7 +37,16 @@ class AuthComponentBuilder
 		return new AuthBuilder( $config );
 	}
 
-	function __construct( array $builder )
+	public static function getInstance()
+	{
+		if ( empty( self::$getInstance ) ) {
+			return new AuthComponentBuilder;
+		}
+
+		return self::$getInstance;
+	}
+
+	public function build ( array $builder )
 	{
 		foreach ( $builder as $class => $component )
 		{
@@ -43,5 +54,7 @@ class AuthComponentBuilder
 				$this->$class = new $component;
 			}
 		}
+
+		return $this;
 	}
 }
