@@ -8,9 +8,9 @@ class CookieAdapter implements CookieAdapterInterface
 {
 	protected CookieAdapterHelper $cookie;
 
-	public function __construct ( CookieAdapterHelper $cookie )
+	public function __construct ()
 	{
-		$this->cookie = $cookie;
+		$this->cookie = new CookieAdapterHelper();
 	}
 
 	public function get_cookie ( $index, bool $xssClean = false )

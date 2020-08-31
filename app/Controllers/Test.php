@@ -10,7 +10,8 @@ use App\Libraries\Red2Horse\Adapter\CodeIgniter\Database\{
 	ThrottleModelAdapter as AuthThrottleModel,
 	ThrottleAdapter as AuthThrottleAdapter
 };
-use App\Libraries\Red2Horse\Facade\Auth\AuthBuilderComponent;
+
+use App\Libraries\Red2Horse\Facade\Auth\AuthComponentBuilder;
 use App\Libraries\Red2Horse\Facade\Database\ThrottleFacade as AuthThrottleFacade;
 use App\Libraries\Red2Horse\Facade\Auth\Config as TestConfig;
 
@@ -85,8 +86,23 @@ class Test extends BaseController {
 
 	public function test()
 	{
-		$builder = AuthBuilderComponent::createBuilder()->common()->cache()->build();
-		var_dump($builder);
+		$auth = Services::Red2HorseAuth();
+		var_dump($auth);
+		// $builder = AuthComponentBuilder::createBuilder( $cf )
+		// ->cache()
+		// ->common()
+		// ->config()
+		// ->cookie()
+		// ->database_user()
+		// ->database_throttle()
+		// ->mail()
+		// ->request()
+		// ->session()
+		// ->validation()
+		// ->build();
+
+		// var_dump($builder);
+		// var_dump( $builder->common );
 
 		// $testConfig = new TestConfig();
 		// print_r( $testConfig );

@@ -5,9 +5,11 @@ declare( strict_types = 1 );
 namespace Config;
 
 use App\Libraries\Red2Horse\Facade\Auth\AuthFacade;
-use App\Libraries\Red2Horse\Config as r2hConfig;
+// use App\Libraries\Red2Horse\Config as r2hConfig;
+use App\Libraries\Red2Horse\Facade\Auth\Config as r2hConfig;
 use App\Libraries\Red2Horse\Sys\Red2HorseSession;
-use App\Libraries\Red2Horse\Red2Horse;
+// use App\Libraries\Red2Horse\Red2Horse;
+use App\Libraries\Red2Horse\Facade\Auth\Red2HorseFacade as Red2Horse;
 
 // use App\Libraries\NknAuth\{
 // 	Config as AuthConfig,
@@ -49,8 +51,13 @@ class Services extends CoreServices
 			$config = new r2hConfig;
 		}
 
-		$adapter = new $config->authAdapter ( new Red2Horse( $config ) );
-		return new AuthFacade( $adapter );
+		// $adapter = new $config->authAdapter ( new Red2Horse( $config ) );
+		// return new AuthFacade( $adapter );
+		$adapterName = $config->adapter();
+		$adapter = new $adapterName();
+		return new Red2Horse( $adapter );
+		// $adapter = new $config->authAdapter ( new Red2Horse( $adapter ) );
+		// return new AuthFacade( $adapter );
 	}
 
 	public static function Extension ( bool $getShared = true ) : Extension

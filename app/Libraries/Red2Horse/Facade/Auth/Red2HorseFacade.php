@@ -60,32 +60,35 @@ class Red2HorseFacade
 	protected mail $mail;
 	protected request $request;
 	protected common $common;
+	protected $builder;
 
 
-	public function __construct (
-		Config $config = null,
-		throttleModel $throttleModel,
-		userModel $userModel,
-		session $session,
-		cookie $cookie,
-		validation $validation,
-		cache $cache,
-		mail $mail,
-		request $request,
-		common $common
-	)
+	public function __construct ( Config $config = null )
 	{
 		$this->config = $config;# --- Todo: ?: new Config;
 
-		$this->throttleModel = $throttleModel;
-		$this->userModel = $userModel;
-		$this->session = $session;
-		$this->cookie = $cookie;
-		$this->validation = $validation;
-		$this->cache = $cache;
-		$this->mail = $mail;
-		$this->request = $request;
-		$this->common = $common;
+		$builder = AuthComponentBuilder::createBuilder( $config )
+		->cache()
+		->common()
+		->config()
+		->cookie()
+		->database_user()
+		->database_throttle()
+		->mail()
+		->request()
+		->session()
+		->validation()
+		->build();
+
+		$this->throttleModel = $builder->throttleModel;
+		$this->userModel = $builder->userModel;
+		$this->session = $builder->session;
+		$this->cookie = $builder->cookie;
+		$this->validation = $builder->validation;
+		$this->cache = $builder->cache;
+		$this->mail = $builder->mail;
+		$this->request = $builder->request;
+		$this->common = $builder->common;
 
 		$this->throttleModel->config(
 			$config->throttle->type,

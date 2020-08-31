@@ -4,8 +4,6 @@ declare( strict_types = 1 );
 
 namespace App\Libraries\Red2Horse\Facade\Auth;
 
-// use App\Libraries\Red2Horse\Facade\Config\ConfigFacadeInterface;
-
 class Config
 {
 	/*

@@ -1,115 +1,88 @@
 <?php
 
 declare( strict_types = 1 );
-
 namespace App\Libraries\Red2Horse\Facade\Auth;
-
-use App\Libraries\Red2Horse\Facade\{
-	Session\SessionFacadeInterface as session,
-	Validation\ValidationFacadeInterface as validation,
-	Cookie\CookieFacadeInterface as cookie,
-	Cache\CacheFacadeInterface as cache,
-	Mail\MailFacadeInterface as mail,
-	Request\RequestFacadeInterface as request,
-	Database\ThrottleFacadeInterface as throttleModel,
-	Database\UserFacadeInterface as userModel,
-	Common\CommonFacadeInterface as common,
-};
-
-use App\Libraries\Red2Horse\Facade\Auth\Config as R2hConfig;
-
+use App\Libraries\Red2Horse\Facade\Auth\Config;
 
 class AuthBuilder
 {
-	private throttleModel $throttleModel;
-	private userModel $userModel;
-	private session $session;
-	private cookie $cookie;
-	private validation $validation;
-	private cache $cache;
-	private mail $mail;
-	private request $request;
-	private common $common;
-	private R2hConfig $R2hConfig;
+	private array $data = [];
 
-	public function __construct()
+	private Config $config;
+
+	public function __construct ( Config $config)
 	{
-		$this->R2hConfig = new R2hConfig;
+		$this->config = $config;
 	}
 
-	public function cache()
+	public function cache () : self
 	{
-		$cache = $this->R2hConfig->adapter( 'Cache' );
-		$this->cache = new $cache();
+		$this->data[ 'cache' ] = $this->config->adapter( 'Cache' );
 		return $this;
 	}
 
-	public function common ()
+	public function common () : self
 	{
-		$common = $this->R2hConfig->adapter( 'Common' );
-		$this->common = new $common();
+		$this->data[ 'common' ] = $this->config->adapter( 'Common' );
 		return $this;
 	}
 
-	public function config ()
+	public function config () : self
 	{
-		$config = $this->R2hConfig->adapter( 'Config' );
-		$this->config = new $config();
+		$this->data[ 'config' ] = $this->config->adapter( 'Config' );
 		return $this;
 	}
 
-	public function cookie ()
+	public function cookie () : self
 	{
-		$cookie = $this->R2hConfig->adapter( 'Cookie' );
-		$this->cookie = new $cookie();
+		$this->data[ 'cookie' ] = $this->config->adapter( 'Cookie' );
 		return $this;
 	}
 
-	public function database_user ()
+	public function database_user () : self
 	{
-		$database_user = $this->R2hConfig->adapter( 'Database', 'User' );
-		$this->database_user = new $database_user();
+		$this->data[ 'user' ] = $this->config->adapter( 'Database', 'User' );
 		return $this;
 	}
 
-	public function database_throttle ()
+	public function database_throttle () : self
 	{
-		$database_throttle = $this->R2hConfig->adapter( 'Database', 'Throttle' );
-		$this->database_throttle = new $database_throttle();
-		// die(var_dump($this->database_throttle));
+		$this->data[ 'throttle' ] = $this->config->adapter( 'Database', 'Throttle' );
 		return $this;
 	}
 
-	public function mail ()
+	public function mail () : self
 	{
-		$mail = $this->R2hConfig->adapter( 'Mail' );
-		$this->mail = new $mail();
+		$this->data[ 'mail' ] = $this->config->adapter( 'Mail' );
 		return $this;
 	}
 
-	public function request ()
+	public function request () : self
 	{
-		$request = $this->R2hConfig->adapter( 'Request' );
-		$this->request = new $request();
+		$this->data[ 'request' ] = $this->config->adapter( 'Request' );
 		return $this;
 	}
 
-	public function session ()
+	public function session () : self
 	{
-		$session = $this->R2hConfig->adapter( 'Session' );
-		$this->session = new $session();
+		$this->data[ 'session' ] = $this->config->adapter( 'Session' );
 		return $this;
 	}
 
-	public function validation ()
+	public function validation () : self
 	{
-		$validation = $this->R2hConfig->adapter( 'Validation' );
-		$this->validation = new $validation();
+		$this->data[ 'validation' ] = $this->config->adapter( 'Validation' );;
 		return $this;
 	}
 
 	public function build ()
 	{
-		return new AuthBuilderComponent( $this );
+		unset( $this->config );
+		return new AuthComponentBuilder( $this->data );
+	}
+
+	public function __call ( $methodName, $arguments )
+	{
+		return $this->data[ $methodName ] ?? $this->$methodName( $arguments );
 	}
 }
