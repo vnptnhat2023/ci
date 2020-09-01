@@ -6,13 +6,24 @@ use App\Libraries\Red2Horse\Facade\Auth\Config;
 
 class AuthBuilder
 {
+	private static self $getInstance;
+
 	private array $data = [];
 
 	private Config $config;
 
-	public function __construct ( Config $config)
+	public function __construct ( Config $config )
 	{
 		$this->config = $config;
+	}
+
+	public static function getInstance ( Config $config )
+	{
+		if ( empty( self::$getInstance ) ) {
+			return new self( $config );
+		}
+
+		return self::$getInstance;
 	}
 
 	public function cache () : self
@@ -71,7 +82,7 @@ class AuthBuilder
 
 	public function validation () : self
 	{
-		$this->data[ 'validation' ] = $this->config->adapter( 'Validation' );;
+		$this->data[ 'validation' ] = $this->config->adapter( 'Validation' );
 		return $this;
 	}
 

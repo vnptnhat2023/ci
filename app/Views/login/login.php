@@ -147,13 +147,13 @@ if ( ! function_exists( 'NknI18' ) )
 						<?php if ( true === $result->showCaptcha ) : helper( 'captcha' ); ?>
 
 						<div class="form-group">
-							<label for="ci_captcha"><?= NknI18( 'labelCaptcha' ) ?></label>
+							<label for="captcha"><?= NknI18( 'labelCaptcha' ) ?></label>
 
 							<div class="input-group">
 								<input type="text"
 								class="form-control"
-								id="ci_captcha"
-								name="ci_captcha"
+								id="captcha"
+								name="captcha"
 								placeholder="<?= NknI18( 'placeholderCaptcha', false ) ?>">
 
 								<span class="input-group-addon"

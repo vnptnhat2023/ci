@@ -10,10 +10,6 @@ use CodeIgniter\Exceptions\ModelException;
 use CodeIgniter\Model;
 use Config\Services;
 
-/**
- * @source https://github.com/joeylevy/CI_throttle/blob/master/library/Throttle
- */
-
 class ThrottleModelAdapter extends Model
 {
   private int $attempts = 0;
@@ -100,7 +96,7 @@ class ThrottleModelAdapter extends Model
 
   public function showCaptcha () : bool
   {
-		return $this->attempts >= --$this->captchaAttempts;
+		return $this->attempts >= $this->captchaAttempts;
   }
 
   public function limited () : bool

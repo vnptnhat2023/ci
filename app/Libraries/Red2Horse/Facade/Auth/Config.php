@@ -27,7 +27,7 @@ class Config
 	public object $throttle;
 
 	public string $sessionSavePath = '';
-	public string $sessionCookieName = '';
+	public string $sessionCookieName = 'r2h';
 	public int $sessionExpiration = 0;
 	public int $sessionTimeToUpdate = 0;
 

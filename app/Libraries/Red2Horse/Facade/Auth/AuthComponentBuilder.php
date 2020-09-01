@@ -34,13 +34,13 @@ class AuthComponentBuilder
 
 	public static function createBuilder ( Config $config )
 	{
-		return new AuthBuilder( $config );
+		return AuthBuilder::getInstance( $config );
 	}
 
-	public static function getInstance()
+	public static function getInstance ()
 	{
 		if ( empty( self::$getInstance ) ) {
-			return new AuthComponentBuilder;
+			return new self;
 		}
 
 		return self::$getInstance;

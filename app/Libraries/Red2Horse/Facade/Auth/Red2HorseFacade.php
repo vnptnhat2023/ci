@@ -60,12 +60,10 @@ class Red2HorseFacade
 	protected mail $mail;
 	protected request $request;
 	protected common $common;
-	protected $builder;
-
 
 	public function __construct ( Config $config = null )
 	{
-		$this->config = $config;# --- Todo: ?: new Config;
+		$this->config = $config;
 
 		$builder = AuthComponentBuilder::createBuilder( $config )
 		->cache()
@@ -79,8 +77,6 @@ class Red2HorseFacade
 		->session()
 		->validation()
 		->build();
-
-		// die( var_dump( $builder ) );
 
 		$this->throttleModel = $builder->throttle;
 		$this->userModel = $builder->user;
@@ -288,7 +284,7 @@ class Red2HorseFacade
 		if ( empty( $data ) )
 		return true;
 
-		# --- Permission config
+		# --- Todo: permission config
 		$configPerm = config( '\BAPI\Config\User' )->setting( 'permission' );
 		$boolVar = true;
 
@@ -313,7 +309,9 @@ class Red2HorseFacade
 	 */
 	public function isLogged ( bool $withCookie = false ) : bool
 	{
-		if ( true === $this->session->has( $this->config->session ) ) return true;
+		if ( true === $this->session->has( $this->config->session ) ) {
+			return true;
+		}
 
 		return ( false === $withCookie ) ? false : $this->cookieHandler();
 	}
@@ -576,16 +574,16 @@ class Red2HorseFacade
 	# --- Todo: clone $config->sessionSavePath to r2hConfig ?
 	private function isMultiLogin ( string $session_id ) : bool
 	{
-		$config = config( '\Config\App' );
-		$pathFile = $config->sessionSavePath;
-		$pathFile .= '/' . $config->sessionCookieName . $session_id;
+		// $config = config( '\Config\App' );
+		$pathFile = $this->config->sessionSavePath;
+		$pathFile .= '/' . $this->config->sessionCookieName . $session_id;
 
 		$date = $this->common->get_file_info( $pathFile, 'date' );
 		if ( empty( $date ) ) {
 			return true;
 		}
 
-		$cookieName = $config->sessionCookieName . '_test';
+		$cookieName = $this->config->sessionCookieName . '_test';
 		if ( $hash = $this->cookie->get_cookie( $cookieName ) ) {
 
 			if ( password_verify( $session_id, $hash ) ) {
@@ -597,14 +595,14 @@ class Red2HorseFacade
 		}
 
 		$time = ( time() - $date[ 'date' ] );
-		$sessionExp = (int) $config->sessionExpiration;
+		$sessionExp = (int) $this->config->sessionExpiration;
 
 		if ( $sessionExp > 0 ) {
 			return $time < $sessionExp ? false : true;
 		}
 
 		if ( $sessionExp === 0 ) {
-			return $time < $config->sessionTimeToUpdate ? false : true;
+			return $time < $this->config->sessionTimeToUpdate ? false : true;
 		}
 
 		$this->errors[] = "else";
@@ -723,9 +721,9 @@ class Red2HorseFacade
 
 	public function regenerateCookie () : void
 	{
-		$config = config( '\Config\App' );
+		// $config = config( '\Config\App' );
 		$cookieValue = password_hash( session_id(), PASSWORD_DEFAULT );
-		$ttl = $config->sessionTimeToUpdate;
+		$ttl = $this->config->sessionTimeToUpdate;
 		// $cookieName = $config->sessionCookieName;
 		$cookieName = $this->config->cookie;
 
