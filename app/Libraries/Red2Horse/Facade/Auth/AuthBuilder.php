@@ -5,6 +5,8 @@ namespace App\Libraries\Red2Horse\Facade\Auth;
 use App\Libraries\Red2Horse\Facade\Auth\Config;
 use App\Libraries\Red2Horse\Mixins\TraitSingleton;
 
+# --------------------------------------------------------------------------
+
 class AuthBuilder
 {
 	use TraitSingleton;
@@ -13,10 +15,14 @@ class AuthBuilder
 
 	private Config $config;
 
+	# ------------------------------------------------------------------------
+
 	public function __construct ( Config $config )
 	{
 		$this->config = $config;
 	}
+
+	# ------------------------------------------------------------------------
 
 	public function cache () : self
 	{
@@ -78,6 +84,8 @@ class AuthBuilder
 		return $this;
 	}
 
+	# ------------------------------------------------------------------------
+
 	public function build ()
 	{
 		unset( $this->config );
@@ -88,4 +96,7 @@ class AuthBuilder
 	{
 		return $this->data[ $methodName ] ?? $this->$methodName( $arguments );
 	}
+
+	# ------------------------------------------------------------------------
+
 }

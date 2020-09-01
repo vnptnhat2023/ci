@@ -1,17 +1,22 @@
 <?php
 
 declare( strict_types = 1 );
-
 namespace App\Libraries\Red2Horse\Facade\Auth;
+
+# --------------------------------------------------------------------------
 
 class AuthFacade implements AuthFacadeInterface
 {
 	protected AuthFacadeInterface $auth;
 
+	# ------------------------------------------------------------------------
+
 	public function __construct ( AuthFacadeInterface $auth )
 	{
 		$this->auth = $auth;
 	}
+
+	# ------------------------------------------------------------------------
 
 	public function login (
 		string $username = null,

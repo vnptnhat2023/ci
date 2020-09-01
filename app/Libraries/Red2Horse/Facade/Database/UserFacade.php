@@ -13,14 +13,14 @@ class UserFacade implements UserFacadeInterface
 		$this->user = $user;
 	}
 
-	public function getUser ( array $where ) : array
+	public function getUser ( string $select, array $where ) : array
 	{
-		return $this->user->getUser( $where );
+		return $this->user->getUser( $select, $where );
 	}
 
-	public function getUserWithGroup ( array $where, array $moreColumns = [] ) : array
+	public function getUserWithGroup ( string $select, array $where ) : array
 	{
-		return $this->getUserWithGroup( $where, $moreColumns = [] );
+		return $this->getUserWithGroup( $select, $where );
 	}
 
 	/**

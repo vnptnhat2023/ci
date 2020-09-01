@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Libraries\Red2Horse\Facade\Auth;
+# ------------------------------------------------------------------------
 
+namespace App\Libraries\Red2Horse\Facade\Auth;
 use App\Libraries\Red2Horse\Facade\{
 	Session\SessionFacadeInterface as session,
 	Validation\ValidationFacadeInterface as validation,
@@ -14,6 +15,8 @@ use App\Libraries\Red2Horse\Facade\{
 	Common\CommonFacadeInterface as common,
 };
 use App\Libraries\Red2Horse\Mixins\TraitSingleton;
+
+# --------------------------------------------------------------------------
 
 class Red2HorseFacade
 {
@@ -54,6 +57,7 @@ class Red2HorseFacade
 	protected array $errors = [];
 	protected array $success = [];
 
+	# ------------------------------------------------------------------------
 	protected throttleModel $throttleModel;
 	protected userModel $userModel;
 	protected session $session;
@@ -63,6 +67,8 @@ class Red2HorseFacade
 	protected mail $mail;
 	protected request $request;
 	protected common $common;
+
+	# ------------------------------------------------------------------------
 
 	public function __construct ( Config $config = null )
 	{
@@ -360,17 +366,14 @@ class Red2HorseFacade
 		if ( $userId === '0' || ! ctype_digit( $userId ) )
 		return $incorrectCookie();
 
-		# --- Todo: ->getUser( string $select, array $where, array $join )
-		# Check token
-		$user = $this->userModel->getUser( [ 'id' => $userId ] );
+		# --- Check token
+		$user = $this->userModel->getUser(
+			$this->config->getColumString(),
+			[ 'id' => $userId ]
+		);
 
 		if ( empty( $user ) )
 		return $incorrectCookie();
-
-		# --- Todo: when ->getUser add params, remove if down below
-		if ( empty( $user[ 'cookie_token' ] ) ) {
-			throw new \Exception( "The database.token not found !", 403 );
-		}
 
 		$userToken = password_verify( $user[ 'cookie_token' ] ?? '', $exp[ 0 ] );
 
@@ -380,7 +383,7 @@ class Red2HorseFacade
 		if ( false === $userToken || false === $userIp )
 		return $incorrectCookie();
 
-		# Check status
+		# --- Check status
 		if ( in_array( $user[ 'status' ] , [ 'inactive', 'banned' ] ) ) {
 			$this->denyStatus( $user[ 'status' ], false, false );
 			return $incorrectCookie();
@@ -393,12 +396,13 @@ class Red2HorseFacade
 
 		# --- Update cookie
 		$logErr = "Cookie success checked, but error when update data: {$userId}";
-
-		# --- Set cookie
 		$this->setCookie( $userId, [], $logErr );
 
 		# --- Create new session
-		$userData = $this->userModel->getUserWithGroup( [ 'user.id' => $userId ] );
+		$userData = $this->userModel->getUserWithGroup(
+			$this->config->getColumString(),
+			[ 'user.id' => $userId ]
+		);
 		$userData[ 'permission' ] = json_decode( $userData[ 'permission' ] );
 		$this->session->set( $this->config->session, $userData );
 		$this->regenerateCookie();
@@ -451,12 +455,10 @@ class Red2HorseFacade
 	private function loginAfterValidation () : array
 	{
 		$userData = $this->userModel->getUserWithGroup(
+			$this->config->getColumString( [ 'password' ] ),
 			[
 				'user.username' => $this->username,
 				'user.email' => $this->username
-			],
-			[
-				'password'
 			]
 		);
 
@@ -543,7 +545,7 @@ class Red2HorseFacade
 			return false;
 		}
 
-		$find_user = $this->userModel->getUser( $data );
+		$find_user = $this->userModel->getUser( $this->config->getColumString() ,$data );
 
 		if ( empty( $find_user ) ) {
 			$this->incorrectInfo();
@@ -732,13 +734,10 @@ class Red2HorseFacade
 
 	public function regenerateCookie () : void
 	{
-		// $config = config( '\Config\App' );
 		$cookieValue = password_hash( session_id(), PASSWORD_DEFAULT );
 		$ttl = $this->config->sessionTimeToUpdate;
-		// $cookieName = $config->sessionCookieName;
 		$cookieName = $this->config->cookie;
 
-		// setcookie( $cookieName . '_test', $cookieValue, $ttl, '/' );
 		$this->cookie->set_cookie( $cookieName . '_test', $cookieValue, $ttl );
 	}
 

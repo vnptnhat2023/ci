@@ -1,9 +1,9 @@
 <?php
 
+# --------------------------------------------------------------------------
+
 declare( strict_types = 1 );
-
 namespace App\Libraries\Red2Horse\Facade\Auth;
-
 use App\Libraries\Red2Horse\Facade\{
 	Session\SessionFacadeInterface as session,
 	Validation\ValidationFacadeInterface as validation,
@@ -19,6 +19,8 @@ use App\Libraries\Red2Horse\Facade\{
 use App\Libraries\Red2Horse\Facade\Auth\Config;
 use App\Libraries\Red2Horse\Mixins\TraitSingleton;
 
+# --------------------------------------------------------------------------
+
 class AuthComponentBuilder
 {
 	use TraitSingleton;
@@ -33,10 +35,14 @@ class AuthComponentBuilder
 	public request $request;
 	public common $common;
 
+	# ------------------------------------------------------------------------
+
 	public static function createBuilder ( Config $config )
 	{
 		return AuthBuilder::getInstance( $config );
 	}
+
+	# ------------------------------------------------------------------------
 
 	public function build ( array $builder )
 	{

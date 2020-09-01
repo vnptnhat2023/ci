@@ -12,9 +12,9 @@ interface UserFacadeInterface
 	/**
 	 * Fetch a user row
 	 */
-	public function getUser ( array $where ) : array;
+	public function getUser ( string $select, array $where ) : array;
 
-	public function getUserWithGroup ( array $where, array $moreColumns = [] ) : array;
+	public function getUserWithGroup ( string $select, array $where ) : array;
 
 	/**
 	 * @param integer|array|string $where

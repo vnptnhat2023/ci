@@ -159,6 +159,7 @@ class Config
 			'user.created_at',
 			'user.updated_at',
 			'user.session_id',
+			'user.cookie_token',
 			...$columns
 		];
 

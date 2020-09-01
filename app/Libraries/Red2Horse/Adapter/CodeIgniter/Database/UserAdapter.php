@@ -1,10 +1,10 @@
 <?php
 
 declare( strict_types = 1 );
-
 namespace App\Libraries\Red2Horse\Adapter\CodeIgniter\Database;
-
 use App\Libraries\Red2Horse\Facade\Auth\Config;
+
+# --------------------------------------------------------------------------
 
 class UserAdapter implements UserAdapterInterface
 {
@@ -16,25 +16,17 @@ class UserAdapter implements UserAdapterInterface
 		$this->user = model(
 			'App\Libraries\Red2Horse\Adapter\CodeIgniter\Database\UserModelAdapter'
 		);
-		$this->config = new Config();
 	}
 
-	public function getUser ( array $where ) : array
+	public function getUser ( string $select, array $where ) : array
 	{
-		$queryColumn = $this->config->getColumString( [ 'user.cookie_token' ], false );
-
-		return (array) $this->user
-		->select( $queryColumn )
-		->where( $where )
-		->first();
+		return $this->user->select( $select )->where( $where )->first();
 	}
 
-	public function getUserWithGroup ( array $where, array $moreColumns = [] ) : array
+	public function getUserWithGroup ( string $select, array $where ) : array
 	{
-		$queryColumn = $this->config->getColumString( $moreColumns );
-
-		return (array) $this->user
-		->select( $queryColumn )
+		return $this->user
+		->select( $select )
 		->join( 'user_group', 'user_group.id = user.group_id' )
 		->orWhere( $where )
 		->first();
