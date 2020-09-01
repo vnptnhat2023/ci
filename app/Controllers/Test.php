@@ -19,10 +19,7 @@ class Test extends BaseController {
 
 	public function ci_ss ()
 	{
-		// $z = Services::NknAuthSession()->regenerate();
-		// $ss = Services::session();
-		echo session_id() . PHP_EOL;
-		// echo date('d-m-Y H:i:s', '1596996174');
+		Services::session()->remove('r2h');
 	}
 
 	protected object $anonymousClass;

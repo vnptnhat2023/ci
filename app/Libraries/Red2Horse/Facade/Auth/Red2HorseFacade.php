@@ -13,9 +13,12 @@ use App\Libraries\Red2Horse\Facade\{
 	Database\UserFacadeInterface as userModel,
 	Common\CommonFacadeInterface as common,
 };
+use App\Libraries\Red2Horse\Mixins\TraitSingleton;
 
 class Red2HorseFacade
 {
+	use TraitSingleton;
+
 	public Config $config;
 
 	# --- Result data
@@ -345,7 +348,8 @@ class Red2HorseFacade
 		$exp = explode( '-', $userCookie, 2 );
 
 		$incorrectCookie = function  () : bool {
-			$this->cookie->delete_cookie( $this->config->cookie );
+			# --- Todo: turn off when testing
+			// $this->cookie->delete_cookie( $this->config->cookie );
 			return false;
 		};
 
@@ -356,12 +360,19 @@ class Red2HorseFacade
 		if ( $userId === '0' || ! ctype_digit( $userId ) )
 		return $incorrectCookie();
 
+		# --- Todo: ->getUser( string $select, array $where, array $join )
 		# Check token
 		$user = $this->userModel->getUser( [ 'id' => $userId ] );
+
 		if ( empty( $user ) )
 		return $incorrectCookie();
 
-		$userToken = password_verify( $user[ 'cookie_token' ], $exp[ 0 ] );
+		# --- Todo: when ->getUser add params, remove if down below
+		if ( empty( $user[ 'cookie_token' ] ) ) {
+			throw new \Exception( "The database.token not found !", 403 );
+		}
+
+		$userToken = password_verify( $user[ 'cookie_token' ] ?? '', $exp[ 0 ] );
 
 		$ip = $this->request->getIPAddress();
 		$userIp = $user[ 'last_login' ] == $ip;
@@ -428,11 +439,7 @@ class Red2HorseFacade
 		if ( false === $validation->isValid( $data, $ruleUsername ) )
 		{
 			$validation->reset();
-
-			$ruleEmail = [
-				$config::USERNAME => $validation->getRules( 'email' )
-			];
-
+			$ruleEmail = [ $config::USERNAME => $validation->getRules( 'email' ) ];
 			$incorrectInfo = ! $validation->isValid( $data, $ruleEmail );
 		}
 
@@ -444,9 +451,15 @@ class Red2HorseFacade
 	private function loginAfterValidation () : array
 	{
 		$userData = $this->userModel->getUserWithGroup(
-			[ 'user.username' => $this->username ],
-			[ 'password' ]
+			[
+				'user.username' => $this->username,
+				'user.email' => $this->username
+			],
+			[
+				'password'
+			]
 		);
+
 		if ( empty( $userData ) ) {
 			return [ 'error' => $this->incorrectInfo() ];
 		}
@@ -571,10 +584,8 @@ class Red2HorseFacade
 		return true;
 	}
 
-	# --- Todo: clone $config->sessionSavePath to r2hConfig ?
 	private function isMultiLogin ( string $session_id ) : bool
 	{
-		// $config = config( '\Config\App' );
 		$pathFile = $this->config->sessionSavePath;
 		$pathFile .= '/' . $this->config->sessionCookieName . $session_id;
 

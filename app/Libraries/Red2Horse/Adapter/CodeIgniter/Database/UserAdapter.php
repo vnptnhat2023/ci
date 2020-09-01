@@ -21,7 +21,7 @@ class UserAdapter implements UserAdapterInterface
 
 	public function getUser ( array $where ) : array
 	{
-		$queryColumn = $this->config->getStringColum( [] );
+		$queryColumn = $this->config->getColumString( [ 'user.cookie_token' ], false );
 
 		return (array) $this->user
 		->select( $queryColumn )
@@ -29,9 +29,9 @@ class UserAdapter implements UserAdapterInterface
 		->first();
 	}
 
-	public function getUserWithGroup ( array $where, array $moreColumns = [] ): array
+	public function getUserWithGroup ( array $where, array $moreColumns = [] ) : array
 	{
-		$queryColumn = $this->config->getStringColum( $moreColumns );
+		$queryColumn = $this->config->getColumString( $moreColumns );
 
 		return (array) $this->user
 		->select( $queryColumn )

@@ -48,19 +48,16 @@ class Services extends CoreServices
 		}
 
 		if ( ! is_object( $config ) ) {
-			$config = new r2hConfig;
+			$config = r2hConfig::getInstance();
 		}
 
 		$adapterName = $config->adapter();
-		// die(var_dump( new $adapterName( new Red2HorseFacade( $config ) ) ));
+
 		return new AuthFacade(
 			new $adapterName(
-				new Red2HorseFacade( $config )
+				Red2HorseFacade::getInstance( $config )
 			)
 		);
-
-		// $adapter = new $config->authAdapter ( new Red2Horse( $adapter ) );
-		// return new AuthFacade( $adapter );
 	}
 
 	public static function Extension ( bool $getShared = true ) : Extension

@@ -13,15 +13,24 @@ class User extends BaseConfig
   private const setting = [
 
 		# --- [ 'user', 'user_group' ]
-		'permission' => [
+		'userPermission' => [
 			'all',
 			'null',
-			'page',
-			'category',
+			'page',# => [ 'c', 'r', 'u', 'd' ] = 'all'?
+			'category',# => [ 'r' ]
 			'post',
 			'theme',
 			'file'
 		],
+
+		/**
+		$userPermissionAction = [
+			'create',
+			'read',
+			'update',
+			'delete'
+		]
+		 */
 
 		'db' => [
 

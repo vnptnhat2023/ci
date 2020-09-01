@@ -4,8 +4,11 @@ declare( strict_types = 1 );
 
 namespace App\Libraries\Red2Horse\Facade\Auth;
 
+use App\Libraries\Red2Horse\Mixins\TraitSingleton;
+
 class Config
 {
+	use TraitSingleton;
 	/*
 	|--------------------------------------------------------------------------
 	| Session & Cookie & Throttle
@@ -54,10 +57,6 @@ class Config
 		. "\\{$name}\\{$different}Adapter";
 	}
 
-	# --- Todo: remove late
-	public string $authAdapter = '\App\Libraries\Red2Horse\Adapter\\'
-	. self::ADAPTER . '\\Auth\AuthAdapter';
-
 	/*
 	|--------------------------------------------------------------------------
 	| constructor
@@ -66,6 +65,11 @@ class Config
 	public function __construct ()
 	{
 		$adapter = $this->adapter( 'Config' );
+
+		if ( false === class_exists( $adapter ) ) {
+			throw new \Exception( "The Config file: {$adapter} not found.", 404 );
+		}
+
 		$config = new $adapter;
 
 		# --- Todo: add more ConfigFacade
@@ -142,7 +146,7 @@ class Config
 	| SQL syntax select user columns names
 	|--------------------------------------------------------------------------
 	*/
-	public function getStringColum ( array $moreColumns = [] ) : string
+	public function getColumString ( array $columns = [], bool $join = true ) : string
 	{
 		$columns = [
 			# user
@@ -155,12 +159,15 @@ class Config
 			'user.created_at',
 			'user.updated_at',
 			'user.session_id',
-			# user_group
-			'user_group.id as group_id',
-			'user_group.name as group_name',
-			'user_group.permission',
-			...$moreColumns
+			...$columns
 		];
+
+		if ( true === $join ) {
+			# user_group
+			$columns[] = 'user_group.id as group_id';
+			$columns[] = 'user_group.name as group_name';
+			$columns[] = 'user_group.permission';
+		}
 
 		return implode( ',', $columns );
 	}

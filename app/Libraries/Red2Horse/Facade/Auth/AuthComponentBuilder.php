@@ -17,10 +17,11 @@ use App\Libraries\Red2Horse\Facade\{
 };
 
 use App\Libraries\Red2Horse\Facade\Auth\Config;
+use App\Libraries\Red2Horse\Mixins\TraitSingleton;
 
 class AuthComponentBuilder
 {
-	private static self $getInstance;
+	use TraitSingleton;
 
 	public throttleModel $throttle;
 	public userModel $user;
@@ -35,15 +36,6 @@ class AuthComponentBuilder
 	public static function createBuilder ( Config $config )
 	{
 		return AuthBuilder::getInstance( $config );
-	}
-
-	public static function getInstance ()
-	{
-		if ( empty( self::$getInstance ) ) {
-			return new self;
-		}
-
-		return self::$getInstance;
 	}
 
 	public function build ( array $builder )

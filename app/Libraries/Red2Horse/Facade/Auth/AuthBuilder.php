@@ -3,10 +3,11 @@
 declare( strict_types = 1 );
 namespace App\Libraries\Red2Horse\Facade\Auth;
 use App\Libraries\Red2Horse\Facade\Auth\Config;
+use App\Libraries\Red2Horse\Mixins\TraitSingleton;
 
 class AuthBuilder
 {
-	private static self $getInstance;
+	use TraitSingleton;
 
 	private array $data = [];
 
@@ -15,15 +16,6 @@ class AuthBuilder
 	public function __construct ( Config $config )
 	{
 		$this->config = $config;
-	}
-
-	public static function getInstance ( Config $config )
-	{
-		if ( empty( self::$getInstance ) ) {
-			return new self( $config );
-		}
-
-		return self::$getInstance;
 	}
 
 	public function cache () : self
