@@ -25,6 +25,8 @@ class AuthComponentBuilder
 {
 	use TraitSingleton;
 
+	# ------------------------------------------------------------------------
+
 	public throttleModel $throttle;
 	public userModel $user;
 	public session $session;

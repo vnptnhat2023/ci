@@ -1,6 +1,6 @@
 <?php
 
-# ------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 
 namespace App\Libraries\Red2Horse\Facade\Auth;
 use App\Libraries\Red2Horse\Facade\{
@@ -58,6 +58,7 @@ class Red2HorseFacade
 	protected array $success = [];
 
 	# ------------------------------------------------------------------------
+
 	protected throttleModel $throttleModel;
 	protected userModel $userModel;
 	protected session $session;
@@ -105,6 +106,8 @@ class Red2HorseFacade
 		);
 	}
 
+	# ------------------------------------------------------------------------
+
 	public function login (
 		string $userNameEmail = null,
 		string $password = null,
@@ -151,47 +154,6 @@ class Red2HorseFacade
 		$this->captcha = $captcha;
 
 		return $this->typeChecker( 'forget' );
-	}
-
-	/**
-	 * @param string $type login|forget
-	 * @throws \Exception
-	 */
-	private function typeChecker ( $type = 'login' ) : bool
-	{
-		if ( ! in_array( $type, [ 'login', 'forget' ] ) ) {
-			throw new \Exception( 'Type must be in "login or forget"', 1 );
-		}
-
-		$requestType = ( $type === 'login' ) ? 'password' : 'email';
-		$isNullUsername = is_null( $this->username );
-		$isNullType = is_null( $this->{$requestType} );
-
-		$hasRequest = ! $isNullUsername && ! $isNullType;
-
-		if ( true === $this->isLogged( true ) )
-		{
-			( $type === 'forget' )
-			? $this->incorrectResetPassword = true
-			: $this->setLoggedInSuccess( $this->getUserdata() );
-
-			return true;
-		}
-
-		if ( true === $this->throttleModel->limited() )
-		{
-			$errArg = [
-				'num' => gmdate( 'i', $this->config->throttle->timeoutAttempts ),
-				'type' => 'minutes'
-			];
-			$this->errors[] = $this->common->lang( 'Red2Horse.errorThrottleLimitedTime', $errArg );
-
-			return false;
-		}
-
-		if ( false === $hasRequest ) return false;
-
-		return ( $type === 'login' ) ? $this->loginHandler() : $this->forgetHandler();
 	}
 
 	/**
@@ -344,6 +306,17 @@ class Red2HorseFacade
 		return true;
 	}
 
+	public function regenerateCookie () : void
+	{
+		$cookieValue = password_hash( session_id(), PASSWORD_DEFAULT );
+		$ttl = $this->config->sessionTimeToUpdate;
+		$cookieName = $this->config->cookie;
+
+		$this->cookie->set_cookie( $cookieName . '_test', $cookieValue, $ttl );
+	}
+
+	# ------------------------------------------------------------------------
+
 	private function cookieHandler () : bool
 	{
 		$userCookie = $this->cookie->get_cookie( $this->config->cookie );
@@ -368,17 +341,15 @@ class Red2HorseFacade
 
 		# --- Check token
 		$user = $this->userModel->getUser(
-			$this->config->getColumString(),
+			$this->config->getColumString( [], false ),
 			[ 'id' => $userId ]
 		);
 
 		if ( empty( $user ) )
 		return $incorrectCookie();
 
-		$userToken = password_verify( $user[ 'cookie_token' ] ?? '', $exp[ 0 ] );
-
-		$ip = $this->request->getIPAddress();
-		$userIp = $user[ 'last_login' ] == $ip;
+		$userToken = password_verify( $user[ 'cookie_token' ], stripslashes( $exp[ 0 ] ) );
+		$userIp = $user[ 'last_login' ] == $this->request->getIPAddress();
 
 		if ( false === $userToken || false === $userIp )
 		return $incorrectCookie();
@@ -519,6 +490,12 @@ class Red2HorseFacade
 		$this->throttleModel->cleanup();
 
 		return true;
+	}
+
+	private function setLoggedInSuccess ( array $userData ) : void
+	{
+		$this->successfully = true;
+		$this->success[] = $this->common->lang( 'Red2Horse.successLoggedWithUsername', [ $userData[ 'username' ] ] );
 	}
 
 	/**
@@ -698,10 +675,45 @@ class Red2HorseFacade
 		}
 	}
 
-	private function setLoggedInSuccess ( array $userData ) : void
+	/**
+	 * @param string $type login|forget
+	 * @throws \Exception
+	 */
+	private function typeChecker ( $type = 'login' ) : bool
 	{
-		$this->successfully = true;
-		$this->success[] = $this->common->lang( 'Red2Horse.successLoggedWithUsername', [ $userData[ 'username' ] ] );
+		if ( ! in_array( $type, [ 'login', 'forget' ] ) ) {
+			throw new \Exception( 'Type must be in "login or forget"', 1 );
+		}
+
+		$requestType = ( $type === 'login' ) ? 'password' : 'email';
+		$isNullUsername = is_null( $this->username );
+		$isNullType = is_null( $this->{$requestType} );
+
+		$hasRequest = ! $isNullUsername && ! $isNullType;
+
+		if ( true === $this->isLogged( true ) )
+		{
+			( $type === 'forget' )
+			? $this->incorrectResetPassword = true
+			: $this->setLoggedInSuccess( $this->getUserdata() );
+
+			return true;
+		}
+
+		if ( true === $this->throttleModel->limited() )
+		{
+			$errArg = [
+				'num' => gmdate( 'i', $this->config->throttle->timeoutAttempts ),
+				'type' => 'minutes'
+			];
+			$this->errors[] = $this->common->lang( 'Red2Horse.errorThrottleLimitedTime', $errArg );
+
+			return false;
+		}
+
+		if ( false === $hasRequest ) return false;
+
+		return ( $type === 'login' ) ? $this->loginHandler() : $this->forgetHandler();
 	}
 
 	/**
@@ -730,15 +742,6 @@ class Red2HorseFacade
 		$updateData += $data;
 
 		return $this->userModel->updateUser( $userId, $updateData );
-	}
-
-	public function regenerateCookie () : void
-	{
-		$cookieValue = password_hash( session_id(), PASSWORD_DEFAULT );
-		$ttl = $this->config->sessionTimeToUpdate;
-		$cookieName = $this->config->cookie;
-
-		$this->cookie->set_cookie( $cookieName . '_test', $cookieValue, $ttl );
 	}
 
 	private function trigger ( string $event, array $eventData )

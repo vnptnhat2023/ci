@@ -5,7 +5,12 @@ declare( strict_types = 1 );
 namespace App\Libraries\Red2Horse\Facade\Database;
 
 /**
- * List **fields** need to allowed: 'last_activity', 'last_login', 'password', 'session_id'
+ * List **fields** need to allowed:
+ * 'last_activity',
+ * 'last_login',
+ * 'password',
+ * 'session_id',
+ * 'cookie_token'
  */
 interface UserFacadeInterface
 {

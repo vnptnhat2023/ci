@@ -4,40 +4,41 @@ declare( strict_types = 1 );
 
 namespace App\Libraries\Red2Horse\Facade\Config;
 
-use App\Libraries\Red2Horse\Facade\Auth\AuthComponentBuilder;
-use App\Libraries\Red2Horse\Facade\Auth\Config;
+// use App\Libraries\Red2Horse\Facade\Auth\{
+// 	AuthComponentBuilder,
+// 	Config
+// };
 
 class ConfigFacade implements ConfigFacadeInterface
 {
 	protected ConfigFacadeInterface $config;
 
-	protected array $userPermission = [
-		'null',
-		'all'
-	];
+	# --- Todo: 'post' => ['create'] => [ 'file', 'text', ... ]
+	# --- Todo: 'post' => ['delete'] => [ 'text' ]
+	# --- Todo: 'post' => ['delete'] => [ 'all' ]
+	# --- Todo: 'post' => ['delete'] => [ 'null' ]
+	protected array $userPermission = [ 'null', 'all' ];
 
-	protected array $userPermissionAction = [
-		'create',
-		'read',
-		'update',
-		'delete'
-	];
+	protected array $userPermissionAction = [ 'create', 'read', 'update', 'delete' ];
+
+	protected array $userPermissionCreate = [];
+
+	protected array $userPermissionRead = [];
+
+	protected array $userPermissionUpdate = [];
+
+	protected array $userPermissionDelete = [];
+
 
 	public function __construct( ConfigFacadeInterface $config )
 	{
 		$this->config = $config;
 	}
 
-	public function userPermission ( array $perm = [] )
+	public function addUserPermission ( array $perm = [] )
 	{
-		$builder = AuthComponentBuilder::createBuilder( Config::getInstance() )
-		->common()
-		->build();
-
-		$common = $builder->common;
-
-		if ( ! empty( $perm ) && ! $common->isAssocArray( $perm ) ) {
-			$this->userPermission += $perm;
+		if ( ! empty( $perm ) ) {
+			$this->userPermission += array_values( $perm );
 		}
 	}
 

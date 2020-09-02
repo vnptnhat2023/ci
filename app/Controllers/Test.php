@@ -5,32 +5,17 @@ namespace App\Controllers;
 use App\Libraries\DesignPattern as StateGyPattern;
 use \Config\Services;
 use CodeIgniter\Events\Events;
-// use CodeIgniter\HTTP\UserAgent;
-use App\Libraries\Red2Horse\Adapter\CodeIgniter\Database\{
-	ThrottleModelAdapter as AuthThrottleModel,
-	ThrottleAdapter as AuthThrottleAdapter
-};
-
 use App\Libraries\Red2Horse\Facade\Auth\AuthComponentBuilder;
-use App\Libraries\Red2Horse\Facade\Database\ThrottleFacade as AuthThrottleFacade;
-use App\Libraries\Red2Horse\Facade\Auth\Config as TestConfig;
 
 class Test extends BaseController {
 
-	public function ci_ss ()
+	public function chua_biet()
 	{
-		Services::session()->remove('r2h');
-	}
+		$a = 'м�t,D[���%�';
 
-	protected object $anonymousClass;
+		$b = bin2hex( $a );
 
-	public function anonymous_class()
-	{
-		$this->anonymousClass = new class {
-			public $lorem = 'lorem ip sum';
-		};
-
-		var_dump($this->anonymousClass->lorem);
+		var_dump( $a === hex2bin( $b ) );
 	}
 
 	public function formatTimelineData()

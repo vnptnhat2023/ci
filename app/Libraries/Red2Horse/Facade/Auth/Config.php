@@ -59,18 +59,18 @@ class Config
 
 	/*
 	|--------------------------------------------------------------------------
-	| constructor
+	| construct
 	|--------------------------------------------------------------------------
 	*/
 	public function __construct ()
 	{
-		$adapter = $this->adapter( 'Config' );
+		$configAdapter = $this->adapter( 'Config' );
 
-		if ( false === class_exists( $adapter ) ) {
-			throw new \Exception( "The Config file: {$adapter} not found.", 404 );
+		if ( false === class_exists( $configAdapter ) ) {
+			throw new \Exception( "The Config file: {$configAdapter} not found.", 404 );
 		}
 
-		$config = new $adapter;
+		$config = new $configAdapter;
 
 		# --- Todo: add more ConfigFacade
 		$this->sessionSavePath = $config->sessionSavePath();
