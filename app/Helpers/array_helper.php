@@ -1,13 +1,14 @@
 <?php
 
-if (! function_exists('dot_array_search_clone'))
+function arrayAssignByPath ( &$arr, $path, $value, $separator = '.' )
 {
-	function dot_array_search_clone(string $index, array $array)
-	{
-		$segments = explode('.', rtrim(rtrim($index, '* '), '.'));
+	$keys = explode( $separator, $path );
 
-		return _array_search_dot($segments, $array);
+	foreach ( $keys as $key ) {
+		$arr = &$arr[ $key ];
 	}
+
+	$arr = $value;
 }
 
 # $cutNum = how many items wanna cut
@@ -17,7 +18,7 @@ if (! function_exists('dot_array_search_clone'))
  * Check duplicates array
  * https://stackoverflow.com/questions/3145607/php-check-if-an-array-has-duplicates
  */
-function arrayHasDupes(array $input_array) : bool
+function arrayHasDupes ( array $input_array ) : bool
 {
   return count( $input_array ) !== count( array_flip( $input_array ) );
 }
@@ -26,11 +27,14 @@ function arrayHasDupes(array $input_array) : bool
  * - Take on internet
  * - https://stackoverflow.com/questions/8840319/build-a-tree-from-a-flat-array-in-php
 */
-function buildTree(array &$elements, $parentId = 0, bool $flat = false)
+function buildTree ( array &$elements, $parentId = 0, bool $flat = false )
 {
-  $branch = [];
-  foreach ( $elements as &$element ) {
+	$branch = [];
+
+	foreach ( $elements as &$element )
+	{
     if ( $element['parent_id'] == $parentId ) {
+
       $children = buildTree( $elements, $element['id'] );
 
       if ( $children ) {
@@ -48,13 +52,14 @@ function buildTree(array &$elements, $parentId = 0, bool $flat = false)
       $branch[ $element['id'] ] = $element;
       unset( $element );
     }
-  }
+	}
+
   return $branch;
 }
 
-function arrayPrint($data, bool $json = false) : string
+function arrayPrint ( $data, bool $json = false ) : string
 {
-  helper('text');
+  helper( 'text' );
 
   $type = gettype($data);
 
@@ -78,13 +83,13 @@ function arrayPrint($data, bool $json = false) : string
   Type:<u>{$type}</u> | JSON: <u>{$json}</u></div><br>$str</pre>";
 }
 
-function arrayDump(array $data, string $title = '') : string
+function arrayDump ( array $data, string $title = '' ) : string
 {
   return $title . PHP_EOL . var_export( $data, true ). PHP_EOL;
 }
 
 
-function arraySearchCustom(string $search = '', array $array)
+function arraySearchCustom ( string $search = '', array $array )
 {
   if ( 0 == strlen($search) OR ! is_array($array) ) return false;
   if ( ! in_array($search, $array) ) return false;
@@ -99,36 +104,42 @@ function arraySearchCustom(string $search = '', array $array)
  * @param string
  * @param array
  * */
-function arrayDeleteByValue(string $search = '', array $array)
+function arrayDeleteByValue ( string $search = '', array $array )
 {
   if ( FALSE === ( $key = arraySearchCustom( $search, $array ) ) ) return false;
-  unset($array[$key]);
+  unset( $array[ $key ] );
 
-  return array_values($array);
+  return array_values( $array );
 }
 
-function side_bar_unique(array $array, array $array_search, array $colum_name) :array
+function side_bar_unique ( array $array, array $array_search, array $colum_name ) :array
 {
-  $column_search = array_column($array_search, $colum_name);
-  $column_delete = array_column($array, $colum_name);
+  $column_search = array_column( $array_search, $colum_name );
+  $column_delete = array_column( $array, $colum_name );
 
-  foreach ($column_search as $tu_can_tim)
+  foreach ( $column_search as $needed )
   {
-    if (in_array($tu_can_tim, $column_delete))
+
+    if ( in_array( $needed, $column_delete ) )
     {
-      if (strlen(array_search($tu_can_tim, $column_delete)) > 0)
+
+      if ( strlen( array_search( $needed, $column_delete ) ) > 0 )
       {
-        $key = array_search($tu_can_tim, $column_delete);
-        unset($array[$key]);
-      }
-    }
-  }
-  return array_values($array);
+        $key = array_search( $needed, $column_delete );
+        unset( $array[ $key ] );
+			}
+
+		}
+
+	}
+
+  return array_values( $array );
 }
 
-function isAssoc(array $data) : bool
+function isAssoc( array $data ) : bool
 {
-  if ( array() === $data ) return false;
+	if ( array() === $data ) return false;
+
   return array_keys($data) !== range( 0, count($data) - 1 );
 }
 
@@ -142,12 +153,11 @@ function isVar( & $var, $return = null )
   return $var ?? $return;
 }
 
-if ( ! function_exists('array_key_first') )
+if ( ! function_exists( 'array_key_first' ) )
 {
-  function array_key_first(array $array)
+  function array_key_first ( array $array )
   {
-    if ( ! is_array($array) OR empty($array) )
-    {
+    if ( ! is_array( $array ) OR empty( $array ) ) {
       return NULL;
     }
 
@@ -155,20 +165,19 @@ if ( ! function_exists('array_key_first') )
   }
 }
 
-if ( ! function_exists('array_key_last') )
+if ( ! function_exists( 'array_key_last' ) )
 {
-  function array_key_last(array $array)
+  function array_key_last ( array $array )
   {
-    if ( ! is_array($array) OR empty($array) )
-    {
+    if ( ! is_array( $array ) OR empty( $array ) ) {
       return NULL;
     }
 
-    return array_keys($array)[ count($array) - 1 ];
+    return array_keys( $array )[ count( $array ) - 1 ];
   }
 }
 
-if ( ! function_exists('array_key_first_last') )
+if ( ! function_exists( 'array_key_first_last' ) )
 {
   function array_key_first_last(array $array)
   {

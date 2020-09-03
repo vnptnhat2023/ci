@@ -9,6 +9,16 @@ use App\Libraries\Red2Horse\Facade\Auth\AuthComponentBuilder;
 
 class Test extends BaseController {
 
+	public function permission()
+	{
+		$group = [];
+
+		arrayAssignByPath( $group, 'moderator.page', [ 'c', 'r' ] );
+		arrayAssignByPath( $group, 'moderator.cat', [ 'c', 'u' ] );
+
+		echo json_encode( $group, JSON_PRETTY_PRINT );
+	}
+
 	public function chua_biet()
 	{
 		$a = 'м�t,D[���%�';

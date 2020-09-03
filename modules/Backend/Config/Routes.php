@@ -119,6 +119,7 @@ $routes->group( 'backend', $bapiOptions, function ( RouteCollection $routes )
 		function ( RouteCollection $routes ) {
 			$option = [ 'only' => 'index,create,delete', 'placeholder' => '(:num)' ];
 			$routes->resource( 'crud', $option );
+
 			$routes->patch( 'crud/(:dotID)', 'Crud::update/$1');
 		}
 	);

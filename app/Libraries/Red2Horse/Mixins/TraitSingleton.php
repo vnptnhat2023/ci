@@ -16,4 +16,6 @@ trait TraitSingleton
 
 		return self::$getInstance;
 	}
+
+	final private function __clone() {}
 }
