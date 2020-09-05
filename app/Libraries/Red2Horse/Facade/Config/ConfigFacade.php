@@ -37,15 +37,26 @@ class ConfigFacade implements ConfigFacadeInterface
 		$this->config = $config;
 	}
 
-	public function addUserPermission ( array $userRoute = [], array $perm = [] )
+	public function userPermission () : array
 	{
+		$userPermission = $this->config->userPermission();
+
+		if ( ! empty( $userPermission ) ) {
+			$this->userPermission += array_values( $userPermission );
+		}
+
+		return $this->userPermission;
+	}
+
+	public function userRoute() : array
+	{
+		$userRoute = $this->config->userRoute();
+
 		if ( ! empty( $userRoute ) ) {
 			$this->userRoute += array_values( $userRoute );
 		}
 
-		if ( ! empty( $perm ) ) {
-			$this->userPermission += array_values( $perm );
-		}
+		return $this->userRoute;
 	}
 
 	public function sessionCookieName ( ?string $name = null ) : string

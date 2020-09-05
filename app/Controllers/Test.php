@@ -13,10 +13,16 @@ class Test extends BaseController {
 	{
 		$group = [];
 
-		arrayAssignByPath( $group, 'moderator.page', [ 'c', 'r' ] );
-		arrayAssignByPath( $group, 'moderator.cat', [ 'c', 'u' ] );
+		dotArrayAssign( $group, 'moderator.page', [ 'c', 'r' ] );
+		dotArrayAssign( $group, 'moderator.category', [ 'c', 'u' ] );
+		// dotArrayAssign( $group, 'moderator.page.c', [ 'page_only' ] );
+		// dotArrayAssign( $group, 'moderator.page.c', [ 'page_all' ] );
+		// dotArrayAssign( $group, 'moderator.post.d', [ 'file_only' ] );
 
+
+		// print_r($group);
 		echo json_encode( $group, JSON_PRETTY_PRINT );
+		// echo json_encode( dot_array_search( 'moderator.post', $group ), JSON_PRETTY_PRINT );
 	}
 
 	public function chua_biet()

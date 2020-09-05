@@ -1,6 +1,6 @@
 <?php
 
-function arrayAssignByPath ( &$arr, $path, $value, $separator = '.' )
+function dotArrayAssign ( array &$arr, string $path, $value, string $separator = '.' )
 {
 	$keys = explode( $separator, $path );
 

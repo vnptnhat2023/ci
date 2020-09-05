@@ -13,6 +13,7 @@ class User extends BaseConfig
   private const setting = [
 
 		# --- [ 'user', 'user_group' ]
+		# --- Todo: delete late
 		'userPermission' => [
 			'all',
 			'null',
@@ -22,15 +23,6 @@ class User extends BaseConfig
 			'theme',
 			'file'
 		],
-
-		/**
-		$userPermissionAction = [
-			'create',
-			'read',
-			'update',
-			'delete'
-		]
-		 */
 
 		'db' => [
 

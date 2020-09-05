@@ -14,6 +14,9 @@ class ConfigAdapter implements ConfigAdapterInterface
 	protected int $sessionExpiration;
 	protected int $sessionTimeToUpdate;
 
+	protected array $userPermission = [];
+	protected array $userRoute = [];
+
 	# -------------------------------------------------------------------------
 
 	public function __construct()
@@ -61,5 +64,23 @@ class ConfigAdapter implements ConfigAdapterInterface
 		}
 
 		return $this->sessionTimeToUpdate = $TimeToUpdate;
+	}
+
+	public function userPermission ( array $perm = [] ) : array
+	{
+		if ( ! empty( $perm ) ) {
+			$this->userPermission += array_values( $perm );
+		}
+
+		return $this->userPermission;
+	}
+
+	public function userRoute( array $route = [] ) : array
+	{
+		if ( ! empty( $route ) ) {
+			$this->userRoute += array_values( $route );
+		}
+
+		return $this->userRoute;
 	}
 }

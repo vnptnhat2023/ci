@@ -13,4 +13,8 @@ interface ConfigFacadeInterface
 	public function sessionExpiration( int $expiration = 0 ) : int;
 
 	public function sessionTimeToUpdate( int $ttl = 0 ) : int;
+
+	public function userPermission () : array;
+
+	public function userRoute () : array;
 }
