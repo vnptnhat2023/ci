@@ -4,6 +4,8 @@ declare( strict_types = 1 );
 
 namespace App\Libraries\Red2Horse\Facade\Config;
 
+use App\Libraries\Red2Horse\Mixins\TraitSingleton;
+
 // use App\Libraries\Red2Horse\Facade\Auth\{
 // 	AuthComponentBuilder,
 // 	Config
@@ -11,12 +13,15 @@ namespace App\Libraries\Red2Horse\Facade\Config;
 
 class ConfigFacade implements ConfigFacadeInterface
 {
+
+	use TraitSingleton;
+
 	protected ConfigFacadeInterface $config;
 
 	# ---  Map of User Permission: [ group => route => permission ]
 
 	# --- a: all, n: null
-	protected array $userRoute = [ 'n', 'a' ];
+	protected array $userRoute = [ 'null', 'all' ];
 
 	# --- a: all, n: null, c: create, r: read, u: update, d: delete
 	protected array $userPermission = [ 'a', 'c', 'r', 'u', 'd' ];
@@ -39,10 +44,12 @@ class ConfigFacade implements ConfigFacadeInterface
 
 	public function userPermission () : array
 	{
-		$userPermission = $this->config->userPermission();
+		$data = $this->config->userPermission();
 
-		if ( ! empty( $userPermission ) ) {
-			$this->userPermission += array_values( $userPermission );
+		if ( ! empty( $data ) )
+		{
+			$data = array_diff( array_values( $data ), $this->userPermission );
+			$this->userPermission = array_merge( $this->userPermission, $data );
 		}
 
 		return $this->userPermission;
@@ -50,10 +57,12 @@ class ConfigFacade implements ConfigFacadeInterface
 
 	public function userRoute() : array
 	{
-		$userRoute = $this->config->userRoute();
+		$data = $this->config->userRoute();
 
-		if ( ! empty( $userRoute ) ) {
-			$this->userRoute += array_values( $userRoute );
+		if ( ! empty( $data ) )
+		{
+			$data = array_diff( array_values( $data ), $this->userRoute );
+			$this->userRoute = array_merge( $this->userRoute, $data );
 		}
 
 		return $this->userRoute;

@@ -51,12 +51,10 @@ class Services extends CoreServices
 			$config = r2hConfig::getInstance();
 		}
 
-		$adapterName = $config->adapter();
+		$authAdapter = $config->adapter();
 
-		return new AuthFacade(
-			new $adapterName(
-				Red2HorseFacade::getInstance( $config )
-			)
+		return AuthFacade::getInstance(
+			new $authAdapter( Red2HorseFacade::getInstance( $config ) )
 		);
 	}
 

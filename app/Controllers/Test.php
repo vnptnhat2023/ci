@@ -3,9 +3,12 @@
 namespace App\Controllers;
 
 use App\Libraries\DesignPattern as StateGyPattern;
+use App\Libraries\Red2Horse\Adapter\Codeigniter\Config\ConfigAdapter;
 use \Config\Services;
 use CodeIgniter\Events\Events;
 use App\Libraries\Red2Horse\Facade\Auth\AuthComponentBuilder;
+use App\Libraries\Red2Horse\Facade\Config\ConfigFacade;
+use App\Libraries\Red2Horse\Facade\Config\ConfigFacadeInterface;
 
 class Test extends BaseController {
 
@@ -27,11 +30,22 @@ class Test extends BaseController {
 
 	public function chua_biet()
 	{
-		$a = 'м�t,D[���%�';
+		$time = microtime( true );
 
-		$b = bin2hex( $a );
+		# ===============================================================================
 
-		var_dump( $a === hex2bin( $b ) );
+		$adapter = new ConfigAdapter();
+
+		$adapter->userRoute( [ 'post', 'page', 'category', 'file' ] );
+		$adapter->userPermission( [ 'a', 'b', 'c', 'd' ] );
+
+		$facade = new ConfigFacade( $adapter );
+
+		var_dump( $facade->userRoute(), $facade->userPermission() );
+
+		# ===============================================================================
+
+		echo microtime( true ) - $time;
 	}
 
 	public function formatTimelineData()

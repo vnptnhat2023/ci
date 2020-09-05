@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace App\Libraries\Red2Horse\Facade\Auth;
 
+use App\Libraries\Red2Horse\Facade\Config\ConfigFacade;
 use App\Libraries\Red2Horse\Mixins\TraitSingleton;
 
 class Config
@@ -67,16 +68,16 @@ class Config
 		$configAdapter = $this->adapter( 'Config' );
 
 		if ( false === class_exists( $configAdapter ) ) {
-			throw new \Exception( "The Config file: {$configAdapter} not found.", 404 );
+			throw new \Exception( "The adapter config file: {$configAdapter} not found.", 403 );
 		}
 
-		$config = new $configAdapter;
+		$facade = ConfigFacade::getInstance( new $configAdapter );
 
 		# --- Todo: add more ConfigFacade
-		$this->sessionSavePath = $config->sessionSavePath();
-		$this->sessionCookieName = $config->sessionCookieName();
-		$this->sessionExpiration = $config->sessionExpiration();
-		$this->sessionTimeToUpdate = $config->sessionTimeToUpdate();
+		$this->sessionSavePath = $facade->sessionSavePath();
+		$this->sessionCookieName = $facade->sessionCookieName();
+		$this->sessionExpiration = $facade->sessionExpiration();
+		$this->sessionTimeToUpdate = $facade->sessionTimeToUpdate();
 
 		$this->throttle = (object) self::THROTTLE;
 	}

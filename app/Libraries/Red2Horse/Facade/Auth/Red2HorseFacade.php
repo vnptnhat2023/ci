@@ -240,6 +240,7 @@ class Red2HorseFacade
 	 */
 	public function hasPermission ( array $data ) : bool
 	{
+		# --- Get current user permission
 		$userPerm = $this->getUserdata( 'permission' );
 
 		if ( ( false === $userPerm ) || empty( $userPerm ) )
