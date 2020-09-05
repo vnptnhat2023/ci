@@ -44,6 +44,14 @@ class Config
 
 	/*
 	|--------------------------------------------------------------------------
+	| User permission
+	|--------------------------------------------------------------------------
+	*/
+	public array $userRoute;
+	public array $userPermission;
+
+	/*
+	|--------------------------------------------------------------------------
 	| Adapter
 	|--------------------------------------------------------------------------
 	*/
@@ -65,15 +73,17 @@ class Config
 	*/
 	public function __construct ()
 	{
-		$configAdapter = $this->adapter( 'Config' );
+		$adapter = $this->adapter( 'Config' );
 
-		if ( false === class_exists( $configAdapter ) ) {
-			throw new \Exception( "The adapter config file: {$configAdapter} not found.", 403 );
+		if ( ! class_exists( $adapter ) ) {
+			throw new \Exception( "The adapter config file: {$adapter} not found.", 403 );
 		}
 
-		$facade = ConfigFacade::getInstance( new $configAdapter );
+		$facade = ConfigFacade::getInstance( new $adapter );
 
-		# --- Todo: add more ConfigFacade
+		$this->userRoute = $facade->userRoute();
+		$this->userPermission = $facade->userPermission();
+
 		$this->sessionSavePath = $facade->sessionSavePath();
 		$this->sessionCookieName = $facade->sessionCookieName();
 		$this->sessionExpiration = $facade->sessionExpiration();

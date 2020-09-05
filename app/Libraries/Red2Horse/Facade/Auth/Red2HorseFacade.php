@@ -78,7 +78,7 @@ class Red2HorseFacade
 		$builder = AuthComponentBuilder::createBuilder( $config )
 		->cache()
 		->common()
-		->config()
+		// ->config()
 		->cookie()
 		->database_user()
 		->database_throttle()

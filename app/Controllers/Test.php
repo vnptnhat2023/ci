@@ -7,6 +7,7 @@ use App\Libraries\Red2Horse\Adapter\Codeigniter\Config\ConfigAdapter;
 use \Config\Services;
 use CodeIgniter\Events\Events;
 use App\Libraries\Red2Horse\Facade\Auth\AuthComponentBuilder;
+use App\Libraries\Red2Horse\Facade\Auth\Config;
 use App\Libraries\Red2Horse\Facade\Config\ConfigFacade;
 use App\Libraries\Red2Horse\Facade\Config\ConfigFacadeInterface;
 
@@ -34,14 +35,9 @@ class Test extends BaseController {
 
 		# ===============================================================================
 
-		$adapter = new ConfigAdapter();
+		$facade = Config::getInstance();
 
-		$adapter->userRoute( [ 'post', 'page', 'category', 'file' ] );
-		$adapter->userPermission( [ 'a', 'b', 'c', 'd' ] );
-
-		$facade = new ConfigFacade( $adapter );
-
-		var_dump( $facade->userRoute(), $facade->userPermission() );
+		var_dump( $facade->userRoute, $facade->userPermission );
 
 		# ===============================================================================
 

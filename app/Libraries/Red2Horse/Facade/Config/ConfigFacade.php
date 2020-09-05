@@ -1,8 +1,9 @@
 <?php
 
 declare( strict_types = 1 );
-
 namespace App\Libraries\Red2Horse\Facade\Config;
+
+# -------------------------------------------------------------------------
 
 use App\Libraries\Red2Horse\Mixins\TraitSingleton;
 
@@ -10,6 +11,8 @@ use App\Libraries\Red2Horse\Mixins\TraitSingleton;
 // 	AuthComponentBuilder,
 // 	Config
 // };
+
+# -------------------------------------------------------------------------
 
 class ConfigFacade implements ConfigFacadeInterface
 {
@@ -36,11 +39,14 @@ class ConfigFacade implements ConfigFacadeInterface
 	// protected array $userPermissionUpdate = [];
 	// protected array $userPermissionDelete = [];
 
+	# -------------------------------------------------------------------------
 
 	public function __construct ( ConfigFacadeInterface $config )
 	{
 		$this->config = $config;
 	}
+
+	# -------------------------------------------------------------------------
 
 	public function userPermission () : array
 	{
