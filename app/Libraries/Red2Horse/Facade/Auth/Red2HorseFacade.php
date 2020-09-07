@@ -1,5 +1,8 @@
 <?php
 
+# --- Todo: 1st Cookie
+# --- Todo: role,permission [ id, group, route, permission ]
+
 # --------------------------------------------------------------------------
 
 namespace App\Libraries\Red2Horse\Facade\Auth;
@@ -256,14 +259,13 @@ class Red2HorseFacade
 		if ( empty( $data ) )
 		return true;
 
-		# --- Todo: permission config
-		$configPerm = config( '\BAPI\Config\User' )->setting( 'permission' );
+		$userRoute = $this->config->userRoute;
 		$boolVar = true;
 
-		foreach ( $data as $role )
+		foreach ( $data as $route )
 		{
-			$inCfPerm = in_array( $role, $configPerm, true );
-			$inUserPerm = in_array( $role, $userPerm, true );
+			$inCfPerm = in_array( $route, $userRoute, true );
+			$inUserPerm = in_array( $route, $userRoute, true );
 
 			if ( false === $inCfPerm || false === $inUserPerm )
 			{
@@ -328,8 +330,7 @@ class Red2HorseFacade
 		$exp = explode( '-', $userCookie, 2 );
 
 		$incorrectCookie = function  () : bool {
-			# --- Todo: turn off when testing
-			// $this->cookie->delete_cookie( $this->config->cookie );
+			$this->cookie->delete_cookie( $this->config->cookie );
 			return false;
 		};
 

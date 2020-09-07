@@ -13,6 +13,13 @@ class Red2HorseAuth implements FilterInterface
 
   public function before( req $request, $arguments = null )
   {
+		// $f = explode( '.', $arguments[0] );
+		// // dd($arguments);
+		// dd( $f[ array_key_last( $f ) ] );
+		// $args = [];
+		// dotArrayAssign( $args, $arguments[0], 'test' );
+		// dd( $args );
+
     if ( ! Services::Red2HorseAuth()->withPermission( $arguments ?: [] ) ) {
       throw PageNotFoundException::forPageNotFound();
     }

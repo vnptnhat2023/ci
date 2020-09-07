@@ -8,6 +8,9 @@ trait TraitSingleton
 {
 	private static self $getInstance;
 
+	/**
+	 * @return static
+	 */
 	public static function getInstance( $params = null )
 	{
 		if ( empty( self::$getInstance ) ) {
