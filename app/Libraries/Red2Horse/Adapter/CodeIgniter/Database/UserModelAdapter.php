@@ -17,6 +17,7 @@ class UserModelAdapter extends Model
 		'last_login',
 		'password',
 		'session_id',
-		'cookie_token'
+		'selector',
+		'token'
 	];
 }

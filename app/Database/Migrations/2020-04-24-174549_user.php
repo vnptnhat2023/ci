@@ -53,9 +53,16 @@ class User extends Migration
         'default' => 'inactive'
 			],
 
-      'cookie_token' => [
+			'selector' => [
         'type' => 'VARCHAR',
-        'constraint' => 32,
+        'constraint' => 255,
+        'null' => true,
+        'default' => null
+			],
+
+      'token' => [
+        'type' => 'VARCHAR',
+        'constraint' => 255,
         'null' => true,
         'default' => null
 			],

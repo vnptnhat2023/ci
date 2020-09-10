@@ -37,13 +37,6 @@ class Config
 
 	/*
 	|--------------------------------------------------------------------------
-	| Lengths of the random_bytes function
-	|--------------------------------------------------------------------------
-	*/
-	public int $randomBytesLength = 8;
-
-	/*
-	|--------------------------------------------------------------------------
 	| User permission
 	|--------------------------------------------------------------------------
 	*/
@@ -170,7 +163,8 @@ class Config
 			'user.created_at',
 			'user.updated_at',
 			'user.session_id',
-			'user.cookie_token',
+			'user.selector',
+			'user.token',
 			...$columns
 		];
 

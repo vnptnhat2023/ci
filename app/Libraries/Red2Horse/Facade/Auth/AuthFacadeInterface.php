@@ -33,7 +33,7 @@ interface AuthFacadeInterface
 	 */
 	public function getUserdata ( string $key = null );
 
-	public function getPasswordHash ( string $pass, int $cost = 12 ) : string;
+	public function getPasswordHash ( string $pass ) : string;
 
 	/**
 	 * @return object|array

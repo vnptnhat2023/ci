@@ -10,7 +10,8 @@ namespace App\Libraries\Red2Horse\Facade\Database;
  * 'last_login',
  * 'password',
  * 'session_id',
- * 'cookie_token'
+ * 'selector
+ * 'token'
  */
 interface UserFacadeInterface
 {

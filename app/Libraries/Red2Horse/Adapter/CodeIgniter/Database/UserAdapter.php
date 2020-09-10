@@ -20,12 +20,12 @@ class UserAdapter implements UserAdapterInterface
 
 	public function getUser ( string $select, array $where ) : array
 	{
-		return $this->user->select( $select )->where( $where )->first();
+		return (array) $this->user->select( $select )->where( $where )->first();
 	}
 
 	public function getUserWithGroup ( string $select, array $where ) : array
 	{
-		return $this->user
+		return (array) $this->user
 		->select( $select )
 		->join( 'user_group', 'user_group.id = user.group_id' )
 		->orWhere( $where )

@@ -57,9 +57,9 @@ class AuthFacade implements AuthFacadeInterface
 		return $this->auth->isLoggedIn( $withCookie );
 	}
 
-	public function getPasswordHash ( string $pass, int $cost = 12 ) : string
+	public function getPasswordHash ( string $pass ) : string
 	{
-		return $this->auth->getPasswordHash( $pass, $cost );
+		return $this->auth->getPasswordHash( $pass );
 	}
 
 	public function getMessage ( array $addMore = [], bool $asObject = true )

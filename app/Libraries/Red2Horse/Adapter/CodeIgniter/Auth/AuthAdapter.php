@@ -49,9 +49,9 @@ class AuthAdapter implements AuthAdapterInterface
 		return $this->auth->isLogged( $withCookie );
 	}
 
-	public function getPasswordHash ( string $pass, int $cost = 12 ) : string
+	public function getPasswordHash ( string $pass ) : string
 	{
-		return $this->auth->getHashPass( $pass, $cost );
+		return $this->auth->getHashPass( $pass );
 	}
 
 	public function getMessage ( array $addMore = [], bool $asObject = true )

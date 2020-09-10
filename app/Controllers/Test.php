@@ -13,6 +13,12 @@ use App\Libraries\Red2Horse\Facade\Config\ConfigFacadeInterface;
 
 class Test extends BaseController {
 
+	public function test_pw()
+	{
+		$r2h = \Config\Services::Red2HorseAuth();
+		echo $r2h->getPasswordHash('123456');
+	}
+
 	public function permission()
 	{
 		$group = [];
@@ -27,6 +33,12 @@ class Test extends BaseController {
 		// print_r($group);
 		echo json_encode( $group, JSON_PRETTY_PRINT );
 		// echo json_encode( dot_array_search( 'moderator.post', $group ), JSON_PRETTY_PRINT );
+	}
+
+	public function delete_ss()
+	{
+		\Config\Services::session()->remove('r2h');
+		d( \Config\Services::session()->has('r2h') );
 	}
 
 	public function chua_biet()
