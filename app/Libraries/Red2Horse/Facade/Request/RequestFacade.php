@@ -12,9 +12,9 @@ class RequestFacade implements RequestFacadeInterface
 
 	protected RequestFacadeInterface $request;
 
-	public function __construct( RequestFacadeInterface $request )
+	public function __construct ( RequestFacadeInterface $request )
 	{
-		$this->$request = $request;
+		$this->request = $request;
 	}
 
 	public function post ( $index = null, $filter = null, $flags = null )

@@ -24,7 +24,7 @@ class CacheFacade implements CacheFacadeInterface
 
 	public function set ( string $key, $value, $timeToLife = 86400 )
 	{
-		return $this->set( $key, $value, $timeToLife );
+		return $this->cache->set( $key, $value, $timeToLife );
 	}
 
 	public function isSupported () : bool

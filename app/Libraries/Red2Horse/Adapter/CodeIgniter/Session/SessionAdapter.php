@@ -4,39 +4,33 @@ declare( strict_types = 1 );
 
 namespace App\Libraries\Red2Horse\Adapter\CodeIgniter\Session;
 
-use CodeIgniter\Session\SessionInterface;
+use Config\Services;
 
 class SessionAdapter implements SessionAdapterInterface
 {
-	protected SessionInterface $session;
-
-	public function __construct ()
-	{
-		$this->session = \Config\Services::session();
-	}
 
 	public function get ( string $key = null )
 	{
-		return $this->session->get( $key );
+		return Services::session()->get( $key );
 	}
 
 	public function has (string $key): bool
 	{
-		return $this->session->has( $key );
+		return Services::session()->has( $key );
 	}
 
 	public function destroy () : void
 	{
-		$this->session->destroy();
+		Services::session()->destroy();
 	}
 
 	public function getFlashdata ( string $key = null )
 	{
-		$this->session->getFlashdata( $key );
+		Services::session()->getFlashdata( $key );
 	}
 
 	public function set ( $data, $value = null ) : void
 	{
-		$this->session->set( $data, $value );
+		Services::session()->set( $data, $value );
 	}
 }

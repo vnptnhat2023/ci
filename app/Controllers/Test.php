@@ -43,17 +43,32 @@ class Test extends BaseController {
 
 	public function chua_biet()
 	{
-		$time = microtime( true );
+		// $time = microtime( true );
 
 		# ===============================================================================
 
-		$facade = Config::getInstance();
+		// $facade = Config::getInstance();
 
-		var_dump( $facade->userRoute, $facade->userPermission );
+		// var_dump( $facade->userRoute, $facade->userPermission );
 
 		# ===============================================================================
 
-		echo microtime( true ) - $time;
+		$builder = AuthComponentBuilder::createBuilder( Config::getInstance() )
+		->cache()
+		->common()
+		// ->config()
+		->cookie()
+		->database_user()
+		->database_throttle()
+		->mail()
+		->request()
+		->session()
+		->validation()
+		->build();
+
+		var_dump($builder);
+
+		// echo microtime( true ) - $time;
 	}
 
 	public function formatTimelineData()

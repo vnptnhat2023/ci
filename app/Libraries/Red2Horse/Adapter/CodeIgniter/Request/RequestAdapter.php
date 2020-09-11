@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 
 namespace App\Libraries\Red2Horse\Adapter\Codeigniter\Request;
 
-use CodeIgniter\HTTP\IncomingRequest;
+use Config\Services;
 
 /**
  * @package Red2ndHorseAuth
@@ -12,40 +12,33 @@ use CodeIgniter\HTTP\IncomingRequest;
  */
 class RequestAdapter implements RequestAdapterInterface
 {
-	protected IncomingRequest $request;
-
-	public function __construct()
-	{
-		$this->request = \Config\Services::request();
-	}
-
 	public function post ( $index = null, $filter = null, $flags = null )
 	{
-		return $this->request->getPost( ...func_get_args() );
+		return Services::request()->getPost( $index, $filter, $flags );
 	}
 
 	public function get ( $index = null, $filter = null, $flags = null )
 	{
-		return $this->request->getGet( ...func_get_args() );
+		return Services::request()->getGet( $index, $filter, $flags );
 	}
 
 	public function getAndPost ( $index = null, $filter = null, $flags = null )
 	{
-		return $this->request->getPostGet( ...func_get_args() );
+		return Services::request()->getPostGet( $index, $filter, $flags );
 	}
 
 	public function postAndGet ( $index = null, $filter = null, $flags = null )
 	{
-		return $this->request->getGetPost( ...func_get_args() );
+		return Services::request()->getGetPost( $index, $filter, $flags );
 	}
 
 	public function getRawInput ()
 	{
-		return $this->request->getRawInput();
+		return Services::request()->getRawInput();
 	}
 
 	public function getIPAddress() : string
 	{
-		return $this->request->getIPAddress();
+		return Services::request()->getIPAddress();
 	}
 }

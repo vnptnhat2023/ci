@@ -10,7 +10,7 @@ class ThrottleAdapter implements ThrottleAdapterInterface
 
 	public function __construct ()
 	{
-		$this->throttle = model( 'App\Libraries\Red2Horse\Adapter\CodeIgniter\Database\ThrottleModelAdapter' );
+		$this->throttle = new ThrottleModelAdapter;
 	}
 
 	public function config ( int $type, int $limit_one, int $limit, int $timeout ) : self

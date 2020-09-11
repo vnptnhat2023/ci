@@ -83,7 +83,6 @@ class Red2HorseFacade
 		$builder = AuthComponentBuilder::createBuilder( $config )
 		->cache()
 		->common()
-		// ->config()
 		->cookie()
 		->database_user()
 		->database_throttle()
@@ -94,7 +93,9 @@ class Red2HorseFacade
 		->build();
 
 		$this->throttleModel = $builder->throttle;
+		// die( var_dump( $this->throttleModel ) );
 		$this->userModel = $builder->user;
+		// die( var_dump( $this->userModel ) );
 		$this->session = $builder->session;
 		$this->cookie = $builder->cookie;
 		$this->validation = $builder->validation;
@@ -351,7 +352,6 @@ class Red2HorseFacade
 		$selector = $separate[ 0 ];
 		$token = $separate[ 1 ];
 
-		# --- is exist user-cookie selector
 		$user = $this->userModel->getUserWithGroup(
 			$this->config->getColumString(),
 			[ 'selector' => $selector ]

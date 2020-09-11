@@ -33,7 +33,7 @@ class CookieFacade implements CookieFacadeInterface
 		bool $httpOnly = false
 	): void
 	{
-		$this->set_cookie(
+		$this->cookie->set_cookie(
 			$name,
 			$value,
 			$expire,

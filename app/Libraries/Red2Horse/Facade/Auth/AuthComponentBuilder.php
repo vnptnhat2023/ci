@@ -3,7 +3,9 @@
 # --------------------------------------------------------------------------
 
 declare( strict_types = 1 );
+
 namespace App\Libraries\Red2Horse\Facade\Auth;
+
 use App\Libraries\Red2Horse\Facade\{
 	Session\SessionFacadeInterface as session,
 	Validation\ValidationFacadeInterface as validation,
@@ -15,7 +17,6 @@ use App\Libraries\Red2Horse\Facade\{
 	Database\UserFacadeInterface as userModel,
 	Common\CommonFacadeInterface as common,
 };
-
 use App\Libraries\Red2Horse\Facade\Auth\Config;
 use App\Libraries\Red2Horse\Mixins\TraitSingleton;
 
@@ -50,8 +51,20 @@ class AuthComponentBuilder
 	{
 		foreach ( $builder as $class => $component )
 		{
-			if ( empty( $this->$class ) ) {
-				$this->$class = new $component;
+			if ( empty( $this->$class ) )
+			{
+				$classAdapter = ucfirst( $class );
+
+				if ( in_array( $class, [ 'user', 'throttle' ], true ) )
+				{
+					$facade = Config::getInstance()->facade( 'Database', $classAdapter );
+				}
+				else
+				{
+					$facade = Config::getInstance()->facade( $classAdapter );
+				}
+
+				$this->$class = $facade::getInstance( new $component );
 			}
 		}
 

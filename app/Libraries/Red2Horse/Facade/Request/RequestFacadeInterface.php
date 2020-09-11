@@ -16,5 +16,5 @@ interface RequestFacadeInterface
 
 	public function getRawInput ();
 
-	public function getIPAddress() :string;
+	public function getIPAddress() : string;
 }

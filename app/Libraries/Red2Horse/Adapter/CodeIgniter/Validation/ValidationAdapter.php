@@ -4,26 +4,25 @@ declare( strict_types = 1 );
 
 namespace App\Libraries\Red2Horse\Adapter\Codeigniter\Validation;
 
-use CodeIgniter\Validation\ValidationInterface;
 use App\Libraries\Red2Horse\Facade\Auth\Config;
+use Config\Services;
+
 /**
  * @package Red2ndHorseAuth
  * @author Red2Horse
  */
 class ValidationAdapter implements ValidationAdapterInterface
 {
-	protected ValidationInterface $validate;
 	protected Config $config;
 
 	public function __construct ()
 	{
-		$this->validate = \Config\Services::validation();
-		$this->config = new Config();
+		$this->config = Config::getInstance();
 	}
 
 	public function isValid ( array $data, array $rules ) : bool
 	{
-		return $this->validate
+		return Services::validation()
 		->withRequest( \Config\Services::request() )
 		->setRules( $rules )
 		->run( $data );
@@ -32,13 +31,13 @@ class ValidationAdapter implements ValidationAdapterInterface
 	public function getErrors( string $field = null ) : array
 	{
 		return ! empty( $field )
-		? $this->validate->getErrors()
-		: [ $this->validate->getError( $field ) ];
+		? Services::validation()->getErrors()
+		: [ Services::validation()->getError( $field ) ];
 	}
 
 	public function reset(): void
 	{
-		$this->validate->reset();
+		Services::validation()->reset();
 	}
 
 	/**

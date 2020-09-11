@@ -59,6 +59,13 @@ class Config
 		. "\\{$name}\\{$different}Adapter";
 	}
 
+	public function facade( string $name = 'Auth', ?string $different = null ) : string
+	{
+		$different = is_null( $different ) ? $name : $different;
+
+		return "\\App\\Libraries\\Red2Horse\Facade\\{$name}\\{$different}Facade";
+	}
+
 	/*
 	|--------------------------------------------------------------------------
 	| construct

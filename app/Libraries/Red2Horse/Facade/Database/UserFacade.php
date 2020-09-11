@@ -24,7 +24,7 @@ class UserFacade implements UserFacadeInterface
 
 	public function getUserWithGroup ( string $select, array $where ) : array
 	{
-		return $this->getUserWithGroup( $select, $where );
+		return $this->user->getUserWithGroup( $select, $where );
 	}
 
 	/**
