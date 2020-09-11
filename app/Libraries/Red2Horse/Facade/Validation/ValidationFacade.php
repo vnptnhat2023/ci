@@ -4,8 +4,12 @@ declare( strict_types = 1 );
 
 namespace App\Libraries\Red2Horse\Facade\Validation;
 
+use App\Libraries\Red2Horse\Mixins\TraitSingleton;
+
 class ValidationFacade implements ValidationFacadeInterface
 {
+	use TraitSingleton;
+
 	protected ValidationFacadeInterface $validate;
 
 	public function __construct ( ValidationFacadeInterface $validate )

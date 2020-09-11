@@ -4,8 +4,12 @@ declare( strict_types = 1 );
 
 namespace App\Libraries\Red2Horse\Facade\Request;
 
+use App\Libraries\Red2Horse\Mixins\TraitSingleton;
+
 class RequestFacade implements RequestFacadeInterface
 {
+	use TraitSingleton;
+
 	protected RequestFacadeInterface $request;
 
 	public function __construct( RequestFacadeInterface $request )

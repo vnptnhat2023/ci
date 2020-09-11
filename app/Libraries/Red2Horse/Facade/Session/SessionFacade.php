@@ -4,8 +4,12 @@ declare( strict_types = 1 );
 
 namespace App\Libraries\Red2Horse\Facade\Session;
 
+use App\Libraries\Red2Horse\Mixins\TraitSingleton;
+
 class SessionFacade implements SessionFacadeInterface
 {
+	use TraitSingleton;
+
 	protected SessionFacadeInterface $session;
 
 	public function __construct ( SessionFacadeInterface $session )

@@ -177,24 +177,24 @@ class Red2HorseFacade
 		return $userData[ $key ] ?? null;
 	}
 
-	public function getHashPass ( string $pass ) : string
+	public function getHashPass ( string $password ) : string
   {
-		$stored = password_hash(
-			base64_encode( hash('sha384', $pass, true) ),
+		$hash = password_hash(
+			base64_encode( hash('sha384', $password, true) ),
 			PASSWORD_DEFAULT
 		);
 
-		return $stored;
+		return $hash;
   }
 
   public function getVerifyPass ( string $password, string $hashed ) : bool
   {
-		$stored = password_verify(
+		$result = password_verify(
 			base64_encode( hash( 'sha384', $password, true ) ),
 			$hashed
 		);
 
-		return $stored;
+		return $result;
 	}
 
 	/**

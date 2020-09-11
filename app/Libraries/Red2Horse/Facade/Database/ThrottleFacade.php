@@ -4,8 +4,12 @@ declare( strict_types = 1 );
 
 namespace App\Libraries\Red2Horse\Facade\Database;
 
+use App\Libraries\Red2Horse\Mixins\TraitSingleton;
+
 class ThrottleFacade implements ThrottleFacadeInterface
 {
+	use TraitSingleton;
+
 	protected $throttle;
 
 	public function __construct( ThrottleFacadeInterface $throttle )

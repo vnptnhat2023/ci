@@ -4,8 +4,12 @@ declare( strict_types = 1 );
 
 namespace App\Libraries\Red2Horse\Facade\Cache;
 
+use App\Libraries\Red2Horse\Mixins\TraitSingleton;
+
 class CacheFacade implements CacheFacadeInterface
 {
+	use TraitSingleton;
+
 	protected CacheFacadeInterface $cache;
 
 	public function __construct ( CacheFacadeInterface $cache )

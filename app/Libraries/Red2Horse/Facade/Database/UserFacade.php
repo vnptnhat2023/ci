@@ -4,8 +4,12 @@ declare( strict_types = 1 );
 
 namespace App\Libraries\Red2Horse\Facade\Database;
 
+use App\Libraries\Red2Horse\Mixins\TraitSingleton;
+
 class UserFacade implements UserFacadeInterface
 {
+	use TraitSingleton;
+
 	protected UserFacadeInterface $user;
 
 	public function __construct( UserFacadeInterface $user )

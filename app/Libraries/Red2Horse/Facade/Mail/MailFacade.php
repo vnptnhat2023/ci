@@ -4,8 +4,12 @@ declare( strict_types = 1 );
 
 namespace App\Libraries\Red2Horse\Facade\Mail;
 
+use App\Libraries\Red2Horse\Mixins\TraitSingleton;
+
 class MailFacade implements MailFacadeInterface
 {
+	use TraitSingleton;
+
 	protected MailFacadeInterface $mail;
 
 	public function __construct( MailFacadeInterface $mail )

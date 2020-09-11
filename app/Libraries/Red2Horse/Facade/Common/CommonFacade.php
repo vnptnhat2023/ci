@@ -4,8 +4,12 @@ declare( strict_types = 1 );
 
 namespace App\Libraries\Red2Horse\Facade\Common;
 
+use App\Libraries\Red2Horse\Mixins\TraitSingleton;
+
 class CommonFacade implements CommonFacadeInterface
 {
+	use TraitSingleton;
+
 	protected CommonFacadeInterface $common;
 
 	public function __construct ( CommonFacadeInterface $common )
