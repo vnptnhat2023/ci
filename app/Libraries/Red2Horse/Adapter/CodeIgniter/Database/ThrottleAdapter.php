@@ -10,7 +10,7 @@ class ThrottleAdapter implements ThrottleAdapterInterface
 
 	public function __construct ()
 	{
-		$this->throttle = new ThrottleModelAdapter;
+		$this->throttle = model( ThrottleModelAdapter::class );
 	}
 
 	public function config ( int $type, int $limit_one, int $limit, int $timeout ) : self

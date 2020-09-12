@@ -1,24 +1,24 @@
 <?php
 
 # --------------------------------------------------------------------------
-
-# --- Todo: 1st Cookie
 # --- Todo: role,permission [ id, group, route, permission ]
-
+# --- Todo: Session & cookie -Todo ]
 # --------------------------------------------------------------------------
 
 namespace App\Libraries\Red2Horse\Facade\Auth;
+
 use App\Libraries\Red2Horse\Facade\{
-	Session\SessionFacadeInterface as session,
-	Validation\ValidationFacadeInterface as validation,
-	Cookie\CookieFacadeInterface as cookie,
-	Cache\CacheFacadeInterface as cache,
-	Mail\MailFacadeInterface as mail,
-	Request\RequestFacadeInterface as request,
-	Database\ThrottleFacadeInterface as throttleModel,
-	Database\UserFacadeInterface as userModel,
-	Common\CommonFacadeInterface as common,
+	Session\SessionFacade as session,
+	Validation\ValidationFacade as validation,
+	Cookie\CookieFacade as cookie,
+	Cache\CacheFacade as cache,
+	Mail\MailFacade as mail,
+	Request\RequestFacade as request,
+	Database\ThrottleFacade as throttleModel,
+	Database\UserFacade as userModel,
+	Common\CommonFacade as common,
 };
+
 use App\Libraries\Red2Horse\Mixins\TraitSingleton;
 
 # --------------------------------------------------------------------------
@@ -28,39 +28,34 @@ class Red2HorseFacade
 	use TraitSingleton;
 
 	public Config $config;
-
-	# --- Result data
-	protected bool $incorrectResetPassword = false;
-	protected bool $incorrectLoggedIn = false;
-	protected bool $successfully = false;
-	protected bool $hasBanned = false;
-	protected bool $accountInactive = false;
+	public Red2HorseMessage $message;
 
 	# --- Form data
+
 	/**
 	 * @var string $username form-data
 	 */
 	private ?string $username = null;
+
 	/**
 	 * @var string $email form-data
 	 */
 	private ?string $email = null;
+
 	/**
 	 * @var string $password form-data
 	 */
 	private ?string $password = null;
+
 	/**
 	 * @var string $captcha form-data
 	 */
 	private ?string $captcha = null;
+
 	/**
 	 * @var bool $rememberMe form-data
 	 */
 	private bool $rememberMe = false;
-
-	# --- Message data
-	protected array $errors = [];
-	protected array $success = [];
 
 	# ------------------------------------------------------------------------
 
@@ -93,9 +88,7 @@ class Red2HorseFacade
 		->build();
 
 		$this->throttleModel = $builder->throttle;
-		// die( var_dump( $this->throttleModel ) );
 		$this->userModel = $builder->user;
-		// die( var_dump( $this->userModel ) );
 		$this->session = $builder->session;
 		$this->cookie = $builder->cookie;
 		$this->validation = $builder->validation;
@@ -110,6 +103,8 @@ class Red2HorseFacade
 			$config->throttle->maxAttempts,
 			$config->throttle->timeoutAttempts
 		);
+
+		$this->message = Red2HorseMessage::getInstance( $config );
 	}
 
 	# ------------------------------------------------------------------------
@@ -121,6 +116,11 @@ class Red2HorseFacade
 		string $captcha = null
 	) : bool
 	{
+		/**
+		 * Authentication-Todo
+		 * Props: [ username, password, rememberMe, captcha]
+		 * Method: Utility->typeChecker( 'login' )
+		 */
 		$this->username = $userNameEmail;
 		$this->password = $password;
 		$this->rememberMe = (bool) $rememberMe;
@@ -131,20 +131,24 @@ class Red2HorseFacade
 
 	public function logout () : bool
 	{
-		$this->successfully = true;
+		/**
+		 * Authentication-Todo
+		 * Components: [ common, message, cookie, session ]
+		 */
+		$this->message->successfully = true;
 
 		$this->cookie->delete_cookie( $this->config->cookie );
 
 		if ( $this->session->has( $this->config->session ) )
 		{
 			$this->session->destroy();
-			$this->success[] = $this->common->lang( 'Red2Horse.successLogout' );
+			$this->message->success[] = $this->common->lang( 'Red2Horse.successLogout' );
 
 			return true;
 		}
 
 		$error = 'You have not login. '.  $this->common->lang( 'Red2Horse.homeLink');
-		$this->errors[] = $error;
+		$this->message->errors[] = $error;
 
 		return false;
 	}
@@ -155,6 +159,11 @@ class Red2HorseFacade
 		string $captcha = null
 	) : bool
 	{
+		/**
+		 * ResetPassword-Todo
+		 * Props: [ username, email, captcha ]
+		 * Methods: Utility->typeChecker( 'forget' )
+		 */
 		$this->username = $username;
 		$this->email = $email;
 		$this->captcha = $captcha;
@@ -168,6 +177,11 @@ class Red2HorseFacade
 	 */
 	public function getUserdata ( string $key = null )
 	{
+		/**
+		 * Authentication-Todo
+		 * Components: [ config, session ]
+		 * Methods: [ Authentication->isLogged() ]
+		 */
 		if ( false === $this->isLogged() )
 		return false;
 
@@ -180,8 +194,11 @@ class Red2HorseFacade
 
 	public function getHashPass ( string $password ) : string
   {
+		/**
+		 * Password-Todo
+		 */
 		$hash = password_hash(
-			base64_encode( hash('sha384', $password, true) ),
+			base64_encode( hash( 'sha384', $password, true ) ),
 			PASSWORD_DEFAULT
 		);
 
@@ -190,6 +207,9 @@ class Red2HorseFacade
 
   public function getVerifyPass ( string $password, string $hashed ) : bool
   {
+		/**
+		 * Password-Todo
+		 */
 		$result = password_verify(
 			base64_encode( hash( 'sha384', $password, true ) ),
 			$hashed
@@ -204,15 +224,7 @@ class Red2HorseFacade
 	 */
 	public function getResult ()
 	{
-		return [
-			'incorrectResetPassword' => $this->incorrectResetPassword,
-			'incorrectLoggedIn' => $this->incorrectLoggedIn,
-			'successfully' => $this->successfully,
-			'hasBanned' => $this->hasBanned,
-			'accountInactive' => $this->accountInactive,
-			'attempt' => $this->throttleModel->getAttempts(),
-			'showCaptcha' => $this->throttleModel->showCaptcha()
-		];
+		return $this->message->getResult();
 	}
 
 	/**
@@ -221,30 +233,21 @@ class Red2HorseFacade
 	 */
 	public function getMessage ( array $addMore = [], bool $asObject = true )
 	{
-		$sysCaptcha = $this->session->getFlashdata( $this->config::CAPTCHA );
-
-		$message = [
-			'success' => $this->success,
-			'errors' => $this->errors,
-			'result' => $this->getResult(),
+		$form = [
 			'form' => [
 				'username' => $this->username,
 				'email' => $this->email,
 				'password' => $this->password,
 				'captcha' => $this->captcha,
 				'remember_me' => $this->rememberMe
-			],
-			'r2h_auth' => [
-				'config' => $this->config,
-				'captcha' => $sysCaptcha[ 'word' ] ?? null
 			]
 		];
 
-		empty( $addMore ) ?: $message += $addMore;
+		if ( ! empty( $addMore ) ) {
+			$form = array_merge( $form, $addMore );
+		}
 
-		return ( true === $asObject )
-		? json_decode( json_encode( $message ) )
-		: $message;
+		return $this->message->getMessage( $form, $asObject );
 	}
 
 	/**
@@ -254,6 +257,11 @@ class Red2HorseFacade
 	 */
 	public function hasPermission ( array $data ) : bool
 	{
+		/**
+		 * Authorization
+		 * Methods : [ getUserdata ]
+		 * Components: [ config ]
+		 */
 		# --- Get current user permission
 		$userPerm = $this->getUserdata( 'permission' );
 
@@ -294,6 +302,11 @@ class Red2HorseFacade
 	 */
 	public function isLogged ( bool $withCookie = false ) : bool
 	{
+		/**
+		 * Authentication-Todo
+		 * Components: [ config, session ]
+		 * Methods: [ Cookie->cookieHandler() ]
+		 */
 		if ( true === $this->session->has( $this->config->session ) ) {
 			return true;
 		}
@@ -303,6 +316,11 @@ class Red2HorseFacade
 
 	public function regenerateSession ( array $userData ) : bool
 	{
+		/**
+		 * Session-Todo
+		 * Components: [ common, userModel ]
+		 * Methods: [ Authentication->isLogged(), Cookie->regenerateCookie() ]
+		 */
 		if ( false === $this->isLogged() )
 		return false;
 
@@ -322,6 +340,10 @@ class Red2HorseFacade
 
 	public function regenerateCookie () : void
 	{
+		/**
+		 * Cookie-Todo
+		 * Components: [ config, cookie ]
+		 */
 		$cookieValue = password_hash( session_id(), PASSWORD_DEFAULT );
 		$ttl = $this->config->sessionTimeToUpdate;
 		$cookieName = $this->config->cookie;
@@ -333,6 +355,15 @@ class Red2HorseFacade
 
 	private function cookieHandler () : bool
 	{
+		/**
+		 * Cookie-Todo
+		 * Components: [ config, cookie, message, session, userModel, request ]
+		 * Methods: [
+		 * Authentication->isMultiLogin( $user[ 'session_id' ] )
+		 * Cookie->setCookie( $user[ 'id' ], [], $logErr )
+		 * Cookie->regenerateCookie()
+		 * ]
+		 */
 		$userCookie = $this->cookie->get_cookie( $this->config->cookie );
 
 		if ( empty( $userCookie ) || ! is_string( $userCookie ) ) {
@@ -370,13 +401,13 @@ class Red2HorseFacade
 
 		# --- Check status
 		if ( in_array( $user[ 'status' ] , [ 'inactive', 'banned' ] ) ) {
-			$this->denyStatus( $user[ 'status' ], false, false );
+			$this->message->denyStatus( $user[ 'status' ], false, false );
 			return $incorrectCookie();
 		}
 
 		# --- Todo: declare inside the config file: is using this feature
 		if ( false === $this->isMultiLogin( $user[ 'session_id' ] ) ) {
-			$this->denyMultiLogin( true, [], false );
+			$this->message->denyMultiLogin( true, [], false );
 			return false;
 		}
 
@@ -394,6 +425,11 @@ class Red2HorseFacade
 
 	private function loginInvalid ()
 	{
+		/**
+		 * Authentication-Todo
+		 * Props: [ username, password, captcha ]
+		 * Components: [ validation, config, throttleModel, message ]
+		 */
 		$validation = $this->validation;
 		$config = $this->config;
 
@@ -409,7 +445,7 @@ class Red2HorseFacade
 			if ( false === $validation->isValid( $data, $ruleCaptcha ) ) {
 				$errorCaptcha = $validation->getErrors( $config::CAPTCHA );
 
-				return $this->incorrectInfo( true, $errorCaptcha );
+				return $this->message->incorrectInfo( true, $errorCaptcha );
 			}
 		}
 
@@ -423,13 +459,22 @@ class Red2HorseFacade
 			$incorrectInfo = ! $validation->isValid( $data, $ruleEmail );
 		}
 
-		false === $incorrectInfo ?: $this->incorrectInfo( true );
+		false === $incorrectInfo ?: $this->message->incorrectInfo( true );
 
 		return $incorrectInfo;
 	}
 
 	private function loginAfterValidation () : array
 	{
+		/**
+		 * Authentication-Todo
+		 * Props: [ username, password ]
+		 * Methods: [
+		 * Authentication->getVerifyPass( $this->password, $userData[ 'password' ] )
+		 * Authentication->isMultiLogin( $userData[ 'session_id' ] )
+		 * ]
+		 * Components: [ config, userModel, message ]
+		 */
 		$userDataArgs = [
 			'user.username' => $this->username,
 			'user.email' => $this->username
@@ -441,7 +486,7 @@ class Red2HorseFacade
 		);
 
 		if ( empty( $userData ) ) {
-			return [ 'error' => $this->incorrectInfo() ];
+			return [ 'error' => $this->message->incorrectInfo() ];
 		}
 
 		$verifyPassword = $this->getVerifyPass(
@@ -449,15 +494,15 @@ class Red2HorseFacade
 		);
 
 		if ( false === $verifyPassword ) {
-			return [ 'error' => $this->incorrectInfo() ];
+			return [ 'error' => $this->message->incorrectInfo() ];
 		}
 
 		if ( 'active' !== $userData[ 'status' ] ) {
-			return [ 'error' => $this->denyStatus( $userData['status'] ) ];
+			return [ 'error' => $this->message->denyStatus( $userData['status'] ) ];
 		}
 
 		if ( false === $this->isMultiLogin( $userData[ 'session_id' ] ) ) {
-			$this->denyMultiLogin( true, [], false );
+			$this->message->denyMultiLogin( true, [], false );
 
 			return [ 'error' => false ];
 		}
@@ -470,6 +515,21 @@ class Red2HorseFacade
 
 	private function loginHandler () : bool
 	{
+		/**
+		 * Authentication-Todo
+		 * Props: [ rememberMe ]
+		 *
+		 * Methods: [
+		 * Authentication->loginInvalid(),
+		 * Authentication->loginAfterValidation(),
+		 * Authentication->setLoggedInSuccess( $userData ),
+		 * Cookie->setCookie( $userId ),
+		 * Authentication->loggedInUpdateData( $userId ),
+		 * Cookie->regenerateCookie()
+		 * ]
+		 *
+		 * Components: [ config, common, throttleModel, session  ]
+		 */
 		if ( false !== $this->loginInvalid() ) {
 			return false;
 		}
@@ -504,8 +564,15 @@ class Red2HorseFacade
 
 	private function setLoggedInSuccess ( array $userData ) : void
 	{
-		$this->successfully = true;
-		$this->success[] = $this->common->lang( 'Red2Horse.successLoggedWithUsername', [ $userData[ 'username' ] ] );
+		/**
+		 * Authentication-Todo
+		 * Components: [ common, message ]
+		 */
+		$this->message->successfully = true;
+		$this->message->success[] = $this->common->lang(
+			'Red2Horse.successLoggedWithUsername',
+			[ $userData[ 'username' ] ]
+		);
 	}
 
 	/**
@@ -513,6 +580,15 @@ class Red2HorseFacade
 	 */
 	private function forgetHandler () : bool
 	{
+		/**
+		 * ResetPassword-Todo
+		 * Props: [ username, email ]
+		 * Components: [ config, common, message, userModel, validation, throttleModel ]
+		 * Methods: [
+		 * Password->getHashPass( $this->common->random_string() )
+		 * Notification->mailSender( $this->common->random_string() )
+		 * ]
+		 */
 		$validation = $this->validation;
 
 		$group = ( true === $this->throttleModel->showCaptcha() )
@@ -527,7 +603,7 @@ class Red2HorseFacade
 		];
 
 		if ( false === $validation->isValid( $data, $rules ) ) {
-			$this->incorrectInfo( true, array_values( $validation->getErrors() ) );
+			$this->message->incorrectInfo( true, array_values( $validation->getErrors() ) );
 
 			return false;
 		}
@@ -535,12 +611,12 @@ class Red2HorseFacade
 		$find_user = $this->userModel->getUser( $this->config->getColumString() ,$data );
 
 		if ( empty( $find_user ) ) {
-			$this->incorrectInfo();
+			$this->message->incorrectInfo();
 
 			return false;
 		}
 
-		$randomPw = random_string();
+		$randomPw = $this->common->random_string();
 		$hashPw = $this->getHashPass( $randomPw );
 
 		$updatePassword = $this->userModel->updateUser(
@@ -551,14 +627,15 @@ class Red2HorseFacade
 		$error = 'The system is busy, please come back later';
 
 		if ( false === $updatePassword ) {
-			$this->errors[] = $error;
+			$this->message->errors[] = $error;
 
 			return false;
 		}
 
 		if ( ! $this->mailSender( $randomPw ) ) {
 
-			$this->errors[] = $error;
+			$this->message->errors[] = $error;
+
 			$this->common->log_message(
 				'error' ,
 				"Cannot sent email: {$find_user[ 'username' ]}"
@@ -567,14 +644,18 @@ class Red2HorseFacade
 			return false;
 		}
 
-		$this->successfully = true;
-		$this->success[] = $this->common->lang( 'Red2Horse.successResetPassword' );
+		$this->message->successfully = true;
+		$this->message->success[] = $this->common->lang( 'Red2Horse.successResetPassword' );
 
 		return true;
 	}
 
 	private function isMultiLogin ( string $session_id ) : bool
 	{
+		/**
+		 * Authentication-Todo
+		 * Components: [ config, common, cookie, message ]
+		 */
 		$pathFile = $this->config->sessionSavePath;
 		$pathFile .= '/' . $this->config->sessionCookieName . $session_id;
 
@@ -605,56 +686,18 @@ class Red2HorseFacade
 			return $time < $this->config->sessionTimeToUpdate ? false : true;
 		}
 
-		$this->errors[] = "else";
+		$this->message->errors[] = "else";
 		return false;
-	}
-
-	/** @read_more getMessage */
-	private function denyMultiLogin (
-		bool $throttle = true, array $addMore = [], $getReturn = true
-	)
-	{
-		false === $throttle ?: $this->throttleModel->throttle();
-		$this->incorrectLoggedIn = true;
-
-		$errors[] = $this->common->lang( 'Red2Horse.noteLoggedInAnotherPlatform' );
-		$this->errors = [ ...$errors, ...array_values( $addMore ) ];
-
-		if ( true === $getReturn ) return $this->getMessage();
-	}
-
-	/** @read_more getMessage */
-	private function incorrectInfo ( bool $throttle = true, array $addMore = [] )
-	{
-		false === $throttle ?: $this->throttleModel->throttle();
-		$this->incorrectLoggedIn = true;
-
-		$errors[] = $this->common->lang( 'Red2Horse.errorIncorrectInformation' );
-		$this->errors = [ ...$errors, ...array_values( $addMore ) ];
-
-		return $this->getMessage();
-	}
-
-	/**
-	 * @return object|array|void
-	 */
-	private function denyStatus (
-		string $status,
-		bool $throttle = true,
-		$getReturn = true
-	)
-	{
-		false === $throttle ?: $this->throttleModel->throttle();
-		$this->hasBanned = $status === 'banned';
-		$this->accountInactive = $status === 'inactive';
-		$this->errors[] = $this->common->lang( 'Red2Horse.errorNotReadyYet', [ $status ] );
-
-		if ( true === $getReturn ) return $this->getMessage();
 	}
 
 	# --- Todo: and Exception
 	private function setCookie ( int $userId, array $updateData = [], string $logError = null ) : void
 	{
+		/**
+		 * Cookie-Todo
+		 * Components: [ config, common ]
+		 * Methods: [ Authentication->loggedInUpdateData( $userId, $data ) ]
+		 */
 		if ( $userId <= 0 ) {
 			$errArg = [ 'field' => 'user_id', 'param' => $userId ];
 			throw new \Exception( $this->common->lang( 'Validation.greater_than', $errArg ), 1 );
@@ -692,6 +735,18 @@ class Red2HorseFacade
 	 */
 	private function typeChecker ( $type = 'login' ) : bool
 	{
+		/**
+		 * Utility-Todo
+		 * Props: [ username, password, email ]
+		 * Components: [ config, common, message, throttleModel ]
+		 * Methods: [
+		 * Authentication->isLogged( true )
+		 * Authentication->setLoggedInSuccess( $this->getUserdata() )
+		 * Authentication->getUserdata()
+		 * Authentication->loginHandler()
+		 * ResetPassword->forgetHandler()
+		 * ]
+		 */
 		if ( ! in_array( $type, [ 'login', 'forget' ] ) ) {
 			throw new \Exception( 'Type must be in "login or forget"', 1 );
 		}
@@ -705,7 +760,7 @@ class Red2HorseFacade
 		if ( true === $this->isLogged( true ) )
 		{
 			( $type === 'forget' )
-			? $this->incorrectResetPassword = true
+			? $this->message->incorrectResetPassword = true
 			: $this->setLoggedInSuccess( $this->getUserdata() );
 
 			return true;
@@ -717,7 +772,7 @@ class Red2HorseFacade
 				'num' => gmdate( 'i', $this->config->throttle->timeoutAttempts ),
 				'type' => 'minutes'
 			];
-			$this->errors[] = $this->common->lang( 'Red2Horse.errorThrottleLimitedTime', $errArg );
+			$this->message->errors[] = $this->common->lang( 'Red2Horse.errorThrottleLimitedTime', $errArg );
 
 			return false;
 		}
@@ -733,6 +788,10 @@ class Red2HorseFacade
 	 */
 	private function loggedInUpdateData ( int $userId, array $updateData = [] )
 	{
+		/**
+		 * Authentication-Todo
+		 * Components: [ common, request, userModel ]
+		 */
 		if ( $userId <= 0 ) {
 			$errArg = [ 'field' => 'user_id', 'param' => $userId ];
 
@@ -754,27 +813,15 @@ class Red2HorseFacade
 		return $this->userModel->updateUser( $userId, $data );
 	}
 
-	private function trigger ( string $event, array $eventData )
-	{
-		if ( ! isset( $this->{$event} ) || empty( $this->{$event} ) ) return $eventData;
-
-		foreach ( $this->{$event} as $callback )
-		{
-			if ( ! method_exists( $this, $callback ) ) {
-				throw new \Exception( 'forInvalidMethodTriggered', 403 );
-			}
-
-			$eventData = $this->{$callback}( $eventData );
-		}
-
-		return $eventData;
-	}
-
 	private function mailSender ( string $randomPw ) : bool
 	{
+		/**
+		 * Notification-Todo
+		 * Components: [ mail ]
+		 */
 		$this->mail
 		// ->setFrom ( 'localhost@example.com', 'Administrator' )
-		->to ( 'cukikt0302@gmail.com' )
+		->to ( 'exa@example.com' )
 		// ->setCC ( 'another@another-example.com' )
 		// ->setBCC ( 'them@their-example.com' )
 		->subject ( 'Email Test' )

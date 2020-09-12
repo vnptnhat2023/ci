@@ -11,7 +11,7 @@ class UserAdapter implements UserAdapterInterface
 
 	public function __construct ()
 	{
-		$this->user = new UserModelAdapter;
+		$this->user = model( UserModelAdapter::class );
 	}
 
 	public function getUser ( string $select, array $where ) : array
