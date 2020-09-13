@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 
 namespace App\Libraries\Red2Horse\Facade;
 
-use App\Libraries\Red2Horse\Facade\AuthInterface;
+use App\Libraries\DesignPattern\Facade\AuthInterface;
 
 class Validate implements ValidateInterface
 {

@@ -197,8 +197,7 @@ class App extends BaseConfig
 	|
 	*/
 	// public $sessionDriver            = 'CodeIgniter\Session\Handlers\FileHandler';
-	// public $sessionDriver            = '\App\Libraries\NknAuth\NknFileHandler';
-	public $sessionDriver            = '\App\Libraries\Red2Horse\Sys\Red2HorseFileHandler';
+	public $sessionDriver            = '\App\Libraries\Red2Horse\Adapter\CodeIgniter\System\Red2HorseFileHandler';
 	public $sessionCookieName        = 'ci_session';
 	public $sessionExpiration        = 3600;
 	public $sessionSavePath          = WRITEPATH . 'session';

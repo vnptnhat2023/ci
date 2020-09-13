@@ -13,13 +13,6 @@ use Config\Services;
  */
 class ValidationAdapter implements ValidationAdapterInterface
 {
-	protected Config $config;
-
-	public function __construct ()
-	{
-		$this->config = Config::getInstance();
-	}
-
 	public function isValid ( array $data, array $rules ) : bool
 	{
 		return Services::validation()
@@ -68,24 +61,25 @@ class ValidationAdapter implements ValidationAdapterInterface
 
 	public function ruleStore() : array
 	{
+		$config = Config::getInstance();
 		$generalRules = [
 
-			$this->config::USERNAME => [
+			$config::USERNAME => [
 				'label' => lang( 'Red2Horse.labelUsername' ),
 				'rules' => 'trim|required|min_length[5]|max_length[32]|alpha_dash'
 			],
 
-			$this->config::PASSWORD => [
+			$config::PASSWORD => [
 				'label' => lang( 'Red2Horse.labelPassword' ),
 				'rules' => 'trim|required|min_length[5]|max_length[32]|alpha_numeric_punct'
 			],
 
-			$this->config::EMAIL => [
+			$config::EMAIL => [
 				'label' => lang( 'Red2Horse.labelEmail' ),
 				'rules' => 'trim|required|min_length[5]|max_length[128]|valid_email'
 			],
 
-			$this->config::CAPTCHA => [
+			$config::CAPTCHA => [
 				'label' => lang( 'Red2Horse.labelCaptcha' ),
 				'rules' => 'trim|required|min_length[5]|ci_captcha'
 			]

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Libraries\Red2Horse\Sys;
+namespace App\Libraries\Red2Horse\Adapter\CodeIgniter\System;
 
 use CodeIgniter\Events\Events;
 use CodeIgniter\Session\Session;

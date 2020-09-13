@@ -2,11 +2,11 @@
 
 declare( strict_types = 1 );
 
-namespace App\Libraries\Red2Horse\Facade;
+namespace App\Libraries\DesignPattern\Facade;
 
-use App\Libraries\Red2Horse\Red2Horse;
-use App\Libraries\Red2Horse\Validation\CiValidationAdapter;
-use App\Libraries\Red2Horse\Auth\CiAuthAdapter;
+use App\Libraries\Red2Horse\Facade\Auth\Red2Horse;
+use App\Libraries\Red2Horse\Adapter\Codeigniter\Validation\ValidationAdapter;
+use App\Libraries\Red2Horse\Adapter\CodeIgniter\Auth\AuthAdapter;
 
 /**
  * Facade pattern class
@@ -52,12 +52,12 @@ class SignUpFacade
 
 }
 # --- New instanced ValidationInterface, with any other constructor
-$CiValidate = new CiValidationAdapter( service( 'validation' ), service( 'request' ) );
+$CiValidate = new ValidationAdapter( service( 'validation' ), service( 'request' ) );
 // Create instance of classes
 $validate = new Validate( $CiValidate );
 
 
-$ciAuth = new CiAuthAdapter ( new Red2Horse() );
+$ciAuth = new AuthAdapter ( new Red2Horse() );
 $auth = new Auth( $ciAuth );
 
 

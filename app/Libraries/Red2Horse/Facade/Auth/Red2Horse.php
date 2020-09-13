@@ -3,13 +3,14 @@
 # --------------------------------------------------------------------------
 # --- Todo: role,permission [ id, group, route, permission ]
 # --------------------------------------------------------------------------
+declare( strict_types = 1 );
 
 namespace App\Libraries\Red2Horse\Facade\Auth;
 
 use App\Libraries\Red2Horse\Facade\Database\ThrottleFacade as throttleModel;
 use App\Libraries\Red2Horse\Mixins\TraitSingleton;
 
-class Red2HorseFacade
+class Red2Horse
 {
 	use TraitSingleton;
 
@@ -49,7 +50,12 @@ class Red2HorseFacade
 		string $captcha = null
 	) : bool
 	{
-		return $this->authentication->login( $userNameEmail, $password, $rememberMe, $captcha );
+		return $this->authentication->login(
+			$userNameEmail,
+			$password,
+			$rememberMe,
+			$captcha
+		);
 	}
 
 	public function logout () : bool

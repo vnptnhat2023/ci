@@ -1,9 +1,9 @@
 <?php
 
-if ( ! function_exists( 'NknI18' ) )
+if ( ! function_exists( 'r2hI18' ) )
 {
-	function NknI18 ( string $field, bool $w = true ) : string {
-		$str = lang( "NknAuth.{$field}" );
+	function r2hI18 ( string $field, bool $w = true ) : string {
+		$str = lang( "Red2Horse.{$field}" );
 
 		return true === $w ? ucwords( $str ) : ucfirst( $str );
 	}
@@ -17,7 +17,7 @@ if ( ! function_exists( 'NknI18' ) )
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title><?= ucfirst(lang('NknAuth.LabelBtnResetSubmit')) ?></title>
+		<title><?= ucfirst(lang('Red2Horse.LabelBtnResetSubmit')) ?></title>
 
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 
@@ -96,7 +96,7 @@ if ( ! function_exists( 'NknI18' ) )
 
 					<div class="form-box">
 
-						<h2 class="form-box-title"><?= NknI18( 'labelResetPasswordPage' ) ?></h2>
+						<h2 class="form-box-title"><?= r2hI18( 'labelResetPasswordPage' ) ?></h2>
 
 						<?php
 							if ( isset( $errors[0] ) ) {
@@ -113,17 +113,17 @@ if ( ! function_exists( 'NknI18' ) )
 						?>
 
 						<div class="form-group" :class="{'has-warning': errors.has('username')}">
-							<label for="username"><?= NknI18( 'labelUsername', false ) ?></label>
+							<label for="username"><?= r2hI18( 'labelUsername', false ) ?></label>
 
 							<input
 							type="text"
 							class="form-control"
 							maxlength="32"
 							v-validate="'required|min:5|max:32'"
-							data-vv-as="<?= NknI18( 'labelUsername', false ) ?>"
+							data-vv-as="<?= r2hI18( 'labelUsername', false ) ?>"
 							name="username"
 							id="username"
-							placeholder="<?= NknI18( 'labelUsername', false ) ?>"
+							placeholder="<?= r2hI18( 'labelUsername', false ) ?>"
 							value="<?php echo set_value('username') ?>"
 							autocomplete="off" spellcheck="false">
 
@@ -132,16 +132,16 @@ if ( ! function_exists( 'NknI18' ) )
 
 						<div class="form-group" :class="{'has-warning': errors.has('email')}">
 
-							<label for="email"><?= NknI18( 'labelEmail', false ) ?></label>
+							<label for="email"><?= r2hI18( 'labelEmail', false ) ?></label>
 
 							<input type="email"
 							class="form-control"
 							maxlength="64"
 							v-validate="'required|min:5|max:64|email'"
-							data-vv-as="<?= NknI18( 'labelEmail', false ) ?>"
+							data-vv-as="<?= r2hI18( 'labelEmail', false ) ?>"
 							name="email"
 							id="email"
-							placeholder="<?= NknI18( 'labelEmail', false ) ?>"
+							placeholder="<?= r2hI18( 'labelEmail', false ) ?>"
 							value="<?php echo set_value('email') ?>"
 							autocomplete="off" spellcheck="false">
 
@@ -152,14 +152,14 @@ if ( ! function_exists( 'NknI18' ) )
 						<?php if ( true === $result->showCaptcha ) : helper( 'captcha' ); ?>
 
 						<div class="form-group">
-							<label for="captcha"><?= NknI18( 'labelCaptcha', false ) ?></label>
+							<label for="captcha"><?= r2hI18( 'labelCaptcha', false ) ?></label>
 
 							<div class="input-group">
 								<input type="text"
 								class="form-control"
 								id="captcha"
 								name="captcha"
-								placeholder="<?= NknI18( 'placeholderCaptcha', false ) ?>">
+								placeholder="<?= r2hI18( 'placeholderCaptcha', false ) ?>">
 
 								<span class="input-group-addon"
 								style="margin: 0; padding: 0;">
@@ -174,14 +174,14 @@ if ( ! function_exists( 'NknI18' ) )
 							<button
 							type="submit"
 							class="btn btn-primary"
-							:disabled="errors.has('username') || errors.has('email')"><?= NknI18( 'LabelBtnResetSubmit' ) ?></button>
-							<button type="reset" class="btn btn-default"><?= NknI18( 'LabelBtnClear') ?></button>
+							:disabled="errors.has('username') || errors.has('email')"><?= r2hI18( 'LabelBtnResetSubmit' ) ?></button>
+							<button type="reset" class="btn btn-default"><?= r2hI18( 'LabelBtnClear') ?></button>
 						</div>
 
 						<div>
 							<a href="<?php echo base_url('login') ?>">
 								<span class="glyphicon glyphicon-arrow-left"></span>&nbsp;
-								<span><?= NknI18( 'LabelBtnLoginSubmit' ) ?></span>
+								<span><?= r2hI18( 'LabelBtnLoginSubmit' ) ?></span>
 							</a>
 						</div>
 					</div>

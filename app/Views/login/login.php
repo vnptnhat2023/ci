@@ -1,12 +1,9 @@
 <?php
 
-// echo '<pre>';
-// die(var_dump( \Config\Services::Red2HorseAuth()->getMessage() ));
-
-if ( ! function_exists( 'NknI18' ) )
+if ( ! function_exists( 'r2hI18' ) )
 {
-	function NknI18 ( string $field, bool $w = true ) : string {
-		$str = lang( "NknAuth.{$field}" );
+	function r2hI18 ( string $field, bool $w = true ) : string {
+		$str = lang( "Red2Horse.{$field}" );
 
 		return true === $w ? ucwords( $str ) : ucfirst( $str );
 	}
@@ -20,7 +17,7 @@ if ( ! function_exists( 'NknI18' ) )
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title><?= NknI18( 'LabelBtnLoginSubmit' ) ?></title>
+		<title><?= r2hI18( 'LabelBtnLoginSubmit' ) ?></title>
 
 		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
 
@@ -88,7 +85,7 @@ if ( ! function_exists( 'NknI18' ) )
 
 					<div class="form-box">
 
-						<h3 class="form-box-title"><?= NknI18( 'LabelBtnLoginSubmit' ) ?></h3>
+						<h3 class="form-box-title"><?= r2hI18( 'LabelBtnLoginSubmit' ) ?></h3>
 
 						<?php
 							if ( isset( $errors[ 0 ] ) ) {
@@ -111,14 +108,14 @@ if ( ! function_exists( 'NknI18' ) )
 						<?php if ( false === $result->successfully ) : ?>
 
 						<div class="form-group" :class="{'has-warning': errors.has( 'username' )}">
-							<label for="username"><?= NknI18( 'labelUserOrEmail' ) ?></label>
+							<label for="username"><?= r2hI18( 'labelUserOrEmail' ) ?></label>
 
 							<input type="text" class="form-control"
 							v-validate="'required|min:5|max:128'"
-							data-vv-as="<?= NknI18( 'labelUserOrEmail' ) ?>"
+							data-vv-as="<?= r2hI18( 'labelUserOrEmail' ) ?>"
 							name="username"
 							id="username"
-							placeholder="<?= NknI18( 'placeholderUserOrEmail', false) ?>"
+							placeholder="<?= r2hI18( 'placeholderUserOrEmail', false) ?>"
 							maxlength="128"
 							value="<?php echo set_value( 'username' ) ?>"
 							autocomplete="off"
@@ -128,16 +125,16 @@ if ( ! function_exists( 'NknI18' ) )
 						</div>
 
 						<div class="form-group" :class="{'has-warning': errors.has( 'password' )}">
-							<label for="password"><?= NknI18( 'labelPassword' ) ?></label>
+							<label for="password"><?= r2hI18( 'labelPassword' ) ?></label>
 
 							<input type="password"
 							class="form-control"
 							maxlength="32"
 							v-validate="'required|min:5|max:64'"
-							data-vv-as="<?= NknI18( 'labelPassword' ) ?>"
+							data-vv-as="<?= r2hI18( 'labelPassword' ) ?>"
 							name="password"
 							id="password"
-							placeholder="<?= NknI18( 'placeholderPassword', false ) ?>"
+							placeholder="<?= r2hI18( 'placeholderPassword', false ) ?>"
 							autocomplete="off"
 							spellcheck="false"
 							value="<?php echo set_value( 'password' ) ?>">
@@ -150,14 +147,14 @@ if ( ! function_exists( 'NknI18' ) )
 						<?php if ( true === $result->showCaptcha ) : helper( 'captcha' ); ?>
 
 						<div class="form-group">
-							<label for="captcha"><?= NknI18( 'labelCaptcha' ) ?></label>
+							<label for="captcha"><?= r2hI18( 'labelCaptcha' ) ?></label>
 
 							<div class="input-group">
 								<input type="text"
 								class="form-control"
 								id="captcha"
 								name="captcha"
-								placeholder="<?= NknI18( 'placeholderCaptcha', false ) ?>">
+								placeholder="<?= r2hI18( 'placeholderCaptcha', false ) ?>">
 
 								<span class="input-group-addon"
 								style="margin: 0; padding: 0;">
@@ -175,7 +172,7 @@ if ( ! function_exists( 'NknI18' ) )
 									type="checkbox"
 									name="remember_me"
 									value="1" <?php echo set_checkbox( 'remember_me', '1' ); ?>>
-									<span><?= NknI18( 'labelRememberMe' ) ?></span>
+									<span><?= r2hI18( 'labelRememberMe' ) ?></span>
 								</label>
 							</div>
 						</div>
@@ -187,18 +184,18 @@ if ( ! function_exists( 'NknI18' ) )
 							style="border-radius: none;"
 							:disabled="errors.has( 'username' ) || errors.has( 'password' )"
 							>
-								<?= NknI18( 'LabelBtnLoginSubmit' ) ?>
+								<?= r2hI18( 'LabelBtnLoginSubmit' ) ?>
 							</button>
 
 							<button type="reset" class="btn btn-default" style="border-radius: none;" >
-								<?= NknI18( 'LabelBtnClear' ) ?>
+								<?= r2hI18( 'LabelBtnClear' ) ?>
 							</button>
 						</div>
 
 						<div>
 							<span class="pull-right">
 								<a href="<?php echo base_url( 'login/forgot' ) ?>">
-									<span><?= NknI18( 'labelResetPasswordPage' ) ?></span>&nbsp;
+									<span><?= r2hI18( 'labelResetPasswordPage' ) ?></span>&nbsp;
 									<span class="glyphicon glyphicon-arrow-right"></span>
 								</a>
 							</span>
@@ -206,7 +203,7 @@ if ( ! function_exists( 'NknI18' ) )
 							<span>
 								<a href="<?php echo base_url() ?>">
 									<span class="glyphicon glyphicon-arrow-left"></span>&nbsp;
-									<span><?= NknI18( 'labelHomePage' ) ?></span>
+									<span><?= r2hI18( 'labelHomePage' ) ?></span>
 								</a>
 							</span>
 						</div>
