@@ -10,7 +10,8 @@ namespace App\Libraries\Red2Horse\Facade\Auth;
  */
 interface AuthFacadeInterface
 {
-	public function login (
+	public function login
+	(
 		string $username = null,
 		string $password = null,
 		bool $rememberMe = false,
@@ -21,7 +22,8 @@ interface AuthFacadeInterface
 	public function logout () : bool;
 
 	/** @read_more login */
-	public function requestPassword (
+	public function requestPassword
+	(
 		string $username = null,
 		string $email = null,
 		string $captcha = null

@@ -54,36 +54,29 @@ class ResetPassword
 		$this->notification = Notification::getInstance( $config );
 	}
 
-	public function requestPassword (
+	public function requestPassword
+	(
 		string $username = null,
 		string $email = null,
 		string $captcha = null
 	) : bool
 	{
-		/**
-		 * ResetPassword-Todo
-		 * Props: [ username, email, captcha ]
-		 * Methods: Utility->typeChecker( 'forget' )
-		 */
-
-		return $this->utility->typeChecker( 'forget', $username, null, $email, $captcha );
+		return $this->utility->typeChecker(
+			'forget',
+			$username,
+			null,
+			$email,
+			$captcha
+		);
 	}
 
-	public function forgetHandler (
+	public function forgetHandler
+	(
 		string $username = null,
 		string $email = null,
 		string $captcha = null
 	) : bool
 	{
-		/**
-		 * ResetPassword-Todo
-		 * Props: [ username, email ]
-		 * Components: [ config, common, message, userModel, validation, throttleModel ]
-		 * Methods: [
-		 * Password->getHashPass( $this->common->random_string() )
-		 * Notification->mailSender( $this->common->random_string() )
-		 * ]
-		 */
 		self::$username = $username;
 		self::$email = $email;
 		self::$captcha = $captcha;
@@ -101,13 +94,20 @@ class ResetPassword
 			$this->config::EMAIL => self::$email
 		];
 
-		if ( false === $validation->isValid( $data, $rules ) ) {
-			$this->message->incorrectInfo( true, array_values( $validation->getErrors() ) );
+		if ( false === $validation->isValid( $data, $rules ) )
+		{
+			$this->message->incorrectInfo(
+				true,
+				array_values( $validation->getErrors() )
+			);
 
 			return false;
 		}
 
-		$find_user = $this->userModel->getUserWithGroup( $this->config->getColumString() ,$data );
+		$find_user = $this->userModel->getUserWithGroup(
+			$this->config->getColumString(),
+			$data
+		);
 
 		if ( empty( $find_user ) ) {
 			$this->message->incorrectInfo();
@@ -144,7 +144,9 @@ class ResetPassword
 		}
 
 		$this->message::$successfully = true;
-		$this->message::$success[] = $this->common->lang( 'Red2Horse.successResetPassword' );
+		$this->message::$success[] = $this->common->lang(
+			'Red2Horse.successResetPassword'
+		);
 
 		return true;
 	}

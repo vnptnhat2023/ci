@@ -13,7 +13,21 @@ use App\Libraries\Red2Horse\Facade\{
 use App\Libraries\Red2Horse\Mixins\TraitSingleton;
 
 # --------------------------------------------------------------------------
-
+/**
+	* @method getMessage
+	* Receive all types of messages in this class
+	* ```
+	* $addMore = [
+	*		'form' => [
+	*			'username' => $_POST['username'],
+	*			'email' => $_POST['email'],
+	*			'password' => $_POST['password'],
+	*			'captcha' => $_POST['captcha'],
+	*			'remember_me' => $_POST['rememberMe']
+	*		]
+	* ];
+	* ```
+ */
 class Message
 {
 	use TraitSingleton;
@@ -54,8 +68,9 @@ class Message
 
 	# ------------------------------------------------------------------------
 
+	# --- Todo: $returnType ( Need declare inside config file )
 	/**
-	 * Depend on static property $returnType ( Need declare inside config file )
+	 * Depend on static property $returnType
 	 * @return array|object
 	 */
 	public function getResult ()
@@ -72,19 +87,6 @@ class Message
 	}
 
 	/**
-	 * Receive all types of messages in this class
-	 * ```
-	 * $addMore = [
-	 *		'form' => [
-	 *			'username' => $_POST['username'],
-	 *			'email' => $_POST['email'],
-	 *			'password' => $_POST['password'],
-	 *			'captcha' => $_POST['captcha'],
-	 *			'remember_me' => $_POST['rememberMe']
-	 *		]
-	 * ];
-	 * ```
-	 *
 	 * @return array|object
 	 */
 	public function getMessage ( array $addMore = [], bool $asObject = true )
@@ -106,7 +108,12 @@ class Message
 	}
 
 	/** @read_more getMessage */
-	public function denyMultiLogin ( bool $throttle = true, array $addMore = [], $getReturn = true )
+	public function denyMultiLogin
+	(
+		bool $throttle = true,
+		array $addMore = [],
+		$getReturn = true
+	)
 	{
 		false === $throttle ?: $this->throttleModel->throttle();
 		self::$incorrectLoggedIn = true;

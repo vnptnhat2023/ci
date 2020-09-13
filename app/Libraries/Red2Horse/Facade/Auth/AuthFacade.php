@@ -1,6 +1,7 @@
 <?php
 
 declare( strict_types = 1 );
+
 namespace App\Libraries\Red2Horse\Facade\Auth;
 
 use App\Libraries\Red2Horse\Mixins\TraitSingleton;
@@ -23,14 +24,20 @@ class AuthFacade implements AuthFacadeInterface
 
 	# ------------------------------------------------------------------------
 
-	public function login (
+	public function login
+	(
 		string $username = null,
 		string $password = null,
 		bool $rememberMe = false,
 		string $captcha = null
-	): bool
+	) : bool
 	{
-		return $this->auth->login( $username, $password, $rememberMe, $captcha );
+		return $this->auth->login(
+			$username,
+			$password,
+			$rememberMe,
+			$captcha
+		);
 	}
 
 	public function logout () : bool
@@ -38,7 +45,8 @@ class AuthFacade implements AuthFacadeInterface
 		return $this->auth->logout();
 	}
 
-	public function requestPassword (
+	public function requestPassword
+	(
 		string $username = null,
 		string $email = null,
 		string $captcha = null

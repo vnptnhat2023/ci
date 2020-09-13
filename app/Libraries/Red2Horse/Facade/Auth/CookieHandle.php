@@ -56,15 +56,6 @@ class CookieHandle
 
 	public function cookieHandler () : bool
 	{
-		/**
-		 * Cookie-Todo
-		 * Components: [ config, cookie, message, session, userModel, request ]
-		 * Methods: [
-		 * Authentication->isMultiLogin( $user[ 'session_id' ] )
-		 * Cookie->setCookie( $user[ 'id' ], [], $logErr )
-		 * Cookie->regenerateCookie()
-		 * ]
-		 */
 		$userCookie = $this->cookie->get_cookie( $this->config->cookie );
 
 		if ( empty( $userCookie ) || ! is_string( $userCookie ) ) {
@@ -72,6 +63,7 @@ class CookieHandle
 		}
 
 		$separate = explode( ':', $userCookie, 2 );
+
 		$incorrectCookie = function  () : bool {
 			$this->cookie->delete_cookie( $this->config->cookie );
 			return false;
@@ -102,14 +94,19 @@ class CookieHandle
 
 		# --- Check status
 		if ( in_array( $user[ 'status' ] , [ 'inactive', 'banned' ] ) ) {
-			Message::getInstance( $this->config )->denyStatus( $user[ 'status' ], false, false );
+			Message::getInstance( $this->config )
+			->denyStatus( $user[ 'status' ], false, false );
 
 			return $incorrectCookie();
 		}
 
 		# --- Todo: declare inside the config file: is using this feature
-		if ( false === Authentication::getInstance( $this->config )->isMultiLogin( $user[ 'session_id' ] ) ) {
-			Message::getInstance( $this->config )->denyMultiLogin( true, [], false );
+		$isMultiLogin = Authentication::getInstance( $this->config )
+		->isMultiLogin( $user[ 'session_id' ] );
+
+		if ( false === $isMultiLogin ) {
+			Message::getInstance( $this->config )
+			->denyMultiLogin( true, [], false );
 
 			return false;
 		}
@@ -126,14 +123,25 @@ class CookieHandle
 		return true;
 	}
 
-	public function setCookie ( int $userId, array $updateData = [], string $logError = null ) : void
+	public function setCookie
+	(
+		int $userId,
+		array $updateData = [],
+		string $logError = null
+	) : void
 	{
-		if ( $userId <= 0 ) {
+		if ( $userId <= 0 )
+		{
 			$errArg = [ 'field' => 'user_id', 'param' => $userId ];
-			throw new \Exception( $this->common->lang( 'Validation.greater_than', $errArg ), 1 );
+
+			throw new \Exception(
+				$this->common->lang( 'Validation.greater_than', $errArg ),
+				1
+			);
 		}
 
-		if ( ! empty( $updateData ) && false === $this->common->isAssocArray( $updateData ) ) {
+		$isAssocData = $this->common->isAssocArray( $updateData );
+		if ( ! empty( $updateData ) && false === $isAssocData ) {
 			throw new \Exception( $this->common->lang( 'Red2Horse.isAssoc' ), 1 );
 		}
 
@@ -147,7 +155,10 @@ class CookieHandle
 		];
 		$data = array_merge( $data, $updateData );
 
- 		if ( true === Authentication::getInstance( $this->config )->loggedInUpdateData( $userId, $data ) )
+		$updatedSuccess = Authentication::getInstance( $this->config )
+		->loggedInUpdateData( $userId, $data );
+
+ 		if ( true === $updatedSuccess )
 		{
 			$ttl = time() + $this->config->ttl;
 			setcookie( $this->config->cookie, $cookieValue, $ttl, '/' );

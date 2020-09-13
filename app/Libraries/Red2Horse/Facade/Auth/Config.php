@@ -10,6 +10,7 @@ use App\Libraries\Red2Horse\Mixins\TraitSingleton;
 class Config
 {
 	use TraitSingleton;
+
 	/*
 	|--------------------------------------------------------------------------
 	| Session & Cookie & Throttle
@@ -76,7 +77,10 @@ class Config
 		$adapter = $this->adapter( 'Config' );
 
 		if ( ! class_exists( $adapter ) ) {
-			throw new \Exception( "The adapter config file: {$adapter} not found.", 403 );
+			throw new \Exception(
+				"The adapter config file: {$adapter} not found.",
+				403
+			);
 		}
 
 		$facade = ConfigFacade::getInstance( new $adapter );
@@ -134,7 +138,7 @@ class Config
 
 	/*
 	|--------------------------------------------------------------------------
-	| Reset all config to default
+	| Reset all config to the default
 	|--------------------------------------------------------------------------
 	*/
 	public function reset () : void

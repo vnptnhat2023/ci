@@ -64,7 +64,8 @@ class Authentication
 		$this->throttleModel = $builder->throttle;
 	}
 
-	public function login (
+	public function login
+	(
 		string $userNameEmail = null,
 		string $password = null,
 		bool $rememberMe = false,
@@ -77,21 +78,20 @@ class Authentication
 		self::$captcha = $captcha;
 
 		return $this->utility->typeChecker(
-			'login', $userNameEmail, $password, null, $captcha
+			'login',
+			$userNameEmail,
+			$password,
+			null,
+			$captcha
 		);
 	}
 
 	public function logout () : bool
 	{
-		/**
-		 * Components: [ common, message, cookie, session ]
-		 */
 		$this->message::$successfully = true;
-
 		$this->cookie->delete_cookie( $this->config->cookie );
 
-		if ( $this->session->has( $this->config->session ) )
-		{
+		if ( $this->session->has( $this->config->session ) ) {
 			$this->session->destroy();
 			$this->message::$success[] = $this->common->lang( 'Red2Horse.successLogout' );
 
@@ -110,17 +110,16 @@ class Authentication
 	 */
 	public function getUserdata ( string $key = null )
 	{
-		/**
-		 * Components: [ config, session ]
-		 * Methods: [ Authentication->isLogged() ]
-		 */
-		if ( false === $this->isLogged() )
-		return false;
+		if ( false === $this->isLogged() ) {
+			return false;
+		}
 
-		if ( empty( $key ) )
-		return $this->session->get( $this->config->session );
+		if ( empty( $key ) ) {
+			return $this->session->get( $this->config->session );
+		}
 
 		$userData = $this->session->get( $this->config->session );
+
 		return $userData[ $key ] ?? null;
 	}
 
@@ -130,28 +129,25 @@ class Authentication
 	 */
 	public function isLogged ( bool $withCookie = false ) : bool
 	{
-		/**
-		 * Components: [ config, session ]
-		 * Methods: [ Cookie->cookieHandler() ]
-		 */
 		if ( true === $this->session->has( $this->config->session ) ) {
 			return true;
 		}
 
-		return ( false === $withCookie ) ? false : $this->cookieHandle->cookieHandler();
+		return ( false === $withCookie )
+		? false
+		: $this->cookieHandle->cookieHandler();
 	}
 
 	private function loginInvalid ()
 	{
-		/**
-		 * Props: [ username, password, captcha ]
-		 * Components: [ validation, config, throttleModel, message ]
-		 */
 		$validation = $this->validation;
 		$config = $this->config;
 
 		if ( true === $this->throttleModel->showCaptcha() ) {
-			$ruleCaptcha = [ $config::CAPTCHA => $validation->getRules( $config::CAPTCHA ) ];
+
+			$ruleCaptcha = [
+				$config::CAPTCHA => $validation->getRules( $config::CAPTCHA )
+			];
 
 			$data = [
 				$config::USERNAME => self::$username,
@@ -167,12 +163,19 @@ class Authentication
 		}
 
 		$incorrectInfo = false;
-		$ruleUsername = [ $config::USERNAME => $validation->getRules( 'username' ) ];
+
+		$ruleUsername = [
+			$config::USERNAME => $validation->getRules( 'username' )
+		];
+
 		$data = [ $config::USERNAME => self::$username ];
 
 		if ( false === $validation->isValid( $data, $ruleUsername ) ) {
+
 			$validation->reset();
+
 			$ruleEmail = [ $config::USERNAME => $validation->getRules( 'email' ) ];
+
 			$incorrectInfo = ! $validation->isValid( $data, $ruleEmail );
 		}
 
@@ -183,14 +186,6 @@ class Authentication
 
 	private function loginAfterValidation () : array
 	{
-		/**
-		 * Props: [ username, password ]
-		 * Methods: [
-		 * Password->getVerifyPass( self::$password, $userData[ 'password' ] )
-		 * Authentication->isMultiLogin( $userData[ 'session_id' ] )
-		 * ]
-		 * Components: [ config, userModel, message ]
-		 */
 		$userDataArgs = [
 			'user.username' => self::$username,
 			'user.email' => self::$username
@@ -231,25 +226,12 @@ class Authentication
 
 	public function loginHandler () : bool
 	{
-		/**
-		 * Props: [ rememberMe ]
-		 *
-		 * Methods: [
-		 * Authentication->loginInvalid(),
-		 * Authentication->loginAfterValidation(),
-		 * Authentication->setLoggedInSuccess( $userData ),
-		 * Cookie->setCookie( $userId ),
-		 * Authentication->loggedInUpdateData( $userId ),
-		 * Cookie->regenerateCookie()
-		 * ]
-		 *
-		 * Components: [ config, common, throttleModel, session  ]
-		 */
 		if ( false !== $this->loginInvalid() ) {
 			return false;
 		}
 
 		$userData = $this->loginAfterValidation();
+
 		if ( true === array_key_exists( 'error', $userData ) ) {
 			return false;
 		}
@@ -262,6 +244,7 @@ class Authentication
 
 		# --- Set cookie
 		$userId = (int) $userData[ 'id' ];
+
 		if ( true === self::$rememberMe )
 		{
 			$this->cookieHandle->setCookie( $userId );
@@ -272,6 +255,9 @@ class Authentication
 		}
 
 		$this->cookieHandle->regenerateCookie();
+		# --- End cookie set
+
+		# --- Clean old throttle attempts
 		$this->throttleModel->cleanup();
 
 		return true;
@@ -279,10 +265,8 @@ class Authentication
 
 	public function setLoggedInSuccess ( array $userData ) : void
 	{
-		/**
-		 * Components: [ common, message ]
-		 */
 		$this->message::$successfully = true;
+
 		$this->message::$success[] = $this->common->lang(
 			'Red2Horse.successLoggedWithUsername',
 			[ $userData[ 'username' ] ]
@@ -291,18 +275,16 @@ class Authentication
 
 	public function isMultiLogin ( string $session_id ) : bool
 	{
-		/**
-		 * Components: [ config, common, cookie, message ]
-		 */
 		$pathFile = $this->config->sessionSavePath;
 		$pathFile .= '/' . $this->config->sessionCookieName . $session_id;
-
 		$date = $this->common->get_file_info( $pathFile, 'date' );
+
 		if ( empty( $date ) ) {
 			return true;
 		}
 
 		$cookieName = $this->config->sessionCookieName . '_test';
+
 		if ( $hash = $this->cookie->get_cookie( $cookieName ) ) {
 
 			if ( password_verify( $session_id, $hash ) ) {
@@ -310,6 +292,7 @@ class Authentication
 			}
 
 			$this->cookie->delete_cookie( $cookieName );
+
 			return false;
 		}
 
@@ -324,7 +307,8 @@ class Authentication
 			return $time < $this->config->sessionTimeToUpdate ? false : true;
 		}
 
-		$this->message::$errors[] = "else";
+		$this->message::$errors[] = 'else';
+
 		return false;
 	}
 
@@ -334,16 +318,18 @@ class Authentication
 	 */
 	public function loggedInUpdateData ( int $userId, array $updateData = [] )
 	{
-		/**
-		 * Components: [ common, request, userModel ]
-		 */
 		if ( $userId <= 0 ) {
 			$errArg = [ 'field' => 'user_id', 'param' => $userId ];
 
-			throw new \Exception( $this->common->lang( 'Validation.greater_than', $errArg ), 1 );
+			throw new \Exception(
+				$this->common->lang( 'Validation.greater_than', $errArg ),
+				1
+			);
 		}
 
-		if ( ! empty( $updateData ) && false === $this->common->isAssocArray( $updateData ) ) {
+		$isAssocData = false === $this->common->isAssocArray( $updateData );
+
+		if ( ! empty( $updateData ) && false === $isAssocData ) {
 			throw new \Exception( $this->common->lang( 'Red2Horse.isAssoc' ), 1 );
 		}
 

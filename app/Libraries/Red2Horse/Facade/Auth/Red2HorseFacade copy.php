@@ -608,7 +608,7 @@ class Red2HorseFacade
 			return false;
 		}
 
-		$find_user = $this->userModel->getUser( $this->config->getColumString() ,$data );
+		$find_user = $this->userModel->getUserWithGroup( $this->config->getColumString() ,$data );
 
 		if ( empty( $find_user ) ) {
 			$this->message->incorrectInfo();

@@ -26,7 +26,9 @@ class Red2Horse
 		$this->config = $config;
 
 		$builder = AuthComponentBuilder::createBuilder( $config )
-		->common()->database_throttle()->build();
+		->common()
+		->database_throttle()
+		->build();
 
 		$this->throttleModel = $builder->throttle;
 
@@ -43,7 +45,8 @@ class Red2Horse
 
 	# ------------------------------------------------------------------------
 
-	public function login (
+	public function login
+	(
 		string $userNameEmail = null,
 		string $password = null,
 		bool $rememberMe = false,
@@ -63,7 +66,8 @@ class Red2Horse
 		return $this->authentication->logout();
 	}
 
-	public function requestPassword (
+	public function requestPassword
+	(
 		string $username = null,
 		string $email = null,
 		string $captcha = null

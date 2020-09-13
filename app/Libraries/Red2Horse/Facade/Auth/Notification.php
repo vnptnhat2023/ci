@@ -30,10 +30,6 @@ class Notification
 
 	public function mailSender ( string $randomPw ) : bool
 	{
-		/**
-		 * Notification-Todo
-		 * Components: [ mail ]
-		 */
 		$this->mail
 		// ->setFrom ( 'localhost@example.com', 'Administrator' )
 		->to ( 'exa@example.com' )

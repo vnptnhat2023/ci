@@ -42,7 +42,8 @@ class Utility
 	 * @return bool
 	 * @throws \Exception
 	 */
-	public function typeChecker (
+	public function typeChecker
+	(
 		$type = 'login',
 		string $username = null,
 		string $password = null,
@@ -50,37 +51,24 @@ class Utility
 		string $captcha = null
 	) : bool
 	{
-		/**
-		 * Utility-Todo
-		 * Props: [ username, password, email ]
-		 * Components: [ config, common, message, throttleModel ]
-		 * Methods: [
-		 * Authentication->isLogged( true )
-		 * Authentication->setLoggedInSuccess( $this->getUserdata() )
-		 * Authentication->getUserdata()
-		 * Authentication->loginHandler()
-		 *
-		 * ResetPassword->forgetHandler()
-		 * ]
-		 */
 		if ( ! in_array( $type, [ 'login', 'forget' ] ) ) {
 			throw new \Exception( 'Type must be in "login or forget"', 1 );
 		}
 
 		$requestType = ( $type === 'login' ) ? 'password' : 'email';
+
 		$isNullUsername = is_null( $username );
 		$isNullType = is_null( $$requestType );
-
 		$hasRequest = ! $isNullUsername && ! $isNullType;
 
-		if ( true === Authentication::getInstance( $this->config )->isLogged( true ) )
+		$authentication = Authentication::getInstance( $this->config );
+		$message = Message::getInstance( $this->config );
+
+		if ( true === $authentication->isLogged( true ) )
 		{
 			( $type === 'forget' )
-			? Message::getInstance( $this->config )::$incorrectResetPassword = true
-			: Authentication::getInstance( $this->config )
-			->setLoggedInSuccess(
-				Authentication::getInstance( $this->config )->getUserdata()
-			);
+			? $message::$incorrectResetPassword = true
+			: $authentication->setLoggedInSuccess( $authentication->getUserdata() );
 
 			return true;
 		}
@@ -92,7 +80,7 @@ class Utility
 				'type' => 'minutes'
 			];
 			$errStr = $this->common->lang( 'Red2Horse.errorThrottleLimitedTime', $errArg );
-			Message::getInstance( $this->config )::$errors[] = $errStr;
+			$message::$errors[] = $errStr;
 
 			return false;
 		}
@@ -100,8 +88,12 @@ class Utility
 		if ( false === $hasRequest ) return false;
 
 		return ( $type === 'login' )
-		? Authentication::getInstance( $this->config )->loginHandler()
-		: ResetPassword::getInstance( $this->config )->forgetHandler( $username, $email, $captcha );
+		? $authentication->loginHandler()
+		: ResetPassword::getInstance( $this->config )->forgetHandler(
+			$username,
+			$email,
+			$captcha
+		);
 	}
 
 	public function trigger ( \Closure $closure, string $event, array $eventData )
