@@ -116,7 +116,7 @@ class CookieHandle
 
 		# --- refresh new cookie
 		$logErr = "Validated cookie, but error when update userId: {$user[ 'id' ]}";
-		$this->setCookie( $user[ 'id' ], [], $logErr );
+		$this->setCookie( (int) $user[ 'id' ], [], $logErr );
 
 		$user[ 'permission' ] = json_decode( $user[ 'permission' ] );
 		$this->session->set( $this->config->session, $user );

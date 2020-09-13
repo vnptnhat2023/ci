@@ -14,10 +14,10 @@ class UserAdapter implements UserAdapterInterface
 		$this->user = model( UserModelAdapter::class );
 	}
 
-	public function getUser ( string $select, array $where ) : array
-	{
-		return (array) $this->user->select( $select )->where( $where )->first();
-	}
+	// public function getUser ( string $select, array $where ) : array
+	// {
+	// 	return (array) $this->user->select( $select )->where( $where )->first();
+	// }
 
 	public function getUserWithGroup ( string $select, array $where ) : array
 	{

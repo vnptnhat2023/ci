@@ -33,15 +33,15 @@ class Authentication
 	protected request $request;
 	protected common $common;
 
-	private ?string $username = null;
-	private ?string $password = null;
-	private ?string $captcha = null;
-	private bool $rememberMe = false;
+	private static ?string $username = null;
+	private static ?string $password = null;
+	private static ?string $captcha = null;
+	private static bool $rememberMe = false;
 
 	public function __construct( Config $config )
 	{
 		$this->config = $config;
-		$this->message = Message::getInstance();
+		$this->message = Message::getInstance( $config );
 		$this->cookieHandle = CookieHandle::getInstance( $config );
 		$this->utility = Utility::getInstance( $config );
 
@@ -71,10 +71,10 @@ class Authentication
 		string $captcha = null
 	) : bool
 	{
-		$this->username = $userNameEmail;
-		$this->password = $password;
-		$this->rememberMe = $rememberMe;
-		$this->captcha = $captcha;
+		self::$username = $userNameEmail;
+		self::$password = $password;
+		self::$rememberMe = $rememberMe;
+		self::$captcha = $captcha;
 
 		return $this->utility->typeChecker(
 			'login', $userNameEmail, $password, null, $captcha
@@ -86,20 +86,20 @@ class Authentication
 		/**
 		 * Components: [ common, message, cookie, session ]
 		 */
-		$this->message->successfully = true;
+		$this->message::$successfully = true;
 
 		$this->cookie->delete_cookie( $this->config->cookie );
 
 		if ( $this->session->has( $this->config->session ) )
 		{
 			$this->session->destroy();
-			$this->message->success[] = $this->common->lang( 'Red2Horse.successLogout' );
+			$this->message::$success[] = $this->common->lang( 'Red2Horse.successLogout' );
 
 			return true;
 		}
 
 		$error = 'You have not login. '.  $this->common->lang( 'Red2Horse.homeLink');
-		$this->message->errors[] = $error;
+		$this->message::$errors[] = $error;
 
 		return false;
 	}
@@ -154,9 +154,9 @@ class Authentication
 			$ruleCaptcha = [ $config::CAPTCHA => $validation->getRules( $config::CAPTCHA ) ];
 
 			$data = [
-				$config::USERNAME => $this->username,
-				$config::PASSWORD => $this->password,
-				$config::CAPTCHA => $this->captcha
+				$config::USERNAME => self::$username,
+				$config::PASSWORD => self::$password,
+				$config::CAPTCHA => self::$captcha
 			];
 
 			if ( false === $validation->isValid( $data, $ruleCaptcha ) ) {
@@ -168,7 +168,7 @@ class Authentication
 
 		$incorrectInfo = false;
 		$ruleUsername = [ $config::USERNAME => $validation->getRules( 'username' ) ];
-		$data = [ $config::USERNAME => $this->username ];
+		$data = [ $config::USERNAME => self::$username ];
 
 		if ( false === $validation->isValid( $data, $ruleUsername ) ) {
 			$validation->reset();
@@ -186,14 +186,14 @@ class Authentication
 		/**
 		 * Props: [ username, password ]
 		 * Methods: [
-		 * Password->getVerifyPass( $this->password, $userData[ 'password' ] )
+		 * Password->getVerifyPass( self::$password, $userData[ 'password' ] )
 		 * Authentication->isMultiLogin( $userData[ 'session_id' ] )
 		 * ]
 		 * Components: [ config, userModel, message ]
 		 */
 		$userDataArgs = [
-			'user.username' => $this->username,
-			'user.email' => $this->username
+			'user.username' => self::$username,
+			'user.email' => self::$username
 		];
 
 		$userData = $this->userModel->getUserWithGroup(
@@ -206,7 +206,7 @@ class Authentication
 		}
 
 		$verifyPassword = Password::getInstance()->getVerifyPass(
-			$this->password, $userData[ 'password' ]
+			self::$password, $userData[ 'password' ]
 		);
 
 		if ( false === $verifyPassword ) {
@@ -261,8 +261,8 @@ class Authentication
 		$this->session->set( $this->config->session, $userData );
 
 		# --- Set cookie
-		$userId = $userData[ 'id' ];
-		if ( true === $this->rememberMe )
+		$userId = (int) $userData[ 'id' ];
+		if ( true === self::$rememberMe )
 		{
 			$this->cookieHandle->setCookie( $userId );
 		}
@@ -282,8 +282,8 @@ class Authentication
 		/**
 		 * Components: [ common, message ]
 		 */
-		$this->message->successfully = true;
-		$this->message->success[] = $this->common->lang(
+		$this->message::$successfully = true;
+		$this->message::$success[] = $this->common->lang(
 			'Red2Horse.successLoggedWithUsername',
 			[ $userData[ 'username' ] ]
 		);
@@ -324,7 +324,7 @@ class Authentication
 			return $time < $this->config->sessionTimeToUpdate ? false : true;
 		}
 
-		$this->message->errors[] = "else";
+		$this->message::$errors[] = "else";
 		return false;
 	}
 

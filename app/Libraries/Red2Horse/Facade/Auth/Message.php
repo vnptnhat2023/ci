@@ -19,15 +19,15 @@ class Message
 	use TraitSingleton;
 
 	# --- Result data
-	public bool $incorrectResetPassword = false;
-	public bool $incorrectLoggedIn = false;
-	public bool $successfully = false;
-	public bool $hasBanned = false;
-	public bool $accountInactive = false;
+	public static bool $incorrectResetPassword = false;
+	public static bool $incorrectLoggedIn = false;
+	public static bool $successfully = false;
+	public static bool $hasBanned = false;
+	public static bool $accountInactive = false;
 
 	# --- Message
-	public array $errors = [];
-	public array $success = [];
+	public static array $errors = [];
+	public static array $success = [];
 
 	# --- Components
 	protected Config $config;
@@ -61,11 +61,11 @@ class Message
 	public function getResult ()
 	{
 		return [
-			'incorrectResetPassword' => $this->incorrectResetPassword,
-			'incorrectLoggedIn' => $this->incorrectLoggedIn,
-			'successfully' => $this->successfully,
-			'hasBanned' => $this->hasBanned,
-			'accountInactive' => $this->accountInactive,
+			'incorrectResetPassword' => self::$incorrectResetPassword,
+			'incorrectLoggedIn' => self::$incorrectLoggedIn,
+			'successfully' => self::$successfully,
+			'hasBanned' => self::$hasBanned,
+			'accountInactive' => self::$accountInactive,
 			'attempt' => $this->throttleModel->getAttempts(),
 			'showCaptcha' => $this->throttleModel->showCaptcha()
 		];
@@ -78,8 +78,8 @@ class Message
 	public function getMessage ( array $addMore = [], bool $asObject = true )
 	{
 		$message = [
-			'success' => $this->success,
-			'errors' => $this->errors,
+			'success' => self::$success,
+			'errors' => self::$errors,
 			'result' => $this->getResult(),
 			'config' => get_object_vars( $this->config )
 		];
@@ -97,10 +97,10 @@ class Message
 	public function denyMultiLogin ( bool $throttle = true, array $addMore = [], $getReturn = true )
 	{
 		false === $throttle ?: $this->throttleModel->throttle();
-		$this->incorrectLoggedIn = true;
+		self::$incorrectLoggedIn = true;
 
 		$errors[] = $this->common->lang( 'Red2Horse.noteLoggedInAnotherPlatform' );
-		$this->errors = [ ...$errors, ...array_values( $addMore ) ];
+		self::$errors = [ ...$errors, ...array_values( $addMore ) ];
 
 		if ( true === $getReturn ) return $this->getMessage();
 	}
@@ -109,10 +109,10 @@ class Message
 	public function incorrectInfo ( bool $throttle = true, array $addMore = [] )
 	{
 		false === $throttle ?: $this->throttleModel->throttle();
-		$this->incorrectLoggedIn = true;
+		self::$incorrectLoggedIn = true;
 
 		$errors[] = $this->common->lang( 'Red2Horse.errorIncorrectInformation' );
-		$this->errors = [ ...$errors, ...array_values( $addMore ) ];
+		self::$errors = [ ...$errors, ...array_values( $addMore ) ];
 
 		return $this->getMessage();
 	}
@@ -123,9 +123,9 @@ class Message
 	public function denyStatus ( string $status, bool $throttle = true, $getReturn = true )
 	{
 		false === $throttle ?: $this->throttleModel->throttle();
-		$this->hasBanned = $status === 'banned';
-		$this->accountInactive = $status === 'inactive';
-		$this->errors[] = $this->common->lang( 'Red2Horse.errorNotReadyYet', [ $status ] );
+		self::$hasBanned = $status === 'banned';
+		self::$accountInactive = $status === 'inactive';
+		self::$errors[] = $this->common->lang( 'Red2Horse.errorNotReadyYet', [ $status ] );
 
 		if ( true === $getReturn ) return $this->getMessage();
 	}

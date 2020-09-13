@@ -76,7 +76,7 @@ class Utility
 		if ( true === Authentication::getInstance( $this->config )->isLogged( true ) )
 		{
 			( $type === 'forget' )
-			? Message::getInstance( $this->config )->incorrectResetPassword = true
+			? Message::getInstance( $this->config )::$incorrectResetPassword = true
 			: Authentication::getInstance( $this->config )
 			->setLoggedInSuccess(
 				Authentication::getInstance( $this->config )->getUserdata()
@@ -92,7 +92,7 @@ class Utility
 				'type' => 'minutes'
 			];
 			$errStr = $this->common->lang( 'Red2Horse.errorThrottleLimitedTime', $errArg );
-			Message::getInstance( $this->config )->errors[] = $errStr;
+			Message::getInstance( $this->config )::$errors[] = $errStr;
 
 			return false;
 		}

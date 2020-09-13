@@ -18,7 +18,7 @@ interface UserFacadeInterface
 	/**
 	 * Fetch a user row
 	 */
-	public function getUser ( string $select, array $where ) : array;
+	// public function getUser ( string $select, array $where ) : array;
 
 	public function getUserWithGroup ( string $select, array $where ) : array;
 

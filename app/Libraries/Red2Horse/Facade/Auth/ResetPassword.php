@@ -28,6 +28,10 @@ class ResetPassword
 	protected throttleModel $throttleModel;
 	protected validation $validation;
 
+	private static ?string $username;
+	private static ?string $email;
+	private static ?string $captcha;
+
 	public function __construct( Config $config )
 	{
 		$this->config = $config;
@@ -80,9 +84,9 @@ class ResetPassword
 		 * Notification->mailSender( $this->common->random_string() )
 		 * ]
 		 */
-		$this->username = $username;
-		$this->email = $email;
-		$this->captcha = $captcha;
+		self::$username = $username;
+		self::$email = $email;
+		self::$captcha = $captcha;
 
 		$validation = $this->validation;
 
@@ -93,8 +97,8 @@ class ResetPassword
 		$rules = $validation->getRules( $this->config->ruleGroup[ $group ] );
 
 		$data = [
-			$this->config::USERNAME => $this->username,
-			$this->config::EMAIL => $this->email
+			$this->config::USERNAME => self::$username,
+			$this->config::EMAIL => self::$email
 		];
 
 		if ( false === $validation->isValid( $data, $rules ) ) {
@@ -103,7 +107,7 @@ class ResetPassword
 			return false;
 		}
 
-		$find_user = $this->userModel->getUser( $this->config->getColumString() ,$data );
+		$find_user = $this->userModel->getUserWithGroup( $this->config->getColumString() ,$data );
 
 		if ( empty( $find_user ) ) {
 			$this->message->incorrectInfo();
@@ -122,14 +126,14 @@ class ResetPassword
 		$error = 'The system is busy, please come back later';
 
 		if ( false === $updatePassword ) {
-			$this->message->errors[] = $error;
+			$this->message::$errors[] = $error;
 
 			return false;
 		}
 
 		if ( ! $this->notification->mailSender( $randomPw ) ) {
 
-			$this->message->errors[] = $error;
+			$this->message::$errors[] = $error;
 
 			$this->common->log_message(
 				'error' ,
@@ -139,8 +143,8 @@ class ResetPassword
 			return false;
 		}
 
-		$this->message->successfully = true;
-		$this->message->success[] = $this->common->lang( 'Red2Horse.successResetPassword' );
+		$this->message::$successfully = true;
+		$this->message::$success[] = $this->common->lang( 'Red2Horse.successResetPassword' );
 
 		return true;
 	}

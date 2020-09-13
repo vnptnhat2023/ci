@@ -35,8 +35,6 @@ class Red2HorseFacade
 			$config->throttle->maxAttempts,
 			$config->throttle->timeoutAttempts
 		);
-
-		// Message::getInstance( $this->config )->incorrectResetPassword = true;
 	}
 
 	# ------------------------------------------------------------------------
