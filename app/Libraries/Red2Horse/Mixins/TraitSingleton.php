@@ -20,5 +20,12 @@ trait TraitSingleton
 		return self::$getInstance;
 	}
 
-	final private function __clone() {}
+	final private function __clone()
+	{
+	}
+
+	public function __debugInfo ()
+	{
+		return call_user_func( 'get_object_vars', $this );
+	}
 }

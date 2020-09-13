@@ -72,7 +72,19 @@ class Message
 	}
 
 	/**
-	 * Receive all types of messages inside Red2ndHorseAuth
+	 * Receive all types of messages in this class
+	 * ```
+	 * $addMore = [
+	 *		'form' => [
+	 *			'username' => $_POST['username'],
+	 *			'email' => $_POST['email'],
+	 *			'password' => $_POST['password'],
+	 *			'captcha' => $_POST['captcha'],
+	 *			'remember_me' => $_POST['rememberMe']
+	 *		]
+	 * ];
+	 * ```
+	 *
 	 * @return array|object
 	 */
 	public function getMessage ( array $addMore = [], bool $asObject = true )
