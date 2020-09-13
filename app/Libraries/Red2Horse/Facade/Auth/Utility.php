@@ -16,13 +16,9 @@ class Utility
 	use TraitSingleton;
 
 	protected Config $config;
-	protected Message $message;
 
 	protected common $common;
 	protected throttleModel $throttleModel;
-
-	protected Authentication $authentication;
-	protected ResetPassword $resetPassword;
 
 	public function __construct( Config $config )
 	{
@@ -35,10 +31,6 @@ class Utility
 
 		$this->common = $builder->common;
 		$this->throttleModel = $builder->throttle;
-
-		$this->message = Message::getInstance( $config );
-		$this->authentication = Authentication::getInstance( $config );
-		$this->resetPassword = ResetPassword::getInstance( $config );
 	}
 
 	/**
@@ -81,11 +73,14 @@ class Utility
 
 		$hasRequest = ! $isNullUsername && ! $isNullType;
 
-		if ( true === $this->authentication->isLogged( true ) )
+		if ( true === Authentication::getInstance( $this->config )->isLogged( true ) )
 		{
 			( $type === 'forget' )
-			? $this->message->incorrectResetPassword = true
-			: $this->authentication->setLoggedInSuccess( $this->authentication->getUserdata() );
+			? Message::getInstance( $this->config )->incorrectResetPassword = true
+			: Authentication::getInstance( $this->config )
+			->setLoggedInSuccess(
+				Authentication::getInstance( $this->config )->getUserdata()
+			);
 
 			return true;
 		}
@@ -96,7 +91,8 @@ class Utility
 				'num' => gmdate( 'i', $this->config->throttle->timeoutAttempts ),
 				'type' => 'minutes'
 			];
-			$this->message->errors[] = $this->common->lang( 'Red2Horse.errorThrottleLimitedTime', $errArg );
+			$errStr = $this->common->lang( 'Red2Horse.errorThrottleLimitedTime', $errArg );
+			Message::getInstance( $this->config )->errors[] = $errStr;
 
 			return false;
 		}
@@ -104,8 +100,8 @@ class Utility
 		if ( false === $hasRequest ) return false;
 
 		return ( $type === 'login' )
-		? $this->authentication->loginHandler()
-		: $this->resetPassword->forgetHandler( $username, $email, $captcha );
+		? Authentication::getInstance( $this->config )->loginHandler()
+		: ResetPassword::getInstance( $this->config )->forgetHandler( $username, $email, $captcha );
 	}
 
 	public function trigger ( \Closure $closure, string $event, array $eventData )

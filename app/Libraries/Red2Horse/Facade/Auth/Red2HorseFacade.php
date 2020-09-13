@@ -7,7 +7,6 @@
 namespace App\Libraries\Red2Horse\Facade\Auth;
 
 use App\Libraries\Red2Horse\Facade\Database\ThrottleFacade as throttleModel;
-
 use App\Libraries\Red2Horse\Mixins\TraitSingleton;
 
 # --------------------------------------------------------------------------
@@ -26,15 +25,18 @@ class Red2HorseFacade
 		$this->config = $config;
 
 		$builder = AuthComponentBuilder::createBuilder( $config )
-		->database_throttle()
-		->build();
+		->common()->database_throttle()->build();
 
-		$builder->throttle->config(
+		$this->throttleModel = $builder->throttle;
+
+		$this->throttleModel->config(
 			$config->throttle->type,
 			$config->throttle->captchaAttempts,
 			$config->throttle->maxAttempts,
 			$config->throttle->timeoutAttempts
 		);
+
+		// Message::getInstance( $this->config )->incorrectResetPassword = true;
 	}
 
 	# ------------------------------------------------------------------------

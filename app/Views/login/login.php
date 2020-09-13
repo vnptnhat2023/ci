@@ -1,5 +1,8 @@
 <?php
 
+// echo '<pre>';
+// die(var_dump( \Config\Services::Red2HorseAuth()->getMessage() ));
+
 if ( ! function_exists( 'NknI18' ) )
 {
 	function NknI18 ( string $field, bool $w = true ) : string {

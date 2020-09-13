@@ -19,15 +19,12 @@ class CookieHandle
 	use TraitSingleton;
 
 	protected Config $config;
-	protected Message $message;
 
 	protected common $common;
 	protected cookie $cookie;
 	protected userModel $userModel;
 	protected session $session;
 	protected request $request;
-
-	protected Authentication $authentication;
 
 	public function __construct( Config $config )
 	{
@@ -46,9 +43,6 @@ class CookieHandle
 		$this->userModel = $builder->user;
 		$this->session = $builder->session;
 		$this->request = $builder->request;
-
-		$this->authentication = Authentication::getInstance( $config );
-		$this->message = Message::getInstance( $config );
 	}
 
 	public function regenerateCookie () : void
@@ -108,13 +102,15 @@ class CookieHandle
 
 		# --- Check status
 		if ( in_array( $user[ 'status' ] , [ 'inactive', 'banned' ] ) ) {
-			$this->message->denyStatus( $user[ 'status' ], false, false );
+			Message::getInstance( $this->config )->denyStatus( $user[ 'status' ], false, false );
+
 			return $incorrectCookie();
 		}
 
 		# --- Todo: declare inside the config file: is using this feature
-		if ( false === $this->authentication->isMultiLogin( $user[ 'session_id' ] ) ) {
-			$this->message->denyMultiLogin( true, [], false );
+		if ( false === Authentication::getInstance( $this->config )->isMultiLogin( $user[ 'session_id' ] ) ) {
+			Message::getInstance( $this->config )->denyMultiLogin( true, [], false );
+
 			return false;
 		}
 
@@ -151,7 +147,7 @@ class CookieHandle
 		];
 		$data = array_merge( $data, $updateData );
 
- 		if ( true === $this->authentication->loggedInUpdateData( $userId, $data ) )
+ 		if ( true === Authentication::getInstance( $this->config )->loggedInUpdateData( $userId, $data ) )
 		{
 			$ttl = time() + $this->config->ttl;
 			setcookie( $this->config->cookie, $cookieValue, $ttl, '/' );

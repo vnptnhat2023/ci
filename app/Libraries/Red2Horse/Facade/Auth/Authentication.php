@@ -41,7 +41,7 @@ class Authentication
 	public function __construct( Config $config )
 	{
 		$this->config = $config;
-		$this->message = Message::getInstance( $config );
+		$this->message = Message::getInstance();
 		$this->cookieHandle = CookieHandle::getInstance( $config );
 		$this->utility = Utility::getInstance( $config );
 
@@ -73,8 +73,8 @@ class Authentication
 	{
 		$this->username = $userNameEmail;
 		$this->password = $password;
-		$this->captcha = $captcha;
 		$this->rememberMe = $rememberMe;
+		$this->captcha = $captcha;
 
 		return $this->utility->typeChecker(
 			'login', $userNameEmail, $password, null, $captcha

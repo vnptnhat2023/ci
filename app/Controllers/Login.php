@@ -3,7 +3,7 @@
 # --- Todo: Move current file to [Auth-folder]
 namespace App\Controllers;
 
-use \App\Libraries\Red2Horse\Facade\Auth\AuthFacadeInterface as r2hAuth;
+use \App\Libraries\Red2Horse\Facade\Auth\AuthFacade as r2hAuth;
 
 class Login extends BaseController
 {
@@ -23,7 +23,17 @@ class Login extends BaseController
 		$captcha = $this->request->getPostGet( 'captcha' );
 
 		$this->auth->login( $username, $password, $rememberMe, $captcha );
-		d( $this->auth->getMessage() );
+
+		$form = [
+			'form' => [
+				'username' => $username,
+				'password' => $password,
+				'captcha' => $captcha,
+				'remember_me' => $rememberMe
+			]
+		];
+
+		d( $this->auth->getMessage( $form ) );
 
 		return view( 'login/login', (array) $this->auth->getMessage() );
 	}
