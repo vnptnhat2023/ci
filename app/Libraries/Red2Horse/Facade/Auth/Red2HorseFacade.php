@@ -17,6 +17,8 @@ class Red2HorseFacade
 
 	public Config $config;
 	protected throttleModel $throttleModel;
+	protected Authentication $authentication;
+	protected Message $message;
 
 	# ------------------------------------------------------------------------
 
@@ -35,6 +37,9 @@ class Red2HorseFacade
 			$config->throttle->maxAttempts,
 			$config->throttle->timeoutAttempts
 		);
+
+		$this->authentication = Authentication::getInstance( $this->config );
+		$this->message = Message::getInstance( $this->config );
 	}
 
 	# ------------------------------------------------------------------------
@@ -46,14 +51,17 @@ class Red2HorseFacade
 		string $captcha = null
 	) : bool
 	{
-		return Authentication::getInstance( $this->config )
-		->login( $userNameEmail, $password, $rememberMe, $captcha );
+		return $this->authentication->login( $userNameEmail, $password, $rememberMe, $captcha );
 	}
+
+	# ------------------------------------------------------------------------
 
 	public function logout () : bool
 	{
-		return Authentication::getInstance( $this->config )->logout();
+		return $this->authentication->logout();
 	}
+
+	# ------------------------------------------------------------------------
 
 	public function requestPassword (
 		string $username = null, string $email = null, string $captcha = null
@@ -63,33 +71,40 @@ class Red2HorseFacade
 		->requestPassword( $username, $email, $captcha );
 	}
 
+	# ------------------------------------------------------------------------
 	/**
 	 * @param string|null $key
 	 * @return mixed
 	 */
 	public function getUserdata ( string $key = null )
 	{
-		return Authentication::getInstance( $this->config )->getUserdata( $key );
+		return $this->authentication->getUserdata( $key );
 	}
+
+	# ------------------------------------------------------------------------
 
 	public function getHashPass ( string $password ) : string
   {
 		return Password::getInstance()->getHashPass( $password );
   }
 
+	# ------------------------------------------------------------------------
+
   public function getVerifyPass ( string $password, string $hashed ) : bool
   {
 		return Password::getInstance()->getVerifyPass( $password, $hashed );
 	}
 
+	# ------------------------------------------------------------------------
 	/**
 	 * @return object|array
 	 */
 	public function getResult ()
 	{
-		return Message::getInstance( $this->config )->getResult();
+		return $this->message->getResult();
 	}
 
+	# ------------------------------------------------------------------------
 	/**
 	 * Receive all types of messages in this class
 	 * ```
@@ -108,9 +123,10 @@ class Red2HorseFacade
 	 */
 	public function getMessage ( array $addMore = [], bool $asObject = true )
 	{
-		return Message::getInstance( $this->config )->getMessage( $addMore, $asObject );
+		return $this->message->getMessage( $addMore, $asObject );
 	}
 
+	# ------------------------------------------------------------------------
 	/**
 	 * The first check the current user session, * the next will be $data parameter
 	 * @param array $data case empty array ( [] ) = 1st group = administrator
@@ -157,48 +173,27 @@ class Red2HorseFacade
 		return $boolVar;
 	}
 
+	# ------------------------------------------------------------------------
 	/**
 	 * Check cookie, session: when have cookie will set session
 	 * @return boolean
 	 */
 	public function isLogged ( bool $withCookie = false ) : bool
 	{
-		return Authentication::getInstance( $this->config )->isLogged( $withCookie );
+		return $this->authentication->isLogged( $withCookie );
 	}
 
+	# ------------------------------------------------------------------------
 	public function regenerateSession ( array $userData ) : bool
 	{
 		return SessionHandle::getInstance( $this->config )
 		->regenerateSession( $userData );
 	}
 
+	# ------------------------------------------------------------------------
 	public function regenerateCookie () : void
 	{
 		CookieHandle::getInstance( $this->config )->regenerateCookie();
 	}
 
-	# ------------------------------------------------------------------------
-
-	private function cookieHandler () : bool
-	{
-		return CookieHandle::getInstance( $this->config )->cookieHandler();
-	}
-
-	private function loginHandler () : bool
-	{
-		return Authentication::getInstance( $this->config )->loginHandler();
-	}
-
-	private function setLoggedInSuccess ( array $userData ) : void
-	{
-		Authentication::getInstance( $this->config )->setLoggedInSuccess( $userData );
-	}
-
-	private function forgetHandler (
-		string $username = null, string $email = null, string $captcha = null
-	) : bool
-	{
-		return ResetPassword::getInstance( $this->config )
-		->forgetHandler( $username, $email, $captcha );
-	}
 }

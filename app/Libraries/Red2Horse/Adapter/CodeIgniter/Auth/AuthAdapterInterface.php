@@ -7,7 +7,7 @@ namespace App\Libraries\Red2Horse\Adapter\CodeIgniter\Auth;
 use App\Libraries\Red2Horse\Facade\Auth\AuthFacadeInterface;
 
 /**
- * @package Red2HorseAuth
+ * @package Red2ndHorseAuth
  * @author Red2Horse
  */
 interface AuthAdapterInterface extends AuthFacadeInterface

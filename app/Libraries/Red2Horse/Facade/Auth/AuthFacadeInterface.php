@@ -5,7 +5,7 @@ declare( strict_types = 1 );
 namespace App\Libraries\Red2Horse\Facade\Auth;
 
 /**
- * @package Red2HorseAuth
+ * @package Red2ndHorseAuth
  * @author Red2Horse
  */
 interface AuthFacadeInterface

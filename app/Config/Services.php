@@ -5,16 +5,9 @@ declare( strict_types = 1 );
 namespace Config;
 
 use App\Libraries\Red2Horse\Facade\Auth\AuthFacade;
-// use App\Libraries\Red2Horse\Config as r2hConfig;
 use App\Libraries\Red2Horse\Facade\Auth\Config as r2hConfig;
 use App\Libraries\Red2Horse\Sys\Red2HorseSession;
-// use App\Libraries\Red2Horse\Red2Horse;
 use App\Libraries\Red2Horse\Facade\Auth\Red2HorseFacade;
-
-// use App\Libraries\NknAuth\{
-// 	Config as AuthConfig,
-// 	NknAuthSession as AuthSession
-// };
 
 use CodeIgniter\Config\Services as CoreServices;
 use CodeIgniter\Session\Session;
@@ -24,20 +17,6 @@ use App\Libraries\Extension;
 
 class Services extends CoreServices
 {
-
-	/*public static function NknAuth ( AuthConfig $config = null, bool $getShared = true )
-	{
-		if ( $getShared === true ) {
-			return static::getSharedInstance( 'NknAuth', $config );
-		}
-
-		if ( ! is_object( $config ) ) {
-			$config = config( AuthConfig::class );
-		}
-
-		return new \App\Libraries\NknAuth( $config );
-	}*/
-
 	/**
 	 * @return AuthFacade
 	 */

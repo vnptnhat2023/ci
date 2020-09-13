@@ -7,6 +7,7 @@ use CodeIgniter\Session\Session;
 
 class Red2HorseSession extends Session
 {
+	# --- Using in CI\App\Config\Services
 	public function __construct ( \SessionHandlerInterface $driver, $config )
 	{
 		parent::__construct( $driver, $config );

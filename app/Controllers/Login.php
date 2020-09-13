@@ -4,6 +4,7 @@
 namespace App\Controllers;
 
 use \App\Libraries\Red2Horse\Facade\Auth\AuthFacade as r2hAuth;
+use \App\Libraries\Red2Horse\Facade\Auth\Config as r2hAuthConfig;
 
 class Login extends BaseController
 {
@@ -11,7 +12,10 @@ class Login extends BaseController
 
 	public function __construct()
 	{
-		$this->auth = \Config\Services::Red2HorseAuth();
+		$authConfig = r2hAuthConfig::getInstance();
+		$authConfig->throttle->captchaAttempts = 3;
+		$this->auth = \Config\Services::Red2HorseAuth( $authConfig );
+
 		helper( [ 'form', 'form_recaptcha' ] );
 	}
 
@@ -24,16 +28,18 @@ class Login extends BaseController
 
 		$this->auth->login( $username, $password, $rememberMe, $captcha );
 
-		$form = [
-			'form' => [
-				'username' => $username,
-				'password' => $password,
-				'captcha' => $captcha,
-				'remember_me' => $rememberMe
-			]
-		];
+		if ( env( 'environment' ) !== 'production' ) {
+			$form = [
+				'form' => [
+					'username' => $username,
+					'password' => $password,
+					'captcha' => $captcha,
+					'remember_me' => $rememberMe
+				]
+			];
 
-		d( $this->auth->getMessage( $form ) );
+			d( $this->auth->getMessage( $form ) );
+		}
 
 		return view( 'login/login', (array) $this->auth->getMessage() );
 	}
@@ -43,6 +49,18 @@ class Login extends BaseController
 		$username = $this->request->getPostGet( 'username' );
 		$email = $this->request->getPostGet( 'email' );
 		$captcha = $this->request->getPostGet( 'captcha' );
+
+		if ( env( 'environment' ) !== 'production' ) {
+			$form = [
+				'form' => [
+					'username' => $username,
+					'email' => $email,
+					'captcha' => $captcha,
+				]
+			];
+
+			d( $this->auth->getMessage( $form ) );
+		}
 
 		$this->auth->requestPassword( $username, $email, $captcha );
 		return view( 'login/forgot', (array) $this->auth->getMessage() );

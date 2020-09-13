@@ -72,7 +72,7 @@ class Message
 	}
 
 	/**
-	 * Receive all types of messages inside red2horseAuth
+	 * Receive all types of messages inside Red2ndHorseAuth
 	 * @return array|object
 	 */
 	public function getMessage ( array $addMore = [], bool $asObject = true )

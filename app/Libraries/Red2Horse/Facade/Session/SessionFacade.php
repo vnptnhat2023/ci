@@ -32,11 +32,6 @@ class SessionFacade implements SessionFacadeInterface
 		$this->session->destroy();
 	}
 
-	public function getFlashdata ( string $key = null )
-	{
-		$this->session->getFlashdata( $key );
-	}
-
 	public function set ( $data, $value = null ) : void
 	{
 		$this->session->set( $data, $value );

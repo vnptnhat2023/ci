@@ -24,11 +24,6 @@ class SessionAdapter implements SessionAdapterInterface
 		Services::session()->destroy();
 	}
 
-	public function getFlashdata ( string $key = null )
-	{
-		Services::session()->getFlashdata( $key );
-	}
-
 	public function set ( $data, $value = null ) : void
 	{
 		Services::session()->set( $data, $value );

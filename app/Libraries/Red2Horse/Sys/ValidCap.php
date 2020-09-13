@@ -4,7 +4,7 @@ namespace App\Libraries\Red2Horse\Sys;
 
 class ValidCap
 {
-
+ # --- Using in CI\App\Config\Validation
   public function ci_captcha ( string $str ) : bool
 	{
 		$ss = \Config\Services::session() ->getFlashdata( 'ci_captcha' );

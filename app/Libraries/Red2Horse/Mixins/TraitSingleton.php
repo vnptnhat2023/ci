@@ -11,7 +11,7 @@ trait TraitSingleton
 	/**
 	 * @return static
 	 */
-	public static function getInstance( $params = null, ...$args )
+	final public static function getInstance( $params = null, ...$args )
 	{
 		if ( empty( self::$getInstance ) ) {
 			return new self( $params, ...$args );

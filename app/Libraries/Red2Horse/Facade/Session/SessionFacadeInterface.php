@@ -12,7 +12,5 @@ interface SessionFacadeInterface
 
 	public function destroy () : void;
 
-	public function getFlashdata ( string $key = null );
-
 	public function set ( $data, $value = null ) : void;
 }

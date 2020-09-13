@@ -8,7 +8,7 @@ use CodeIgniter\Session\Exceptions\SessionException;
 
 class Red2HorseFileHandler extends BaseHandler implements \SessionHandlerInterface
 {
-
+	# --- Using in CI\App\Config\App
 	/**
 	 * Where to save the session files to.
 	 *
