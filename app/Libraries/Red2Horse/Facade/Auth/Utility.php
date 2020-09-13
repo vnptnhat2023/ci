@@ -16,9 +16,13 @@ class Utility
 	use TraitSingleton;
 
 	protected Config $config;
+	protected Message $message;
+
 	protected common $common;
 	protected throttleModel $throttleModel;
-	protected Red2HorseMessage $message;
+
+	protected Authentication $authentication;
+	protected ResetPassword $resetPassword;
 
 	public function __construct( Config $config )
 	{
@@ -31,7 +35,10 @@ class Utility
 
 		$this->common = $builder->common;
 		$this->throttleModel = $builder->throttle;
-		$this->message = Red2HorseMessage::getInstance( $config );
+
+		$this->message = Message::getInstance( $config );
+		$this->authentication = Authentication::getInstance( $config );
+		$this->resetPassword = ResetPassword::getInstance( $config );
 	}
 
 	/**
@@ -43,7 +50,7 @@ class Utility
 	 * @return bool
 	 * @throws \Exception
 	 */
-	private function typeChecker (
+	public function typeChecker (
 		$type = 'login',
 		string $username = null,
 		string $password = null,
@@ -74,11 +81,11 @@ class Utility
 
 		$hasRequest = ! $isNullUsername && ! $isNullType;
 
-		if ( true === $this->isLogged( true ) )
+		if ( true === $this->authentication->isLogged( true ) )
 		{
 			( $type === 'forget' )
 			? $this->message->incorrectResetPassword = true
-			: $this->setLoggedInSuccess( $this->getUserdata() );
+			: $this->authentication->setLoggedInSuccess( $this->authentication->getUserdata() );
 
 			return true;
 		}
@@ -97,8 +104,8 @@ class Utility
 		if ( false === $hasRequest ) return false;
 
 		return ( $type === 'login' )
-		? $this->loginHandler()
-		: ResetPassword::getInstance()->forgetHandler( $username, $email, $captcha );
+		? $this->authentication->loginHandler()
+		: $this->resetPassword->forgetHandler( $username, $email, $captcha );
 	}
 
 	public function trigger ( \Closure $closure, string $event, array $eventData )

@@ -14,7 +14,7 @@ use App\Libraries\Red2Horse\Mixins\TraitSingleton;
 
 # --------------------------------------------------------------------------
 
-class Red2HorseMessage
+class Message
 {
 	use TraitSingleton;
 

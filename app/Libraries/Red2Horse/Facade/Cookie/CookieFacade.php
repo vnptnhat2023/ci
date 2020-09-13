@@ -31,27 +31,20 @@ class CookieFacade implements CookieFacadeInterface
 		string $prefix = '',
 		bool $secure = false,
 		bool $httpOnly = false
-	): void
+	) : void
 	{
 		$this->cookie->set_cookie(
-			$name,
-			$value,
-			$expire,
-			$domain,
-			$path,
-			$prefix,
-			$secure,
-			$httpOnly
+			$name, $value, $expire, $domain, $path, $prefix, $secure, $httpOnly
 		);
 	}
 
 	public function delete_cookie(
-		$name, string
-		$domain = '',
+		$name,
+		string $domain = '',
 		string $path = '/',
 		string $prefix = ''
-	): void
+	) : void
 	{
-		$this->cookie->delete_cookie( ...func_get_args() );
+		$this->cookie->delete_cookie( $name, $domain, $path, $prefix );
 	}
 }

@@ -14,11 +14,18 @@ class Notification
 {
 	use TraitSingleton;
 
+	protected Config $config;
 	protected mail $mail;
 
-	public function __construct( mail $mail )
+	public function __construct( Config $config )
 	{
-		$this->mail = $mail;
+		$this->config = $config;
+
+		$builder = AuthComponentBuilder::createBuilder( $config )
+		->mail()
+		->build();
+
+		$this->mail = $builder->mail;
 	}
 
 	public function mailSender ( string $randomPw ) : bool

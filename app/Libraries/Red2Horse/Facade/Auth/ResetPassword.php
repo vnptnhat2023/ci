@@ -18,7 +18,10 @@ class ResetPassword
 	use TraitSingleton;
 
 	protected Config $config;
-	protected Red2HorseMessage $message;
+	protected Message $message;
+	protected Utility $utility;
+	protected Password $passwordHandle;
+	protected Notification $notification;
 
 	protected common $common;
 	protected userModel $userModel;
@@ -27,11 +30,7 @@ class ResetPassword
 
 	public function __construct( Config $config )
 	{
-		// $Method = [
-			// Utility->typeChecker( 'forget' ),
-			// Password->getHashPass( $this->common->random_string() ),
-			// Notification->mailSender( $this->common->random_string() )
-		// ];
+		$this->config = $config;
 
 		$builder = AuthComponentBuilder::createBuilder( $config )
 		->common()
@@ -44,14 +43,18 @@ class ResetPassword
 		$this->userModel = $builder->user;
 		$this->throttleModel = $builder->throttle;
 		$this->validation = $builder->validation;
-		$this->message = Red2HorseMessage::getInstance( $config );
+
+		$this->message = Message::getInstance( $config );
+		$this->utility = Utility::getInstance( $config );
+		$this->passwordHandle = Password::getInstance( $config );
+		$this->notification = Notification::getInstance( $config );
 	}
 
 	public function requestPassword (
 		string $username = null,
 		string $email = null,
 		string $captcha = null
-	) //: bool
+	) : bool
 	{
 		/**
 		 * ResetPassword-Todo
@@ -59,7 +62,7 @@ class ResetPassword
 		 * Methods: Utility->typeChecker( 'forget' )
 		 */
 
-		// return Utility::getInstance()->typeChecker( 'forget', $username, null, $email, $captcha );
+		return $this->utility->typeChecker( 'forget', $username, null, $email, $captcha );
 	}
 
 	public function forgetHandler (
@@ -109,7 +112,7 @@ class ResetPassword
 		}
 
 		$randomPw = $this->common->random_string();
-		$hashPw = Password::getInstance()->getHashPass( $randomPw );
+		$hashPw = $this->passwordHandle->getHashPass( $randomPw );
 
 		$updatePassword = $this->userModel->updateUser(
 			[ 'username' => $find_user[ 'username' ] ],
@@ -124,7 +127,7 @@ class ResetPassword
 			return false;
 		}
 
-		if ( ! Notification::getInstance()->mailSender( $randomPw ) ) {
+		if ( ! $this->notification->mailSender( $randomPw ) ) {
 
 			$this->message->errors[] = $error;
 
