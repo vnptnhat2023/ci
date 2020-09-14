@@ -1,9 +1,13 @@
 <?php
 
 declare( strict_types = 1 );
+
 namespace App\Libraries\Red2Horse\Facade\Auth;
-use App\Libraries\Red2Horse\Facade\Auth\Config;
-use App\Libraries\Red2Horse\Mixins\TraitSingleton;
+
+use App\Libraries\Red2Horse\{
+	Facade\Auth\Config,
+	Mixins\TraitSingleton
+};
 
 # --------------------------------------------------------------------------
 

@@ -1,7 +1,8 @@
 <?php
 
 # --------------------------------------------------------------------------
-# --- Todo: role,permission [ id, group, route, permission ]
+# --- Todo: [ permission ] => [ route, 'all', null === empty() ]
+# --- Case: route[ get, post, delete, put, patch , ... ??? ]
 # --------------------------------------------------------------------------
 declare( strict_types = 1 );
 

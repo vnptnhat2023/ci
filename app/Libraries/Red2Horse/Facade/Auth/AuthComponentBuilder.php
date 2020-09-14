@@ -16,8 +16,9 @@ use App\Libraries\Red2Horse\Facade\{
 	Database\ThrottleFacadeInterface as throttleModel,
 	Database\UserFacadeInterface as userModel,
 	Common\CommonFacadeInterface as common,
+	Auth\Config
 };
-use App\Libraries\Red2Horse\Facade\Auth\Config;
+
 use App\Libraries\Red2Horse\Mixins\TraitSingleton;
 
 # --------------------------------------------------------------------------

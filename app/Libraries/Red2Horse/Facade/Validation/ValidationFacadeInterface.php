@@ -10,15 +10,17 @@ interface ValidationFacadeInterface
 
 	public function getErrors ( string $field = null ) : array;
 
-	// public function getSingleRule( string $key ) : array;
-	// public function getMultiRule( string $key ) : array;
-	// public function getGroupRule( string $key ) : array;
-
 	/**
-	 * @param $key string|array|null
-	 * @return mixed
+	 * @param string|array|null $needed
+	 * @string single rule
+	 * @array multiple rules, array NOT associative
+	 * @null all rules
+	 * @return string|array
 	 */
 	public function getRules ( $needed );
 
+	/**
+	 * Clear all rules and data
+	 */
 	public function reset () : void;
 }

@@ -145,14 +145,14 @@ class Authentication
 
 		if ( true === $this->throttleModel->showCaptcha() ) {
 
-			$ruleCaptcha = [
-				$config::CAPTCHA => $validation->getRules( $config::CAPTCHA )
-			];
-
 			$data = [
 				$config::USERNAME => self::$username,
 				$config::PASSWORD => self::$password,
 				$config::CAPTCHA => self::$captcha
+			];
+
+			$ruleCaptcha = [
+				$config::CAPTCHA => $validation->getRules( $config::CAPTCHA )
 			];
 
 			if ( false === $validation->isValid( $data, $ruleCaptcha ) ) {

@@ -10,23 +10,20 @@ class Password
 {
 	use TraitSingleton;
 
+	private const PW_HASH_TYPE = 'sha384';
+
+	private function typeOfHash( string $string, $raw_output = true ) : string
+	{
+		return base64_encode( hash( SELF::PW_HASH_TYPE, $string, $raw_output ) );
+	}
+
 	public function getHashPass ( string $password ) : string
   {
-		$hash = password_hash(
-			base64_encode( hash( 'sha384', $password, true ) ),
-			PASSWORD_DEFAULT
-		);
-
-		return $hash;
+		return password_hash( $this->typeOfHash( $password ), PASSWORD_DEFAULT );
   }
 
   public function getVerifyPass ( string $password, string $hashed ) : bool
   {
-		$result = password_verify(
-			base64_encode( hash( 'sha384', $password, true ) ),
-			$hashed
-		);
-
-		return $result;
+		return password_verify( $this->typeOfHash( $password ), $hashed );
 	}
 }

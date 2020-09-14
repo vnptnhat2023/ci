@@ -68,6 +68,7 @@ class Utility
 		{
 			( $type === 'forget' )
 			? $message::$incorrectResetPassword = true
+			# Didn't understand: when "Dependency Injected = INFINITY LOOP"
 			: $authentication->setLoggedInSuccess( $authentication->getUserdata() );
 
 			return true;
