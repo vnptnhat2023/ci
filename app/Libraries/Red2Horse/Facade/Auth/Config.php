@@ -41,7 +41,7 @@ class Config
 	| User permission
 	|--------------------------------------------------------------------------
 	*/
-	public array $routeGates;
+	public array $userRouteGates;
 	public array $userPermission;
 
 	/*
@@ -85,7 +85,7 @@ class Config
 
 		$facade = ConfigFacade::getInstance( new $adapter );
 
-		$this->routeGates = $facade->routeGates();
+		$this->userRouteGates = $facade->userRouteGates();
 		$this->userPermission = $facade->userPermission();
 
 		$this->sessionSavePath = $facade->sessionSavePath();

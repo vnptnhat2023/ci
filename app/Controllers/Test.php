@@ -121,35 +121,13 @@ class Test extends BaseController {
 
 	public function test()
 	{
-		$timeS = microtime( true );
-		$auth = Services::Red2HorseAuth();
-		var_dump($auth);
-		var_dump( microtime( true ) - $timeS, memory_get_usage( true ) );
+		$fromConfig = [ 'a', 'b', 'c', 'from config' ];
 
-		// $builder = AuthComponentBuilder::createBuilder( $cf )
-		// ->cache()
-		// ->common()
-		// ->config()
-		// ->cookie()
-		// ->database_user()
-		// ->database_throttle()
-		// ->mail()
-		// ->request()
-		// ->session()
-		// ->validation()
-		// ->build();
+		$fromFilters = [ 'a', 'b', 'c', 'from filters' ];
 
-		// var_dump($builder);
-		// var_dump( $builder->common );
+		$result = array_diff( $fromFilters, $fromConfig );
 
-		// $testConfig = new TestConfig();
-		// print_r( $testConfig );
-
-		// $model = new AuthThrottleModel();
-		// $adapter = new AuthThrottleAdapter( $model );
-		// $throttle = new AuthThrottleFacade( $adapter );
-
-		// var_dump( $throttle->throttle() );
+		var_dump($result);
 	}
 
 	public function ci_tl()

@@ -33,12 +33,14 @@ class Red2HorseAuth implements FilterInterface
 
   public function before( req $request, $arguments = null )
   {
-		if ( ! empty( $arguments ) ) {
-			// $time = microtime( true );
+		if ( ! empty( $arguments ) )
+		{
 			$d = $this->test( $arguments );
-
-			// echo microtime( true ) - $time . PHP_EOL;
 			print_r($d);
+		}
+		else
+		{
+			$arguments = [];
 		}
 
 		die;

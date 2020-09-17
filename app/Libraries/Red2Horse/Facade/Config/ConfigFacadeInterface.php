@@ -16,5 +16,5 @@ interface ConfigFacadeInterface
 
 	public function userPermission () : array;
 
-	public function routeGates () : array;
+	public function userRouteGates () : array;
 }

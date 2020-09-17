@@ -24,7 +24,7 @@ class ConfigFacade implements ConfigFacadeInterface
 	# ---  Map of User Permission: [ group => route => permission ]
 
 	# --- a: all, n: null
-	protected array $routeGates = [ 'null', 'all' ];
+	protected array $userRouteGates = [ 'null', 'all' ];
 
 	# --- a: all, n: null, c: create, r: read, u: update, d: delete
 	protected array $userPermission = [ 'a', 'c', 'r', 'u', 'd' ];
@@ -61,17 +61,17 @@ class ConfigFacade implements ConfigFacadeInterface
 		return $this->userPermission;
 	}
 
-	public function routeGates() : array
+	public function userRouteGates() : array
 	{
-		$data = $this->config->routeGates();
+		$data = $this->config->userRouteGates();
 
 		if ( ! empty( $data ) )
 		{
-			$data = array_diff( array_values( $data ), $this->routeGates );
-			$this->routeGates = array_merge( $this->routeGates, $data );
+			$data = array_diff( array_values( $data ), $this->userRouteGates );
+			$this->userRouteGates = array_merge( $this->userRouteGates, $data );
 		}
 
-		return $this->routeGates;
+		return $this->userRouteGates;
 	}
 
 	public function sessionCookieName ( ?string $name = null ) : string

@@ -42,12 +42,12 @@ class Authorization
 		if ( empty( $data ) )
 		return true;
 
-		$userRoute = $this->config->userRoute;
+		$routeGates = $this->config->userRouteGates;
 		$boolVar = true;
 
 		foreach ( $data as $route )
 		{
-			$inCfPerm = in_array( $route, $userRoute, true );
+			$inCfPerm = in_array( $route, $routeGates, true );
 			$inUserPerm = in_array( $route, $userPerm, true );
 
 			if ( false === $inCfPerm || false === $inUserPerm )
@@ -60,35 +60,32 @@ class Authorization
 		return $boolVar;
 	}
 
-	public function hasPermissionGroup ( array $data, string $permission ) : bool
+	public function hasPermissionGroup ( array $dataFilters ) : bool
 	{
-		$userCfPermission = $this->config->userPermission;
+		$userSessionPerm = $this->getSessionPem();
 
-		if ( ! in_array( $permission, $userCfPermission, true ) ) {
-			throw new \Exception( 'Permission not defined !', 403 );
+		if ( empty( $userSessionPerm ) ) {
+			return false;
 		}
 
-		$userSsPerm = $this->getSessionPem();
-
-		if ( empty( $userSsPerm ) ) { return false; }
-
-		# --- Administrator (1st) group !
-		if ( empty( $data ) ) { return true; }
-
-		$routeGates = $this->config->userRoute;
 		$boolVar = true;
 
-		foreach ( $data as $gate => $sessionPem )
+		foreach ( $dataFilters as $gate => $filterGatePem )
 		{
-			$hasConfig = in_array( $gate, $routeGates, true );
-			$hasSession = array_key_exists( $gate, $userSsPerm );
-			$hasPem = in_array( $permission, $sessionPem );
+			if ( empty( $filterGatePem || ! is_array( $filterGatePem ) ) ) {
+				throw new \Exception( 'The gate of user-permission cannot be empty !', 403 );
+			}
+			# Check in session permission in config->userPermission
 
-			if ( false === $hasConfig || false === $hasSession || false === $hasPem ) {
+			if ( false === $this->isValidPerm( (string) $gate, $filterGatePem, $userSessionPerm ) ) {
 				$boolVar = false;
+
 				break;
 			}
 
+			/**
+			 * Session store pattern
+			 */
 			$session = [
 				'permission' => [
 					'page' => [
@@ -104,21 +101,35 @@ class Authorization
 		return $boolVar;
 	}
 
-	private function getSessionPem() : array
+	private function isValidPerm (
+		string $gate,
+		array $filterGatePem,
+		array $userSessionPerm
+	) : bool
 	{
-		$userSsPerm = Authentication::getInstance( $this->config )
-		->getUserdata( 'permission' );
+		$hasConfig = in_array( $gate, $this->config->userRouteGates, true );
+		$hasSession = array_key_exists( $gate, $userSessionPerm );
 
-		if ( ( false === $userSsPerm ) || empty( $userSsPerm ) ) {
-			return [];
+		if ( false === $hasConfig || false === $hasSession ) {
+			return false;
 		}
 
-		if ( in_array( 'null', $userSsPerm, true ) ) {
+		$hasDifferent = array_diff( $filterGatePem, $this->config->userPermission );
+
+		return ! empty( $hasDifferent );
+	}
+
+	private function getSessionPem() : array
+	{
+		$userSsPerm = (array) Authentication::getInstance( $this->config )
+		->getUserdata( 'permission' );
+
+		if ( empty( $userSsPerm ) ) {
 			return [];
 		}
 
 		if ( in_array( 'all', $userSsPerm, true ) ) {
-			return [];
+			return $userSsPerm;
 		}
 
 		return $userSsPerm;
