@@ -24,6 +24,7 @@ class Authorization
 	 */
 	public function hasPermission ( array $data ) : bool
 	{
+		dd($data);
 		# --- Get current user permission
 		$userPerm = Authentication::getInstance( $this->config )
 		->getUserdata( 'permission' );
@@ -47,7 +48,7 @@ class Authorization
 		foreach ( $data as $route )
 		{
 			$inCfPerm = in_array( $route, $userRoute, true );
-			$inUserPerm = in_array( $route, $userRoute, true );
+			$inUserPerm = in_array( $route, $userPerm, true );
 
 			if ( false === $inCfPerm || false === $inUserPerm )
 			{
@@ -57,5 +58,69 @@ class Authorization
 		}
 
 		return $boolVar;
+	}
+
+	public function hasPermissionGroup ( array $data, string $permission ) : bool
+	{
+		$userCfPermission = $this->config->userPermission;
+
+		if ( ! in_array( $permission, $userCfPermission, true ) ) {
+			throw new \Exception( 'Permission not defined !', 403 );
+		}
+
+		$userSsPerm = $this->getSessionPem();
+
+		if ( empty( $userSsPerm ) ) { return false; }
+
+		# --- Administrator (1st) group !
+		if ( empty( $data ) ) { return true; }
+
+		$routeGates = $this->config->userRoute;
+		$boolVar = true;
+
+		foreach ( $data as $gate => $sessionPem )
+		{
+			$hasConfig = in_array( $gate, $routeGates, true );
+			$hasSession = array_key_exists( $gate, $userSsPerm );
+			$hasPem = in_array( $permission, $sessionPem );
+
+			if ( false === $hasConfig || false === $hasSession || false === $hasPem ) {
+				$boolVar = false;
+				break;
+			}
+
+			$session = [
+				'permission' => [
+					'page' => [
+						'r', 'c', 'u'
+					],
+					'user' => [
+						'c', 'd'
+					]
+				]
+			];
+		}
+
+		return $boolVar;
+	}
+
+	private function getSessionPem() : array
+	{
+		$userSsPerm = Authentication::getInstance( $this->config )
+		->getUserdata( 'permission' );
+
+		if ( ( false === $userSsPerm ) || empty( $userSsPerm ) ) {
+			return [];
+		}
+
+		if ( in_array( 'null', $userSsPerm, true ) ) {
+			return [];
+		}
+
+		if ( in_array( 'all', $userSsPerm, true ) ) {
+			return [];
+		}
+
+		return $userSsPerm;
 	}
 }

@@ -1,8 +1,10 @@
 <?php
 
 # --------------------------------------------------------------------------
-# --- Todo: [ permission ] => [ route, 'all', null === empty() ]
+# --- Todo: [ permission: 'all', null === empty, c, r, u, d ] => [ route ]
 # --- Case: route[ get, post, delete, put, patch , ... ??? ]
+# --- Case: c => [ page, post, ... ]
+# --- Case: c => [ 'all' ] || []
 # --------------------------------------------------------------------------
 declare( strict_types = 1 );
 

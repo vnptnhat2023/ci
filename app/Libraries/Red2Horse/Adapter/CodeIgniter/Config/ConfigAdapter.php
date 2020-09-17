@@ -15,7 +15,7 @@ class ConfigAdapter implements ConfigAdapterInterface
 	protected int $sessionTimeToUpdate;
 
 	protected array $userPermission = [];
-	protected array $userRoute = [];
+	protected array $routeGates = [];
 
 	# -------------------------------------------------------------------------
 
@@ -77,12 +77,12 @@ class ConfigAdapter implements ConfigAdapterInterface
 		return $this->userPermission;
 	}
 
-	public function userRoute( array $route = [] ) : array
+	public function routeGates( array $gate = [] ) : array
 	{
-		if ( ! empty( $route ) ) {
-			$this->userRoute += array_values( $route );
+		if ( ! empty( $gate ) ) {
+			$this->routeGates += array_values( $gate );
 		}
 
-		return $this->userRoute;
+		return $this->routeGates;
 	}
 }

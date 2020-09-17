@@ -11,14 +11,37 @@ use Config\Services;
 class Red2HorseAuth implements FilterInterface
 {
 
+	private function test( $arguments )
+	{
+		$d = [];
+
+		foreach ( $arguments as $value )
+		{
+			$t = explode( '.', $value );
+			$f = $t[ array_key_first( $t ) ];
+			$l = $t[ array_key_last( $t ) ];
+
+			if ( empty( $f ) || empty( $l ) || in_array( $l, $d[ $f ] ?? $d ) ) {
+				continue;
+			}
+
+			$d[ $f ][] = $l;
+		}
+
+		return $d;
+	}
+
   public function before( req $request, $arguments = null )
   {
-		// $f = explode( '.', $arguments[0] );
-		// // dd($arguments);
-		// dd( $f[ array_key_last( $f ) ] );
-		// $args = [];
-		// dotArrayAssign( $args, $arguments[0], 'test' );
-		// dd( $args );
+		if ( ! empty( $arguments ) ) {
+			// $time = microtime( true );
+			$d = $this->test( $arguments );
+
+			// echo microtime( true ) - $time . PHP_EOL;
+			print_r($d);
+		}
+
+		die;
 
     if ( ! Services::Red2HorseAuth()->withPermission( $arguments ?: [] ) ) {
       throw PageNotFoundException::forPageNotFound();
