@@ -11,9 +11,9 @@ use Config\Services;
 class Red2HorseAuth implements FilterInterface
 {
 
-	private function test( $arguments )
+	private function handleArg( $arguments )
 	{
-		$d = [];
+		$data = [];
 
 		foreach ( $arguments as $value )
 		{
@@ -21,33 +21,22 @@ class Red2HorseAuth implements FilterInterface
 			$f = $t[ array_key_first( $t ) ];
 			$l = $t[ array_key_last( $t ) ];
 
-			if ( empty( $f ) || empty( $l ) || in_array( $l, $d[ $f ] ?? $d ) ) {
+			if ( empty( $f ) || empty( $l ) || in_array( $l, $d[ $f ] ?? $data ) ) {
 				continue;
 			}
 
-			$d[ $f ][] = $l;
+			$data[ $f ][] = $l;
 		}
 
-		return $d;
+		return $data;
 	}
 
   public function before( req $request, $arguments = null )
   {
-		if ( ! empty( $arguments ) )
-		{
-			$arguments = $this->test( $arguments );
-			// print_r($arguments);
-		}
-		else
-		{
-			$arguments = [];
-		}
+		$arguments = ! empty( $arguments ) ? $this->handleArg( $arguments ) : [];
+		$hasPermission = Services::Red2HorseAuth()->withPermission( $arguments );
 
-		// die( print_r( $arguments ) );
-		$t = Services::Red2HorseAuth()->withPermission( $arguments );
-		die(var_dump($t));
-
-    if ( ! Services::Red2HorseAuth()->withPermission( $arguments ) ) {
+    if ( false === $hasPermission ) {
       throw PageNotFoundException::forPageNotFound();
     }
   }

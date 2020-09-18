@@ -115,7 +115,7 @@ $routes->group( 'backend', $bapiOptions, function ( RouteCollection $routes )
 	);
 
 	$routes->group( 'extension',
-		$groupOptions ( 'Extension', 'extension.a.r, extension.n.vx..df.d, page.u, category.d' ),
+		$groupOptions ( 'Extension', 'extension.r, extension.c, extension.u' ),
 		// $groupOptions ( 'Extension', 'extension' ),
 		function ( RouteCollection $routes ) {
 			$option = [ 'only' => 'index,create,delete', 'placeholder' => '(:num)' ];

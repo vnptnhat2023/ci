@@ -121,9 +121,7 @@ class Test extends BaseController {
 
 	public function test()
 	{
-		$pem = '{"extension":["c","u","r"]}';
-		$t = json_decode( $pem, true );
-		var_dump($t);
+		echo random_bytes(32);
 		// $fromConfig = [ 'a', 'b', 'c', 'from config' ];
 		// $fromFilters = [ 'a', 'b', 'c', 'from filters' ];
 		// $result = array_diff( $fromFilters, $fromConfig );

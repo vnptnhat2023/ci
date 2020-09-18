@@ -15,6 +15,8 @@ class Authorization
 	public function __construct( Config $config )
 	{
 		$this->config = $config;
+		// $test = $this->getSessionPem();
+		// die(var_dump($test));
 	}
 
 	/**
@@ -62,9 +64,9 @@ class Authorization
 
 	public function hasPermissionGroup ( array $dataFilters ) : bool
 	{
-		$sessionPerm = $this->getSessionPem();
+		$sessionPem = $this->getSessionPem();
 
-		if ( empty( $sessionPerm ) ) {
+		if ( empty( $sessionPem ) ) {
 			return false;
 		}
 
@@ -73,13 +75,22 @@ class Authorization
 		foreach ( $dataFilters as $gate => $filterPem )
 		{
 			if ( ! is_array( $filterPem ) || empty( $filterPem ) ) {
-				throw new \Exception( 'The gate of user-permission cannot be empty !', 403 );
+				$errStr = 'The current gate of user-permission cannot be empty !';
+				throw new \Exception( $errStr, 403 );
 			}
 
-			$unknown = $this->isValidPerm( (string) $gate, $filterPem, $sessionPerm );
-			// die(var_dump($unknown));
-			if ( false === $unknown ) {
-				die('here? false === $unknown');
+			$checkGate = $this->isValidPerm(
+				(string) $gate,
+				$filterPem,
+				$sessionPem
+			);
+
+			if ( false === $checkGate ) {
+				die(var_dump([
+					'gate' => $gate,
+					'filterPem' => $filterPem,
+					'sessionPem' => $sessionPem
+				]));
 				$boolVar = false;
 				break;
 			}
@@ -88,6 +99,7 @@ class Authorization
 			 * Session store pattern
 			 */
 			$session = [
+				# --- Or 'all'
 				'permission' => [
 					'page' => [
 						'r', 'c', 'u'
@@ -99,28 +111,38 @@ class Authorization
 			];
 		}
 
-		die('it true@@@@@@@@@');
 		return $boolVar;
 	}
 
-	private function isValidPerm ( string $gate, array $filterPem, array $sessionPerm ) : bool
+	private function isValidPerm (
+		string $gate,
+		array $filterPem,
+		array $sessionPem
+	) : bool
 	{
-		$hasConfig = in_array( $gate, $this->config->userRouteGates, true );
-		$hasSession = array_key_exists( $gate, $sessionPerm );
+		$config = $this->config;
 
+		$AdminGate = $config->superAdminGate;
+		if ( isset( $sessionPem[ 0 ] ) && $sessionPem[ 0 ] === $AdminGate ) {
+			return true;
+		}
+
+		$hasConfig = in_array( $gate, $config->userRouteGates, true );
+		$hasSession = array_key_exists( $gate, $sessionPem );
 		if ( false === $hasConfig || false === $hasSession ) {
-			// d( 'hasConfig', $gate, $this->config->userRouteGates );
-			// dd( 'hasSession', $gate, $sessionPerm );
 			return false;
 		}
 
-		$hasFilterDiff = array_diff( $filterPem, $this->config->userPermission );
-		// die(var_dump( $sessionPerm[ $gate ], $this->config->userPermission ));
-		$hasSessionDiff = array_diff( $sessionPerm[ $gate ], $this->config->userPermission );
-		// var_dump( $hasFilterDiff, $hasSessionDiff );
-		// die(var_dump( empty( $hasFilterDiff ), empty( $hasSessionDiff ) ));
-		if ( empty( $hasFilterDiff ) && empty( $hasSessionDiff ) ) {
+		$currentSessionGate = $sessionPem[ $gate ] ?? [];
+		if ( in_array( $config->superAdminPermission, $currentSessionGate, true ) ) {
 			return true;
+		}
+
+		$hasFilterDiff = array_diff( $filterPem, $config->userPermission );
+		$hasSessionDiff = array_diff( $currentSessionGate, $config->userPermission );
+
+		if ( empty( $hasFilterDiff ) && empty( $hasSessionDiff ) ) {
+			return empty( array_diff( $filterPem, $currentSessionGate ) );
 		}
 
 		return false;
@@ -131,14 +153,6 @@ class Authorization
 		$userSsPerm = (array) Authentication::getInstance( $this->config )
 		->getUserdata( 'permission' );
 
-		if ( empty( $userSsPerm ) ) {
-			return [];
-		}
-
-		if ( in_array( 'all', $userSsPerm, true ) ) {
-			return $userSsPerm;
-		}
-
-		return $userSsPerm;
+		return empty( $userSsPerm ) ? [] : $userSsPerm;
 	}
 }

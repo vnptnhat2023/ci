@@ -23,11 +23,24 @@ class ConfigFacade implements ConfigFacadeInterface
 
 	# ---  Map of User Permission: [ group => route => permission ]
 
-	# --- a: all, n: null
-	protected array $userRouteGates = [ 'null', 'all' ];
+	# --- Todo: UserRouteGates must be ignore const::SUPER_ADMINISTRATOR_GATE
+	public const SUPER_ADMINISTRATOR_GATE = 'all';
+	public const SUPER_ADMINISTRATOR_PERMISSION = 'a';
 
-	# --- a: all, n: null, c: create, r: read, u: update, d: delete
-	protected array $userPermission = [ 'a', 'c', 'r', 'u', 'd' ];
+	# --- Todo: Thinking more [ STR token => 'all' || 'all' => STR token ]
+	// public const SUPER_ADMINISTRATOR_TOKEN = 'random_bytes()';
+
+	# --- User add more feature: page, post, ...
+	protected array $userRouteGates = [];
+
+	# --- a: all, c: create, r: read, u: update, d: delete
+	protected array $userPermission = [
+		self::SUPER_ADMINISTRATOR_PERMISSION,
+		'c',
+		'r',
+		'u',
+		'd'
+	];
 
 	# --- Todo: 'post' => ['create'] => [ 'file', 'text', ... ]
 	# --- Todo: 'post' => ['delete'] => [ 'text' ]

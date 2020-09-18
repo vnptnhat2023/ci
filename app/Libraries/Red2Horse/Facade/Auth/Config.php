@@ -38,11 +38,13 @@ class Config
 
 	/*
 	|--------------------------------------------------------------------------
-	| User permission
+	| User Authorization
 	|--------------------------------------------------------------------------
 	*/
 	public array $userRouteGates;
 	public array $userPermission;
+	public string $superAdminGate;
+	public string $superAdminPermission;
 
 	/*
 	|--------------------------------------------------------------------------
@@ -84,8 +86,11 @@ class Config
 		}
 
 		$facade = ConfigFacade::getInstance( new $adapter );
+
 		$this->userRouteGates = $facade->userRouteGates();
 		$this->userPermission = $facade->userPermission();
+		$this->superAdminGate = $facade::SUPER_ADMINISTRATOR_GATE;
+		$this->superAdminPermission = $facade::SUPER_ADMINISTRATOR_PERMISSION;
 
 		$this->sessionSavePath = $facade->sessionSavePath();
 		$this->sessionCookieName = $facade->sessionCookieName();
