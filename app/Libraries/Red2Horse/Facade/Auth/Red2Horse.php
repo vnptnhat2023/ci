@@ -112,7 +112,8 @@ class Red2Horse
 
 	public function hasPermission ( array $data ) : bool
 	{
-		return Authorization::getInstance( $this->config )->hasPermission( $data );
+		// return Authorization::getInstance( $this->config )->hasPermission( $data );
+		return Authorization::getInstance( $this->config )->hasPermissionGroup( $data );
 	}
 
 	public function isLogged ( bool $withCookie = false ) : bool

@@ -219,7 +219,12 @@ class Authentication
 		}
 
 		unset( $userData[ 'password' ] );
-		$userData[ 'permission' ] = json_decode( $userData[ 'permission' ] );
+
+		$isValidJson = $this->common->valid_json( $userData[ 'permission' ] );
+
+		$userData[ 'permission' ] = ( true === $isValidJson )
+		? json_decode( $userData[ 'permission' ], true )
+		: [];
 
 		return $userData;
 	}

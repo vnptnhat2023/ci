@@ -43,6 +43,12 @@ class CommonFacade implements CommonFacadeInterface
 		return $this->common->get_file_info( $file, $returned_values );
 	}
 
+	public function valid_json( string $str = null ) : bool
+	{
+		json_decode( $str );
+		return json_last_error() === JSON_ERROR_NONE;
+	}
+
 	/**
 	 * Create a Random String
 	 *

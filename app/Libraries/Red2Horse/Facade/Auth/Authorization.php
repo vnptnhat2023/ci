@@ -62,24 +62,25 @@ class Authorization
 
 	public function hasPermissionGroup ( array $dataFilters ) : bool
 	{
-		$userSessionPerm = $this->getSessionPem();
+		$sessionPerm = $this->getSessionPem();
 
-		if ( empty( $userSessionPerm ) ) {
+		if ( empty( $sessionPerm ) ) {
 			return false;
 		}
 
 		$boolVar = true;
 
-		foreach ( $dataFilters as $gate => $filterGatePem )
+		foreach ( $dataFilters as $gate => $filterPem )
 		{
-			if ( empty( $filterGatePem || ! is_array( $filterGatePem ) ) ) {
+			if ( ! is_array( $filterPem ) || empty( $filterPem ) ) {
 				throw new \Exception( 'The gate of user-permission cannot be empty !', 403 );
 			}
-			# Check in session permission in config->userPermission
 
-			if ( false === $this->isValidPerm( (string) $gate, $filterGatePem, $userSessionPerm ) ) {
+			$unknown = $this->isValidPerm( (string) $gate, $filterPem, $sessionPerm );
+			// die(var_dump($unknown));
+			if ( false === $unknown ) {
+				die('here? false === $unknown');
 				$boolVar = false;
-
 				break;
 			}
 
@@ -98,25 +99,31 @@ class Authorization
 			];
 		}
 
+		die('it true@@@@@@@@@');
 		return $boolVar;
 	}
 
-	private function isValidPerm (
-		string $gate,
-		array $filterGatePem,
-		array $userSessionPerm
-	) : bool
+	private function isValidPerm ( string $gate, array $filterPem, array $sessionPerm ) : bool
 	{
 		$hasConfig = in_array( $gate, $this->config->userRouteGates, true );
-		$hasSession = array_key_exists( $gate, $userSessionPerm );
+		$hasSession = array_key_exists( $gate, $sessionPerm );
 
 		if ( false === $hasConfig || false === $hasSession ) {
+			// d( 'hasConfig', $gate, $this->config->userRouteGates );
+			// dd( 'hasSession', $gate, $sessionPerm );
 			return false;
 		}
 
-		$hasDifferent = array_diff( $filterGatePem, $this->config->userPermission );
+		$hasFilterDiff = array_diff( $filterPem, $this->config->userPermission );
+		// die(var_dump( $sessionPerm[ $gate ], $this->config->userPermission ));
+		$hasSessionDiff = array_diff( $sessionPerm[ $gate ], $this->config->userPermission );
+		// var_dump( $hasFilterDiff, $hasSessionDiff );
+		// die(var_dump( empty( $hasFilterDiff ), empty( $hasSessionDiff ) ));
+		if ( empty( $hasFilterDiff ) && empty( $hasSessionDiff ) ) {
+			return true;
+		}
 
-		return ! empty( $hasDifferent );
+		return false;
 	}
 
 	private function getSessionPem() : array

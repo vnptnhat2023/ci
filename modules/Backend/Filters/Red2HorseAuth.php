@@ -35,17 +35,19 @@ class Red2HorseAuth implements FilterInterface
   {
 		if ( ! empty( $arguments ) )
 		{
-			$d = $this->test( $arguments );
-			print_r($d);
+			$arguments = $this->test( $arguments );
+			// print_r($arguments);
 		}
 		else
 		{
 			$arguments = [];
 		}
 
-		die;
+		// die( print_r( $arguments ) );
+		$t = Services::Red2HorseAuth()->withPermission( $arguments );
+		die(var_dump($t));
 
-    if ( ! Services::Red2HorseAuth()->withPermission( $arguments ?: [] ) ) {
+    if ( ! Services::Red2HorseAuth()->withPermission( $arguments ) ) {
       throw PageNotFoundException::forPageNotFound();
     }
   }

@@ -115,7 +115,12 @@ class CookieHandle
 		$logErr = "Validated cookie, but error when update userId: {$user[ 'id' ]}";
 		$this->setCookie( (int) $user[ 'id' ], [], $logErr );
 
-		$user[ 'permission' ] = json_decode( $user[ 'permission' ] );
+		$isValidJson = $this->common->valid_json( $user[ 'permission' ] );
+
+		$user[ 'permission' ] = ( true === $isValidJson )
+		? json_decode( $user[ 'permission' ], true )
+		: [];
+
 		$this->session->set( $this->config->session, $user );
 
 		$this->regenerateCookie();

@@ -29,8 +29,9 @@ class App extends BaseConfig
 	| Red2horse user permission
 	|--------------------------------------------------------------------------
 	*/
-	public array $userRoute = [
+	public array $userRouteGates = [
 		'category',
+		'extension',
 		'file',
 		'page',
 		'post',

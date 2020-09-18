@@ -28,7 +28,7 @@ class ConfigAdapter implements ConfigAdapterInterface
 		$this->sessionExpiration = $appConfig->sessionExpiration;
 		$this->sessionTimeToUpdate = $appConfig->sessionTimeToUpdate;
 
-		$this->userRoute = $appConfig->userRoute;
+		$this->userRouteGates = $appConfig->userRouteGates;
 	}
 
 	# -------------------------------------------------------------------------

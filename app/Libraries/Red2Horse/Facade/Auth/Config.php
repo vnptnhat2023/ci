@@ -84,7 +84,6 @@ class Config
 		}
 
 		$facade = ConfigFacade::getInstance( new $adapter );
-
 		$this->userRouteGates = $facade->userRouteGates();
 		$this->userPermission = $facade->userPermission();
 
