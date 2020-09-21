@@ -15,8 +15,6 @@ class Authorization
 	public function __construct( Config $config )
 	{
 		$this->config = $config;
-		// $test = $this->getSessionPem();
-		// die(var_dump($test));
 	}
 
 	/**
@@ -24,7 +22,7 @@ class Authorization
 	 * @param array $data case empty array ( [] ) = 1st group = administrator
 	 * @return boolean
 	 */
-	public function hasPermission ( array $data ) : bool
+	/*public function hasPermission ( array $data ) : bool
 	{
 		dd($data);
 		# --- Get current user permission
@@ -60,7 +58,7 @@ class Authorization
 		}
 
 		return $boolVar;
-	}
+	}*/
 
 	public function hasPermissionGroup ( array $dataFilters ) : bool
 	{
@@ -86,6 +84,7 @@ class Authorization
 			);
 
 			if ( false === $checkGate ) {
+				echo '<pre>';
 				die(var_dump([
 					'gate' => $gate,
 					'filterPem' => $filterPem,

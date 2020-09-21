@@ -115,8 +115,8 @@ $routes->group( 'backend', $bapiOptions, function ( RouteCollection $routes )
 	);
 
 	$routes->group( 'extension',
-		$groupOptions ( 'Extension', 'extension.r, extension.c, extension.u' ),
-		// $groupOptions ( 'Extension', 'extension' ),
+		// $groupOptions ( 'Extension', 'extension.r, extension.d, extension.u' ),
+		$groupOptions ( 'Extension', 'extension' ),
 		function ( RouteCollection $routes ) {
 			$option = [ 'only' => 'index,create,delete', 'placeholder' => '(:num)' ];
 			$routes->resource( 'crud', $option );

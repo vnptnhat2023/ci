@@ -273,4 +273,22 @@ interface RouteCollectionInterface
 	public function getRedirectCode(string $from): int;
 
 	//--------------------------------------------------------------------
+
+	public function get(string $from, $to, array $options = null): self;
+
+	//--------------------------------------------------------------------
+
+	public function post(string $from, $to, array $options = null): self;
+
+	//--------------------------------------------------------------------
+
+	public function delete(string $from, $to, array $options = null): self;
+
+	//--------------------------------------------------------------------
+
+	public function put(string $from, $to, array $options = null): self;
+
+	//--------------------------------------------------------------------
+
+	public function patch(string $from, $to, array $options = null): self;
 }

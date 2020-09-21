@@ -1,4 +1,4 @@
-GET http://localhost/codeigniter/login?username=administrator&password=123456
+GET http://localhost/codeigniter/login?username=member&password=123456
 
 ###
 GET http://localhost/codeigniter/bapi/page
