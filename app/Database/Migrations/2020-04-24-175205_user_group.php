@@ -25,6 +25,13 @@ class UserGroup extends Migration
 				'default' => 'guest'
 			],
 
+			'role' => [
+				'type' => 'VARCHAR',
+				'constraint' => 64,
+				'null' => false,
+				'default' => 'unknown'
+			],
+
 			'permission' => [
 				'type' => 'VARCHAR',
 				'constraint' => '512',

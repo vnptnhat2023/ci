@@ -40,6 +40,20 @@ class Crud extends \CodeIgniter\Entity
   //   if ( empty( $this->attributes['slug'] ) ) {
   //     $this->setSlug( $this->attributes['title'] );
   //   }
-  // }
+	// }
 
+	public function setAuthor( string $str ) : void
+	{
+		$this->attributes[ 'author' ] = mb_strtolower( $str );
+	}
+
+	public function setContact( string $str ) : void
+	{
+		$this->attributes[ 'contact' ] = mb_strtolower( $str );
+	}
+
+	public function setCategoryName( string $str ) : void
+	{
+		$this->attributes[ 'category_name' ] = mb_strtolower( $str );
+	}
 }

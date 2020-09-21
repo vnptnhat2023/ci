@@ -11,11 +11,13 @@ class UserGroup extends Seeder
     $data = [
       [
         'name' => '1st Group',
-        'permission' => '["all"]'
+				'permission' => '["all"]',
+				'role' => 'administrator'
       ],
       [
         'name' => 'guest',
-        'permission' => '["null"]'
+				'permission' => '["null"]',
+				'role' => 'guest'
       ]
     ];
 

@@ -22,9 +22,8 @@ class Authorization
 	 * @param array $data case empty array ( [] ) = 1st group = administrator
 	 * @return boolean
 	 */
-	/*public function hasPermission ( array $data ) : bool
+	public function hasPermission ( array $data ) : bool
 	{
-		dd($data);
 		# --- Get current user permission
 		$userPerm = Authentication::getInstance( $this->config )
 		->getUserdata( 'permission' );
@@ -58,8 +57,12 @@ class Authorization
 		}
 
 		return $boolVar;
-	}*/
+	}
 
+	/**
+	 * Use it late, because current CI4 not support filter on RestAPI method
+	 * @example Gate.Permission: extension.r,extension.c
+	 */
 	public function hasPermissionGroup ( array $dataFilters ) : bool
 	{
 		$sessionPem = $this->getSessionPem();
