@@ -121,11 +121,9 @@ class Test extends BaseController {
 
 	public function test()
 	{
-		echo random_bytes(32);
-		// $fromConfig = [ 'a', 'b', 'c', 'from config' ];
-		// $fromFilters = [ 'a', 'b', 'c', 'from filters' ];
-		// $result = array_diff( $fromFilters, $fromConfig );
-		// var_dump($result);
+		$a = 'a1.2.3';
+		$b = preg_match( '/^(\d+\.)?(\d+\.)?(\*|\d+)$/', $a, $m );
+		var_dump( $b, $m );
 	}
 
 	public function ci_tl()
@@ -449,14 +447,14 @@ class Test extends BaseController {
 
 	public function scan_more (string $class = 'Book')
   {
-		helper('filesystem_helper');
-		$class = ucfirst($class);
+		helper( 'filesystem_helper' );
+		$class = ucfirst( $class );
 		$classPath = EXTPATH . "{$class}/{$class}.php";
 		$class = "\\Ext\\{$class}\\{$class}";
 
 		$file = get_file_info( set_realpath( $classPath ), 'date' );
 		if ( ! empty( $file['date'] ) ) {
-			$extHashed = password_hash( $file['date'], PASSWORD_DEFAULT );
+			$extHashed = password_hash( $file[ 'date' ], PASSWORD_DEFAULT );
 
 			$map = $class::getMap();
 			$map['hashed_file'] = $extHashed;

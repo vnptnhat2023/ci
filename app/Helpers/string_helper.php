@@ -23,42 +23,14 @@ if ( ! function_exists('strHighestVersion') )
   }
 }
 
-if ( ! function_exists('strCamelCase') )
+if ( ! function_exists( 'strCamelCase' ) )
 {
   /**
-   * Conver string to CamelCaseUpperFirstLetter
+	 * @package CodeIgniter4
+   * Convert string to CamelCaseUpperFirstLetter
    */
-  function strCamelCase(string $str) : string
+  function strCamelCase ( string $str ) : string
   {
-    $str = str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $str)));
-
-    return $str;
-  }
-}
-
-
-if ( ! function_exists('mb__ucfirst') )
-{
-  function mb__ucfirst(string $str, bool $esc = FALSE) : string
-  {
-    $str = $esc ? esc($str) : $str;
-    if ( ! extension_loaded('mbstring')) return strtolower($str);
-
-    $str = mb_strtolower($str);
-    return mb_convert_case(mb_substr($str, 0, 1), MB_CASE_TITLE) . mb_substr($str, 1);
-  }
-}
-
-if ( ! function_exists('mb_strtolower') )
-{
-  function mb_strtolower(string $str, bool $esc = FALSE) : string
-  {
-    $str = $esc ? esc($str) : $str;
-
-    if ( extension_loaded('mbstring') ) {
-      return mb_strtolower($str);
-    }
-
-    return strtolower($str);
+    return str_replace( ' ', '', ucwords( str_replace( [ '-', '_' ], ' ', $str ) ) );
   }
 }

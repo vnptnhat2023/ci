@@ -157,9 +157,7 @@ class Crud extends ResourceController
 			return [ 'error' => lang( 'Validation.less_than_equal_to', $errField ) ];
 		}
 
-		/**
-		 * @var \BAPI\Entities\Extension\Crud $entityExtension
-		 */
+		/** @var \BAPI\Entities\Extension\Crud $entityExtension */
 		$entityExtension = new $this->entityExtension( $data[ 'data' ] );
 		$data[ 'data' ] = $entityExtension->createFillable()->toRawArray();
 
@@ -176,16 +174,13 @@ class Crud extends ResourceController
 		$slug = $data[ 'data' ][ 'slug' ];
 		$hashedFileData = strip_slashes( $data[ 'data' ][ 'hashed_file' ] );
 
-		$file = get_file_info(
-			set_realpath( EXTPATH . "{$slug}/{$slug}.php" ), 'date'
-		);
+		$file = get_file_info( set_realpath( EXTPATH . "{$slug}/{$slug}.php" ), 'date' );
 
-		if ( empty( $file[ 'date' ] ) )
-		{
+		if ( empty( $file[ 'date' ] ) ) {
 			return [ 'error' => lang( 'Files.fileNotFound', [ $slug ] ) ];
 		}
-		else if ( false === password_verify( $file[ 'date' ], $hashedFileData ) )
-		{
+
+		if ( false === password_verify( $file[ 'date' ], $hashedFileData ) ) {
 			return [ 'error' => lang( 'Api.errorHashCheckingFailed', [ 'extension' ] ) ];
 		}
 
@@ -196,44 +191,58 @@ class Crud extends ResourceController
 
 	/**
 	 * Add the extensions "event and relation" to the database
+	 * @use Using: data.data.events, data.data.title
 	 */
   private function __afterCreate ( array $data ) : array
   {
 		$id = $data[ 'id' ];
 
 		# --- The extension just have an only one EventName
+		/** @var \BAPI\Models\GeneralItem\Crud $itemModel */
 		$itemModel = new $this->itemModel();
 
 		# Ensure data is not empty
 		$maxId = $itemModel->selectMax( 'id' )->first();
-		if ( ! isset( $maxId[ 'id' ] ) ) { $maxId = [ 'id' => 0 ]; }
+
+		if ( ! isset( $maxId[ 'id' ] ) ) {
+			$maxId = [ 'id' => 0 ];
+		}
 
 		# The expected id we can get
 		helper( 'generalRelation' );
+
 		$relationData = generateGeneralRelation(
-			$maxId[ 'id' ], count( $data[ 'data' ][ 'events' ] ), 1, $id
+			$maxId[ 'id' ],
+			count( $data[ 'data' ][ 'events' ] ),
+			1,
+			$id
 		);
 
 		if ( ! empty( $relationData ) )
 		{
 			if ( ! ( new $this->relationModel() )->insertBatch( $relationData ) ) {
-				log_message( 'error',
-				"Could not create relations extension, extension-id: {$id}");
+				log_message(
+					'error',
+					"Could not create relations extension, extension-id: {$id}"
+				);
 
 				# No need to add events when the relationship is not possible
 				return $data;
 			}
 
 			if ( ! $itemModel->insertBatch( $data[ 'data' ][ 'events' ] ) ) {
-				log_message( 'error',
-				"Could not create events extension, extension-id: {$id}");
+				log_message(
+					'error',
+					"Could not create events extension, extension-id: {$id}"
+				);
 			}
 		}
-
 		else
 		{
-			log_message( 'error',
-			"Could not create relationship for extension {$data[ 'data' ][ 'name' ]}." );
+			log_message(
+				'error',
+				"Could not create relationship for extension {$data[ 'data' ][ 'name' ]}."
+			);
 		}
 
 		# Delete the "event extension" stored in the cache named in: "extStore" event
@@ -241,8 +250,10 @@ class Crud extends ResourceController
 			config( '\BAPI\Config\Extension' )->getSetting( 'cache.name' )
 		);
 
-		log_message( 'info',
-		"The extension {$data[ 'data' ][ 'title' ]} has been created successfully." );
+		log_message(
+			'info',
+			"The extension {$data[ 'data' ][ 'title' ]} has been created successfully."
+		);
 
     return $data;
   }
@@ -271,8 +282,10 @@ class Crud extends ResourceController
 		->findAll();
 
 		if ( ! $findRelation ) {
-			log_message( 'error',
-			"Cannot find relations extension, event-ids: {$idsString}" . __METHOD__ );
+			log_message(
+				'error',
+				"Cannot find relations extension, event-ids: {$idsString}" . __METHOD__
+			);
 
 			return $data;
 		}
@@ -281,16 +294,20 @@ class Crud extends ResourceController
 
 		# Remove extension "events" from the database
 		if ( false === $itemModel->delete( $itemIds, true ) ) {
-			log_message( 'error',
-			"Cannot find remove event relations, event-ids: {$idsString}" . __METHOD__);
+			log_message(
+				'error',
+				"Cannot find remove event relations, event-ids: {$idsString}" . __METHOD__
+			);
 		}
 
 		$relationIds = array_column( $findRelation, 'relation_id' );
 
 		# Remove extension "relation" from the database
 		if ( false === $relationModel->delete( $relationIds, true ) ) {
-			log_message( 'error',
-			"Cannot delete extension, event-ids: {$idsString}" . __METHOD__);
+			log_message(
+				'error',
+				"Cannot delete extension, event-ids: {$idsString}" . __METHOD__
+			);
 		}
 
 		helper( 'filesystem' );
@@ -303,8 +320,10 @@ class Crud extends ResourceController
 			$deletedFile = delete_files( EXTPATH . "{$pathFile}", TRUE );
 
 			if ( ! $deletedFile ) {
-				log_message( 'error',
-				"Cannot delete file extension on path: \"{$pathFile}\"" . __METHOD__ );
+				log_message(
+					'error',
+					"Cannot delete file extension on path: \"{$pathFile}\"" . __METHOD__
+				);
 			}
 		}
 
@@ -314,8 +333,10 @@ class Crud extends ResourceController
 		);
 
 		$strPathFiles = implode( ',', $arrayPathFiles );
-		log_message( 'info',
-		"Deleted extension on path: \"{$strPathFiles}\"" . __METHOD__ );
+		log_message(
+			'info',
+			"Deleted extension on path: \"{$strPathFiles}\"" . __METHOD__
+		);
 
     return $data;
 	}

@@ -10,6 +10,7 @@ class Extension extends BaseConfig
 	use ConfigTrait;
 
   private const setting = [
+
 		'db' => [
 			'create' => [
 				'maximum_rows' => 1,
