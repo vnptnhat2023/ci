@@ -31,6 +31,6 @@ trait ExtensionTrait
 			) );
 		}
 
-		return dot_array_search($key, $class::map);
+		return dot_array_search( $key, $class::map );
 	}
 }

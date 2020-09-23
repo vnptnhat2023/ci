@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types = 1 );
+
 namespace BAPI\Entities\Extension;
 
 class Crud extends \CodeIgniter\Entity
@@ -10,16 +12,18 @@ class Crud extends \CodeIgniter\Entity
 		//
 	];
 
-	// public function updateFillable() : \Codeigniter\Entity;
+	// public function updateFillable() : \Codeigniter\Entity; # maybe not needed
 
   public function createFillable() : \Codeigniter\Entity
   {
-		return $this;
-		// $config = ( new \BAPI\Config\GeneralGroup() );
+		$config = config( '\BAPI\Config\Extension' )->getSetting( 'db.fill' );
 
-    // $this->attributes['status'] ??= $config->getSetting('db.fill.status');
+		foreach ( $config as $key => $value )
+		{
+			$this->attributes[ $key ] ??= $value[ $key ];
+		}
 
-    // return $this;
+    return $this;
   }
 
 	public function setAuthor ( string $str ) : void
@@ -81,10 +85,8 @@ class Crud extends \CodeIgniter\Entity
 
 	public function setVersion ( string $str ) : void
 	{
-		$isVersionValid = preg_match( '/^(\d+\.)?(\d+\.)?(\*|\d+)$/', $str );
-
-		$this->attributes[ 'version' ] = $isVersionValid
-		? $isVersionValid
+		$this->attributes[ 'version' ] = preg_match( '/^(\d+\.)?(\d+\.)?(\*|\d+)$/', $str )
+		? $str
 		: config( '\BAPI\Config\Extension' )->getSetting( 'db.fill.version' );
 	}
 

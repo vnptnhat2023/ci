@@ -16,7 +16,7 @@ class Test extends BaseController {
 	public function test_pw()
 	{
 		$r2h = \Config\Services::Red2HorseAuth();
-		echo $r2h->getPasswordHash('123456');
+		echo $r2h->getPasswordHash( '123456' );
 	}
 
 	public function permission()
@@ -37,8 +37,8 @@ class Test extends BaseController {
 
 	public function delete_ss()
 	{
-		\Config\Services::session()->remove('r2h');
-		d( \Config\Services::session()->has('r2h') );
+		\Config\Services::session()->remove( 'r2h' );
+		d( \Config\Services::session()->has( 'r2h' ) );
 	}
 
 	public function chua_biet()
@@ -78,10 +78,10 @@ class Test extends BaseController {
 		$rows = $benchmark->getTimers(6);
 
 		foreach ($rows as $name => $info) {
-			if ($name == 'total_execution') {
+			if ($name == 'total_execution' ) {
 				continue;
 			}
-			$data[] = ['name' => ucwords(str_replace('_', ' ', $name)), 'component' => 'Timer', 'start' => $info['start'], 'duration' => $info['end'] - $info['start']];
+			$data[] = [ 'name' => ucwords(str_replace( '_', ' ', $name)), 'component' => 'Timer', 'start' => $info[ 'start' ], 'duration' => $info[ 'end' ] - $info[ 'start' ]];
 		}
 		d( $data );
 	}
@@ -139,7 +139,7 @@ class Test extends BaseController {
 				case strpos($file, FCPATH) === 0:
 					$file = 'FCPATH' . DIRECTORY_SEPARATOR . substr($file, strlen(FCPATH));
 					break;
-				case defined('VENDORPATH') && strpos($file, VENDORPATH) === 0:
+				case defined( 'VENDORPATH' ) && strpos($file, VENDORPATH) === 0:
 					$file = 'VENDORPATH' . DIRECTORY_SEPARATOR . substr($file, strlen(VENDORPATH));
 					break;
 			}
@@ -160,7 +160,7 @@ class Test extends BaseController {
 				'path' => $path,
 			];
 
-			if (strpos($path, 'SYSTEMPATH') !== false)
+			if (strpos($path, 'SYSTEMPATH' ) !== false)
 			{
 				$coreFiles[] = [
 					'name' => basename($file),
@@ -294,8 +294,8 @@ class Test extends BaseController {
 			$rows = count( $mediaData );
 
 			$mediaRelation = generateMediaRelation( 5, 15, 'post_id', 7 );
-			# --- Todo: store to $entity['media_data'] = $mediaData
-			# --- Todo: check existing in DB $mediaData['media_id']
+			# --- Todo: store to $entity[ 'media_data' ] = $mediaData
+			# --- Todo: check existing in DB $mediaData[ 'media_id' ]
 			# --- Todo: whereIn( media.id, $mediaRelation[ media_id ] )
 
 			print_r( $mediaRelation );
@@ -357,7 +357,7 @@ class Test extends BaseController {
 			$relationData[ 'group_id' ]
 		);
 		if ( isset( $ggCounter[ 'error' ] ) ) {
-			print_r( $ggCounter[ 'error' ] ); # return ['error]
+			print_r( $ggCounter[ 'error' ] ); # return [ 'error]
 		}
 
 		$giCounter = $counterModel(
@@ -365,7 +365,7 @@ class Test extends BaseController {
 			$relationData[ 'item_id' ]
 		);
 		if ( isset( $giCounter[ 'error' ] ) ) {
-			print_r( $giCounter[ 'error' ] ); # return ['error]
+			print_r( $giCounter[ 'error' ] ); # return [ 'error]
 		}
 
 		// print_r( $relationData[ 'data' ] );
@@ -414,23 +414,23 @@ class Test extends BaseController {
       ]
     ];
 
-		$query = http_build_query($data, 'flags_');
-		$query = preg_replace('/%5B[0-9]+%5D/simU', '%5B%5D', $query);
+		$query = http_build_query($data, 'flags_' );
+		$query = preg_replace( '/%5B[0-9]+%5D/simU', '%5B%5D', $query);
 		echo $query;
 	}
 
-	public function scan_extension (string $path = EXTPATH, string $currExtension = 'Book')
+	public function scan_extension (string $path = EXTPATH, string $currExtension = 'Book' )
   {
 		#Validate
 		$validation = \Config\Services::validation();
-		$ruleName = \Config\Validation::modifier( config('Extension')->rules('slug'), 'extension name' );
+		$ruleName = \Config\Validation::modifier( config( 'Extension' )->rules( 'slug' ), 'extension name' );
 
 		if ( ! $validation->setRules( $ruleName )->run( [ 'slug' => $currExtension ] ) ) {
 			return [ 'error' => $validation->getErrors() ];
 		}
 
 		# When no haven't "cache":
-		helper('filesystem');
+		helper( 'filesystem' );
 
 		if ( empty( $maps = directory_map( set_realpath( $path ), 1 ) ) ) {
 			$logStr = 'The directory containing extension is empty.';
@@ -445,7 +445,7 @@ class Test extends BaseController {
 		// echo '<pre>'; print_r($map); echo '</pre>';
 	}
 
-	public function scan_more (string $class = 'Book')
+	public function scan_more (string $class = 'Book' )
   {
 		helper( 'filesystem_helper' );
 		$class = ucfirst( $class );
@@ -453,23 +453,23 @@ class Test extends BaseController {
 		$class = "\\Ext\\{$class}\\{$class}";
 
 		$file = get_file_info( set_realpath( $classPath ), 'date' );
-		if ( ! empty( $file['date'] ) ) {
+		if ( ! empty( $file[ 'date' ] ) ) {
 			$extHashed = password_hash( $file[ 'date' ], PASSWORD_DEFAULT );
 
 			$map = $class::getMap();
-			$map['hashed_file'] = $extHashed;
+			$map[ 'hashed_file' ] = $extHashed;
 
-			$client = service('curlrequest');
+			$client = service( 'curlrequest' );
 			$response = $client->request(
 				'POST',
-				base_url('bapi/extension/crud'),
+				base_url( 'bapi/extension/crud' ),
 				[ 'form_params' => $map ]
 			);
 
 			var_dump([
 				'getStatusCode' => $response->getStatusCode(),
 				'getBody' => $response->getBody(),
-				'getHeader' => $response->getHeader('Content-Type')
+				'getHeader' => $response->getHeader( 'Content-Type' )
 			]);
 		}
   }
@@ -487,7 +487,7 @@ class Test extends BaseController {
 
 	public function more ()
 	{
-		$config = config('Post');
+		$config = config( 'Post' );
 
 		Events::trigger( 'add-post-relation', 'book', 'Simple book extension' );
 		Events::trigger( 'add-post-relation', 'health', 'Basic health extension' );
@@ -500,10 +500,10 @@ class Test extends BaseController {
 		{
 			print_r( $config->getRelationShip() );
 
-			$config->removeRelationShip('book');
-			$config->removeRelationShip('page');
-			$config->removeRelationShip('category');
-			$config->removeRelationShip('health');
+			$config->removeRelationShip( 'book' );
+			$config->removeRelationShip( 'page' );
+			$config->removeRelationShip( 'category' );
+			$config->removeRelationShip( 'health' );
 
 			print_r( $config->getRelationShip() );
 		}
@@ -511,7 +511,7 @@ class Test extends BaseController {
 
 	public function test_locator ()
 	{
-		$ext = \Config\Services::locator()->search('ShopTest/ShopTest');
+		$ext = \Config\Services::locator()->search( 'ShopTest/ShopTest' );
 		var_dump($ext);
 	}
 
@@ -541,7 +541,7 @@ class Test extends BaseController {
 		$dataDB = [ 'data' => 'Changed params', 'current_event' => 'another handleEvent Love' ];
 		handleExtension( 'love', $dataDB , true );
 
-		$loveIndex = runExtension('Love');
+		$loveIndex = runExtension( 'Love' );
 		echo '<pre>'; print_r( $loveIndex->index() ); echo '</pre>';
 
 		// echo '<pre>'; print_r( runExtension()->getLoaded() ); echo '</pre>';
@@ -566,10 +566,10 @@ class Test extends BaseController {
 		$param2 = [ 'title' => 'Download C', 'slug' => 'download-c' ];
 
 		$a = handleExtension( 'curkit-map' );
-		echo '<pre style="margin: 50px 0">'; print_r( runExtension('curkit', $param1) ); echo '</pre>';
+		echo '<pre style="margin: 50px 0">'; print_r( runExtension( 'curkit', $param1) ); echo '</pre>';
 
 		$c = handleExtension( 'curkit-event' );
-		echo '<pre style="margin: 50px 0">'; print_r( runExtension('curkit', $param2) ); echo '</pre>';
+		echo '<pre style="margin: 50px 0">'; print_r( runExtension( 'curkit', $param2) ); echo '</pre>';
 
 		handleExtension( 'Book-event' );
 		echo '<pre style="margin: 50px 0">';
@@ -583,17 +583,17 @@ class Test extends BaseController {
 		echo '</pre>';
 
 		// handleExtension( 'curkit-event', $param2, false );
-		// echo '<pre>'; print_r( runExtension('curkit', ['another' => 'Parameters']) ); echo '</pre>';
+		// echo '<pre>'; print_r( runExtension( 'curkit', [ 'another' => 'Parameters' ]) ); echo '</pre>';
 		// echo '<pre>'; print_r( runExtension()->getLoaded() ); echo '</pre>';
 	}
 
-	public function shop ($eventName = 'shop-test')
+	public function shop ($eventName = 'shop-test' )
 	{
 		$extData = runExtension( $eventName )->index();
 
 		# ----------------------
 
-		if ( ! empty( $extData['inputComponents'] ) )
+		if ( ! empty( $extData[ 'inputComponents' ] ) )
 		{
 			$data = $extData[ 'inputComponents' ][ 'data' ];
 			$vueTemplate = $extData[ 'inputComponents' ][ 'vueTemplate' ];
@@ -632,16 +632,16 @@ class Test extends BaseController {
 	public function validEmail ()
 	{
 		$id = 40;
-		$model = model('\BAPI\Models\Post\Crud');
-		$data = ['cat_id' => 'a'];# This is validate title
+		$model = model( '\BAPI\Models\Post\Crud' );
+		$data = [ 'cat_id' => 'a' ];# This is validate title
 
 		$rules = $model->rulePut( [ 'id' => $id ] );
 
 		die(var_dump($rules));
-		// $validation = service('validation');
+		// $validation = service( 'validation' );
 
-		if ( ! service('validation')->setRules($rules)->run($data) ) {
-			echo var_dump( service('validation')->getErrors() );
+		if ( ! service( 'validation' )->setRules($rules)->run($data) ) {
+			echo var_dump( service( 'validation' )->getErrors() );
 		} else {
 			echo 'pass';
 		}
