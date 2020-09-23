@@ -36,10 +36,10 @@ class Red2HorseAuth implements FilterInterface
 
   public function before( req $request, $arguments = null )
   {
-		die(var_dump($arguments));
-		$args = $this->handleArg( (array) $arguments );
+		// die(var_dump($arguments));
+		// $args = $this->handleArg( (array) $arguments );
 
-    if ( false === Services::Red2HorseAuth()->withPermission( $args ) ) {
+    if ( false === Services::Red2HorseAuth()->withPermission( ( array ) $arguments ) ) {
       throw PageNotFoundException::forPageNotFound();
     }
   }

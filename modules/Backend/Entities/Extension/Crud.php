@@ -4,8 +4,14 @@ declare( strict_types = 1 );
 
 namespace BAPI\Entities\Extension;
 
-class Crud extends \CodeIgniter\Entity
+use CodeIgniter\Entity;
+
+class Crud extends Entity
 {
+	protected $datamap = [
+		'name' => 'title'
+	];
+
   public function createFillable () : self
   {
 		$config = config( '\BAPI\Config\Extension' )
