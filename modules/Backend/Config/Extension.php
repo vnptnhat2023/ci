@@ -39,6 +39,7 @@ class Extension extends BaseConfig
 				'category_name' => 'unknown',
 				'category_slug' => 'unknown',
 				'description' => null,
+				'events' => [],
 				'status' => 'disable',
 				'version' => '0.1'
 			]

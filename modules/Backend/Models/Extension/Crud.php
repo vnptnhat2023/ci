@@ -27,19 +27,20 @@ class Crud extends \CodeIgniter\Model
     return $rules;
   }
 
-  public function ruleCreate (array $data) : array
+  public function ruleCreate ( array $data ) : array
   {
-		$rules = config( '\BAPI\Config\Extension' ) ->getRules();
+		$rules = config( '\BAPI\Config\Extension' )->getRules();
+		$events = $data[ 'data' ][ 'events' ] ?? [];
 
 		# Add more unique-slug
-		$rules['slug'] = Validation::modifier(
-			$rules['slug'],
+		$rules[ 'slug' ] = Validation::modifier(
+			$rules[ 'slug' ],
 			null,
 			null,
 			"is_unique[{$this->table}.slug]"
 		);
 
-		foreach ( $data[ 'data' ][ 'events' ] as $key => $value ) {
+		foreach ( $events as $key => $value ) {
 			$key = $key ?: '*';
 			$rules[ "events.{$key}.title" ] = $rules[ 'method' ];
 			$rules[ "events.{$key}.slug" ] = $rules[ 'name' ];
@@ -66,11 +67,11 @@ class Crud extends \CodeIgniter\Model
     return $rules;
 	}
 
-	public function rulePatch (array $data) : array
+	public function rulePatch () : array
 	{
 		$this->allowedFields = [ 'status' ];
 
 		return [ 'status' => config( '\BAPI\Config\Extension' )
-		->getRules('status') ];
+		->getRules( 'status' ) ];
 	}
 }

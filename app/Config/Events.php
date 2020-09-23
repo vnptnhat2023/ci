@@ -80,8 +80,8 @@ Events::on( 'extStore', function(
 {
 	// $start = microtime( true );
 	# --- Cache all enabled extensions
-	if ( $storeData = model('\App\Models\Extension')->enabled() ) {
-		$store = $storeData['full'];
+	if ( $storeData = model( '\App\Models\Extension' )->enabled() ) {
+		$store = $storeData[ 'full' ];
 
 		# --- Todo: find ext haven't event-name => instance them
 		# --- Todo: make another EVENT to do that; (extStoreWithoutEvents, event-name: afterControllersCreated)
@@ -93,7 +93,7 @@ Events::on( 'extStore', function(
 		$keys = array_keys( array_column( $store, 'event_name' ) , $Name );
 
 		if ( ! empty( $keys ) ) {
-			helper('string');
+			helper( 'string' );
 
 			static $extLoaded = [];
 			$extCreated = [];

@@ -92,20 +92,38 @@ class Crud extends ResourceController
     return $this->deleteTrait( $id, true );
 	}
 
-	# --- Todo: Not using now; Need more to code
 	# ==========================================================
-	public function scan ( string $name )
+	public function scan_more (string $class = 'Book' )
   {
-		helper( 'filesystem_helper' );
-		$file = get_file_info( set_realpath( EXTPATH . "{$name}/{$name}.php" ), 'date' );
+		helper( 'filesystem' );
 
-		if ( empty( $file[ 'date' ] ) ) {
-			return [ 'error' => lang( 'Files.fileNotFound', [ $name ] ) ];
+		$class = ucfirst( $class );
+
+		$classPath = EXTPATH . "{$class}/{$class}.php";
+		$class = "\\Ext\\{$class}\\{$class}";
+
+		$file = get_file_info( set_realpath( $classPath ), 'date' );
+
+		if ( ! empty( $file[ 'date' ] ) ) {
+			$extHashed = password_hash( $file[ 'date' ], PASSWORD_DEFAULT );
+
+			$map = $class::getMap();
+			$map[ 'hashed_file' ] = $extHashed;
+
+			$client = service( 'curlrequest' );
+
+			$response = $client->request(
+				'POST',
+				base_url( 'bapi/extension/crud' ),
+				[ 'form_params' => $map ]
+			);
+
+			var_dump([
+				'getStatusCode' => $response->getStatusCode(),
+				'getBody' => $response->getBody(),
+				'getHeader' => $response->getHeader( 'Content-Type' )
+			]);
 		}
-
-		$extHashed = password_hash( $file[ 'date' ], PASSWORD_DEFAULT );
-		// var_dump( password_verify( '1594660675', $extHashed ) );
-		return password_verify( '1594660675', $extHashed ); # Arg1 = post[hashedFile]
   }
 
   private function __indexRun ( array $data ) : array

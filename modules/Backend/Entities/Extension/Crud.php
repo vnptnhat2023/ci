@@ -16,7 +16,8 @@ class Crud extends \CodeIgniter\Entity
 
   public function createFillable() : \Codeigniter\Entity
   {
-		$config = config( '\BAPI\Config\Extension' )->getSetting( 'db.fill' );
+		$config = config( '\BAPI\Config\Extension' )
+		->getSetting( 'db.fill' );
 
 		foreach ( $config as $key => $value )
 		{
@@ -85,13 +86,38 @@ class Crud extends \CodeIgniter\Entity
 
 	public function setVersion ( string $str ) : void
 	{
-		$this->attributes[ 'version' ] = preg_match( '/^(\d+\.)?(\d+\.)?(\*|\d+)$/', $str )
-		? $str
+		$isValid = preg_match( '/^(\d+\.)?(\d+\.)?(\*|\d+)$/', $str );
+
+		$this->attributes[ 'version' ] = $isValid ? $str
 		: config( '\BAPI\Config\Extension' )->getSetting( 'db.fill.version' );
 	}
 
+	/**
+	 * Format [ method, name ] to [ reduce_multiples( title ), url_title( slug ) ]
+	 */
 	public function setEvents( array $events ) : void
 	{
-		# events.method = title, .name = url_title( slug )
+		$data = [];
+
+		if ( ! empty( $events ) )
+		{
+			helper( 'text' );
+
+			foreach ( $events as $event )
+			{
+				if ( isset( $event[ 'method' ], $event[ 'name' ] ) )
+				{
+					$title = reduce_multiples( $event[ 'method' ], ' ', true );
+					$slug = url_title( $event[ 'name' ], '-', true );
+
+					$data[] = [
+						'title' => $title,
+						'slug' => $slug
+					];
+				}
+			}
+		}
+
+		$this->attributes[ 'events' ] = $data;
 	}
 }

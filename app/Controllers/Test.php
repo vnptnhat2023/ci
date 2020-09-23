@@ -445,6 +445,15 @@ class Test extends BaseController {
 		// echo '<pre>'; print_r($map); echo '</pre>';
 	}
 
+	public function event_map()
+	{
+		$map = \Ext\Curkit\Curkit::getMap();
+		$entity = new \BAPI\Entities\Extension\Crud( $map );
+
+		var_dump( $entity->toRawArray() );
+		// var_dump( \Ext\Curkit\Curkit::getMap() );
+	}
+
 	public function scan_more (string $class = 'Book' )
   {
 		helper( 'filesystem_helper' );
