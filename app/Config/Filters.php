@@ -10,7 +10,8 @@ class Filters extends BaseConfig
 		'csrf'     => \CodeIgniter\Filters\CSRF::class,
 		'toolbar'  => \CodeIgniter\Filters\DebugToolbar::class,
 		'honeypot' => \CodeIgniter\Filters\Honeypot::class,
-		'R2hAuth' => \BAPI\Filters\Red2HorseAuth::class,
+		'R2hPermission' => \BAPI\Filters\Red2HorseAuthPermission::class,
+		'R2hRole' => \BAPI\Filters\Red2HorseAuthRole::class,
 		'throttle' => \App\Filters\Throttle::class
 	];
 

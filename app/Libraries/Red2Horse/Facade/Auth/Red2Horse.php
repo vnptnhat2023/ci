@@ -110,10 +110,18 @@ class Red2Horse
 		return $this->message->getMessage( $addMore, $asObject );
 	}
 
-	public function hasPermission ( array $data ) : bool
+	public function withPermission ( array $data ) : bool
 	{
-		return Authorization::getInstance( $this->config )->hasPermission( $data );
-		// return Authorization::getInstance( $this->config )->hasPermissionGroup( $data );
+		return Authorization::getInstance( $this->config )
+		->withPermission( $data );
+		// return Authorization::getInstance( $this->config )
+		// ->withGroup( $data );
+	}
+
+	public function withRole ( string $role ) : bool
+	{
+		return Authorization::getInstance( $this->config )
+		->withRole( $role );
 	}
 
 	public function isLogged ( bool $withCookie = false ) : bool

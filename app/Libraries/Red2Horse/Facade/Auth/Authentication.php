@@ -280,6 +280,10 @@ class Authentication
 
 	public function isMultiLogin ( string $session_id ) : bool
 	{
+		if ( false === $this->config->useMultiLogin ) {
+			return true;
+		}
+
 		$pathFile = $this->config->sessionSavePath;
 		$pathFile .= '/' . $this->config->sessionCookieName . $session_id;
 		$date = $this->common->get_file_info( $pathFile, 'date' );

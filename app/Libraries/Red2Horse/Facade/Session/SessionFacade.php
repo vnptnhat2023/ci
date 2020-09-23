@@ -19,7 +19,7 @@ class SessionFacade implements SessionFacadeInterface
 
 	public function get ( string $key = null )
 	{
-		return $this->session->get( $key );
+		return $this->session->get( $key ) ?? null;
 	}
 
 	public function has (string $key): bool

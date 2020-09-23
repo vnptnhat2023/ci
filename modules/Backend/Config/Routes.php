@@ -20,14 +20,14 @@ $bapiPermData = [
 $bapiPermStr = implode( ',', $bapiPermData );
 $bapiOptions = [
 	'namespace' => '\BAPI\Controllers',
-	'filter' => "R2hAuth:{$bapiPermStr}"
+	'filter' => "R2hPermission:{$bapiPermStr}"
 ];
 
 $routes->group( 'backend', $bapiOptions, function ( RouteCollection $routes )
 {
 	$groupOptions = fn ( string $lastSegment, string $permission ) => [
 		'namespace' => "\\BAPI\\Controllers\\{$lastSegment}",
-		'filter' => "R2hAuth:{$permission}"
+		'filter' => "R2hPermission:{$permission}"
 	];
 
 	$routes->get( '/', 'Home::index' );

@@ -1,4 +1,5 @@
 <?php
+
 namespace BAPI\Filters;
 
 use CodeIgniter\Exceptions\PageNotFoundException;
@@ -8,9 +9,12 @@ use CodeIgniter\HTTP\RequestInterface as req;
 use CodeIgniter\HTTP\ResponseInterface as res;
 use Config\Services;
 
-class Red2HorseAuth implements FilterInterface
+class Red2HorseAuthPermission implements FilterInterface
 {
 
+	/**
+	 * Using for groupPermission only
+	 */
 	private function handleArg( array $arguments )
 	{
 		helper('text');
@@ -38,10 +42,14 @@ class Red2HorseAuth implements FilterInterface
   {
 		// die(var_dump($arguments));
 		// $args = $this->handleArg( (array) $arguments );
+		$isValid = Services::Red2HorseAuth()
+		->withPermission( ( array ) $arguments );
 
-    if ( false === Services::Red2HorseAuth()->withPermission( ( array ) $arguments ) ) {
+    if ( false === $isValid ) {
       throw PageNotFoundException::forPageNotFound();
-    }
+		}
+
+		// return $request;
   }
 
   public function after( req $request, res $response, $arguments = null )

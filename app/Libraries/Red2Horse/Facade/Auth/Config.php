@@ -13,6 +13,14 @@ class Config
 
 	/*
 	|--------------------------------------------------------------------------
+	| General
+	|--------------------------------------------------------------------------
+	*/
+	public bool $useRememberMe = true;
+	public bool $useMultiLogin = false;
+
+	/*
+	|--------------------------------------------------------------------------
 	| Session & Cookie & Throttle
 	|--------------------------------------------------------------------------
 	*/
@@ -188,6 +196,7 @@ class Config
 			$columns[] = 'user_group.id as group_id';
 			$columns[] = 'user_group.name as group_name';
 			$columns[] = 'user_group.permission';
+			$columns[] = 'user_group.role';
 		}
 
 		return implode( ',', $columns );

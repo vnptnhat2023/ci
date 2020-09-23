@@ -12,9 +12,22 @@ class Authorization
 
 	protected Config $config;
 
-	public function __construct( Config $config )
+	public function __construct ( Config $config )
 	{
 		$this->config = $config;
+	}
+
+	public function withRole ( string $roleName ) : bool
+	{
+		if ( true === $this->specialPermission() ) {
+			return true;
+		}
+
+		return in_array(
+			$roleName,
+			$this->getSessionData( 'role' ),
+			true
+		);
 	}
 
 	/**
@@ -22,24 +35,18 @@ class Authorization
 	 * @param array $data case empty array ( [] ) = 1st group = administrator
 	 * @return boolean
 	 */
-	public function hasPermission ( array $data ) : bool
+	public function withPermission ( array $data ) : bool
 	{
-		# --- Get current user permission
-		$userPerm = Authentication::getInstance( $this->config )
-		->getUserdata( 'permission' );
+		$userPerm = $this->getSessionData();
 
-		if ( ( false === $userPerm ) || empty( $userPerm ) )
-		return false;
+		if ( empty( $userPerm ) ) return false;
 
-		if ( in_array( 'null', $userPerm, true ) )
-		return false;
+		if ( in_array( 'null', $userPerm, true ) ) return false;
 
-		if ( in_array( 'all', $userPerm, true ) )
-		return true;
+		if ( in_array( 'all', $userPerm, true ) ) return true;
 
 		# --- Administrator (1st) group !
-		if ( empty( $data ) )
-		return true;
+		if ( empty( $data ) ) return true;
 
 		$routeGates = $this->config->userRouteGates;
 		$boolVar = true;
@@ -63,9 +70,9 @@ class Authorization
 	 * Use it late, because current CI4 not support filter on RestAPI method
 	 * @example Gate.Permission: extension.r,extension.c
 	 */
-	public function hasPermissionGroup ( array $dataFilters ) : bool
+	public function withGroup ( array $dataFilters ) : bool
 	{
-		$sessionPem = $this->getSessionPem();
+		$sessionPem = $this->getSessionData();
 
 		if ( empty( $sessionPem ) ) {
 			return false;
@@ -122,12 +129,11 @@ class Authorization
 		array $sessionPem
 	) : bool
 	{
-		$config = $this->config;
-
-		$AdminGate = $config->superAdminGate;
-		if ( isset( $sessionPem[ 0 ] ) && $sessionPem[ 0 ] === $AdminGate ) {
+		if ( true === $this->specialPermission() ) {
 			return true;
 		}
+
+		$config = $this->config;
 
 		$hasConfig = in_array( $gate, $config->userRouteGates, true );
 		$hasSession = array_key_exists( $gate, $sessionPem );
@@ -150,11 +156,23 @@ class Authorization
 		return false;
 	}
 
-	private function getSessionPem() : array
+	private function getSessionData ( $key = 'permission' ) : array
 	{
-		$userSsPerm = (array) Authentication::getInstance( $this->config )
-		->getUserdata( 'permission' );
+		$sessionData = ( array ) Authentication::getInstance( $this->config )
+		->getUserdata( $key );
 
-		return empty( $userSsPerm ) ? [] : $userSsPerm;
+		return empty( $sessionData ) ? [] : $sessionData;
+	}
+
+	private function specialPermission () : bool
+	{
+		$sessionPem = $this->getSessionData();
+		$AdminGate = $this->config->superAdminGate;
+
+		if ( isset( $sessionPem[ 0 ] ) && $sessionPem[ 0 ] === $AdminGate ) {
+			return true;
+		}
+
+		return false;
 	}
 }

@@ -56,6 +56,10 @@ class CookieHandle
 
 	public function cookieHandler () : bool
 	{
+		if ( false === $this->config->useRememberMe ) {
+			return false;
+		}
+
 		$userCookie = $this->cookie->get_cookie( $this->config->cookie );
 
 		if ( empty( $userCookie ) || ! is_string( $userCookie ) ) {
@@ -105,8 +109,7 @@ class CookieHandle
 		->isMultiLogin( $user[ 'session_id' ] );
 
 		if ( false === $isMultiLogin ) {
-			Message::getInstance( $this->config )
-			->denyMultiLogin( true, [], false );
+			Message::getInstance( $this->config )->denyMultiLogin( true, [], false );
 
 			return false;
 		}
@@ -135,8 +138,11 @@ class CookieHandle
 		string $logError = null
 	) : void
 	{
-		if ( $userId <= 0 )
-		{
+		if ( false === $this->config->useRememberMe ) {
+			return;
+		}
+
+		if ( $userId <= 0 ) {
 			$errArg = [ 'field' => 'user_id', 'param' => $userId ];
 
 			throw new \Exception(
@@ -146,6 +152,7 @@ class CookieHandle
 		}
 
 		$isAssocData = $this->common->isAssocArray( $updateData );
+
 		if ( ! empty( $updateData ) && false === $isAssocData ) {
 			throw new \Exception( $this->common->lang( 'Red2Horse.isAssoc' ), 1 );
 		}
