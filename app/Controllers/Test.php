@@ -121,9 +121,19 @@ class Test extends BaseController {
 
 	public function test()
 	{
-		$a = 'a1.2.3';
-		$b = preg_match( '/^(\d+\.)?(\d+\.)?(\*|\d+)$/', $a, $m );
-		var_dump( $b, $m );
+		$entity = (new \BAPI\Entities\Extension\Crud([
+			'events' => [
+				[
+					'method' => 'blah blah METHOD',
+					'name' => 'name of events'
+				],
+				[
+					'method' => 'one more METHOD',
+					'name' => 'one more of events'
+				]
+			]
+		]))->createFillable();
+		var_dump( $entity->toRawArray() );
 	}
 
 	public function ci_tl()
@@ -419,11 +429,18 @@ class Test extends BaseController {
 		echo $query;
 	}
 
-	public function scan_extension (string $path = EXTPATH, string $currExtension = 'Book' )
+	public function scan_extension (
+		string $path = EXTPATH,
+		string $currExtension = 'Book'
+	)
   {
 		#Validate
 		$validation = \Config\Services::validation();
-		$ruleName = \Config\Validation::modifier( config( 'Extension' )->rules( 'slug' ), 'extension name' );
+
+		$ruleName = \Config\Validation::modifier(
+			config( 'Extension' )->rules( 'slug' ),
+			'extension name'
+		);
 
 		if ( ! $validation->setRules( $ruleName )->run( [ 'slug' => $currExtension ] ) ) {
 			return [ 'error' => $validation->getErrors() ];
@@ -575,10 +592,14 @@ class Test extends BaseController {
 		$param2 = [ 'title' => 'Download C', 'slug' => 'download-c' ];
 
 		$a = handleExtension( 'curkit-map' );
-		echo '<pre style="margin: 50px 0">'; print_r( runExtension( 'curkit', $param1) ); echo '</pre>';
+		echo '<pre style="margin: 50px 0">';
+		print_r( runExtension( 'curkit', $param1 ) );
+		echo '</pre>';
 
 		$c = handleExtension( 'curkit-event' );
-		echo '<pre style="margin: 50px 0">'; print_r( runExtension( 'curkit', $param2) ); echo '</pre>';
+		echo '<pre style="margin: 50px 0">';
+		print_r( runExtension( 'curkit', $param2 ) );
+		echo '</pre>';
 
 		handleExtension( 'Book-event' );
 		echo '<pre style="margin: 50px 0">';

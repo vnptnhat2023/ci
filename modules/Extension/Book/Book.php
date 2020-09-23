@@ -1,7 +1,11 @@
 <?php
+
 namespace Ext\Book;
 
-use App\Libraries\Ext\{ AbstractExtension, ExtensionTrait };
+use App\Libraries\Ext\{
+	AbstractExtension, ExtensionTrait
+};
+
 use CodeIgniter\Router\RouteCollection;
 
 class Book extends AbstractExtension

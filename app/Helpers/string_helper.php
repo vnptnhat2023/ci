@@ -1,5 +1,7 @@
 <?php
 
+declare( strict_types = 1 );
+
 if ( ! function_exists('strHighestVersion') )
 {
   /**
@@ -33,4 +35,15 @@ if ( ! function_exists( 'strCamelCase' ) )
   {
     return str_replace( ' ', '', ucwords( str_replace( [ '-', '_' ], ' ', $str ) ) );
   }
+}
+
+if ( ! function_exists( 'strValidVersion' ) )
+{
+	/**
+	 * @return int|false
+	 */
+	function strValidVersion( string $str )
+	{
+		return preg_match( '/^(\d+\.)?(\d+\.)?(\*|\d+)$/', $str );
+	}
 }

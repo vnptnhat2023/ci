@@ -93,15 +93,18 @@ class Crud extends ResourceController
 	}
 
 	# ==========================================================
-	public function scan_more (string $class = 'Book' )
+	/**
+	 * @param string $class The name of the extension
+	 * @return mixed
+	 */
+	public function scan_more (string $class )
   {
-		helper( 'filesystem' );
-
 		$class = ucfirst( $class );
 
 		$classPath = EXTPATH . "{$class}/{$class}.php";
 		$class = "\\Ext\\{$class}\\{$class}";
 
+		helper( 'filesystem' );
 		$file = get_file_info( set_realpath( $classPath ), 'date' );
 
 		if ( ! empty( $file[ 'date' ] ) ) {

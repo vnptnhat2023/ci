@@ -136,11 +136,13 @@ function side_bar_unique ( array $array, array $array_search, array $colum_name 
   return array_values( $array );
 }
 
-function isAssoc( array $data ) : bool
+function isAssoc ( array $data ) : bool
 {
-	if ( array() === $data ) return false;
+	if ( [] === $data ) {
+		return false;
+	}
 
-  return array_keys($data) !== range( 0, count($data) - 1 );
+  return array_keys( $data ) !== range( 0, count($data) - 1 );
 }
 
 /**
@@ -148,7 +150,7 @@ function isAssoc( array $data ) : bool
  * @param set return
  * @return var $return
  */
-function isVar( & $var, $return = null )
+function isVar ( & $var, $return = null )
 {
   return $var ?? $return;
 }
@@ -157,11 +159,11 @@ if ( ! function_exists( 'array_key_first' ) )
 {
   function array_key_first ( array $array )
   {
-    if ( ! is_array( $array ) OR empty( $array ) ) {
+    if ( ! is_array( $array ) || empty( $array ) ) {
       return NULL;
     }
 
-    return key($array)[0];
+    return key( $array )[ 0 ];
   }
 }
 
@@ -169,7 +171,7 @@ if ( ! function_exists( 'array_key_last' ) )
 {
   function array_key_last ( array $array )
   {
-    if ( ! is_array( $array ) OR empty( $array ) ) {
+    if ( ! is_array( $array ) || empty( $array ) ) {
       return NULL;
     }
 
@@ -179,16 +181,15 @@ if ( ! function_exists( 'array_key_last' ) )
 
 if ( ! function_exists( 'array_key_first_last' ) )
 {
-  function array_key_first_last(array $array)
+  function array_key_first_last ( array $array )
   {
-    if ( ! is_array($array) OR empty($array) )
-    {
+    if ( ! is_array( $array ) || empty( $array ) ) {
       return NULL;
     }
 
     return [
-      'first' => $array[ array_key_first($array) ],
-      'last' => $array[ array_key_last($array) ]
+      'first' => $array[ array_key_first( $array ) ],
+      'last' => $array[ array_key_last( $array ) ]
     ];
   }
 }

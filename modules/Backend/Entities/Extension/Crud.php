@@ -6,22 +6,22 @@ namespace BAPI\Entities\Extension;
 
 class Crud extends \CodeIgniter\Entity
 {
-  protected $attributes = [];
-
-  protected $datamap = [
-		//
-	];
-
-	// public function updateFillable() : \Codeigniter\Entity; # maybe not needed
-
-  public function createFillable() : \Codeigniter\Entity
+  public function createFillable () : self
   {
 		$config = config( '\BAPI\Config\Extension' )
 		->getSetting( 'db.fill' );
 
 		foreach ( $config as $key => $value )
 		{
-			$this->attributes[ $key ] ??= $value[ $key ];
+			if ( $key === 'events' )
+			{
+				$events = $this->attributes[ 'events' ] ?? [];
+				$this->attributes[ 'events' ] = (array) $events;
+			}
+			else
+			{
+				$this->attributes[ $key ] ??= $value;
+			}
 		}
 
     return $this;
@@ -34,12 +34,20 @@ class Crud extends \CodeIgniter\Entity
 
 	public function setContact ( string $str ) : void
 	{
-		$this->attributes[ 'contact' ] = mb_strtolower( $str );
+		helper( 'text' );
+
+		$this->attributes[ 'contact' ] = mb_strtolower(
+			reduce_multiples( $str, ' ', true )
+		);
 	}
 
 	public function setCategoryName ( string $str ) : void
 	{
-		$this->attributes[ 'category_name' ] = mb_strtolower( $str );
+		helper( 'text' );
+
+		$this->attributes[ 'category_name' ] = mb_strtolower(
+			reduce_multiples( $str, ' ', true )
+		);
 	}
 
 	public function setCategorySlug ( string $str ) : void
@@ -55,12 +63,16 @@ class Crud extends \CodeIgniter\Entity
 
 	public function setDescription( string $str ) : void
 	{
-		$this->attributes[ 'description' ] = mb_strtolower( $str );
+		helper( 'text' );
+
+		$this->attributes[ 'description' ] = mb_strtolower(
+			reduce_multiples( $str, ' ', true )
+		);
 	}
 
   public function setTitle ( string $title ) : void
   {
-		helper( [ 'text' ] );
+		helper( 'text' );
 
     $this->attributes[ 'title' ] = mb_strtolower(
       reduce_multiples( $title, ' ', true )
@@ -86,33 +98,35 @@ class Crud extends \CodeIgniter\Entity
 
 	public function setVersion ( string $str ) : void
 	{
-		$isValid = preg_match( '/^(\d+\.)?(\d+\.)?(\*|\d+)$/', $str );
+		helper( 'string' );
 
-		$this->attributes[ 'version' ] = $isValid ? $str
+		$this->attributes[ 'version' ] = strValidVersion( $str )
+		? $str
 		: config( '\BAPI\Config\Extension' )->getSetting( 'db.fill.version' );
 	}
 
 	/**
-	 * Format [ method, name ] to [ reduce_multiples( title ), url_title( slug ) ]
+	 * Format [ method, name ] to [ reduce_multiples( title ),
+	 * url_title( slug ) ]
 	 */
-	public function setEvents( array $events ) : void
+	public function setEvents( $events ) : void
 	{
+		$events = (array) $events;
 		$data = [];
 
 		if ( ! empty( $events ) )
 		{
-			helper( 'text' );
+			helper( [ 'text', 'string' ] );
 
 			foreach ( $events as $event )
 			{
 				if ( isset( $event[ 'method' ], $event[ 'name' ] ) )
 				{
 					$title = reduce_multiples( $event[ 'method' ], ' ', true );
-					$slug = url_title( $event[ 'name' ], '-', true );
 
 					$data[] = [
-						'title' => $title,
-						'slug' => $slug
+						'title' => strCamelCase( $title ),
+						'slug' => url_title( $event[ 'name' ], '-', true )
 					];
 				}
 			}

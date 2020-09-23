@@ -17,9 +17,10 @@ class Crud extends \CodeIgniter\Entity
   /**
    * Fillable data for create
    */
-  public function createFillable() : \CodeIgniter\Entity
+  public function createFillable () : self
   {
-		$fillable = config('\BAPI\Config\Category')->getSetting('db.fill');
+		$fillable = config( '\BAPI\Config\Category' )
+		->getSetting( 'db.fill' );
 
     foreach ( $fillable as $field => $value ) {
       $this->attributes[ $field ] ??= $value;
@@ -28,51 +29,58 @@ class Crud extends \CodeIgniter\Entity
     return $this;
   }
 
-  protected function setSlug(string $slug)
+  protected function setSlug ( string $slug )
   {
-    helper( [ 'url', 'text' ] );
-    $slug = convert_accented_characters($slug);
-    $this->attributes['slug'] = url_title(
-      $slug, config('\BAPI\Config\Entities')::slugSeparate, true
+		helper( [ 'url', 'text' ] );
+
+		$slug = convert_accented_characters( $slug );
+
+    $this->attributes[ 'slug' ] = url_title(
+			$slug,
+			config( '\BAPI\Config\Entities' )::slugSeparate,
+			true
     );
   }
 
-  protected function setTitle(string $title)
+  protected function setTitle ( string $title )
   {
-    helper( [ 'text' ] );
-    $this->attributes['title'] = mb_strtolower(
+		helper( 'text' );
+
+    $this->attributes[ 'title' ] = mb_strtolower(
       reduce_multiples( $title, ' ', true )
     );
 
-    if ( empty( $this->attributes['slug'] ) ) {
-      $this->setSlug( $this->attributes['title'] );
+    if ( empty( $this->attributes[ 'slug' ] ) ) {
+      $this->setSlug( $this->attributes[ 'title' ] );
     }
   }
 
-  protected function setParentId($pid)
+  protected function setParentId ( $pid )
   {
-    $this->attributes['parent_id'] = (int) $pid;
+    $this->attributes[ 'parent_id' ] = (int) $pid;
   }
 
-  protected function setKeyword($str)
+  protected function setKeyword ( $str )
   {
-    helper('text');
-    $this->attributes['keyword'] = empty($str)
-    ? null : reduce_multiples( $str, ' ', true );
+		helper( 'text' );
+
+    $this->attributes[ 'keyword' ] = empty( $str )
+		? null
+		: reduce_multiples( $str, ' ', true );
   }
 
-  protected function setSort($sid)
+  protected function setSort ( $sid )
   {
-    $this->attributes['sort'] = (int) $sid;
+    $this->attributes[ 'sort' ] = (int) $sid;
   }
 
-  protected function setNameId($nameId)
+  protected function setNameId ( $nameId )
   {
-    $this->attributes['name_id'] = (int) $nameId;
+    $this->attributes[ 'name_id' ] = (int) $nameId;
   }
 
-  protected function setIcon($icon)
+  protected function setIcon ( $icon )
   {
-    $this->attributes['icon'] = strtolower($icon);
+    $this->attributes[ 'icon' ] = mb_strtolower( $icon );
   }
 }

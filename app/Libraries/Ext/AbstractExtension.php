@@ -33,7 +33,7 @@ abstract class AbstractExtension implements InterfaceExtension {
 	}
 
 	/**
-	 * @return static::$getInstance
+	 * @return static
 	 */
   final public static function getInstance ( $params = null ) : self
   {
