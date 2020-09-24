@@ -13,10 +13,7 @@ class Red2HorseAuthRole implements FilterInterface
 {
   public function before( req $request, $arguments = null )
   {
-		$isValid = Services::Red2HorseAuth()
-		->withRole( ( string ) $arguments );
-
-    if ( false === $isValid ) {
+    if ( false === Services::Red2HorseAuth()->withRole( ( array ) $arguments ) ) {
       throw PageNotFoundException::forPageNotFound();
 		}
 

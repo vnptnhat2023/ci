@@ -114,8 +114,8 @@ $routes->group( 'backend', $bapiOptions, function ( RouteCollection $routes )
 		fn ( RouteCollection $routes ) => $routes->get( '/', 'General::index')
 	);
 
+	// $groupOptions ( 'Extension', 'extension.r, extension.d, extension.u' ),
 	$routes->group( 'extension',
-		// $groupOptions ( 'Extension', 'extension.r, extension.d, extension.u' ),
 		$groupOptions ( 'Extension', 'extension' ),
 		function ( RouteCollection $routes ) {
 			$option = [ 'only' => 'index,create,delete', 'placeholder' => '(:num)' ];

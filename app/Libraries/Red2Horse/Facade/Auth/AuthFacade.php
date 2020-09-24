@@ -80,7 +80,7 @@ class AuthFacade implements AuthFacadeInterface
 		return $this->auth->withPermission( $data );
 	}
 
-	public function withRole ( string $role ) : bool
+	public function withRole ( array $role ) : bool
 	{
 		return $this->auth->withRole( $role );
 	}

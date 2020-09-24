@@ -17,17 +17,33 @@ class Authorization
 		$this->config = $config;
 	}
 
-	public function withRole ( string $roleName ) : bool
+	public function withRole ( array $needle, $or = true ) : bool
 	{
 		if ( true === $this->specialPermission() ) {
 			return true;
 		}
 
-		return in_array(
-			$roleName,
-			$this->getSessionData( 'role' ),
-			true
-		);
+		$roleSession = $this->getSessionData( 'role' );
+
+		if ( false === $or ) {
+			return $needle === $roleSession;
+		}
+
+		if ( true === $or ) {
+
+			$orCheck = false;
+
+			foreach ( $needle as $value )
+			{
+				if ( in_array( $value, $roleSession, true ) ) {
+					$orCheck = true;
+
+					break;
+				}
+			}
+
+			return $orCheck;
+		}
 	}
 
 	/**
