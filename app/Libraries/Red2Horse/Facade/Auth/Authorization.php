@@ -1,34 +1,51 @@
 <?php
 
+# --------------------------------------------------------------------------
+
 declare( strict_types = 1 );
 
 namespace App\Libraries\Red2Horse\Facade\Auth;
 
 use App\Libraries\Red2Horse\Mixins\TraitSingleton;
 
-# --- Todo: declare config::SUPER_ADMINISTRATOR_ROLE
+# --------------------------------------------------------------------------
+
 class Authorization
 {
+
 	use TraitSingleton;
 
 	protected Config $config;
 
+	/**
+	 * Current session user role
+	 */
 	protected array $userRole;
 
+	/**
+	 * Current session user permission
+	 */
 	protected array $userPermission;
+
+	# ------------------------------------------------------------------------
 
 	public function __construct ( Config $config )
 	{
 		$this->config = $config;
-
 		$this->userRole = $this->getSessionData( 'role' );
-
 		$this->userPermission = $this->getSessionData();
 	}
 
+	# ------------------------------------------------------------------------
+
+	# --- Todo: $or not working, cause db-role is a single column
 	public function withRole ( array $needle, $or = true ) : bool
 	{
-		if ( $this->specialPermission() ) {
+		if ( $this->isInvalid() ) {
+			return false;
+		}
+
+		if ( $this->isAdmin() ) {
 			return true;
 		}
 
@@ -36,19 +53,31 @@ class Authorization
 			return $needle === $this->userRole;
 		}
 
-		$orCheck = false;
+		$isValid = false;
 
 		foreach ( $needle as $value )
 		{
+			// if ( is_string( $value ) && $value[0] === '!' ) {
+			// 	$value = str_replace( [ '!', 'not' ], '', $value );
+
+			// 	if ( in_array( $value, $this->userRole, true ) )
+			// 	{
+			// 		$isValid = false;
+			// 		break;
+			// 	}
+			// }
+
 			if ( in_array( $value, $this->userRole, true ) ) {
-				$orCheck = true;
+				$isValid = true;
 
 				break;
 			}
 		}
 
-		return $orCheck;
+		return $isValid;
 	}
+
+	# ------------------------------------------------------------------------
 
 	/**
 	 * The first check the current user session, * the next will be $data parameter
@@ -58,11 +87,15 @@ class Authorization
 	 */
 	public function withPermission ( array $filters, bool $or = true ) : bool
 	{
-		if ( $this->specialPermission() ) {
+		if ( $this->isInvalid() ) {
+			return false;
+		}
+
+		if ( $this->isAdmin() ) {
 			return true;
 		}
 
-		if ( empty( $filters ) || empty( $this->userPermission ) ) {
+		if ( empty( $filters ) ) {
 			return false;
 		}
 
@@ -102,18 +135,20 @@ class Authorization
 		return $boolVar;
 	}
 
+	# ------------------------------------------------------------------------
+
 	/**
 	 * Use it late, because current CI4 not support filter on RestAPI method
 	 * @example Gate.Permission: extension.r,extension.c
 	 */
 	public function withGroup ( array $dataFilters ) : bool
 	{
-		if ( $this->specialPermission() ) {
-			return true;
+		if ( $this->isInvalid() ) {
+			return false;
 		}
 
-		if ( empty( $this->userPermission ) ) {
-			return false;
+		if ( $this->isAdmin() ) {
+			return true;
 		}
 
 		$boolVar = true;
@@ -161,6 +196,9 @@ class Authorization
 		return $boolVar;
 	}
 
+
+	# ------------------------------------------------------------------------
+
 	private function isValidPerm (
 		string $gate,
 		array $filterPem,
@@ -198,11 +236,17 @@ class Authorization
 		return empty( $sessionData ) ? [] : $sessionData;
 	}
 
-	private function specialPermission () : bool
+	private function isAdmin () : bool
 	{
-		$isValid = isset( $this->userPermission[ 0 ] ) &&
-		( $this->userPermission[ 0 ] === $this->config->superAdminGate );
+		$isAdmin = ( $this->userRole === $this->config->adminRole ) ||
+		isset( $this->userPermission[ 0 ] ) &&
+		( $this->userPermission[ 0 ] === $this->config->adminGate );
 
-		return ( bool ) $isValid;
+		return ( bool ) $isAdmin;
+	}
+
+	private function isInvalid() : bool
+	{
+		return empty( $this->userRole[ 0] ) || empty( $this->userPermission[ 0] );
 	}
 }

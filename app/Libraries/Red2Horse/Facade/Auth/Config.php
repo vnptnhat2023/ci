@@ -51,8 +51,9 @@ class Config
 	*/
 	public array $userRouteGates;
 	public array $userPermission;
-	public string $superAdminGate;
-	public string $superAdminPermission;
+	public string $adminGate;
+	public string $adminPermission;
+	public string $adminRole;
 
 	/*
 	|--------------------------------------------------------------------------
@@ -97,8 +98,9 @@ class Config
 
 		$this->userRouteGates = $facade->userRouteGates();
 		$this->userPermission = $facade->userPermission();
-		$this->superAdminGate = $facade::SUPER_ADMINISTRATOR_GATE;
-		$this->superAdminPermission = $facade::SUPER_ADMINISTRATOR_PERMISSION;
+		$this->adminGate = $facade::ADMINISTRATOR_GATE;
+		$this->adminPermission = $facade::ADMINISTRATOR_PERMISSION;
+		$this->adminRole = $facade::ADMINISTRATOR_ROLE;
 
 		$this->sessionSavePath = $facade->sessionSavePath();
 		$this->sessionCookieName = $facade->sessionCookieName();

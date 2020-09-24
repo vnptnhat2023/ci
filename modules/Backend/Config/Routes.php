@@ -6,23 +6,23 @@ use CodeIgniter\Router\RouteCollection;
 $routes = Services::routes();
 # Option array[ controller, placeholder, only, except, websafe ]
 
-$bapiPermData = [
-	'post',
-	'page',
-	'category',
-	'general_group',
-	'general_item',
-	'general_relation',
-	'general_theme',
-	'extension'
-];
+// $bapiPermData = [
+// 	'post',
+// 	'page',
+// 	'category',
+// 	'general_group',
+// 	'general_item',
+// 	'general_relation',
+// 	'general_theme',
+// 	'extension'
+// ];
 
-$bapiPermStr = implode( ',', $bapiPermData );
+// $bapiPermStr = implode( ',', $bapiPermData );
 $bapiOptions = [
 	'namespace' => '\BAPI\Controllers',
 	// 'filter' => "r2h_permission:{$bapiPermStr}"
 	// 'filter' => "r2h_role:unknown", 'r2h_permission:testing'
-	'filter' => 'r2h_role: administrator'
+	'filter' => 'r2h_role: unknown'
 ];
 
 $routes->group( 'backend', $bapiOptions, function ( RouteCollection $routes )
@@ -30,7 +30,7 @@ $routes->group( 'backend', $bapiOptions, function ( RouteCollection $routes )
 	$groupOptions = fn ( string $lastSegment, string $permission ) => [
 		'namespace' => "\\BAPI\\Controllers\\{$lastSegment}",
 		// 'filter' => "r2h_permission:{$permission}"
-		'filter' => 'r2h_role:administrator'
+		'filter' => 'r2h_role: administrator'
 	];
 
 	$routes->get( '/', 'Home::index' );
