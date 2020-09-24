@@ -80,9 +80,9 @@ class AuthFacade implements AuthFacadeInterface
 		return $this->auth->withPermission( $data );
 	}
 
-	public function withRole ( array $role ) : bool
+	public function withRole ( array $role, bool $or = true ) : bool
 	{
-		return $this->auth->withRole( $role );
+		return $this->auth->withRole( $role, $or );
 	}
 
 	public function regenerateCookie () : void

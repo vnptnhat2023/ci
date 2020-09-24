@@ -11,16 +11,21 @@ use Config\Services;
 
 class Red2HorseAuthRole implements FilterInterface
 {
-  public function before( req $request, $arguments = null )
+  public function before( req $request, $args = null )
   {
-    if ( false === Services::Red2HorseAuth()->withRole( ( array ) $arguments ) ) {
+		$isValid = Services::Red2HorseAuth()->withRole(
+			( array ) $args,
+			false
+		);
+
+    if ( false === $isValid ) {
       throw PageNotFoundException::forPageNotFound();
 		}
 
 		// return $request;
   }
 
-  public function after( req $request, res $response, $arguments = null )
+  public function after( req $request, res $response, $args = null )
   {
   }
 

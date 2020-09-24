@@ -118,9 +118,9 @@ class Red2Horse
 		// ->withGroup( $data );
 	}
 
-	public function withRole ( array $role ) : bool
+	public function withRole ( array $role, bool $or = true ) : bool
 	{
-		return Authorization::getInstance( $this->config )->withRole( $role );
+		return Authorization::getInstance( $this->config )->withRole( $role, $or );
 	}
 
 	public function isLogged ( bool $withCookie = false ) : bool
