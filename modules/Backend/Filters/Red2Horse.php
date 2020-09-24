@@ -9,17 +9,21 @@ use CodeIgniter\HTTP\RequestInterface as req;
 use CodeIgniter\HTTP\ResponseInterface as res;
 use Config\Services;
 
-class Red2HorseAuthRole implements FilterInterface
+class Red2Horse implements FilterInterface
 {
   public function before( req $request, $args = null )
   {
-		$isValid = Services::Red2HorseAuth()->withRole(
-			( array ) $args,
-			false
-		);
+		$auth = Services::Red2HorseAuth();
 
-    if ( false === $isValid ) {
-      throw PageNotFoundException::forPageNotFound();
+		$isValidRole = $auth->withRole( ( array ) $args );
+
+		if ( false === $isValidRole )
+		{
+			$isValidPem = $auth->withPermission( ( array ) $args );
+
+			if ( false === $isValidPem ) {
+				throw PageNotFoundException::forPageNotFound();
+			}
 		}
   }
 

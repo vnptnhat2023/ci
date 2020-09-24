@@ -46,7 +46,7 @@ interface AuthFacadeInterface
 	 * @param array $data empty = ( 1st group === administrator group )
 	 * @return boolean
 	 */
-	public function withPermission ( array $data ) : bool;
+	public function withPermission ( array $data, bool $or = true ) : bool;
 
 	public function withRole ( array $role, bool $or = true ) : bool;
 

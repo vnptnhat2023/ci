@@ -40,16 +40,12 @@ class Red2HorseAuthPermission implements FilterInterface
 
   public function before( req $request, $arguments = null )
   {
-		// die(var_dump($arguments));
-		// $args = $this->handleArg( (array) $arguments );
 		$isValid = Services::Red2HorseAuth()
 		->withPermission( ( array ) $arguments );
 
     if ( false === $isValid ) {
       throw PageNotFoundException::forPageNotFound();
 		}
-
-		// return $request;
   }
 
   public function after( req $request, res $response, $arguments = null )

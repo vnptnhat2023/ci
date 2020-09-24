@@ -110,10 +110,10 @@ class Red2Horse
 		return $this->message->getMessage( $addMore, $asObject );
 	}
 
-	public function withPermission ( array $data ) : bool
+	public function withPermission ( array $data, bool $or = true ) : bool
 	{
 		return Authorization::getInstance( $this->config )
-		->withPermission( $data );
+		->withPermission( $data, $or );
 		// return Authorization::getInstance( $this->config )
 		// ->withGroup( $data );
 	}

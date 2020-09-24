@@ -19,18 +19,20 @@ class Authorization
 
 	public function withRole ( array $needle, $or = true ) : bool
 	{
-		if ( true === $this->specialPermission() ) {
+		if ( true === $this->specialPermission() )
+		{
 			return true;
 		}
 
 		$roleSession = $this->getSessionData( 'role' );
 
-		if ( false === $or ) {
+		if ( false === $or )
+		{
 			return $needle === $roleSession;
 		}
 
-		if ( true === $or ) {
-
+		if ( true === $or )
+		{
 			$orCheck = false;
 
 			foreach ( $needle as $value )
@@ -49,33 +51,48 @@ class Authorization
 	/**
 	 * The first check the current user session, * the next will be $data parameter
 	 * @param array $data case empty array ( [] ) = 1st group = administrator
+	 * @param bool $or when $or is false, will be check === permission, true check in_array
 	 * @return boolean
 	 */
-	public function withPermission ( array $data ) : bool
+	public function withPermission ( array $filters, bool $or = true ) : bool
 	{
-		$userPerm = $this->getSessionData();
+		$sessionPerm = $this->getSessionData();
 
-		if ( empty( $userPerm ) ) return false;
+		if ( empty( $sessionPerm ) || empty( $filters ) )
+		{
+			return false;
+		}
 
-		if ( in_array( 'null', $userPerm, true ) ) return false;
-
-		if ( in_array( 'all', $userPerm, true ) ) return true;
-
-		# --- Administrator (1st) group !
-		if ( empty( $data ) ) return true;
+		if ( in_array( 'all', $sessionPerm, true ) )
+		{
+			return true;
+		}
 
 		$routeGates = $this->config->userRouteGates;
-		$boolVar = true;
 
-		foreach ( $data as $route )
+		$inCfPerm = fn( $filter ) : bool => in_array( $filter, $routeGates, true );
+		$inUserPerm = fn( $filter ) : bool => in_array( $filter, $sessionPerm, true );
+
+		$boolVar = true !== $or;
+
+		if ( true === $or )
 		{
-			$inCfPerm = in_array( $route, $routeGates, true );
-			$inUserPerm = in_array( $route, $userPerm, true );
-
-			if ( false === $inCfPerm || false === $inUserPerm )
+			foreach ( $filters as $filter )
 			{
-				$boolVar = false;
-				break;
+				if ( true === $inCfPerm( $filter ) && true === $inUserPerm( $filter ) ) {
+					$boolVar = true;
+					break;
+				}
+			}
+		}
+		else
+		{
+			foreach ( $filters as $filter )
+			{
+				if ( false === $inCfPerm( $filter ) || false === $inUserPerm( $filter ) ) {
+					$boolVar = false;
+					break;
+				}
 			}
 		}
 
