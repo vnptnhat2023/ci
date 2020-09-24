@@ -1,11 +1,5 @@
 <?php
 
-# --------------------------------------------------------------------------
-# --- Todo: [ permission: 'all', null === empty, c, r, u, d ] => [ route ]
-# --- Case: route[ get, post, delete, put, patch , ... ??? ]
-# --- Case: c => [ page, post, ... ]
-# --- Case: c => [ 'all' ] || []
-# --------------------------------------------------------------------------
 declare( strict_types = 1 );
 
 namespace App\Libraries\Red2Horse\Facade\Auth;
@@ -112,10 +106,13 @@ class Red2Horse
 
 	public function withPermission ( array $data, bool $or = true ) : bool
 	{
-		return Authorization::getInstance( $this->config )
-		->withPermission( $data, $or );
-		// return Authorization::getInstance( $this->config )
-		// ->withGroup( $data );
+		return Authorization::getInstance( $this->config )->withPermission( $data, $or );
+	}
+
+	# --- Todo: Waiting for CI4 have multi filter on single route
+	public function withGroup( array $data ) : bool
+	{
+		return Authorization::getInstance( $this->config )->withGroup( $data );
 	}
 
 	public function withRole ( array $role, bool $or = true ) : bool

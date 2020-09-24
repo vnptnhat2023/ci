@@ -6,46 +6,48 @@ namespace App\Libraries\Red2Horse\Facade\Auth;
 
 use App\Libraries\Red2Horse\Mixins\TraitSingleton;
 
+# --- Todo: declare config::SUPER_ADMINISTRATOR_ROLE
 class Authorization
 {
 	use TraitSingleton;
 
 	protected Config $config;
 
+	protected array $userRole;
+
+	protected array $userPermission;
+
 	public function __construct ( Config $config )
 	{
 		$this->config = $config;
+
+		$this->userRole = $this->getSessionData( 'role' );
+
+		$this->userPermission = $this->getSessionData();
 	}
 
 	public function withRole ( array $needle, $or = true ) : bool
 	{
-		if ( true === $this->specialPermission() )
-		{
+		if ( $this->specialPermission() ) {
 			return true;
 		}
 
-		$roleSession = $this->getSessionData( 'role' );
-
-		if ( false === $or )
-		{
-			return $needle === $roleSession;
+		if ( ! $or ) {
+			return $needle === $this->userRole;
 		}
 
-		if ( true === $or )
+		$orCheck = false;
+
+		foreach ( $needle as $value )
 		{
-			$orCheck = false;
+			if ( in_array( $value, $this->userRole, true ) ) {
+				$orCheck = true;
 
-			foreach ( $needle as $value )
-			{
-				if ( in_array( $value, $roleSession, true ) ) {
-					$orCheck = true;
-
-					break;
-				}
+				break;
 			}
-
-			return $orCheck;
 		}
+
+		return $orCheck;
 	}
 
 	/**
@@ -56,26 +58,27 @@ class Authorization
 	 */
 	public function withPermission ( array $filters, bool $or = true ) : bool
 	{
-		$sessionPerm = $this->getSessionData();
-
-		if ( empty( $sessionPerm ) || empty( $filters ) )
-		{
-			return false;
+		if ( $this->specialPermission() ) {
+			return true;
 		}
 
-		if ( in_array( 'all', $sessionPerm, true ) )
-		{
-			return true;
+		if ( empty( $filters ) || empty( $this->userPermission ) ) {
+			return false;
 		}
 
 		$routeGates = $this->config->userRouteGates;
 
-		$inCfPerm = fn( $filter ) : bool => in_array( $filter, $routeGates, true );
-		$inUserPerm = fn( $filter ) : bool => in_array( $filter, $sessionPerm, true );
+		$inCfPerm = fn( $filter ) : bool => in_array(
+			$filter, $routeGates, true
+		);
+
+		$inUserPerm = fn( $filter ) : bool => in_array(
+			$filter, $this->userPermission, true
+		);
 
 		$boolVar = true !== $or;
 
-		if ( true === $or )
+		if ( $or )
 		{
 			foreach ( $filters as $filter )
 			{
@@ -105,9 +108,11 @@ class Authorization
 	 */
 	public function withGroup ( array $dataFilters ) : bool
 	{
-		$sessionPem = $this->getSessionData();
+		if ( $this->specialPermission() ) {
+			return true;
+		}
 
-		if ( empty( $sessionPem ) ) {
+		if ( empty( $this->userPermission ) ) {
 			return false;
 		}
 
@@ -123,7 +128,7 @@ class Authorization
 			$checkGate = $this->isValidPerm(
 				(string) $gate,
 				$filterPem,
-				$sessionPem
+				$this->userPermission
 			);
 
 			if ( false === $checkGate ) {
@@ -131,7 +136,7 @@ class Authorization
 				die(var_dump([
 					'gate' => $gate,
 					'filterPem' => $filterPem,
-					'sessionPem' => $sessionPem
+					'sessionPem' => $this->userPermission
 				]));
 				$boolVar = false;
 				break;
@@ -162,10 +167,6 @@ class Authorization
 		array $sessionPem
 	) : bool
 	{
-		if ( true === $this->specialPermission() ) {
-			return true;
-		}
-
 		$config = $this->config;
 
 		$hasConfig = in_array( $gate, $config->userRouteGates, true );
@@ -199,13 +200,9 @@ class Authorization
 
 	private function specialPermission () : bool
 	{
-		$sessionPem = $this->getSessionData();
-		$AdminGate = $this->config->superAdminGate;
+		$isValid = isset( $this->userPermission[ 0 ] ) &&
+		( $this->userPermission[ 0 ] === $this->config->superAdminGate );
 
-		if ( isset( $sessionPem[ 0 ] ) && $sessionPem[ 0 ] === $AdminGate ) {
-			return true;
-		}
-
-		return false;
+		return ( bool ) $isValid;
 	}
 }

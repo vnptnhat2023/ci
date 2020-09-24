@@ -22,7 +22,7 @@ $bapiOptions = [
 	'namespace' => '\BAPI\Controllers',
 	// 'filter' => "r2h_permission:{$bapiPermStr}"
 	// 'filter' => "r2h_role:unknown", 'r2h_permission:testing'
-	'filter' => 'r2h:testing,anotherWrong,extension'
+	'filter' => 'r2h_role: administrator'
 ];
 
 $routes->group( 'backend', $bapiOptions, function ( RouteCollection $routes )
@@ -30,7 +30,7 @@ $routes->group( 'backend', $bapiOptions, function ( RouteCollection $routes )
 	$groupOptions = fn ( string $lastSegment, string $permission ) => [
 		'namespace' => "\\BAPI\\Controllers\\{$lastSegment}",
 		// 'filter' => "r2h_permission:{$permission}"
-		'filter' => "r2h_role:unknown", 'r2h_permission:testing'
+		'filter' => 'r2h_role:administrator'
 	];
 
 	$routes->get( '/', 'Home::index' );
