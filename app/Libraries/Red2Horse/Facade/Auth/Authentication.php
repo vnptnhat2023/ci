@@ -278,7 +278,7 @@ class Authentication
 		);
 	}
 
-	public function isMultiLogin ( string $session_id ) : bool
+	public function isMultiLogin ( ?string $session_id = null ) : bool
 	{
 		if ( false === $this->config->useMultiLogin ) {
 			return true;

@@ -17,6 +17,8 @@ class Authorization
 
 	protected Config $config;
 
+	protected Authentication $authentication;
+
 	/**
 	 * Current session user role
 	 */
@@ -32,40 +34,55 @@ class Authorization
 	public function __construct ( Config $config )
 	{
 		$this->config = $config;
+		$this->authentication = Authentication::getInstance( $this->config );
+
 		$this->sessionRole = $this->getSessionData( 'role' );
-		$this->sessionPermission = $this->getSessionData( 'Permission' );
+		$this->sessionPermission = $this->getSessionData( 'permission' );
 	}
 
 	# ------------------------------------------------------------------------
 
-	public function withRole ( array $needle ) : bool
+	/**
+	 * @param array $filters
+	 * @param bool $onlyRole when false will be do except
+	 * @return bool
+	 */
+	public function withRole ( array $filters, $only = 'wtf?' ) : bool
 	{
 		if ( $this->isInvalid() ) {
 			return false;
 		}
 
-		if ( $this->isAdmin() ) {
-			return true;
-		}
-
+		// if ( $this->isAdmin() ) {
+		// 	return true;
+		// }
+		dd($only);
 		$isValid = false;
 
-		foreach ( $needle as $value )
-		{
-			# --- Except role
-			// if ( is_string( $value ) && $value[0] === '!' ) {
-			// 	$value = str_replace( [ '!', 'not' ], '', $value );
+		$checked = [];
 
-			// 	if ( in_array( $value, $this->sessionRole, true ) )
-			// 	{
-			// 		$isValid = false;
-			// 		break;
-			// 	}
+		foreach ( $filters as $filter )
+		{
+			$filter = str_replace( ' ', '', ( string ) $filter );
+
+			if ( in_array( $filter, $checked, true ) ) {
+				continue;
+			}
+
+			// if ( $filter[ 0 ] === '!' )
+			// {
+			// 	# saved not, check them for all other filter ?
+			// 	$filterExcept = str_replace( [ '!', 'NOT' ], '', $filter );
+			// 	$checked[] = $filterExcept;
+
+			// 	continue;
 			// }
 
-			if ( in_array( $value, $this->sessionRole, true ) ) {
-				$isValid = true;
+			if ( in_array( $filter, $this->sessionRole, true ) )
+			{
+				$checked[] = $filter;
 
+				$isValid = ! $isValid;
 				break;
 			}
 		}
@@ -157,7 +174,7 @@ class Authorization
 			}
 
 			$checkGate = $this->isValidPerm(
-				(string) $gate,
+				( string ) $gate,
 				$filterPem,
 				$this->sessionPermission
 			);
@@ -226,8 +243,7 @@ class Authorization
 
 	private function getSessionData ( $key = 'permission' ) : array
 	{
-		$sessionData = ( array ) Authentication::getInstance( $this->config )
-		->getUserdata( $key );
+		$sessionData = ( array ) $this->authentication->getUserdata( $key );
 
 		return empty( $sessionData ) ? [] : $sessionData;
 	}

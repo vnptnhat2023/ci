@@ -59,14 +59,14 @@ class AuthAdapter implements AuthAdapterInterface
 		return $this->auth->getMessage( $addMore );
 	}
 
-	public function withPermission ( array $data ) : bool
+	public function withPermission ( array $data, bool $or = true ) : bool
 	{
-		return $this->auth->withPermission( $data );
+		return $this->auth->withPermission( $data, $or );
 	}
 
-	public function withRole ( array $role, bool $or = true ) : bool
+	public function withRole ( array $role ) : bool
 	{
-		return $this->auth->withRole( $role, $or );
+		return $this->auth->withRole( $role );
 	}
 
 	public function regenerateCookie () : void
