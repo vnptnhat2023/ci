@@ -7,11 +7,6 @@ namespace App\Libraries\Red2Horse\Facade\Config;
 
 use App\Libraries\Red2Horse\Mixins\TraitSingleton;
 
-// use App\Libraries\Red2Horse\Facade\Auth\{
-// 	AuthComponentBuilder,
-// 	Config
-// };
-
 # -------------------------------------------------------------------------
 
 class ConfigFacade implements ConfigFacadeInterface
@@ -28,11 +23,15 @@ class ConfigFacade implements ConfigFacadeInterface
 	public const ADMINISTRATOR_PERMISSION = 'a';
 	public const ADMINISTRATOR_ROLE = 'administrator';
 
+	public const MEMBER_ROLE = 'member';
+
 	# --- Todo: Thinking more [ STR token => 'all' || 'all' => STR token ]
 	// public const SUPER_ADMINISTRATOR_TOKEN = 'random_bytes()';
 
 	# --- User add more feature: page, post, ...
-	protected array $userRouteGates = [];
+	protected array $userRouteGates = [
+		self::ADMINISTRATOR_GATE
+	];
 
 	# --- a: all, c: create, r: read, u: update, d: delete
 	protected array $userPermission = [
@@ -42,6 +41,12 @@ class ConfigFacade implements ConfigFacadeInterface
 		'u',
 		'd'
 	];
+
+	protected array $userRole = [
+		self::ADMINISTRATOR_ROLE,
+		self::MEMBER_ROLE
+	];
+
 
 	# --- Todo: 'post' => ['create'] => [ 'file', 'text', ... ]
 	# --- Todo: 'post' => ['delete'] => [ 'text' ]
@@ -62,30 +67,43 @@ class ConfigFacade implements ConfigFacadeInterface
 
 	# -------------------------------------------------------------------------
 
-	public function userPermission () : array
+	/**
+	 * @param string $name userPermission|userRouteGates|userRole
+	 */
+	private function getConfigUser ( string $prop = 'userPermission' ) : array
 	{
-		$data = $this->config->userPermission();
+		$data = $this->config->$prop();
 
 		if ( ! empty( $data ) )
 		{
-			$data = array_diff( array_values( $data ), $this->userPermission );
-			$this->userPermission = array_merge( $this->userPermission, $data );
+			$data = array_diff( array_values( $data ), $this->$prop );
+			$newData = array_merge( $this->$prop, $data );
+
+			return $newData;
 		}
+
+		return $this->$prop;
+	}
+
+	public function userPermission () : array
+	{
+		$this->userPermission = $this->getConfigUser( 'userPermission' );
 
 		return $this->userPermission;
 	}
 
 	public function userRouteGates() : array
 	{
-		$data = $this->config->userRouteGates();
-
-		if ( ! empty( $data ) )
-		{
-			$data = array_diff( array_values( $data ), $this->userRouteGates );
-			$this->userRouteGates = array_merge( $this->userRouteGates, $data );
-		}
+		$this->userRouteGates = $this->getConfigUser( 'userRouteGates' );
 
 		return $this->userRouteGates;
+	}
+
+	public function userRole () : array
+	{
+		$this->userRole = $this->getConfigUser( 'userRole' );
+
+		return $this->userRole;
 	}
 
 	public function sessionCookieName ( ?string $name = null ) : string

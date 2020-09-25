@@ -51,6 +51,8 @@ class Config
 	*/
 	public array $userRouteGates;
 	public array $userPermission;
+	public array $userRole;
+
 	public string $adminGate;
 	public string $adminPermission;
 	public string $adminRole;
@@ -96,12 +98,16 @@ class Config
 
 		$facade = ConfigFacade::getInstance( new $adapter );
 
+		# --- Authorization
 		$this->userRouteGates = $facade->userRouteGates();
 		$this->userPermission = $facade->userPermission();
+		$this->userRole = $facade->userRole();
+
 		$this->adminGate = $facade::ADMINISTRATOR_GATE;
 		$this->adminPermission = $facade::ADMINISTRATOR_PERMISSION;
 		$this->adminRole = $facade::ADMINISTRATOR_ROLE;
 
+		# --- Session
 		$this->sessionSavePath = $facade->sessionSavePath();
 		$this->sessionCookieName = $facade->sessionCookieName();
 		$this->sessionExpiration = $facade->sessionExpiration();

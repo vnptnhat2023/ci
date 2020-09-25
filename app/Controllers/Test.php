@@ -121,6 +121,12 @@ class Test extends BaseController {
 
 	public function test()
 	{
+		$facade = ConfigFacade::getInstance( new ConfigAdapter() );
+		var_dump( $facade->userRouteGates() );
+	}
+
+	public function entity_extension()
+	{
 		$entity = (new \BAPI\Entities\Extension\Crud([
 			'events' => [
 				[

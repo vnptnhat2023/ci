@@ -16,6 +16,7 @@ class ConfigAdapter implements ConfigAdapterInterface
 
 	protected array $userPermission = [];
 	protected array $userRouteGates = [];
+	protected array $userRole = [];
 
 	# -------------------------------------------------------------------------
 
@@ -29,6 +30,8 @@ class ConfigAdapter implements ConfigAdapterInterface
 		$this->sessionTimeToUpdate = $appConfig->sessionTimeToUpdate;
 
 		$this->userRouteGates = $appConfig->userRouteGates;
+		$this->userPermission = $appConfig->userPermission;
+		$this->userRole = $appConfig->userRole;
 	}
 
 	# -------------------------------------------------------------------------
@@ -84,5 +87,14 @@ class ConfigAdapter implements ConfigAdapterInterface
 		}
 
 		return $this->userRouteGates;
+	}
+
+	public function userRole ( array $role = [] ) : array
+	{
+		if ( ! empty( $role ) ) {
+			$this->userRole += array_values( $role );
+		}
+
+		return $this->userRole;
 	}
 }

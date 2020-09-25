@@ -37,6 +37,8 @@ class App extends BaseConfig
 		'post',
 		'theme'
 	];
+	public array $userPermission = [];
+	public array $userRole = [];
 
 	/*
 	|--------------------------------------------------------------------------

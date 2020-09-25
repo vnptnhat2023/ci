@@ -48,7 +48,7 @@ interface AuthFacadeInterface
 	 */
 	public function withPermission ( array $data, bool $or = true ) : bool;
 
-	public function withRole ( array $role, bool $or = true ) : bool;
+	public function withRole ( array $role ) : bool;
 
 	/**
 	 * Check cookie & session: when have cookie will set session

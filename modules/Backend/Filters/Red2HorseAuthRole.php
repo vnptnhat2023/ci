@@ -13,9 +13,6 @@ class Red2HorseAuthRole implements FilterInterface
 {
   public function before( req $request, $args = null )
   {
-		// var_dump( $args[0][0] === '!' );
-		// die;
-		// $isValid = Services::Red2HorseAuth()->withRole( ( array ) $args, false );
 		$isValid = Services::Red2HorseAuth()->withRole( ( array ) $args );
 
     if ( false === $isValid ) {

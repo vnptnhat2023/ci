@@ -20,26 +20,25 @@ class Authorization
 	/**
 	 * Current session user role
 	 */
-	protected array $userRole;
+	protected array $sessionRole;
 
 	/**
 	 * Current session user permission
 	 */
-	protected array $userPermission;
+	protected array $sessionPermission;
 
 	# ------------------------------------------------------------------------
 
 	public function __construct ( Config $config )
 	{
 		$this->config = $config;
-		$this->userRole = $this->getSessionData( 'role' );
-		$this->userPermission = $this->getSessionData();
+		$this->sessionRole = $this->getSessionData( 'role' );
+		$this->sessionPermission = $this->getSessionData( 'Permission' );
 	}
 
 	# ------------------------------------------------------------------------
 
-	# --- Todo: $or not working, cause db-role is a single column
-	public function withRole ( array $needle, $or = true ) : bool
+	public function withRole ( array $needle ) : bool
 	{
 		if ( $this->isInvalid() ) {
 			return false;
@@ -49,25 +48,22 @@ class Authorization
 			return true;
 		}
 
-		if ( ! $or ) {
-			return $needle === $this->userRole;
-		}
-
 		$isValid = false;
 
 		foreach ( $needle as $value )
 		{
+			# --- Except role
 			// if ( is_string( $value ) && $value[0] === '!' ) {
 			// 	$value = str_replace( [ '!', 'not' ], '', $value );
 
-			// 	if ( in_array( $value, $this->userRole, true ) )
+			// 	if ( in_array( $value, $this->sessionRole, true ) )
 			// 	{
 			// 		$isValid = false;
 			// 		break;
 			// 	}
 			// }
 
-			if ( in_array( $value, $this->userRole, true ) ) {
+			if ( in_array( $value, $this->sessionRole, true ) ) {
 				$isValid = true;
 
 				break;
@@ -106,7 +102,7 @@ class Authorization
 		);
 
 		$inUserPerm = fn( $filter ) : bool => in_array(
-			$filter, $this->userPermission, true
+			$filter, $this->sessionPermission, true
 		);
 
 		$boolVar = true !== $or;
@@ -163,7 +159,7 @@ class Authorization
 			$checkGate = $this->isValidPerm(
 				(string) $gate,
 				$filterPem,
-				$this->userPermission
+				$this->sessionPermission
 			);
 
 			if ( false === $checkGate ) {
@@ -171,7 +167,7 @@ class Authorization
 				die(var_dump([
 					'gate' => $gate,
 					'filterPem' => $filterPem,
-					'sessionPem' => $this->userPermission
+					'sessionPem' => $this->sessionPermission
 				]));
 				$boolVar = false;
 				break;
@@ -218,8 +214,8 @@ class Authorization
 			return true;
 		}
 
-		$hasFilterDiff = array_diff( $filterPem, $config->userPermission );
-		$hasSessionDiff = array_diff( $currentSessionGate, $config->userPermission );
+		$hasFilterDiff = array_diff( $filterPem, $config->sessionPermission );
+		$hasSessionDiff = array_diff( $currentSessionGate, $config->sessionPermission );
 
 		if ( empty( $hasFilterDiff ) && empty( $hasSessionDiff ) ) {
 			return empty( array_diff( $filterPem, $currentSessionGate ) );
@@ -238,15 +234,15 @@ class Authorization
 
 	private function isAdmin () : bool
 	{
-		$isAdmin = ( $this->userRole === $this->config->adminRole ) ||
-		isset( $this->userPermission[ 0 ] ) &&
-		( $this->userPermission[ 0 ] === $this->config->adminGate );
+		$isAdmin = ( $this->sessionRole === $this->config->adminRole ) ||
+		isset( $this->sessionPermission[ 0 ] ) &&
+		( $this->sessionPermission[ 0 ] === $this->config->adminGate );
 
 		return ( bool ) $isAdmin;
 	}
 
 	private function isInvalid() : bool
 	{
-		return empty( $this->userRole[ 0] ) || empty( $this->userPermission[ 0] );
+		return empty( $this->sessionRole[ 0] ) || empty( $this->sessionPermission[ 0] );
 	}
 }
