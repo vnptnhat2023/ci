@@ -55,8 +55,7 @@ class Category extends Migration
       'keyword' => [
 				'type' => 'TEXT',
 				'constraint' => 128,
-        'null' => true,
-				'default' => null
+        'null' => true
 			],
 
       'parent_id' => [

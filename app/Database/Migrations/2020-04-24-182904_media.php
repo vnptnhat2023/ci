@@ -27,8 +27,7 @@ class Media extends Migration
 
       'value' => [
         'type' => 'TEXT',
-				'null' => false,
-				'default' => 'unknown'
+				'null' => false
 			],
 
       'created_at' => [

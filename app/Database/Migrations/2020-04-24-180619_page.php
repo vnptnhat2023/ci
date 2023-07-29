@@ -40,14 +40,12 @@ class Page extends Migration
 
       'content' => [
         'type' => 'TEXT',
-        'null' => true,
-				'default' => null
+        'null' => true
 			],
 
       'advanced_content' => [
         'type' => 'TEXT',
-				'null' => true,
-				'default' => null
+				'null' => true
 			],
 
       'advanced_position' => [

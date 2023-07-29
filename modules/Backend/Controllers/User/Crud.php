@@ -1,5 +1,5 @@
 <?php
-
+declare( strict_types = 1 );
 namespace BAPI\Controllers\User;
 
 use \BAPI\Controllers\Mixins\{ BAPITrait, UserCrudTrait };
@@ -11,16 +11,10 @@ class Crud extends ResourceController
 
   protected $modelName = '\BAPI\Models\User\Crud';
 
-  /**
-	 * Model: __afterCreate
-	 * @var \BAPI\Models\User\Detail $modelUserDetail
-	 */
+  /** @var \BAPI\Models\User\Detail $modelUserDetail Model: __afterCreate */
   private string $modelUserDetail = '\BAPI\Models\User\Detail';
 
-  /**
-	 * Entity: __beforeCreate, __beforeUpdate
-	 * @var \BAPI\Entities\User\Crud $entityUserCrud
-	 */
+  /** @var \BAPI\Entities\User\Crud $entityUserCrud Entity: __beforeCreate, __beforeUpdate */
   private string $entityUserCrud = '\BAPI\Entities\User\Crud';
 
 	# ==========================================================

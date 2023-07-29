@@ -163,12 +163,12 @@ class Post extends BaseConfig
 
 	# ==========================================================
 	/**
-	 * @param string|null $needed when null,
-	 * return array containing all relationship
+	 * @param string|null $key when null,
+	 * return array relationship
 	 */
-	public function getRelationShip ( string $needed = null ) : array
+	public function getRelationShip ( string $key = null ) : array
 	{
-		$data = self::$relations[ $needed ]
+		$data = self::$relations[ $key ]
 		?? self::$relations
 		?: $this->getSetting('db.relation');
 
@@ -179,22 +179,22 @@ class Post extends BaseConfig
 	}
 
 	# ==========================================================
-	public function removeRelationShip ( string $needed ) : bool
+	public function removeRelationShip ( string $key ) : bool
 	{
 		$get = $this->getSetting('db.relation');
 
-		if ( empty( self::$relations[ $needed ] ) || isset( $get[ $needed ] ) ) {
+		if ( empty( self::$relations[ $key ] ) || isset( $get[ $key ] ) ) {
 			return false;
 		}
 
-		unset( self::$relations[ $needed ] );
+		unset( self::$relations[ $key ] );
 
 		return true;
 	}
 
 	# ==========================================================
 	/**
-	 * @return array combine with validation::errors
+	 * @return array
 	 */
 	public function getErrors() : array
 	{

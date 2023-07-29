@@ -42,7 +42,7 @@ class Post extends Migration
 			'content' => [
 				'type' => 'TEXT',
 				'null' => false,
-				'default' => 'unknown'
+				'default' => ''
 			],
 
 			'name' => [

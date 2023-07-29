@@ -4,20 +4,23 @@ declare( strict_types = 1 );
 
 namespace App\Libraries\Red2Horse\Adapter\CodeIgniter\Database;
 
-use CodeIgniter\Cache\CacheInterface;
-use CodeIgniter\Config\BaseConfig;
-use CodeIgniter\Exceptions\ModelException;
-use CodeIgniter\Model;
+use CodeIgniter\{
+	Cache\CacheInterface, Config\BaseConfig, Exceptions\ModelException, Model
+
+};
 use Config\Services;
 
 class ThrottleModelAdapter extends Model
 {
+	# Reset
   private int $attempts = 0;
   private int $type = 1;
+
   private int $captchaAttempts = 5;
   private int $maxAttempts = 10;
 	private int $timeoutAttempts = 1800;
 
+	# Config
 	private BaseConfig $cacheConfig;
 	private string $cacheName = '';
 
@@ -123,22 +126,19 @@ class ThrottleModelAdapter extends Model
 		{
 			$this->cache() ->delete( $this->cacheName );
 		}
-		else
-		{
-			$time = strtotime( '-' . (int) $this->timeoutAttempts . ' minutes' );
-			$from = date( 'Y-00-00 00:00:00' );
-			$to = date( 'Y-m-d H:i:s', $time );
+		
+		$time = strtotime( '-' . (int) $this->timeoutAttempts . ' minutes' );
+		$from = date( 'Y-00-00 00:00:00' );
+		$to = date( 'Y-m-d H:i:s', $time );
 
-			// $this ->builder()
-			// ->where( "created_at BETWEEN '{$from}' AND '{$to}'")
-			// ->where( 'ip', Services::request() ->getIPAddress() )
-			// ->delete( [ 'type' => $this->type ], 100 );
-			$this
-			->where( "created_at BETWEEN '{$from}' AND '{$to}'")
-			->where( 'ip', Services::request() ->getIPAddress() )
-			->where( [ 'type' => $this->type ] )
-			->delete( null , true );
-		}
+		$this
+		->where( "created_at BETWEEN '{$from}' AND '{$to}'")
+		->where( 'ip', Services::request() ->getIPAddress() )
+		->where( [ 'type' => $this->type ] )
+		->delete( null , true );
+
+		$this->type = 1;
+		$this->captchaAttempts = 0;
 	}
 
 	private function throttle_db () : int
@@ -149,7 +149,6 @@ class ThrottleModelAdapter extends Model
 			'created_at' => date( 'Y-m-d H:i:s', time() )
 		];
 
-		// $this->builder() ->insert( $data );
 		if ( false === $this->insert( $data, false ) ) {
 			$err = (array) $this->errors( true );
 			log_message( 'error', implode( ',', $err ) );
@@ -180,7 +179,7 @@ class ThrottleModelAdapter extends Model
 	}
 
 	/**
-	 * Override default config
+	 * Override config
 	 * @return CacheInterface
 	 */
 	private function cache () : CacheInterface

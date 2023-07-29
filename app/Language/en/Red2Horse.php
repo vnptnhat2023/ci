@@ -5,6 +5,7 @@ $homeLink = anchor( base_url(), 'Back to home.' );
 return [
 	'homeLink' => $homeLink,
 
+	'errorChuaDangNhap' => 'You have not login yet. ',
   'errorIncorrectInformation' => 'Incorrect information.',
 	'errorNotReadyYet' => 'The current account is in status `{0}` has not been activated yet.',
 	'errorThrottleLimitedTime' => 'Please try to login again after {num} {type}',

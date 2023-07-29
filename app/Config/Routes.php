@@ -54,6 +54,7 @@ if (file_exists(APPPATH . 'Config/' . ENVIRONMENT . '/Routes.php'))
 }
 
 $routes->cli( 'createdb', 'CLI_CreateDB::index' );
+$routes->cli('test/(:segment)', 'Test::index/$1');
 
 $extCachedName = config( '\BAPI\Config\Extension' ) ->getSetting( 'cache' );
 if ( $extCached = cache( "{$extCachedName[ 'prefix' ]}{$extCachedName[ 'name' ]}" ) ) {

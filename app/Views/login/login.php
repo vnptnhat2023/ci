@@ -1,5 +1,4 @@
 <?php
-
 if ( ! function_exists( 'r2hI18' ) )
 {
 	function r2hI18 ( string $field, bool $w = true ) : string {
@@ -19,10 +18,10 @@ if ( ! function_exists( 'r2hI18' ) )
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<title><?= r2hI18( 'LabelBtnLoginSubmit' ) ?></title>
 
-		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+		<link rel="stylesheet" href="<?= base_url('public/assets/css/bootstrap.min.css') ?>">
 
-		<script src="https://cdn.jsdelivr.net/npm/vue@2.6.11"></script>
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/vee-validate/2.2.15/vee-validate.min.js"></script>
+		<script src="<?= base_url('public/assets/js/vue@2.6.11.min.js') ?>"></script>
+		<script src="<?= base_url('public/assets/js/vee-validate.min.js') ?>"></script>
 
 		<style>
 			body {

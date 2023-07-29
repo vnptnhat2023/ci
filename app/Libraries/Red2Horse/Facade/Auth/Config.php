@@ -7,6 +7,10 @@ namespace App\Libraries\Red2Horse\Facade\Auth;
 use App\Libraries\Red2Horse\Facade\Config\ConfigFacade;
 use App\Libraries\Red2Horse\Mixins\TraitSingleton;
 
+/**
+ * 	FACADE, ADAPTER AUTH
+ * 
+ * */
 class Config
 {
 	use TraitSingleton;

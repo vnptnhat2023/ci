@@ -2,6 +2,9 @@
 	"folders": [
 		{
 			"path": "."
+		},
+		{
+			"path": "..\\..\\..\\wamp64\\www\\ci"
 		}
 	],
 	"settings": {

@@ -13,6 +13,29 @@ use App\Libraries\Red2Horse\Facade\Config\ConfigFacadeInterface;
 
 class Test extends BaseController {
 
+	public function index($a = '')
+	{
+		echo "aaaaa: {$a}";
+	}
+
+	public function migrate()
+	{
+		$migrate = \Config\Services::migrations();
+
+    try {
+        $migrate->latest();
+    } catch (Throwable $e) {
+    	var_dump($e);
+        // Do something with the error here...
+    }
+	}
+
+	public function seed()
+	{
+		$seeder = \Config\Database::seeder();
+		$seeder->call('Seed');
+	}
+
 	public function test_pw()
 	{
 		$r2h = \Config\Services::Red2HorseAuth();
@@ -547,7 +570,7 @@ class Test extends BaseController {
 		var_dump($ext);
 	}
 
-	public function index ( $params = [ 'a' => 'A', 'b' => 'B' ] )
+	public function index3434 ( $params = [ 'a' => 'A', 'b' => 'B' ] )
 	{
 		# before-page-input-render
 		# "HandleExt" just once time

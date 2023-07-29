@@ -47,16 +47,17 @@ class Authorization
 	 * @param bool $onlyRole when false will be do except
 	 * @return bool
 	 */
-	public function withRole ( array $filters, $only = 'wtf?' ) : bool
+	public function withRole ( array $filters, $only = 'gdg' ) : bool
 	{
 		if ( $this->isInvalid() ) {
 			return false;
 		}
 
-		// if ( $this->isAdmin() ) {
-		// 	return true;
-		// }
-		dd($only);
+		if ( $this->isAdmin() ) {
+			// dd('admin');
+			return true;
+		}
+		// dd($only);
 		$isValid = false;
 
 		$checked = [];

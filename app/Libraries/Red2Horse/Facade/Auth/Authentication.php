@@ -98,7 +98,7 @@ class Authentication
 			return true;
 		}
 
-		$error = 'You have not login. '.  $this->common->lang( 'Red2Horse.homeLink');
+		$error = $this->common->lang( 'Red2Horse.errorChuaDangNhap').  $this->common->lang( 'Red2Horse.homeLink');
 		$this->message::$errors[] = $error;
 
 		return false;
@@ -336,9 +336,9 @@ class Authentication
 			);
 		}
 
-		$isAssocData = false === $this->common->isAssocArray( $updateData );
+		$isAssocData = $this->common->isAssocArray( $updateData );
 
-		if ( ! empty( $updateData ) && false === $isAssocData ) {
+		if ( ! empty( $updateData ) && !$isAssocData ) {
 			throw new \Exception( $this->common->lang( 'Red2Horse.isAssoc' ), 1 );
 		}
 

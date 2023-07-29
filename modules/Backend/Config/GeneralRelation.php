@@ -12,7 +12,7 @@ class GeneralRelation extends BaseConfig
   private const setting = [
 		'fetch' => [
 			'record' => 10,
-			'orderBy' => 'id',
+			'orderBy' => 'id',// []
 			'direction' => 'DESC'
 		]
 	];
