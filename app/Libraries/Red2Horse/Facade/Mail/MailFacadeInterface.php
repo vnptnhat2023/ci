@@ -2,7 +2,7 @@
 
 declare( strict_types = 1 );
 
-namespace App\Libraries\Red2Horse\Facade\Mail;
+namespace Red2Horse\Facade\Mail;
 
 interface MailFacadeInterface
 {

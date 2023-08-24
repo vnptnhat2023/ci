@@ -2,7 +2,7 @@
 
 declare( strict_types = 1 );
 
-namespace App\Libraries\Red2Horse\Facade\Config;
+namespace Red2Horse\Facade\Config;
 
 interface ConfigFacadeInterface
 {
@@ -19,4 +19,6 @@ interface ConfigFacadeInterface
 	public function userRouteGates () : array;
 
 	public function userRole () : array;
+
+	public function getSessionKey () : array;
 }

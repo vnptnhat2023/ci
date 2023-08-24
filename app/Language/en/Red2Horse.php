@@ -5,8 +5,9 @@ $homeLink = anchor( base_url(), 'Back to home.' );
 return [
 	'homeLink' => $homeLink,
 
-	'errorChuaDangNhap' => 'You have not login yet. ',
-  'errorIncorrectInformation' => 'Incorrect information.',
+	'errorCookieUpdate' => 'Validated cookie, when update userId: {0}',
+	'errorNeedLoggedIn' => 'You have not login yet. ',
+	'errorIncorrectInformation' => 'Incorrect information.',
 	'errorNotReadyYet' => 'The current account is in status `{0}` has not been activated yet.',
 	'errorThrottleLimitedTime' => 'Please try to login again after {num} {type}',
 
@@ -14,8 +15,8 @@ return [
 	'noteLoggedInAnotherPlatform' => 'Your account has been logged-in with another platform.',
 
 	'successLogged' => 'You are already logged in. ' . $homeLink,
-	'successLoggedWithUsername' => 'Hello {0}, you are already logged in. ' . $homeLink,
-	'successLogoutWithUsername' => 'Bye {0} you have been logged out. ' . $homeLink,
+	'successLoggedWithUsername' => 'Hi {0}, you are already logged in. ' . $homeLink,
+	'successLogoutWithUsername' => '{0} you have been logged out. ' . $homeLink,
 	'successLogout' => 'You have been logged out. ' . $homeLink,
 	'successResetPassword' => 'Your password has been successfully reset.',
 
@@ -36,5 +37,5 @@ return [
 	'placeholderPassword' => 'password',
 	'placeholderCaptcha' => 'captcha code',
 
-	'isAssoc' => 'Data must be an associative array'
+	'isAssoc' => 'Data must be an associative array.'
 ];

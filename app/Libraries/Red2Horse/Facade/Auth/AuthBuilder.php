@@ -2,9 +2,9 @@
 
 declare( strict_types = 1 );
 
-namespace App\Libraries\Red2Horse\Facade\Auth;
+namespace Red2Horse\Facade\Auth;
 
-use App\Libraries\Red2Horse\{
+use Red2Horse\{
 	Facade\Auth\Config,
 	Mixins\TraitSingleton
 };
@@ -61,6 +61,12 @@ class AuthBuilder
 	public function database_throttle () : self
 	{
 		$this->data[ 'throttle' ] = $this->config->adapter( 'Database', 'Throttle' );
+		return $this;
+	}
+
+	public function event () : self
+	{
+		$this->data[ 'event' ] = $this->config->adapter( 'event' );
 		return $this;
 	}
 

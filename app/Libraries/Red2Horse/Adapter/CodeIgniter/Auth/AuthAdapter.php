@@ -2,9 +2,10 @@
 
 declare( strict_types = 1 );
 
-namespace App\Libraries\Red2Horse\Adapter\CodeIgniter\Auth;
+namespace Red2Horse\Adapter\CodeIgniter\Auth;
 
-use App\Libraries\Red2Horse\Facade\Auth\Red2Horse;
+use Red2Horse\Facade\Auth\Red2Horse;
+use CodeIgniter\Events\Events;
 
 class AuthAdapter implements AuthAdapterInterface
 {
@@ -15,23 +16,24 @@ class AuthAdapter implements AuthAdapterInterface
 		$this->auth = $auth;
 	}
 
-	public function login (
-		string $username = null,
-		string $password = null,
-		bool $rememberMe = false,
-		string $captcha = null
-	) : bool
+	public static function eventOn ( $name, $callback, $priority = EVENT_PRIORITY_NORMAL ) : void
 	{
-		return $this->auth->login( $username, $password, $rememberMe, $captcha );
+		Events::on( $name, $callback, $priority );
 	}
 
-	public function requestPassword (
-		string $username = null,
-		string $email = null,
-		string $captcha = null
-	) : bool
+	public static function eventTrigger ( $name, $args )
 	{
-		return $this->auth->requestPassword( $username, $email, $captcha );
+		return Events::trigger( $name, ...$args );
+	}
+
+	public function login ( $u = null, $p = null, $r = false, $c = null ) : bool
+	{
+		return $this->auth->login( $u, $p, $r, $c );
+	}
+
+	public function requestPassword ( $u = null, $e = null, $c = null ) : bool
+	{
+		return $this->auth->requestPassword( $u, $e, $c );
 	}
 
 	public function logout () : bool
@@ -39,32 +41,32 @@ class AuthAdapter implements AuthAdapterInterface
 		return $this->auth->logout();
 	}
 
-	public function getUserdata ( string $key = null )
+	public function getUserdata ( $key = null )
 	{
 		return $this->auth->getUserdata( $key );
 	}
 
-	public function isLoggedIn ( bool $withCookie = false ) : bool
+	public function isLoggedIn ( $withCookie = false ) : bool
 	{
 		return $this->auth->isLogged( $withCookie );
 	}
 
-	public function getPasswordHash ( string $pass ) : string
+	public function getPasswordHash ( $pass ) : string
 	{
 		return $this->auth->getHashPass( $pass );
 	}
 
-	public function getMessage ( array $addMore = [], bool $asObject = true )
+	public function getMessage ( $addMore = [], $asObject = true )
 	{
 		return $this->auth->getMessage( $addMore );
 	}
 
-	public function withPermission ( array $data, bool $or = true ) : bool
+	public function withPermission ( $data, $or = true ) : bool
 	{
 		return $this->auth->withPermission( $data, $or );
 	}
 
-	public function withRole ( array $role ) : bool
+	public function withRole ( $role ) : bool
 	{
 		return $this->auth->withRole( $role );
 	}
@@ -74,7 +76,7 @@ class AuthAdapter implements AuthAdapterInterface
 		$this->auth->regenerateCookie();
 	}
 
-	public function regenerateSession ( array $userData ) : bool
+	public function regenerateSession ( $userData ) : bool
 	{
 		return $this->auth->regenerateSession( $userData );
 	}

@@ -2,9 +2,9 @@
 
 declare( strict_types = 1 );
 
-namespace App\Libraries\Red2Horse\Adapter\Codeigniter\Validation;
+namespace Red2Horse\Adapter\Codeigniter\Validation;
 
-use App\Libraries\Red2Horse\Facade\Auth\Config;
+use Red2Horse\Facade\Auth\Config;
 use Config\Services;
 
 /**

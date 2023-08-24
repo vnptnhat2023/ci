@@ -2,7 +2,7 @@
 
 declare( strict_types = 1 );
 
-namespace App\Libraries\Red2Horse\Adapter\CodeIgniter\Common;
+namespace Red2Horse\Adapter\CodeIgniter\Common;
 
 class CommonAdapter implements CommonAdapterInterface
 {

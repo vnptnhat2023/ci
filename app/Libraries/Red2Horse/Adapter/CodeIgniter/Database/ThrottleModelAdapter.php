@@ -2,7 +2,7 @@
 
 declare( strict_types = 1 );
 
-namespace App\Libraries\Red2Horse\Adapter\CodeIgniter\Database;
+namespace Red2Horse\Adapter\CodeIgniter\Database;
 
 use CodeIgniter\{
 	Cache\CacheInterface, Config\BaseConfig, Exceptions\ModelException, Model

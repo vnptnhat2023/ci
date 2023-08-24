@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Libraries\Red2Horse\Adapter\CodeIgniter\System;
+namespace Red2Horse\Adapter\CodeIgniter\System;
 
 use CodeIgniter\Events\Events;
 use CodeIgniter\Session\Session;
@@ -20,7 +20,7 @@ class Red2HorseSession extends Session
 
 		$auth = \Config\Services::Red2HorseAuth();
 
-		if ( $auth->isLoggedIn() ) {
+		if ( $auth->isLogged() ) {
 			Events::trigger( 'Red2HorseAuthRegenerate', $auth->getUserdata() );
 		}
 	}

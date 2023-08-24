@@ -2,9 +2,9 @@
 
 declare( strict_types = 1 );
 
-namespace App\Libraries\Red2Horse\Facade\Request;
+namespace Red2Horse\Facade\Request;
 
-use App\Libraries\Red2Horse\Mixins\TraitSingleton;
+use Red2Horse\Mixins\TraitSingleton;
 
 class RequestFacade implements RequestFacadeInterface
 {

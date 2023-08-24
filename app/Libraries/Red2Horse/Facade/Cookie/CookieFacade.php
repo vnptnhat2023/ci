@@ -2,9 +2,9 @@
 
 declare( strict_types = 1 );
 
-namespace App\Libraries\Red2Horse\Facade\Cookie;
+namespace Red2Horse\Facade\Cookie;
 
-use App\Libraries\Red2Horse\Mixins\TraitSingleton;
+use Red2Horse\Mixins\TraitSingleton;
 
 class CookieFacade implements CookieFacadeInterface
 {

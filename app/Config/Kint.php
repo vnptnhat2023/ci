@@ -26,7 +26,7 @@ class Kint extends BaseConfig
 
 	public $plugins = null;
 
-	public $maxDepth = 6;
+	public $maxDepth = 20;
 
 	public $displayCalledFrom = true;
 

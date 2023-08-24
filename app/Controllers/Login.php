@@ -1,40 +1,46 @@
 <?php
-
-# --- Todo: Move current file to [Auth-folder]
+declare(strict_types = 1);
+# @Todo: Captcha
 namespace App\Controllers;
 
-use \App\Libraries\Red2Horse\Facade\Auth\AuthFacade as r2hAuth;
-use \App\Libraries\Red2Horse\Facade\Auth\Config as r2hAuthConfig;
+use Red2Horse\R2h;
 
 class Login extends BaseController
 {
-	private r2hAuth $auth;
+	private R2h $auth;
+	private ?string $u;
+	private ?string $p;
+	private bool $r;
+	private ?string $c;
+	private ?string $e;
 
 	public function __construct()
 	{
-		$authConfig = r2hAuthConfig::getInstance();
-		$authConfig->throttle->captchaAttempts = 3;
-		$this->auth = \Config\Services::Red2HorseAuth( $authConfig );
+		$this->auth = \Config\Services::Red2HorseAuth();
+		$request = \Config\Services::request();
+
+		$this->u = $request->getPostGet('username');
+		$this->p = $request->getPostGet('password');
+		$this->r = null !== $request->getPostGet('remember_me');
+		$this->c = $request->getPostGet('captcha');
+		$this->e = $request->getPostGet('email');
 
 		helper( [ 'form', 'form_recaptcha' ] );
 	}
 
 	public function index()
 	{
-		$username = $this->request->getPostGet( 'username' );
-		$password = $this->request->getPostGet( 'password' );
-		$rememberMe = null !== $this->request->getPostGet( 'remember_me' );
-		$captcha = $this->request->getPostGet( 'captcha' );
+		$u = $this->u; $p = $this->p; $r = null !== $this->r; $c = $this->c;
 
-		$this->auth->login( $username, $password, $rememberMe, $captcha );
+		$this->auth->login( $u, $p, $r, $c );
 
 		if ( env( 'environment' ) !== 'production' ) {
 			$form = [
 				'form' => [
-					'username' => $username,
-					'password' => $password,
-					'captcha' => $captcha,
-					'remember_me' => $rememberMe
+					'username' => $u,
+					'password' => $p,
+					'captcha' => $c,
+					'remember_me' => $r
 				]
 			];
 
@@ -46,23 +52,23 @@ class Login extends BaseController
 
 	public function forgot ()
 	{
-		$username = $this->request->getPostGet( 'username' );
-		$email = $this->request->getPostGet( 'email' );
-		$captcha = $this->request->getPostGet( 'captcha' );
+		$u = $this->u;
+		$e = $this->e;
+		$c = $this->c;
 
 		if ( env( 'environment' ) !== 'production' ) {
 			$form = [
 				'form' => [
-					'username' => $username,
-					'email' => $email,
-					'captcha' => $captcha,
+					'username' => $u,
+					'email' => $e,
+					'captcha' => $c,
 				]
 			];
 
 			d( $this->auth->getMessage( $form ) );
 		}
 
-		$this->auth->requestPassword( $username, $email, $captcha );
+		$this->auth->requestPassword( $u, $e, $c );
 		return view( 'login/forgot', (array) $this->auth->getMessage() );
 	}
 

@@ -1,9 +1,6 @@
 <?php
-
 declare( strict_types = 1 );
-namespace App\Libraries\Red2Horse\Adapter\CodeIgniter\Database;
-
-# --------------------------------------------------------------------------
+namespace Red2Horse\Adapter\CodeIgniter\Database;
 
 class UserAdapter implements UserAdapterInterface
 {
@@ -13,11 +10,6 @@ class UserAdapter implements UserAdapterInterface
 	{
 		$this->user = model( UserModelAdapter::class );
 	}
-
-	// public function getUser ( string $select, array $where ) : array
-	// {
-	// 	return (array) $this->user->select( $select )->where( $where )->first();
-	// }
 
 	public function getUserWithGroup ( string $select, array $where ) : array
 	{

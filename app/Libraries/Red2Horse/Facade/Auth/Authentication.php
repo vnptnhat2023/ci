@@ -1,19 +1,17 @@
 <?php
-
 declare( strict_types = 1 );
+namespace Red2Horse\Facade\Auth;
 
-namespace App\Libraries\Red2Horse\Facade\Auth;
-
-use App\Libraries\Red2Horse\Mixins\TraitSingleton;
-
-use App\Libraries\Red2Horse\Facade\{
-	Session\SessionFacade as session,
-	Validation\ValidationFacade as validation,
-	Cookie\CookieFacade as cookie,
-	Request\RequestFacade as request,
-	Database\ThrottleFacade as throttleModel,
-	Database\UserFacade as userModel,
-	Common\CommonFacade as common,
+use Red2Horse\Mixins\TraitSingleton;
+use Red2Horse\Facade\{
+	Session\SessionFacadeInterface as session,
+	Validation\ValidationFacadeInterface as validation,
+	Cookie\CookieFacadeInterface as cookie,
+	Request\RequestFacadeInterface as request,
+	Database\ThrottleFacadeInterface as throttleModel,
+	Database\UserFacadeInterface as userModel,
+	Common\CommonFacadeInterface as common,
+	Event\EventFacadeInterface as event
 };
 
 class Authentication
@@ -32,6 +30,7 @@ class Authentication
 	protected validation $validation;
 	protected request $request;
 	protected common $common;
+	protected event $event;
 
 	private static ?string $username = null;
 	private static ?string $password = null;
@@ -53,6 +52,7 @@ class Authentication
 		->request()
 		->database_user()
 		->database_throttle()
+		->event()
 		->build();
 
 		$this->common = $builder->common;
@@ -62,28 +62,17 @@ class Authentication
 		$this->request = $builder->request;
 		$this->userModel = $builder->user;
 		$this->throttleModel = $builder->throttle;
+		$this->event = $builder->event;
 	}
 
-	public function login
-	(
-		string $userNameEmail = null,
-		string $password = null,
-		bool $rememberMe = false,
-		string $captcha = null
-	) : bool
+	public function login ( string $u = null, string $p = null, bool $r = false, string $c = null ) : bool
 	{
-		self::$username = $userNameEmail;
-		self::$password = $password;
-		self::$rememberMe = $rememberMe;
-		self::$captcha = $captcha;
+		self::$username = $u;
+		self::$password = $p;
+		self::$rememberMe = $r;
+		self::$captcha = $c;
 
-		return $this->utility->typeChecker(
-			'login',
-			$userNameEmail,
-			$password,
-			null,
-			$captcha
-		);
+		return $this->utility->typeChecker( 'login', $u, $p, null, $c );
 	}
 
 	public function logout () : bool
@@ -98,7 +87,7 @@ class Authentication
 			return true;
 		}
 
-		$error = $this->common->lang( 'Red2Horse.errorChuaDangNhap').  $this->common->lang( 'Red2Horse.homeLink');
+		$error = $this->common->lang( 'Red2Horse.errorNeedLoggedIn').  $this->common->lang( 'Red2Horse.homeLink');
 		$this->message::$errors[] = $error;
 
 		return false;
@@ -280,7 +269,7 @@ class Authentication
 
 	public function isMultiLogin ( ?string $session_id = null ) : bool
 	{
-		if ( false === $this->config->useMultiLogin ) {
+		if ( ! $this->config->useMultiLogin ) {
 			return true;
 		}
 
@@ -288,9 +277,7 @@ class Authentication
 		$pathFile .= '/' . $this->config->sessionCookieName . $session_id;
 		$date = $this->common->get_file_info( $pathFile, 'date' );
 
-		if ( empty( $date ) ) {
-			return true;
-		}
+		if ( empty( $date ) ) { return true; }
 
 		$cookieName = $this->config->sessionCookieName . '_test';
 

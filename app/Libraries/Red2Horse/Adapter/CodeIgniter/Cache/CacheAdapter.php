@@ -2,7 +2,7 @@
 
 declare( strict_types = 1 );
 
-namespace App\Libraries\Red2Horse\Adapter\CodeIgniter\Cache;
+namespace Red2Horse\Adapter\CodeIgniter\Cache;
 
 class CacheAdapter implements CacheAdapterInterface
 {

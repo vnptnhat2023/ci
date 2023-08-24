@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Libraries\Red2Horse\Adapter\Codeigniter\Validation;
+namespace Red2Horse\Adapter\Codeigniter\Validation;
 
-use App\Libraries\Red2Horse\Facade\Validation\ValidationFacadeInterface;
+use Red2Horse\Facade\Validation\ValidationFacadeInterface;
 
 /**
  * @package Red2ndHorseAuth

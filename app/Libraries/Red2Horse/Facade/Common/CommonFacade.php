@@ -2,9 +2,9 @@
 
 declare( strict_types = 1 );
 
-namespace App\Libraries\Red2Horse\Facade\Common;
+namespace Red2Horse\Facade\Common;
 
-use App\Libraries\Red2Horse\Mixins\TraitSingleton;
+use Red2Horse\Mixins\TraitSingleton;
 
 class CommonFacade implements CommonFacadeInterface
 {

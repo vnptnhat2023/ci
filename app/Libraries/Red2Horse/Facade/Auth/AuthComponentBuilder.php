@@ -1,12 +1,9 @@
 <?php
-
-# --------------------------------------------------------------------------
-
 declare( strict_types = 1 );
+namespace Red2Horse\Facade\Auth;
 
-namespace App\Libraries\Red2Horse\Facade\Auth;
-
-use App\Libraries\Red2Horse\Facade\{
+use Red2Horse\Facade\{
+	Event\EventFacadeInterface as event,
 	Session\SessionFacadeInterface as session,
 	Validation\ValidationFacadeInterface as validation,
 	Cookie\CookieFacadeInterface as cookie,
@@ -19,15 +16,11 @@ use App\Libraries\Red2Horse\Facade\{
 	Auth\Config
 };
 
-use App\Libraries\Red2Horse\Mixins\TraitSingleton;
-
-# --------------------------------------------------------------------------
+use Red2Horse\Mixins\TraitSingleton;
 
 class AuthComponentBuilder
 {
 	use TraitSingleton;
-
-	# ------------------------------------------------------------------------
 
 	public throttleModel $throttle;
 	public userModel $user;
@@ -38,15 +31,12 @@ class AuthComponentBuilder
 	public mail $mail;
 	public request $request;
 	public common $common;
-
-	# ------------------------------------------------------------------------
+	public event $event;
 
 	public static function createBuilder ( Config $config )
 	{
 		return AuthBuilder::getInstance( $config );
 	}
-
-	# ------------------------------------------------------------------------
 
 	public function build ( array $builder )
 	{

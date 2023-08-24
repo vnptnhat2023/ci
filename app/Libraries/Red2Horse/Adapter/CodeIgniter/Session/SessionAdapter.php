@@ -2,7 +2,7 @@
 
 declare( strict_types = 1 );
 
-namespace App\Libraries\Red2Horse\Adapter\CodeIgniter\Session;
+namespace Red2Horse\Adapter\CodeIgniter\Session;
 
 use Config\Services;
 

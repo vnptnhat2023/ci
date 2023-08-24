@@ -44,7 +44,8 @@ class Autoload extends AutoloadConfig
 		'Config' => APPPATH . 'Config',
 		'BAPI' => BACKENDPATH,
 		'FAPI' => FRONTENDPATH,
-		'Ext' => EXTPATH
+		'Ext' => EXTPATH,
+		'Red2Horse' => APPPATH . 'Libraries/Red2Horse/'
 	];
 
 	/**

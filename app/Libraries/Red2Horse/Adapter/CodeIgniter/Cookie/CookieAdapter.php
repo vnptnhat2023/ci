@@ -2,7 +2,7 @@
 
 declare( strict_types = 1 );
 
-namespace App\Libraries\Red2Horse\Adapter\Codeigniter\Cookie;
+namespace Red2Horse\Adapter\Codeigniter\Cookie;
 
 class CookieAdapter implements CookieAdapterInterface
 {

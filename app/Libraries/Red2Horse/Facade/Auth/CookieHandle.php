@@ -1,12 +1,9 @@
 <?php
-
 declare( strict_types = 1 );
+namespace Red2Horse\Facade\Auth;
 
-namespace App\Libraries\Red2Horse\Facade\Auth;
-
-use App\Libraries\Red2Horse\Mixins\TraitSingleton;
-
-use App\Libraries\Red2Horse\Facade\{
+use Red2Horse\Mixins\TraitSingleton;
+use Red2Horse\Facade\{
 	Common\CommonFacade as common,
 	Cookie\CookieFacade as cookie,
 	Database\UserFacade as userModel,
@@ -56,7 +53,7 @@ class CookieHandle
 
 	public function cookieHandler () : bool
 	{
-		if ( false === $this->config->useRememberMe ) {
+		if ( ! $this->config->useRememberMe ) {
 			return false;
 		}
 
@@ -68,7 +65,7 @@ class CookieHandle
 
 		$separate = explode( ':', $userCookie, 2 );
 
-		$incorrectCookie = function  () : bool {
+		$incorrectCookie = function() : bool {
 			$this->cookie->delete_cookie( $this->config->cookie );
 			return false;
 		};
@@ -85,18 +82,14 @@ class CookieHandle
 			[ 'selector' => $selector ]
 		);
 
-		if ( empty( $user ) ) {
-			return $incorrectCookie();
-		}
+		if ( empty( $user ) ) { return $incorrectCookie(); }
 
 		$isValid = hash_equals( $user[ 'token' ], hash( 'sha256', $token ) );
 		$isUserIp = $user[ 'last_login' ] == $this->request->getIPAddress();
 
-		if ( false === $isValid || false === $isUserIp ) {
-			return $incorrectCookie();
-		}
+		if ( ! $isValid || ! $isUserIp ) { return $incorrectCookie(); }
 
-		# --- Check status
+		# Check status
 		if ( in_array( $user[ 'status' ] , [ 'inactive', 'banned' ] ) ) {
 			Message::getInstance( $this->config )
 			->denyStatus( $user[ 'status' ], false, false );
@@ -104,23 +97,26 @@ class CookieHandle
 			return $incorrectCookie();
 		}
 
-		# --- Todo: declare inside the config file: is using this feature
+		# @Todo: declare inside the config file: is using this feature
 		$isMultiLogin = Authentication::getInstance( $this->config )
 		->isMultiLogin( $user[ 'session_id' ] );
 
-		if ( false === $isMultiLogin ) {
+		if (! $isMultiLogin ) {
 			Message::getInstance( $this->config )->denyMultiLogin( true, [], false );
 
 			return false;
 		}
 
-		# --- refresh new cookie
-		$logErr = "Validated cookie, but error when update userId: {$user[ 'id' ]}";
-		$this->setCookie( (int) $user[ 'id' ], [], $logErr );
+		# Refresh cookie
+		$this->setCookie(
+			(int) $user[ 'id' ],
+			[],
+			$this->common->lang('errorCookieUpdate', [$user[ 'id' ]])
+		);
 
-		$isValidJson = $this->common->valid_json( $user[ 'permission' ] );
+		$isJson = $this->common->valid_json( $user[ 'permission' ] );
 
-		$user[ 'permission' ] = ( true === $isValidJson )
+		$user[ 'permission' ] = $isJson
 		? json_decode( $user[ 'permission' ], true )
 		: [];
 

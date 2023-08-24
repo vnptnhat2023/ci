@@ -2,7 +2,7 @@
 
 declare( strict_types = 1 );
 
-namespace App\Libraries\Red2Horse\Facade;
+namespace Red2Horse\Facade;
 
 use App\Libraries\DesignPattern\Facade\AuthInterface;
 

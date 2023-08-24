@@ -2,7 +2,7 @@
 
 declare( strict_types = 1 );
 
-namespace App\Libraries\Red2Horse\Facade\Auth;
+namespace Red2Horse\Facade\Auth;
 
 /**
  * @package Red2ndHorseAuth
@@ -10,24 +10,28 @@ namespace App\Libraries\Red2Horse\Facade\Auth;
  */
 interface AuthFacadeInterface
 {
-	public function login
-	(
-		string $username = null,
-		string $password = null,
-		bool $rememberMe = false,
-		string $captcha = null
-	) : bool;
+	/**
+	 * @param string $eventName
+	 * @param callable $callback
+	 * @param int $priority
+	 * @return mixed
+	 */
+	public static function eventOn ( string $eventName, callable $callback, int $priority ) : void;
+
+	/**
+	 * @param string $name
+	 * @param mixed $name
+	 * @return mixed $name
+	 */
+	public static function eventTrigger ( string $name, $args );
+
+	public function login ( string $u = null, string $p = null, bool $r = false, string $c = null ) : bool;
 
 	/** @read_more login */
 	public function logout () : bool;
 
 	/** @read_more login */
-	public function requestPassword
-	(
-		string $username = null,
-		string $email = null,
-		string $captcha = null
-	) : bool;
+	public function requestPassword ( string $u = null, string $e = null, string $c = null ) : bool;
 
 	/**
 	 * @param string|null $key
@@ -42,21 +46,12 @@ interface AuthFacadeInterface
 	 */
 	public function getMessage ( array $addMore = [], bool $asObject = true );
 
-	/**
-	 * @param array $data empty = ( 1st group === administrator group )
-	 * @return boolean
-	 */
-	public function withPermission ( array $data, bool $or = true ) : bool;
-
-	public function withRole ( array $role ) : bool;
-
-	/**
-	 * Check cookie & session: when have cookie will set session
-	 * @return boolean
-	 */
 	public function isLoggedIn ( bool $withCookie = false ) : bool;
 
 	public function regenerateCookie () : void;
 
 	public function regenerateSession ( array $userData ) : bool;
+
+	public function withRole ( array $role ) : bool;
+	public function withPermission ( array $data, bool $or = true ) : bool;
 }

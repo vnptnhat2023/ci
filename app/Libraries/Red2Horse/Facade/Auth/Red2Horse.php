@@ -1,61 +1,52 @@
 <?php
-
 declare( strict_types = 1 );
+namespace Red2Horse\Facade\Auth;
 
-namespace App\Libraries\Red2Horse\Facade\Auth;
-
-use App\Libraries\Red2Horse\Facade\Database\ThrottleFacade as throttleModel;
-use App\Libraries\Red2Horse\Mixins\TraitSingleton;
+use Red2Horse\{
+	Facade\Database\ThrottleFacade as throttleModel,
+	Facade\Event\EventFacadeInterface,
+	Mixins\TraitSingleton
+};
 
 class Red2Horse
 {
 	use TraitSingleton;
 
 	public Config $config;
+	public EventFacadeInterface $event;
 	protected throttleModel $throttleModel;
 	protected Authentication $authentication;
 	protected Message $message;
+	// protected ReflectClass___ $reflect;
 
-	# ------------------------------------------------------------------------
-
-	public function __construct ( Config $config = null )
+	public function __construct ( ?Config $config = null )
 	{
-		$this->config = $config;
+		$this->config = $config ?? Config::getInstance();
 
-		$builder = AuthComponentBuilder::createBuilder( $config )
+		$builder = AuthComponentBuilder::createBuilder( $this->config )
 		->common()
 		->database_throttle()
+		->event()
 		->build();
 
+		$this->event = $builder->event;
+		$throttle = $this->config->throttle;
 		$this->throttleModel = $builder->throttle;
 
 		$this->throttleModel->config(
-			$config->throttle->type,
-			$config->throttle->captchaAttempts,
-			$config->throttle->maxAttempts,
-			$config->throttle->timeoutAttempts
+			$throttle->type,
+			$throttle->captchaAttempts,
+			$throttle->maxAttempts,
+			$throttle->timeoutAttempts
 		);
 
 		$this->authentication = Authentication::getInstance( $this->config );
 		$this->message = Message::getInstance( $this->config );
 	}
 
-	# ------------------------------------------------------------------------
-
-	public function login
-	(
-		string $userNameEmail = null,
-		string $password = null,
-		bool $rememberMe = false,
-		string $captcha = null
-	) : bool
+	public function login ( string $u = null, string $p = null, bool $r = false, string $c = null ) : bool
 	{
-		return $this->authentication->login(
-			$userNameEmail,
-			$password,
-			$rememberMe,
-			$captcha
-		);
+		return $this->authentication->login( $u, $p, $r, $c );
 	}
 
 	public function logout () : bool
@@ -63,15 +54,9 @@ class Red2Horse
 		return $this->authentication->logout();
 	}
 
-	public function requestPassword
-	(
-		string $username = null,
-		string $email = null,
-		string $captcha = null
-	) : bool
+	public function requestPassword ( string $u = null, string $e = null, string $c = null ) : bool
 	{
-		return ResetPassword::getInstance( $this->config )
-		->requestPassword( $username, $email, $captcha );
+		return ResetPassword::getInstance( $this->config )->requestPassword( $u, $e, $c );
 	}
 
 	/**
@@ -84,13 +69,13 @@ class Red2Horse
 	}
 
 	public function getHashPass ( string $password ) : string
-  {
+	{
 		return Password::getInstance()->getHashPass( $password );
-  }
+	}
 
-  public function getVerifyPass ( string $password, string $hashed ) : bool
-  {
-		return Password::getInstance()->getVerifyPass( $password, $hashed );
+	public function getVerifyPass ( string $p, string $hashed ) : bool
+	{
+		return Password::getInstance()->getVerifyPass( $p, $hashed );
 	}
 
 	/** @return object|array */
@@ -99,25 +84,25 @@ class Red2Horse
 		return $this->message->getResult();
 	}
 
- 	public function getMessage ( array $addMore = [], bool $asObject = true )
+	public function getMessage ( array $add = [], bool $asObject = true )
 	{
-		return $this->message->getMessage( $addMore, $asObject );
+		return $this->message->getMessage( $add, $asObject );
 	}
 
 	public function withPermission ( array $data, bool $or = true ) : bool
 	{
-		return Authorization::getInstance( $this->config )->withPermission( $data, $or );
+		return Authorization::getInstance( $this->config )->run( $data );
 	}
 
-	# --- Todo: Waiting for CI4 have multi filter on single route
+	# @Todo: not using: multiple filters on single route
 	public function withGroup( array $data ) : bool
 	{
-		return Authorization::getInstance( $this->config )->withGroup( $data );
+		return Authorization::getInstance( $this->config )->run( $data );
 	}
 
 	public function withRole ( array $role, bool $or = true ) : bool
 	{
-		return Authorization::getInstance( $this->config )->withRole( $role, $or );
+		return Authorization::getInstance( $this->config )->run( $role );
 	}
 
 	public function isLogged ( bool $withCookie = false ) : bool
@@ -127,8 +112,7 @@ class Red2Horse
 
 	public function regenerateSession ( array $userData ) : bool
 	{
-		return SessionHandle::getInstance( $this->config )
-		->regenerateSession( $userData );
+		return SessionHandle::getInstance( $this->config )->regenerateSession( $userData );
 	}
 
 	public function regenerateCookie () : void

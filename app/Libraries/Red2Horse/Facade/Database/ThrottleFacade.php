@@ -2,9 +2,9 @@
 
 declare( strict_types = 1 );
 
-namespace App\Libraries\Red2Horse\Facade\Database;
+namespace Red2Horse\Facade\Database;
 
-use App\Libraries\Red2Horse\Mixins\TraitSingleton;
+use Red2Horse\Mixins\TraitSingleton;
 
 class ThrottleFacade implements ThrottleFacadeInterface
 {

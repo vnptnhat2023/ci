@@ -2,7 +2,7 @@
 
 declare( strict_types = 1 );
 
-namespace App\Libraries\Red2Horse\Facade\Validation;
+namespace Red2Horse\Facade\Validation;
 
 interface ValidationFacadeInterface
 {

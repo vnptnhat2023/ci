@@ -1,265 +1,99 @@
 <?php
-
-# --------------------------------------------------------------------------
-
 declare( strict_types = 1 );
+namespace Red2Horse\Facade\Auth;
+use Red2Horse\Mixins\TraitSingleton;
 
-namespace App\Libraries\Red2Horse\Facade\Auth;
-
-use App\Libraries\Red2Horse\Mixins\TraitSingleton;
-
-# --------------------------------------------------------------------------
-
+/**
+ * @todo filter->not [ or, and, except]
+ * admin
+ * */
 class Authorization
 {
-
 	use TraitSingleton;
-
 	protected Config $config;
-
 	protected Authentication $authentication;
-
-	/**
-	 * Current session user role
-	 */
-	protected array $sessionRole;
-
-	/**
-	 * Current session user permission
-	 */
-	protected array $sessionPermission;
-
-	# ------------------------------------------------------------------------
+	protected array $userRole;
+	protected array $userPerm;
+	private array $roleList = [];
+	private array $permissionList = [];
+	protected array $prefix = ['!', 'NOT'];
+	private array $configPerm = [];
+	private array $sessionPerm = [];
 
 	public function __construct ( Config $config )
 	{
 		$this->config = $config;
 		$this->authentication = Authentication::getInstance( $this->config );
 
-		$this->sessionRole = $this->getSessionData( 'role' );
-		$this->sessionPermission = $this->getSessionData( 'permission' );
-	}
+		// $this->userRole = $this->_getSessionData( $this->config->roleKey );
+		$this->userRole = $this->_getSessionData( 'role' );
+		// $this->userPerm = $this->_getSessionData( $this->config->permKey );
+		$this->userPerm = $this->_getSessionData( 'permKey' );
 
-	# ------------------------------------------------------------------------
+		$this->configPerm = $this->config->userRouteGates;
+		$this->sessionPerm = $this->userPerm;
+	}
 
 	/**
-	 * @param array $filters
-	 * @param bool $onlyRole when false will be do except
-	 * @return bool
+	 * @param array<string> $data
+	 * @param string $k [ or, and, except; Default or ]
 	 */
-	public function withRole ( array $filters, $only = 'gdg' ) : bool
+	public function run(array $data, string $k = 'or') : bool
 	{
-		if ( $this->isInvalid() ) {
-			return false;
+		if ( ! $this->_check1( $data ) ) { return false; }
+		if ( $this->_isAdmin() ) { return true; }
+
+		switch ($k) {
+			case 'except': return $this->_useExcept( $data );
+			case 'and': return $this->_useAnd( $data );
+			default: return $this->_useOr( $data );
 		}
-
-		if ( $this->isAdmin() ) {
-			// dd('admin');
-			return true;
-		}
-		// dd($only);
-		$isValid = false;
-
-		$checked = [];
-
-		foreach ( $filters as $filter )
-		{
-			$filter = str_replace( ' ', '', ( string ) $filter );
-
-			if ( in_array( $filter, $checked, true ) ) {
-				continue;
-			}
-
-			// if ( $filter[ 0 ] === '!' )
-			// {
-			// 	# saved not, check them for all other filter ?
-			// 	$filterExcept = str_replace( [ '!', 'NOT' ], '', $filter );
-			// 	$checked[] = $filterExcept;
-
-			// 	continue;
-			// }
-
-			if ( in_array( $filter, $this->sessionRole, true ) )
-			{
-				$checked[] = $filter;
-
-				$isValid = ! $isValid;
-				break;
-			}
-		}
-
-		return $isValid;
 	}
 
-	# ------------------------------------------------------------------------
-
-	/**
-	 * The first check the current user session, * the next will be $data parameter
-	 * @param array $data case empty array ( [] ) = 1st group = administrator
-	 * @param bool $or when $or is false, will be check === permission, true check in_array
-	 * @return boolean
-	 */
-	public function withPermission ( array $filters, bool $or = true ) : bool
+	private function _useOr (array $data) : bool
 	{
-		if ( $this->isInvalid() ) {
-			return false;
-		}
-
-		if ( $this->isAdmin() ) {
-			return true;
-		}
-
-		if ( empty( $filters ) ) {
-			return false;
-		}
-
-		$routeGates = $this->config->userRouteGates;
-
-		$inCfPerm = fn( $filter ) : bool => in_array(
-			$filter, $routeGates, true
-		);
-
-		$inUserPerm = fn( $filter ) : bool => in_array(
-			$filter, $this->sessionPermission, true
-		);
-
-		$boolVar = true !== $or;
-
-		if ( $or )
-		{
-			foreach ( $filters as $filter )
-			{
-				if ( true === $inCfPerm( $filter ) && true === $inUserPerm( $filter ) ) {
-					$boolVar = true;
-					break;
-				}
-			}
-		}
-		else
-		{
-			foreach ( $filters as $filter )
-			{
-				if ( false === $inCfPerm( $filter ) || false === $inUserPerm( $filter ) ) {
-					$boolVar = false;
-					break;
-				}
-			}
-		}
-
-		return $boolVar;
+		if ( $data === $this->sessionPerm ) { return true; }
+		return empty( array_diff( $data, $this->sessionPerm ) );
 	}
 
-	# ------------------------------------------------------------------------
-
-	/**
-	 * Use it late, because current CI4 not support filter on RestAPI method
-	 * @example Gate.Permission: extension.r,extension.c
-	 */
-	public function withGroup ( array $dataFilters ) : bool
+	private function _useAnd (array $data) : bool
 	{
-		if ( $this->isInvalid() ) {
-			return false;
-		}
-
-		if ( $this->isAdmin() ) {
-			return true;
-		}
-
-		$boolVar = true;
-
-		foreach ( $dataFilters as $gate => $filterPem )
-		{
-			if ( ! is_array( $filterPem ) || empty( $filterPem ) ) {
-				$errStr = 'The current gate of user-permission cannot be empty !';
-				throw new \Exception( $errStr, 403 );
-			}
-
-			$checkGate = $this->isValidPerm(
-				( string ) $gate,
-				$filterPem,
-				$this->sessionPermission
-			);
-
-			if ( false === $checkGate ) {
-				echo '<pre>';
-				die(var_dump([
-					'gate' => $gate,
-					'filterPem' => $filterPem,
-					'sessionPem' => $this->sessionPermission
-				]));
-				$boolVar = false;
-				break;
-			}
-
-			/**
-			 * Session store pattern
-			 */
-			$session = [
-				# --- Or 'all'
-				'permission' => [
-					'page' => [
-						'r', 'c', 'u'
-					],
-					'user' => [
-						'c', 'd'
-					]
-				]
-			];
-		}
-
-		return $boolVar;
-	}
-
-
-	# ------------------------------------------------------------------------
-
-	private function isValidPerm (
-		string $gate,
-		array $filterPem,
-		array $sessionPem
-	) : bool
-	{
-		$config = $this->config;
-
-		$hasConfig = in_array( $gate, $config->userRouteGates, true );
-		$hasSession = array_key_exists( $gate, $sessionPem );
-		if ( false === $hasConfig || false === $hasSession ) {
-			return false;
-		}
-
-		$currentSessionGate = $sessionPem[ $gate ] ?? [];
-		if ( in_array( $config->superAdminPermission, $currentSessionGate, true ) ) {
-			return true;
-		}
-
-		$hasFilterDiff = array_diff( $filterPem, $config->sessionPermission );
-		$hasSessionDiff = array_diff( $currentSessionGate, $config->sessionPermission );
-
-		if ( empty( $hasFilterDiff ) && empty( $hasSessionDiff ) ) {
-			return empty( array_diff( $filterPem, $currentSessionGate ) );
-		}
-
+		if ( $data === $this->sessionPerm ) { return true; }
 		return false;
 	}
 
-	private function getSessionData ( $key = 'permission' ) : array
+	private function _useExcept (array $data) : bool
+	{
+		if ( $data === $this->sessionPerm ) { return true; }
+		return empty( array_diff( $data, $this->sessionPerm ) );
+	}
+
+	private function _check1( array $data ) : bool
+	{
+		$passed = false;
+		if ( empty( $this->userRole[ 0] ) || empty( $this->userPerm[ 0] ) ) {
+			$passed = false;
+		}
+
+		if ( empty( $data ) ) {
+			$passed = false;
+		}
+
+		return $passed;
+	}
+
+	private function _getSessionData ( $key = 'permission' ) : array
 	{
 		$sessionData = ( array ) $this->authentication->getUserdata( $key );
-
 		return empty( $sessionData ) ? [] : $sessionData;
 	}
 
-	private function isAdmin () : bool
+	private function _isAdmin () : bool
 	{
-		$isAdmin = ( $this->sessionRole === $this->config->adminRole ) ||
-		isset( $this->sessionPermission[ 0 ] ) &&
-		( $this->sessionPermission[ 0 ] === $this->config->adminGate );
+		$isAdmin = ( $this->userRole === $this->config->adminRole ) ||
+		isset( $this->userPerm[ 0 ] ) &&
+		( $this->userPerm[ 0 ] === $this->config->adminGate );
 
 		return ( bool ) $isAdmin;
-	}
-
-	private function isInvalid() : bool
-	{
-		return empty( $this->sessionRole[ 0] ) || empty( $this->sessionPermission[ 0] );
 	}
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Libraries\Red2Horse\Adapter\CodeIgniter\System;
+namespace Red2Horse\Adapter\CodeIgniter\System;
 
 use CodeIgniter\Session\Handlers\BaseHandler;
 use CodeIgniter\Config\BaseConfig;

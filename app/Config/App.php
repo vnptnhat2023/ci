@@ -40,6 +40,18 @@ class App extends BaseConfig
 	public array $userPermission = [];
 	public array $userRole = [];
 
+	/**
+	 * Summary of sessionKey
+	 * @var array
+	 */
+	public array $sessionKey = [
+		'keys' => [
+			'perms', 'roles'
+		],
+		'perms' => [ 'permission' ],
+		'roles' => [ 'role' ]
+	];
+
 	/*
 	|--------------------------------------------------------------------------
 	| Index File
@@ -200,7 +212,7 @@ class App extends BaseConfig
 	|
 	*/
 	// public $sessionDriver            = 'CodeIgniter\Session\Handlers\FileHandler';
-	public $sessionDriver            = '\App\Libraries\Red2Horse\Adapter\CodeIgniter\System\Red2HorseFileHandler';
+	public $sessionDriver            = 'Red2Horse\Adapter\CodeIgniter\System\Red2HorseFileHandler';
 	public $sessionCookieName        = 'ci_session';
 	public $sessionExpiration        = 3600;
 	public $sessionSavePath          = WRITEPATH . 'session';

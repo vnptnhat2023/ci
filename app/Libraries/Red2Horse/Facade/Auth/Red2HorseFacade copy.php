@@ -5,9 +5,9 @@
 # --- Todo: Session & cookie -Todo ]
 # --------------------------------------------------------------------------
 
-namespace App\Libraries\Red2Horse\Facade\Auth;
+namespace Red2Horse\Facade\Auth;
 
-use App\Libraries\Red2Horse\Facade\{
+use Red2Horse\Facade\{
 	Session\SessionFacade as session,
 	Validation\ValidationFacade as validation,
 	Cookie\CookieFacade as cookie,
@@ -19,7 +19,7 @@ use App\Libraries\Red2Horse\Facade\{
 	Common\CommonFacade as common,
 };
 
-use App\Libraries\Red2Horse\Mixins\TraitSingleton;
+use Red2Horse\Mixins\TraitSingleton;
 
 # --------------------------------------------------------------------------
 

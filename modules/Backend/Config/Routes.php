@@ -24,6 +24,7 @@ $bapiOptions = [
 	// 'filter' => "r2h_role:unknown", 'r2h_permission:testing'
 	// 'filter' => 'r2h_role: !administrator'
 	'filter' => 'r2h_role: unknown, test'
+	// 'filter' => ['r2h_role: unknown, test']
 ];
 
 $routes->group( 'backend', $bapiOptions, function ( RouteCollection $routes )

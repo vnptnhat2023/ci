@@ -2,9 +2,9 @@
 
 declare( strict_types = 1 );
 
-namespace App\Libraries\Red2Horse\Adapter\CodeIgniter\Session;
+namespace Red2Horse\Adapter\CodeIgniter\Session;
 
-use App\Libraries\Red2Horse\Facade\Session\SessionFacadeInterface;
+use Red2Horse\Facade\Session\SessionFacadeInterface;
 
 interface SessionAdapterInterface extends SessionFacadeInterface
 {

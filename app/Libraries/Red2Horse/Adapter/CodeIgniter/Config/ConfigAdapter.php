@@ -1,14 +1,11 @@
 <?php
-
 declare( strict_types = 1 );
-
-namespace App\Libraries\Red2Horse\Adapter\Codeigniter\Config;
+namespace Red2Horse\Adapter\Codeigniter\Config;
 
 # --------------------------------------------------------------------------
 
 class ConfigAdapter implements ConfigAdapterInterface
 {
-
 	protected string $sessionCookieName;
 	protected string $sessionSavePath;
 	protected int $sessionExpiration;
@@ -17,8 +14,9 @@ class ConfigAdapter implements ConfigAdapterInterface
 	protected array $userPermission = [];
 	protected array $userRouteGates = [];
 	protected array $userRole = [];
-
-	# -------------------------------------------------------------------------
+	protected string $roleKey;
+	protected string $permKey;
+	protected array $sessionKey = [];
 
 	public function __construct()
 	{
@@ -32,9 +30,10 @@ class ConfigAdapter implements ConfigAdapterInterface
 		$this->userRouteGates = $appConfig->userRouteGates;
 		$this->userPermission = $appConfig->userPermission;
 		$this->userRole = $appConfig->userRole;
+
+		$this->sessionKey = $appConfig->sessionKey;
 	}
 
-	# -------------------------------------------------------------------------
 	public function sessionCookieName( ?string $name = null ) : string
 	{
 		if ( null === $name ) {
@@ -96,5 +95,10 @@ class ConfigAdapter implements ConfigAdapterInterface
 		}
 
 		return $this->userRole;
+	}
+
+	public function getSessionKey() : array
+	{
+		return $this->sessionKey;
 	}
 }

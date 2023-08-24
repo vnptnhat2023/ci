@@ -2,9 +2,9 @@
 
 declare( strict_types = 1 );
 
-namespace App\Libraries\Red2Horse\Adapter\Codeigniter\Request;
+namespace Red2Horse\Adapter\Codeigniter\Request;
 
-use App\Libraries\Red2Horse\Facade\Request\RequestFacadeInterface;
+use Red2Horse\Facade\Request\RequestFacadeInterface;
 
 /**
  * @package Red2ndHorseAuth

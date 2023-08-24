@@ -82,6 +82,7 @@
 			"viewcell",
 			"writepath",
 			"xmlhttprequest"
-		]
+		],
+		"php.version": "php7.4.33"
 	}
 }

@@ -2,7 +2,7 @@
 
 declare( strict_types = 1 );
 
-namespace App\Libraries\Red2Horse\Facade\Common;
+namespace Red2Horse\Facade\Common;
 
 interface CommonFacadeInterface
 {
@@ -23,4 +23,6 @@ interface CommonFacadeInterface
 	 * @return array|null
 	 */
 	public function get_file_info( string $file, $returned_values = ['name', 'server_path', 'size', 'date'] );
+
+	// public function valid_json( string $str = null ) : bool;
 }

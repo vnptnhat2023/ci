@@ -3,19 +3,30 @@
 namespace App\Controllers;
 
 use App\Libraries\DesignPattern as StateGyPattern;
-use App\Libraries\Red2Horse\Adapter\Codeigniter\Config\ConfigAdapter;
+use Red2Horse\Adapter\Codeigniter\Config\ConfigAdapter;
+use Red2Horse\Mixins\TraitEvents;
 use \Config\Services;
 use CodeIgniter\Events\Events;
-use App\Libraries\Red2Horse\Facade\Auth\AuthComponentBuilder;
-use App\Libraries\Red2Horse\Facade\Auth\Config;
-use App\Libraries\Red2Horse\Facade\Config\ConfigFacade;
-use App\Libraries\Red2Horse\Facade\Config\ConfigFacadeInterface;
+use Red2Horse\Facade\Auth\AuthComponentBuilder;
+use Red2Horse\Facade\Auth\Config;
+use Red2Horse\Facade\Config\ConfigFacade;
+use Red2Horse\Facade\Config\ConfigFacadeInterface;
 
 class Test extends BaseController {
 
+	// use TraitEvents;
 	public function index($a = '')
 	{
-		echo "aaaaa: {$a}";
+		// echo __FUNCTION__;
+		$obj = new class {
+			use TraitEvents;
+			public function o ($o) {
+				echo 'asd qwe rty yui' . PHP_EOL;
+				return $this;
+			}
+		};
+
+		echo $obj->o('oooo')->$a('vvd');
 	}
 
 	public function migrate()

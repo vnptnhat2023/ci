@@ -1,13 +1,8 @@
 <?php
-
 declare( strict_types = 1 );
-namespace App\Libraries\Red2Horse\Facade\Config;
+namespace Red2Horse\Facade\Config;
 
-# -------------------------------------------------------------------------
-
-use App\Libraries\Red2Horse\Mixins\TraitSingleton;
-
-# -------------------------------------------------------------------------
+use Red2Horse\Mixins\TraitSingleton;
 
 class ConfigFacade implements ConfigFacadeInterface
 {
@@ -16,19 +11,17 @@ class ConfigFacade implements ConfigFacadeInterface
 
 	protected ConfigFacadeInterface $config;
 
-	# ---  Map of User Permission: [ group => route => permission ]
-
-	# --- Todo: UserRouteGates must be ignore const::ADMINISTRATOR_GATE
+	# Map of User Permission: [ group => route => permission ]
+	# @Todo: UserRouteGates must be ignore const::ADMINISTRATOR_GATE
 	public const ADMINISTRATOR_GATE = 'all';
 	public const ADMINISTRATOR_PERMISSION = 'a';
 	public const ADMINISTRATOR_ROLE = 'administrator';
 
 	public const MEMBER_ROLE = 'member';
 
-	# --- Todo: Thinking more [ STR token => 'all' || 'all' => STR token ]
+	# @Todo: [ STR token => 'all' || 'all' => STR token ]
+	# User add more feature: page, post, ...
 	// public const SUPER_ADMINISTRATOR_TOKEN = 'random_bytes()';
-
-	# --- User add more feature: page, post, ...
 	protected array $userRouteGates = [
 		self::ADMINISTRATOR_GATE
 	];
@@ -46,6 +39,8 @@ class ConfigFacade implements ConfigFacadeInterface
 		self::ADMINISTRATOR_ROLE,
 		self::MEMBER_ROLE
 	];
+
+	protected array $sessionKey;
 
 
 	# --- Todo: 'post' => ['create'] => [ 'file', 'text', ... ]
@@ -83,6 +78,12 @@ class ConfigFacade implements ConfigFacadeInterface
 		}
 
 		return $this->$prop;
+	}
+
+	public function getSessionKey() : array
+	{
+		$this->sessionKey = $this->config->getSessionKey();
+		return $this->sessionKey;
 	}
 
 	public function userPermission () : array

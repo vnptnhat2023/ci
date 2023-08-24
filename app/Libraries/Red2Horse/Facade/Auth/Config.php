@@ -1,15 +1,14 @@
 <?php
-
 declare( strict_types = 1 );
+namespace Red2Horse\Facade\Auth;
 
-namespace App\Libraries\Red2Horse\Facade\Auth;
-
-use App\Libraries\Red2Horse\Facade\Config\ConfigFacade;
-use App\Libraries\Red2Horse\Mixins\TraitSingleton;
+use Red2Horse\{
+	Facade\Config\ConfigFacade,
+	Mixins\TraitSingleton
+};
 
 /**
- * 	FACADE, ADAPTER AUTH
- * 
+ * 	Facade, adapter
  * */
 class Config
 {
@@ -31,11 +30,11 @@ class Config
 	private const SESSION_NAME = 'r2h';
 	private const COOKIE_NAME = 'r2h';
 	private const TIME_TO_LIFE = 604800;
-  private const THROTTLE = [
-  	'type' => 1,
-  	'captchaAttempts' => 5,
-  	'maxAttempts' => 10,
-  	'timeoutAttempts' => 1800
+	private const THROTTLE = [
+		'type' => 1,
+		'captchaAttempts' => 5,
+		'maxAttempts' => 10,
+		'timeoutAttempts' => 1800
 	];
 
 	public string $session = self::SESSION_NAME;
@@ -60,6 +59,7 @@ class Config
 	public string $adminGate;
 	public string $adminPermission;
 	public string $adminRole;
+	public array $sessionKey;
 
 	/*
 	|--------------------------------------------------------------------------
@@ -68,20 +68,20 @@ class Config
 	*/
 	private const ADAPTER = 'CodeIgniter';
 
-	public function adapter( string $name = 'Auth', ?string $different = null ) : string
+	public function adapter( string $name = 'Auth', ?string $diff = null ) : string
 	{
-		$different = is_null( $different ) ? $name : $different;
+		$diff = is_null( $diff ) ? $name : $diff;
 
-		return '\\App\\Libraries\\Red2Horse\Adapter\\'
+		return 'Red2Horse\Adapter\\'
 		. self::ADAPTER
-		. "\\{$name}\\{$different}Adapter";
+		. "\\{$name}\\{$diff}Adapter";
 	}
 
-	public function facade( string $name = 'Auth', ?string $different = null ) : string
+	public function facade( string $name = 'Auth', ?string $diff = null ) : string
 	{
-		$different = is_null( $different ) ? $name : $different;
+		$diff = is_null( $diff ) ? $name : $diff;
 
-		return "\\App\\Libraries\\Red2Horse\Facade\\{$name}\\{$different}Facade";
+		return "Red2Horse\Facade\\{$name}\\{$diff}Facade";
 	}
 
 	/*
@@ -91,16 +91,14 @@ class Config
 	*/
 	public function __construct ()
 	{
-		$adapter = $this->adapter( 'Config' );
+		$adapterComponents = $this->adapter( 'Config' );
 
-		if ( ! class_exists( $adapter ) ) {
-			throw new \Exception(
-				"The adapter config file: {$adapter} not found.",
-				403
-			);
+		if ( ! class_exists( $adapterComponents ) ) {
+			throw new \Exception( "The adapter : {$adapterComponents} not found.", 403 );
 		}
 
-		$facade = ConfigFacade::getInstance( new $adapter );
+		$facade = ConfigFacade::getInstance( new $adapterComponents );
+		$this->sessionKey = $facade->getSessionKey();
 
 		# --- Authorization
 		$this->userRouteGates = $facade->userRouteGates();

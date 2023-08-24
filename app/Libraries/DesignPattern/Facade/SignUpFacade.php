@@ -1,12 +1,12 @@
 <?php
-
 declare( strict_types = 1 );
-
 namespace App\Libraries\DesignPattern\Facade;
 
-use App\Libraries\Red2Horse\Facade\Auth\Red2Horse;
-use App\Libraries\Red2Horse\Adapter\Codeigniter\Validation\ValidationAdapter;
-use App\Libraries\Red2Horse\Adapter\CodeIgniter\Auth\AuthAdapter;
+use Red2Horse\{
+	Facade\Auth\Red2Horse,
+	Adapter\Codeigniter\Validation\ValidationAdapter,
+	Adapter\CodeIgniter\Auth\AuthAdapter
+};
 
 /**
  * Facade pattern class
@@ -52,19 +52,19 @@ class SignUpFacade
 
 }
 # --- New instanced ValidationInterface, with any other constructor
-$CiValidate = new ValidationAdapter( service( 'validation' ), service( 'request' ) );
-// Create instance of classes
-$validate = new Validate( $CiValidate );
+// $CiValidate = new ValidationAdapter( service( 'validation' ), service( 'request' ) );
+// // Create instance of classes
+// $validate = new Validate( $CiValidate );
 
 
-$ciAuth = new AuthAdapter ( new Red2Horse() );
-$auth = new Auth( $ciAuth );
+// $ciAuth = new AuthAdapter ( new Red2Horse() );
+// $auth = new Auth( $ciAuth );
 
 
-$user = new User();
-$mail = new Mail();
+// $user = new User();
+// $mail = new Mail();
 
-# --- witFacade.php
-// Simple sign up process with facade pattern
-$facade = new SignUpFacade( $validate, $user, $auth, $mail );
-$facade->signUpUser( $userName, $userPass, $userMail );
+// # --- witFacade.php
+// // Simple sign up process with facade pattern
+// $facade = new SignUpFacade( $validate, $user, $auth, $mail );
+// $facade->signUpUser( $userName, $userPass, $userMail );
