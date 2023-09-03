@@ -24,7 +24,8 @@ if ( ! function_exists( 'r2hI18' ) )
 		<script src="<?= base_url('public/assets/js/vee-validate.min.js') ?>"></script>
 
 		<style>
-			body {
+			body
+			{
 				font-family: cursive, monospace, sans-serif;
 				/* background-image: url(https://source.unsplash.com/random); */
 				background-repeat: no-repeat;
@@ -35,29 +36,52 @@ if ( ! function_exists( 'r2hI18' ) )
 				min-height: 100vh;
 			}
 
-			.form-box-title {
+			.form-box .alert
+			{
+				background: none;
+			}
+
+			.alert .alert-success
+			{
+				border-color: #506950;
+			}
+
+			.alert .alert-danger
+			{
+				border-color: #dd7472;
+			}
+
+			.form-box-title
+			{
 				position: absolute;
 				top: 65px;
 				transform-origin: 0 0;
 				transform: rotate(90deg);
 				text-align: right;
 			}
-			.form-box {
+
+			.form-box
+			{
 				background: rgba(0,0,0,.8);
 				opacity: .9;
 				margin-top: 80px;
 				padding: 40px;
 				border-radius: 3.5px;
 			}
-			.form-box .form-group label{
+
+			.form-box .form-group label
+			{
 				color: #fff;
 			}
-			.form-box .form-group input{
+
+			.form-box .form-group input
+			{
 				border-radius: 0px;
 				/*height: 35px;*/
 				background: none;
 				color: #fff;
 			}
+
 			.submit-btn{
 				border-radius: 0px;
 				background: #fff!important;
@@ -89,7 +113,7 @@ if ( ! function_exists( 'r2hI18' ) )
 						<?php
 							if ( isset( $errors[ 0 ] ) ) {
 
-								echo '<div class="alert alert-warning">';
+								echo '<div class="alert alert-danger">';
 									foreach ( $errors as $error ) { echo "<p>{$error}</p>"; }
 								echo '</div>';
 
@@ -104,7 +128,7 @@ if ( ! function_exists( 'r2hI18' ) )
 							}
 						?>
 
-						<?php if ( false === $result->successfully ) : ?>
+						<?php if ( ! $result->successfully && ! $result->limited ) : ?>
 
 						<div class="form-group" :class="{'has-warning': errors.has( 'username' )}">
 							<label for="username"><?= r2hI18( 'labelUserOrEmail' ) ?></label>
@@ -143,7 +167,7 @@ if ( ! function_exists( 'r2hI18' ) )
 							</span>
 						</div>
 
-						<?php if ( true === $result->showCaptcha ) : helper( 'captcha' ); ?>
+						<?php if ( $result->showCaptcha ) : helper( 'captcha' ); ?>
 
 						<div class="form-group">
 							<label for="captcha"><?= r2hI18( 'labelCaptcha' ) ?></label>
@@ -159,7 +183,7 @@ if ( ! function_exists( 'r2hI18' ) )
 								style="margin: 0; padding: 0;">
 									<?= ci_captcha() ?>
 								</span>
-						  </div>
+							</div>
 						</div>
 
 						<?php endif ?>

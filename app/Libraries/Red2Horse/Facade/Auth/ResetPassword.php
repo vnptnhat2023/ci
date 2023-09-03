@@ -6,147 +6,85 @@ namespace Red2Horse\Facade\Auth;
 
 use Red2Horse\Mixins\TraitSingleton;
 
-use Red2Horse\Facade\{
-	Validation\ValidationFacade as validation,
-	Database\ThrottleFacade as throttleModel,
-	Database\UserFacade as userModel,
-	Common\CommonFacade as common,
+use function Red2Horse\Mixins\Functions\{
+	getComponents,
+	getInstance
 };
 
 class ResetPassword
 {
 	use TraitSingleton;
 
-	protected Config $config;
-	protected Message $message;
-	protected Utility $utility;
-	protected Password $passwordHandle;
-	protected Notification $notification;
-
-	protected common $common;
-	protected userModel $userModel;
-	protected throttleModel $throttleModel;
-	protected validation $validation;
-
 	private static ?string $username;
 	private static ?string $email;
 	private static ?string $captcha;
 
-	public function __construct( Config $config )
+	public function requestPassword ( string $u = null, string $e = null, string $c = null ) : bool
 	{
-		$this->config = $config;
-
-		$builder = AuthComponentBuilder::createBuilder( $config )
-		->common()
-		->database_user()
-		->database_throttle()
-		->validation()
-		->build();
-
-		$this->common = $builder->common;
-		$this->userModel = $builder->user;
-		$this->throttleModel = $builder->throttle;
-		$this->validation = $builder->validation;
-
-		$this->message = Message::getInstance( $config );
-		$this->utility = Utility::getInstance( $config );
-		$this->passwordHandle = Password::getInstance( $config );
-		$this->notification = Notification::getInstance( $config );
+		return getInstance( Utility::class ) ->typeChecker( 'forget', $u, null, $e, $c );
 	}
 
-	public function requestPassword
-	(
-		string $username = null,
-		string $email = null,
-		string $captcha = null
-	) : bool
+	public function forgetHandler ( string $u = null, string $e = null, string $c = null ) : bool
 	{
-		return $this->utility->typeChecker(
-			'forget',
-			$username,
-			null,
-			$email,
-			$captcha
-		);
-	}
+		self::$username = $u; self::$email = $e; self::$captcha = $c;
 
-	public function forgetHandler
-	(
-		string $username = null,
-		string $email = null,
-		string $captcha = null
-	) : bool
-	{
-		self::$username = $username;
-		self::$email = $email;
-		self::$captcha = $captcha;
+		$config = getInstance( Config::class );
+		$validation = getComponents( 'validation' );
 
-		$validation = $this->validation;
+		$group = getComponents( 'throttle' )->showCaptcha() 
+			? $config::FORGET_WITH_CAPTCHA 
+			: $config::FORGET;
 
-		$group = ( true === $this->throttleModel->showCaptcha() )
-		? $this->config::FORGET_WITH_CAPTCHA
-		: $this->config::FORGET;
-
-		$rules = $validation->getRules( $this->config->ruleGroup[ $group ] );
+		$rules = $validation->getRules( $config->ruleGroup[ $group ] );
 
 		$data = [
-			$this->config::USERNAME => self::$username,
-			$this->config::EMAIL => self::$email
+			$config::USERNAME => self::$username,
+			$config::EMAIL => self::$email
 		];
 
-		if ( false === $validation->isValid( $data, $rules ) )
+		$message = getInstance( Message::class );
+
+		if ( ! $validation->isValid( $data, $rules ) )
 		{
-			$this->message->incorrectInfo(
-				true,
-				array_values( $validation->getErrors() )
-			);
-
+			$message ->incorrectInfo( true, array_values( $validation->getErrors() ) );
 			return false;
 		}
 
-		$find_user = $this->userModel->getUserWithGroup(
-			$this->config->getColumString(),
-			$data
-		);
+		$find_user = getComponents( 'user' )
+			->getUserWithGroup( getInstance( Config::class )->getColumString(), $data );
 
-		if ( empty( $find_user ) ) {
-			$this->message->incorrectInfo();
-
+		if ( empty( $find_user ) )
+		{
+			$message->incorrectInfo();
 			return false;
 		}
 
-		$randomPw = $this->common->random_string();
-		$hashPw = $this->passwordHandle->getHashPass( $randomPw );
+		$common = getComponents( 'common' );
+		$randomPw = $common->random_string();
+		$hashPw = getInstance( Password::class )->getHashPass( $randomPw );
 
-		$updatePassword = $this->userModel->updateUser(
+		$updatePassword = getComponents( 'user' )->updateUser(
 			[ 'username' => $find_user[ 'username' ] ],
 			[ 'password' => $hashPw ]
 		);
 
 		$error = 'The system is busy, please come back later';
 
-		if ( false === $updatePassword ) {
-			$this->message::$errors[] = $error;
-
+		if ( ! $updatePassword )
+		{
+			$message::$errors[] = $error;
 			return false;
 		}
 
-		if ( ! $this->notification->mailSender( $randomPw ) ) {
-
-			$this->message::$errors[] = $error;
-
-			$this->common->log_message(
-				'error' ,
-				"Cannot sent email: {$find_user[ 'username' ]}"
-			);
-
+		if ( ! getInstance( Notification::class ) ->mailSender( $randomPw ) )
+		{
+			$message::$errors[] = $error;
+			$common->log_message( 'error' , "Cannot sent email: {$find_user[ 'username' ]}" );
 			return false;
 		}
 
-		$this->message::$successfully = true;
-		$this->message::$success[] = $this->common->lang(
-			'Red2Horse.successResetPassword'
-		);
+		$message::$successfully = true;
+		$message::$success[] = $common->lang( 'Red2Horse.successResetPassword' );
 
 		return true;
 	}

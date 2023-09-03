@@ -13,14 +13,23 @@ class EventAdapter implements EventAdapterInterface {
      * @property string[] $data
      */
     private array $events = [
-        'BeforeLogin'
+        'R2hBeforeLogin',
+        'R2hAfterLogin',
+
+        'R2hBeforeLogout',
+        'R2hAfterLogout'
     ];
 
     public function trigger ( string $name, array ...$args ) : bool
     {
         $this->init();
+
+        $search = [' ', '\\', '/', '\'', '"'];
+        $replace = [''];
+        $subject = ucwords( str_replace( [ '-', '_' ], ' ', $name ) );
         /** @var string $name CamelCase */
-        $name = str_replace( ' ', '', ucwords( str_replace( [ '-', '_' ], ' ', $name ) ) );
+        $name = str_replace( $search, $replace, $subject );
+
         return Events::trigger( $name, ...$args );
     }
 
@@ -35,10 +44,20 @@ class EventAdapter implements EventAdapterInterface {
         helper( 'event' );
         $eventHelper = new $this->eventHelper;
 
+        $i = 100;
+
         /** @var string $event */
-        foreach( $this->events as $name )
+        foreach( $this->events as $eventName )
         {
-            Events::on( $name, static fn( ...$data ) => $eventHelper->$name( ...$data ) );
+            if ( ! method_exists( $eventHelper, $eventName ) )
+            {
+                $err = sprintf( '[ERROR] Invalid method trigger %s::%s', $this->eventHelper, $eventName );
+                log_message( 'error', $err );
+            }
+
+            // echo '<p> class: ' . __CLASS__ . ' event name: ' . $eventName . '</p>';
+            // echo '<p> class event name: ' . $eventName . '</p>';
+            Events::on( $eventName, [ $eventHelper, $eventName ],  $i--);
         }
     }
 

@@ -1,30 +1,31 @@
 <?php
 
 declare( strict_types = 1 );
-
 namespace Red2Horse\Adapter\CodeIgniter\Database;
 
 use CodeIgniter\{
-	Cache\CacheInterface, Config\BaseConfig, Exceptions\ModelException, Model
-
+	Cache\CacheInterface,
+	Config\BaseConfig,
+	Exceptions\ModelException,
+	Model
 };
 use Config\Services;
 
 class ThrottleModelAdapter extends Model
 {
 	# Reset
-  private int $attempts = 0;
-  private int $type = 1;
+	private int $attempts = 0;
+	private int $type = 1;
 
-  private int $captchaAttempts = 5;
-  private int $maxAttempts = 10;
+	private int $captchaAttempts = 5;
+	private int $maxAttempts = 10;
 	private int $timeoutAttempts = 1800;
 
 	# Config
 	private BaseConfig $cacheConfig;
 	private string $cacheName = '';
 
-  protected $table = 'throttle';
+	protected $table = 'throttle';
 	protected $tempReturnType = 'object';
 
 	protected $dateFormat = 'datetime';
@@ -38,8 +39,8 @@ class ThrottleModelAdapter extends Model
 		'updated_at'
 	];
 
-  public function __construct ()
-  {
+	public function __construct ()
+	{
 		$config = config( 'Cache', false );
 		$config->storePath .= 'Red2HorseAuth';
 
@@ -50,14 +51,9 @@ class ThrottleModelAdapter extends Model
 			'-',
 			Services::request() ->getIPAddress()
 		);
-  }
+	}
 
-  public function config (
-		int $type,
-		int $captchaAttempts,
-		int $maxAttempts,
-		int $timeoutAttempts
-	) : self
+	public function config ( int $type, int $captchaAttempts, int $maxAttempts, int $timeoutAttempts ) : self
 	{
 		$this->type = $type;
 		$this->captchaAttempts = $captchaAttempts;
@@ -82,8 +78,9 @@ class ThrottleModelAdapter extends Model
 			->where( $whereQuery )
 			->first();
 
-			if ( null === $row ) {
-				throw new ModelException('The number of row cannot be empty' );
+			if ( null === $row )
+			{
+				throw new ModelException( 'The number of row cannot be empty' );
 			}
 
 			$this->attempts = $row->count;
@@ -92,36 +89,42 @@ class ThrottleModelAdapter extends Model
 		return $this;
 	}
 
-	public function getAttempts()
+	public function getAttempts () : int
 	{
 		return $this->attempts;
 	}
 
-  public function showCaptcha () : bool
-  {
+	public function showCaptcha () : bool
+	{
 		return $this->attempts >= $this->captchaAttempts;
-  }
+	}
 
-  public function limited () : bool
-  {
+	public function limited () : bool
+	{
 		return $this->attempts >= $this->maxAttempts;
 	}
 
-  /**
-   * Throttle multiple connections attempts to prevent abuse
-   * @return int attempts
-   */
-  public function throttle () : int
-  {
-		if ( $this->limited() ) return $this->maxAttempts;
+	/**
+	* Throttle multiple connections attempts to prevent abuse
+	* @return int attempts
+	*/
+	public function throttle () : int
+	{
+		if ( $this->limited() )
+		{
+			return $this->maxAttempts;
+		}
 
-		if ( $this->cache() ->isSupported() ) return $this->throttle_cache();
+		if ( $this->cache() ->isSupported() )
+		{
+			return $this->throttle_cache();
+		}
 
 		return $this->throttle_db();
-  }
+	}
 
-  public function throttle_cleanup () : void
-  {
+	public function throttle_cleanup () : void
+	{
 		if ( $this->cache() ->isSupported() )
 		{
 			$this->cache() ->delete( $this->cacheName );
@@ -149,12 +152,13 @@ class ThrottleModelAdapter extends Model
 			'created_at' => date( 'Y-m-d H:i:s', time() )
 		];
 
-		if ( false === $this->insert( $data, false ) ) {
+		if ( ! $this->insert( $data, false ) )
+		{
 			$err = (array) $this->errors( true );
 			log_message( 'error', implode( ',', $err ) );
 		}
 
-    return $this->attempts;
+		return $this->attempts;
 	}
 
 	private function throttle_cache () : int

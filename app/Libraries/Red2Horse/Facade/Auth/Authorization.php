@@ -3,6 +3,8 @@ declare( strict_types = 1 );
 namespace Red2Horse\Facade\Auth;
 use Red2Horse\Mixins\TraitSingleton;
 
+use function Red2Horse\Mixins\Functions\getInstance;
+
 /**
  * @todo filter->not [ or, and, except]
  * admin
@@ -10,8 +12,6 @@ use Red2Horse\Mixins\TraitSingleton;
 class Authorization
 {
 	use TraitSingleton;
-	protected Config $config;
-	protected Authentication $authentication;
 	protected array $userRole;
 	protected array $userPerm;
 	private array $roleList = [];
@@ -20,17 +20,14 @@ class Authorization
 	private array $configPerm = [];
 	private array $sessionPerm = [];
 
-	public function __construct ( Config $config )
+	public function __construct ()
 	{
-		$this->config = $config;
-		$this->authentication = Authentication::getInstance( $this->config );
-
 		// $this->userRole = $this->_getSessionData( $this->config->roleKey );
 		$this->userRole = $this->_getSessionData( 'role' );
 		// $this->userPerm = $this->_getSessionData( $this->config->permKey );
 		$this->userPerm = $this->_getSessionData( 'permKey' );
 
-		$this->configPerm = $this->config->userRouteGates;
+		$this->configPerm = getInstance( Config::class )->userRouteGates;
 		$this->sessionPerm = $this->userPerm;
 	}
 
@@ -38,7 +35,7 @@ class Authorization
 	 * @param array<string> $data
 	 * @param string $k [ or, and, except; Default or ]
 	 */
-	public function run(array $data, string $k = 'or') : bool
+	public function run ( array $data, string $k = 'or' ) : bool
 	{
 		if ( ! $this->_check1( $data ) ) { return false; }
 		if ( $this->_isAdmin() ) { return true; }
@@ -84,15 +81,16 @@ class Authorization
 
 	private function _getSessionData ( $key = 'permission' ) : array
 	{
-		$sessionData = ( array ) $this->authentication->getUserdata( $key );
+		$sessionData = ( array ) getInstance( Authentication::class )->getUserdata( $key );
 		return empty( $sessionData ) ? [] : $sessionData;
 	}
 
 	private function _isAdmin () : bool
 	{
-		$isAdmin = ( $this->userRole === $this->config->adminRole ) ||
+		$config = getInstance( Config::class );
+		$isAdmin = ( $this->userRole === $config->adminRole ) ||
 		isset( $this->userPerm[ 0 ] ) &&
-		( $this->userPerm[ 0 ] === $this->config->adminGate );
+		( $this->userPerm[ 0 ] === $config->adminGate );
 
 		return ( bool ) $isAdmin;
 	}

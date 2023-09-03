@@ -16,16 +16,16 @@ class ValidationAdapter implements ValidationAdapterInterface
 	public function isValid ( array $data, array $rules ) : bool
 	{
 		return Services::validation()
-		->withRequest( \Config\Services::request() )
-		->setRules( $rules )
-		->run( $data );
+			->withRequest( Services::request() )
+			->setRules( $rules )
+			->run( $data );
 	}
 
 	public function getErrors( string $field = null ) : array
 	{
 		return ! empty( $field )
-		? Services::validation()->getErrors()
-		: [ Services::validation()->getError( $field ) ];
+			? Services::validation() ->getErrors()
+			: [ Services::validation() ->getError( $field ) ];
 	}
 
 	public function reset(): void
@@ -54,7 +54,10 @@ class ValidationAdapter implements ValidationAdapterInterface
 			}
 		}
 
-		if ( empty( $result ) ) throw new \Exception( "Error the rule is required", 403 );
+		if ( empty( $result ) )
+		{
+			throw new \Exception( "Error the rule is required", 403 );
+		}
 
 		return $result;
 	}
@@ -62,23 +65,20 @@ class ValidationAdapter implements ValidationAdapterInterface
 	public function ruleStore() : array
 	{
 		$config = Config::getInstance();
-		$generalRules = [
 
+		$generalRules = [
 			$config::USERNAME => [
 				'label' => lang( 'Red2Horse.labelUsername' ),
 				'rules' => 'trim|required|min_length[5]|max_length[32]|alpha_dash'
 			],
-
 			$config::PASSWORD => [
 				'label' => lang( 'Red2Horse.labelPassword' ),
 				'rules' => 'trim|required|min_length[5]|max_length[32]|alpha_numeric_punct'
 			],
-
 			$config::EMAIL => [
 				'label' => lang( 'Red2Horse.labelEmail' ),
 				'rules' => 'trim|required|min_length[5]|max_length[128]|valid_email'
 			],
-
 			$config::CAPTCHA => [
 				'label' => lang( 'Red2Horse.labelCaptcha' ),
 				'rules' => 'trim|required|min_length[5]|ci_captcha'

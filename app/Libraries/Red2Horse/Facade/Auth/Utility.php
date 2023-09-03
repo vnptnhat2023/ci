@@ -6,108 +6,84 @@ namespace Red2Horse\Facade\Auth;
 
 use Red2Horse\Mixins\TraitSingleton;
 
-use Red2Horse\Facade\{
-	Common\CommonFacade as common,
-	Database\ThrottleFacade as throttleModel
+use function Red2Horse\Mixins\Functions\{
+	getComponents,
+	getInstance
 };
 
 class Utility
 {
 	use TraitSingleton;
 
-	protected Config $config;
-
-	protected common $common;
-	protected throttleModel $throttleModel;
-
-	public function __construct( Config $config )
-	{
-		$this->config = $config;
-
-		$builder = AuthComponentBuilder::createBuilder( $config )
-		->common()
-		->database_throttle()
-		->build();
-
-		$this->common = $builder->common;
-		$this->throttleModel = $builder->throttle;
-	}
-
-	/**
-	 * @param string $type login|forget
-	 * @param string|null $username
-	 * @param string|null $password
-	 * @param string|null $email
-	 * @param string|null $captcha
-	 * @return bool
-	 * @throws \Exception
-	 */
 	public function typeChecker
 	(
 		$type = 'login',
-		string $username = null,
+		string $u = null,
 		string $password = null,
-		string $email = null,
-		string $captcha = null
+		string $e = null,
+		string $c = null
 	) : bool
 	{
-		if ( ! in_array( $type, [ 'login', 'forget' ] ) ) {
-			throw new \Exception( 'Type must be in "login or forget"', 1 );
+		if ( ! in_array( $type, [ 'login', 'forget' ] ) )
+		{
+			throw new \Exception( 'Invalid type checker."', 403 );
 		}
 
 		$requestType = ( $type === 'login' ) ? 'password' : 'email';
 
-		$isNullUsername = is_null( $username );
-		$isNullType = is_null( $$requestType );
+		$isNullUsername = null === $u;
+		$isNullType = null === $requestType;
 		$hasRequest = ! $isNullUsername && ! $isNullType;
 
-		$authentication = Authentication::getInstance( $this->config );
-		$message = Message::getInstance( $this->config );
+		$authentication = getInstance( Authentication::class );
+		$message = getInstance( Message::class );
 
-		if ( true === $authentication->isLogged( true ) )
+		if ( $authentication->isLogged( true ) )
 		{
-			( $type === 'forget' )
-			? $message::$incorrectResetPassword = true
-			# Didn't understand: when "Dependency Injected = INFINITY LOOP"
-			: $authentication->setLoggedInSuccess( $authentication->getUserdata() );
+			$type === 'forget'
+				? $message::$incorrectResetPassword = true
+				: $authentication->setLoggedInSuccess( $authentication->getUserdata() );
 
 			return true;
 		}
 
-		if ( true === $this->throttleModel->limited() )
+		if ( getComponents( 'throttle' )->limited() )
 		{
 			$errArg = [
-				'num' => gmdate( 'i', $this->config->throttle->timeoutAttempts ),
+				'num' => gmdate( 'i', getInstance( Config::class )->throttle->timeoutAttempts ),
 				'type' => 'minutes'
 			];
-			$errStr = $this->common->lang( 'Red2Horse.errorThrottleLimitedTime', $errArg );
+			$errStr = getComponents( 'common' )->lang( 'Red2Horse.errorThrottleLimitedTime', $errArg );
 			$message::$errors[] = $errStr;
 
 			return false;
 		}
 
-		if ( false === $hasRequest ) return false;
+		if ( ! $hasRequest )
+		{
+			return false;
+		}
 
 		return ( $type === 'login' )
-		? $authentication->loginHandler()
-		: ResetPassword::getInstance( $this->config )->forgetHandler(
-			$username,
-			$email,
-			$captcha
-		);
+			? $authentication->loginHandler()
+			: getInstance( ResetPassword::class )->forgetHandler( $u, $e, $c );
 	}
 
 	public function trigger ( \Closure $closure, string $event, array $eventData )
 	{
-		if ( ! isset( $closure->{$event} ) || empty( $closure->{$event} ) ) return $eventData;
+		if ( ! isset( $closure->{$event} ) || empty( $closure->{$event} ) )
+		{
+			return $eventData;
+		}
 
 		foreach ( $closure->{$event} as $callback )
 		{
-			if ( ! method_exists( $closure, $callback ) ) {
+			if ( ! method_exists( $closure, $callback ) )
+			{
 				throw new \Exception( 'Invalid Method Triggered', 403 );
 			}
 
-			$eventData = $closure->{$callback}( $eventData );
+			$eventData = $closure->{ $callback }( $eventData );
 		}
 
 		return $eventData;

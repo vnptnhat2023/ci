@@ -1,62 +1,37 @@
 <?php
+
 declare( strict_types = 1 );
+
 namespace Red2Horse\Facade\Auth;
 
-use Red2Horse\{
-	Facade\Database\ThrottleFacade as throttleModel,
-	Facade\Event\EventFacadeInterface,
-	Mixins\TraitSingleton
+use Red2Horse\Mixins\
+{
+	TraitSingleton,
+	TraitCall
+};
+
+use function Red2Horse\Mixins\Functions\
+{
+	callClass
 };
 
 class Red2Horse
 {
-	use TraitSingleton;
-
-	public Config $config;
-	public EventFacadeInterface $event;
-	protected throttleModel $throttleModel;
-	protected Authentication $authentication;
-	protected Message $message;
-	// protected ReflectClass___ $reflect;
-
-	public function __construct ( ?Config $config = null )
-	{
-		$this->config = $config ?? Config::getInstance();
-
-		$builder = AuthComponentBuilder::createBuilder( $this->config )
-		->common()
-		->database_throttle()
-		->event()
-		->build();
-
-		$this->event = $builder->event;
-		$throttle = $this->config->throttle;
-		$this->throttleModel = $builder->throttle;
-
-		$this->throttleModel->config(
-			$throttle->type,
-			$throttle->captchaAttempts,
-			$throttle->maxAttempts,
-			$throttle->timeoutAttempts
-		);
-
-		$this->authentication = Authentication::getInstance( $this->config );
-		$this->message = Message::getInstance( $this->config );
-	}
+	use TraitSingleton, TraitCall;
 
 	public function login ( string $u = null, string $p = null, bool $r = false, string $c = null ) : bool
 	{
-		return $this->authentication->login( $u, $p, $r, $c );
+		return callClass( Authentication::class, false )->login( $u, $p, $r, $c );
 	}
 
 	public function logout () : bool
 	{
-		return $this->authentication->logout();
+		return callClass( Authentication::class, false )->logout();
 	}
 
 	public function requestPassword ( string $u = null, string $e = null, string $c = null ) : bool
 	{
-		return ResetPassword::getInstance( $this->config )->requestPassword( $u, $e, $c );
+		return callClass( ResetPassword::class, false )->requestPassword( $u, $e, $c );
 	}
 
 	/**
@@ -65,58 +40,58 @@ class Red2Horse
 	 */
 	public function getUserdata ( string $key = null )
 	{
-		return $this->authentication->getUserdata( $key );
+		return callClass( Authentication::class, false )->getUserdata( $key );
 	}
 
 	public function getHashPass ( string $password ) : string
 	{
-		return Password::getInstance()->getHashPass( $password );
+		return callClass( Password::class, false )->getHashPass( $password );
 	}
 
 	public function getVerifyPass ( string $p, string $hashed ) : bool
 	{
-		return Password::getInstance()->getVerifyPass( $p, $hashed );
+		return callClass( Password::class, false )->getVerifyPass( $p, $hashed );
 	}
 
 	/** @return object|array */
 	public function getResult ()
 	{
-		return $this->message->getResult();
+		return callClass( Message::class, false )->getResult();
 	}
 
 	public function getMessage ( array $add = [], bool $asObject = true )
 	{
-		return $this->message->getMessage( $add, $asObject );
+		return callClass( Message::class, false )->getMessage( $add, $asObject );
 	}
 
 	public function withPermission ( array $data, bool $or = true ) : bool
 	{
-		return Authorization::getInstance( $this->config )->run( $data );
+		return callClass( Authorization::class, false )->run( $data );
 	}
 
-	# @Todo: not using: multiple filters on single route
+	# @Todo: late
 	public function withGroup( array $data ) : bool
 	{
-		return Authorization::getInstance( $this->config )->run( $data );
+		return callClass( Authorization::class, false )->run( $data );
 	}
 
 	public function withRole ( array $role, bool $or = true ) : bool
 	{
-		return Authorization::getInstance( $this->config )->run( $role );
+		return callClass( Authorization::class, false )->run( $role );
 	}
 
 	public function isLogged ( bool $withCookie = false ) : bool
 	{
-		return $this->authentication->isLogged( $withCookie );
+		return callClass( Authentication::class, false )->isLogged( $withCookie );
 	}
 
 	public function regenerateSession ( array $userData ) : bool
 	{
-		return SessionHandle::getInstance( $this->config )->regenerateSession( $userData );
+		return callClass( SessionHandle::class, false )->regenerateSession( $userData );
 	}
 
 	public function regenerateCookie () : void
 	{
-		CookieHandle::getInstance( $this->config )->regenerateCookie();
+		callClass( CookieHandle::class, false )->regenerateCookie();
 	}
 }

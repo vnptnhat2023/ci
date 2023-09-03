@@ -70,18 +70,14 @@ class Config
 
 	public function adapter( string $name = 'Auth', ?string $diff = null ) : string
 	{
-		$diff = is_null( $diff ) ? $name : $diff;
-
-		return 'Red2Horse\Adapter\\'
-		. self::ADAPTER
-		. "\\{$name}\\{$diff}Adapter";
+		$diff = $diff ?? $name;
+		return 'Red2Horse\\Adapter\\' . self::ADAPTER . "\\{$name}\\{$diff}Adapter";
 	}
 
 	public function facade( string $name = 'Auth', ?string $diff = null ) : string
 	{
-		$diff = is_null( $diff ) ? $name : $diff;
-
-		return "Red2Horse\Facade\\{$name}\\{$diff}Facade";
+		$diff = $diff ?? $name;
+		return "Red2Horse\\Facade\\{$name}\\{$diff}Facade";
 	}
 
 	/*

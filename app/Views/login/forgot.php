@@ -25,59 +25,87 @@ if ( ! function_exists( 'r2hI18' ) )
 		<script src="<?= base_url('public/assets/js/vee-validate.min.js') ?>"></script>
 
 		<style>
-	 		body {
+			body
+			{
 				font-family: cursive, monospace, sans-serif;
-      	/* background-image: url(https://source.unsplash.com/random); */
-      	background-repeat: no-repeat;
-        background-position: center center;
-        background-size: cover;
-        margin: 0px;
-        padding: 0px;
-        min-height: 100vh;
-      }
-			.form-box-title {
+				/* background-image: url(https://source.unsplash.com/random); */
+				background-repeat: no-repeat;
+				background-position: center center;
+				background-size: cover;
+				margin: 0px;
+				padding: 0px;
+				min-height: 100vh;
+			}
+
+			.form-box .alert
+			{
+				background: none;
+			}
+
+			.alert .alert-success
+			{
+				border-color: #506950;
+			}
+
+			.alert .alert-danger
+			{
+				border-color: #dd7472;
+			}
+
+			.form-box-title
+			{
 				position: absolute;
 				top: 65px;
 				transform-origin: 0 0;
 				transform: rotate(90deg);
 				text-align: right;
 			}
-      .form-box {
-        background: rgba(0,0,0,.8);
-        background-repeat: no-repeat;
-        background-position: center center;
-		    opacity: .9;
-		    margin-top: 80px;
-		    padding: 40px;
-		    border-radius: 3.5px;
-      }
-      /*.form-box {
-        top: 50%;
-		    left: 50%;
-		    position: absolute;
-		    width: 500px;
-		    margin-top: 100px;
-		    background: rgba(0,0,0,.8);
-		    margin-left: -250px;
-		    padding: 20px 30px;
-		    line-height: 50px;
-      }*/
-      .form-box .form-group label{
-        color: #fff;
-      }
-      .form-box .form-group input{
-        border-radius: 0px;
-        /*height: 35px;*/
-        background: none;
-        color: #fff;
-      }
-      .submit-btn {
-        border-radius: 0px;
-        background: #fff!important;
-        color: red!important;
-        padding: 10px 25px;
-        font-weight: 600
-      }
+
+			.form-box
+			{
+				background: rgba(0,0,0,.8);
+				background-repeat: no-repeat;
+				background-position: center center;
+				opacity: .9;
+				margin-top: 80px;
+				padding: 40px;
+				border-radius: 3.5px;
+			}
+
+			/*.form-box
+			{
+				top: 50%;
+				left: 50%;
+				position: absolute;
+				width: 500px;
+				margin-top: 100px;
+				background: rgba(0,0,0,.8);
+				margin-left: -250px;
+				padding: 20px 30px;
+				line-height: 50px;
+			}*/
+
+			.form-box .form-group label
+			{
+				color: #fff;
+			}
+
+			.form-box .form-group input
+			{
+				border-radius: 0px;
+				/*height: 35px;*/
+				background: none;
+				color: #fff;
+			}
+
+			.submit-btn
+			{
+				border-radius: 0px;
+				background: #fff!important;
+				color: red!important;
+				padding: 10px 25px;
+				font-weight: 600
+			}
 		</style>
 		<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
 		<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -100,7 +128,7 @@ if ( ! function_exists( 'r2hI18' ) )
 
 						<?php
 							if ( isset( $errors[0] ) ) {
-								echo '<div class="alert alert-warning">';
+								echo '<div class="alert alert-danger">';
 								foreach ($errors as $error) { echo "<p>{$error}</p>"; }
 								echo '</div>';
 							}
@@ -111,6 +139,8 @@ if ( ! function_exists( 'r2hI18' ) )
 								echo '</div>';
 							}
 						?>
+
+						<?php if ( ! $result->successfully && ! $result->limited ) : ?>
 
 						<div class="form-group" :class="{'has-warning': errors.has('username')}">
 							<label for="username"><?= r2hI18( 'labelUsername', false ) ?></label>
@@ -177,6 +207,8 @@ if ( ! function_exists( 'r2hI18' ) )
 							:disabled="errors.has('username') || errors.has('email')"><?= r2hI18( 'LabelBtnResetSubmit' ) ?></button>
 							<button type="reset" class="btn btn-default"><?= r2hI18( 'LabelBtnClear') ?></button>
 						</div>
+
+						<?php endif; ?>
 
 						<div>
 							<a href="<?php echo base_url('login') ?>">

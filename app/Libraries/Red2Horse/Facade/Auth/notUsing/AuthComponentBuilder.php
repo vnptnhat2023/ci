@@ -1,4 +1,5 @@
 <?php
+
 declare( strict_types = 1 );
 namespace Red2Horse\Facade\Auth;
 
@@ -18,6 +19,8 @@ use Red2Horse\Facade\{
 
 use Red2Horse\Mixins\TraitSingleton;
 
+use function Red2Horse\Mixins\Functions\getInstance;
+
 class AuthComponentBuilder
 {
 	use TraitSingleton;
@@ -33,13 +36,15 @@ class AuthComponentBuilder
 	public common $common;
 	public event $event;
 
-	public static function createBuilder ( Config $config )
+	public function createBuilder ()
 	{
-		return AuthBuilder::getInstance( $config );
+		return getInstance( AuthBuilder::class );
 	}
 
 	public function build ( array $builder )
 	{
+		$config = getInstance( Config::class );
+
 		foreach ( $builder as $class => $component )
 		{
 			if ( empty( $this->$class ) )
@@ -48,11 +53,11 @@ class AuthComponentBuilder
 
 				if ( in_array( $class, [ 'user', 'throttle' ], true ) )
 				{
-					$facade = Config::getInstance()->facade( 'Database', $classAdapter );
+					$facade = $config->facade( 'Database', $classAdapter );
 				}
 				else
 				{
-					$facade = Config::getInstance()->facade( $classAdapter );
+					$facade = $config->facade( $classAdapter );
 				}
 
 				$this->$class = $facade::getInstance( new $component );
