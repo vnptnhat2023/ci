@@ -7,8 +7,7 @@ use Red2Horse\Facade\Auth\Config;
 use Red2Horse\Mixins\
 {
     RegistryClass___ as Registry,
-    CallClass___ as Call,
-    TraitCall
+    CallClass___ as Call
 };
 
 /**
@@ -51,15 +50,17 @@ function getInstance ( string $className, bool $getShared = true )
         $classData = instanceData( $className );
         return $classData[ 'instance' ];
     }
+
     return new $className;
 }
 
 /**
  * @param string $name name only ( not namespace )
+ * @param bool $getShared adapter only
  */
-function getComponents ( string $name ) : object
+function getComponents ( string $name, bool $getShared = true ) : object
 {
-    $config = getInstance( Config::class );
+    $config = getInstance( Config::class, $getShared );
     $name = ucfirst( $name );
     $facadeName = $config->facade( $name );
 
@@ -72,19 +73,33 @@ function getComponents ( string $name ) : object
     {
         $adapterName = $config->adapter( $name );
     }
-    
-    return $facadeName::getInstance( new $adapterName );
+
+    if ( $getShared && method_exists( $adapterName, 'getInstance' ) )
+    {
+        $adapterInstance = $adapterName::getInstance();
+    }
+    else
+    {
+        return new $facadeName( new $adapterName );
+    }
+
+    return $facadeName::getInstance( $adapterInstance );
 }
 
-function getInstanceMethods ( string $className ) : array
+function getInstanceMethods ( string $className, bool $getShared = true ) : array
 {
-    $classData = instanceData( $className );
-    return $classData[ 'methods' ];
+    if ( $getShared )
+    {
+        $classData = instanceData( $className );
+        return $classData[ 'methods' ];
+    }
+
+    return get_class_methods( $className );
 }
 
-function setClass ( string $className, array $value, bool $override = false ) : void
+function setClass ( string $className, array $value, bool $override = false ) : bool
 {
-    Registry::set( $className, $value, $override );
+    return Registry::set( $className, $value, $override );
 }
 
 function delClass ( string $className ) : bool
@@ -92,29 +107,29 @@ function delClass ( string $className ) : bool
     return Registry::delete( $className );
 }
 
-function callClass ( string $className, bool $getShared = true  ) : object
+/**
+ * @param bool $getShared true: callClass___ class; false: anonymous class
+ */
+function callClass ( string $className, bool $getShared = true, array $arguments = [] ) : object
 {
     if ( $getShared )
     {
-        return getInstance( Call::class )->run( $className );
+        $instance = Call::getInstance( $className, $arguments );
+    }
+    else
+    {
+        $instance = new class( $className, $arguments )
+        {
+            use \Red2Horse\Mixins\TraitCall;
+
+            public function __construct( string $className, array $arguments )
+            {
+                $this->traitCallback[ 'before' ] = $arguments[ 'traitCallback' ][ 'before' ] ?? false;
+                $this->traitCallback[ 'after' ] = $arguments[ 'traitCallback' ][ 'after' ] ?? false;
+                $this->run( $className );
+            }
+        };
     }
 
-    $class = new class( $className )
-    {
-        use TraitCall;
-
-        public function __construct( $className )
-        {
-            $this->traitCallback[ 'before' ] = true;
-            $this->traitCallback[ 'after' ] = true;
-            $this->traitCallback[ 'arguments' ] = [ 'argument 2e' ];
-
-            $this->traitBeforePrefix = 'R2h_before_';
-            $this->traitBeforePrefix = 'R2h_after_';
-
-            $this->run( $className );
-        }
-    };
-
-    return $class;
+    return $instance;
 }

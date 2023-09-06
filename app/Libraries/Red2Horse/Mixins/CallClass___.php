@@ -7,14 +7,11 @@ class CallClass___ {
 
     use TraitCall, TraitSingleton;
 
-    public function __construct()
+    public function __construct( $className = null, array $arguments = [] )
     {
-        $this->traitCallback[ 'before' ] = true;
-        $this->traitCallback[ 'after' ] = true;
-        $this->traitCallback[ 'arguments' ] = [ 'argument 2e' ];
+        $this->traitCallback[ 'before' ] = $arguments[ 'traitCallback' ][ 'before' ] ?? false;
+        $this->traitCallback[ 'after' ] = $arguments[ 'traitCallback' ][ 'after' ] ?? false;
 
-        $this->traitBeforePrefix = 'R2h_before_';
-        $this->traitBeforePrefix = 'R2h_after_';
+        $this->run( $className );
     }
-
 }

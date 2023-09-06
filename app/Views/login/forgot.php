@@ -1,12 +1,9 @@
 <?php
 
-if ( ! function_exists( 'r2hI18' ) )
+function r2hI18 ( string $field, bool $w = false ) : string
 {
-	function r2hI18 ( string $field, bool $w = true ) : string {
-		$str = lang( "Red2Horse.{$field}" );
-
-		return true === $w ? ucwords( $str ) : ucfirst( $str );
-	}
+	$str = lang( "Red2Horse.{$field}" );
+	return $w ? ucwords( $str ) : ucfirst( $str );
 }
 
 ?>
@@ -17,12 +14,12 @@ if ( ! function_exists( 'r2hI18' ) )
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title><?= ucfirst(lang('Red2Horse.LabelBtnResetSubmit')) ?></title>
+		<title><?= r2hI18( lang( 'resetPassword' ), true ) ?></title>
 
-		<link rel="stylesheet" href="<?= base_url('public/assets/css/bootstrap.min.css') ?>">
+		<link rel="stylesheet" href="<?= base_url( 'public/assets/css/bootstrap.min.css' ) ?>">
 
-		<script src="<?= base_url('public/assets/js/vue@2.6.11.min.js') ?>"></script>
-		<script src="<?= base_url('public/assets/js/vee-validate.min.js') ?>"></script>
+		<script src="<?= base_url( 'public/assets/js/vue@2.6.11.min.js' ) ?>"></script>
+		<script src="<?= base_url( 'public/assets/js/vee-validate.min.js ') ?>"></script>
 
 		<style>
 			body
@@ -54,11 +51,13 @@ if ( ! function_exists( 'r2hI18' ) )
 
 			.form-box-title
 			{
-				position: absolute;
+				color: wheat;
+				margin-bottom: 50px;
+				/* position: absolute;
 				top: 65px;
 				transform-origin: 0 0;
 				transform: rotate(90deg);
-				text-align: right;
+				text-align: right; */
 			}
 
 			.form-box
@@ -120,11 +119,11 @@ if ( ! function_exists( 'r2hI18' ) )
 				<div class="col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3"
 				id="forget-password-page">
 
-					<?= form_open(  base_url( 'login/forgot' ) , '@submit="submit($event)"' ) ?>
+					<?= form_open( base_url( 'login/forgot' ) , '@submit="submit($event)"' ) ?>
 
 					<div class="form-box">
 
-						<h2 class="form-box-title"><?= r2hI18( 'labelResetPasswordPage' ) ?></h2>
+						<h2 class="form-box-title"><?= r2hI18( 'resetPassword' ) ?></h2>
 
 						<?php
 							if ( isset( $errors[0] ) ) {
@@ -179,7 +178,7 @@ if ( ! function_exists( 'r2hI18' ) )
 
 						</div>
 
-						<?php if ( true === $result->showCaptcha ) : helper( 'captcha' ); ?>
+						<?php if ( $result->showCaptcha ) : helper( 'captcha' ); ?>
 
 						<div class="form-group">
 							<label for="captcha"><?= r2hI18( 'labelCaptcha', false ) ?></label>
@@ -195,7 +194,7 @@ if ( ! function_exists( 'r2hI18' ) )
 								style="margin: 0; padding: 0;">
 									<?= ci_captcha() ?>
 								</span>
-						  </div>
+							</div>
 						</div>
 
 						<?php endif ?>
@@ -205,17 +204,15 @@ if ( ! function_exists( 'r2hI18' ) )
 							type="submit"
 							class="btn btn-primary"
 							:disabled="errors.has('username') || errors.has('email')"><?= r2hI18( 'LabelBtnResetSubmit' ) ?></button>
-							<button type="reset" class="btn btn-default"><?= r2hI18( 'LabelBtnClear') ?></button>
 						</div>
 
-						<?php endif; ?>
-
-						<div>
+						<div style="margin: 30px 0;">
 							<a href="<?php echo base_url('login') ?>">
-								<span class="glyphicon glyphicon-arrow-left"></span>&nbsp;
-								<span><?= r2hI18( 'LabelBtnLoginSubmit' ) ?></span>
+								<!-- <span class="glyphicon glyphicon-arrow-left"></span>&nbsp; -->
+								<span><?= r2hI18( 'login' ) ?></span>
 							</a>
 						</div>
+						<?php endif; ?>
 					</div>
 					<?php echo form_close() ?>
 

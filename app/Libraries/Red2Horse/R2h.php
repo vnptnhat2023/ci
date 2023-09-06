@@ -4,16 +4,14 @@ declare( strict_types = 1 );
 namespace Red2Horse;
 
 use Red2Horse\{
-    Mixins\TraitCall,
     Mixins\TraitSingleton,
-
     Facade\Auth\Config,
     Facade\Auth\Red2Horse
 };
 
 use function Red2Horse\Mixins\Functions\
 {
-    getComponents, setClass
+    callClass, getComponents, setClass
 };
 
 define( 'R2H_PATH', __DIR__ );
@@ -23,27 +21,21 @@ require_once( $functions_path . '/Functions.php' );
 
 class R2h
 {
-    use TraitCall, TraitSingleton;
+    use TraitSingleton;
 
     public function __construct ( ?Config $config = null )
 	{
         $config = $config ?? Config::getInstance();
-		setClass
-        (
-            Config::class,
-            [ 'methods' => $config::_getMPs(), 'instance' => $config ],
-            true
-        );
+        $configData = [ 'methods' => $config::_getMPs(), 'instance' => $config ];
+		setClass( Config::class, $configData, true );
 
-        $throttle = $config->throttle;
-        getComponents( 'throttle' )->config(
-			$throttle->type,
-			$throttle->captchaAttempts,
-			$throttle->maxAttempts,
-			$throttle->timeoutAttempts
-		);
+        $throttle = array_values( ( array ) $config->throttle );
+        getComponents( 'throttle' )->config( ...$throttle );
+    }
 
-        Red2Horse::getInstance( $config );
-        $this->run( Red2Horse::class );
+    public function __call ( string $name, array $arguments = [] )
+    {
+        $setting = [ 'traitCallback' => [ 'before' => true, 'after' => true ] ];
+        return callClass( Red2Horse::class, true, $setting ) ->__call( $name, $arguments );
     }
 }

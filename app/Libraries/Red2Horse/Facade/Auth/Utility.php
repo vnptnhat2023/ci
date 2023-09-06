@@ -38,11 +38,13 @@ class Utility
 		$authentication = getInstance( Authentication::class );
 		$message = getInstance( Message::class );
 
-		if ( $authentication->isLogged( true ) )
+		if ( $authentication->isLogged() || $authentication->isLogged( true ) )
 		{
 			$type === 'forget'
-				? $message::$incorrectResetPassword = true
-				: $authentication->setLoggedInSuccess( $authentication->getUserdata() );
+				? getInstance( ResetPassword::class )
+					->alreadyLoggedIn( $authentication->getUserdata() )
+				: $authentication
+					->setLoggedInSuccess( $authentication->getUserdata() );
 
 			return true;
 		}
@@ -50,8 +52,8 @@ class Utility
 		if ( getComponents( 'throttle' )->limited() )
 		{
 			$errArg = [
-				'num' => gmdate( 'i', getInstance( Config::class )->throttle->timeoutAttempts ),
-				'type' => 'minutes'
+				'number' => gmdate( 'i', getInstance( Config::class )->throttle->timeoutAttempts ),
+				'minutes' => 'minutes'
 			];
 			$errStr = getComponents( 'common' )->lang( 'Red2Horse.errorThrottleLimitedTime', $errArg );
 			$message::$errors[] = $errStr;

@@ -17,7 +17,7 @@ class EventFacade implements EventFacadeInterface
 		$this->event = $event;
 	}
 
-    public function trigger ( string $name, array ...$args ) : bool
+    public function trigger ( string $name, ...$args ) : bool
     {
         return $this->event->trigger( $name, ...$args );
     }

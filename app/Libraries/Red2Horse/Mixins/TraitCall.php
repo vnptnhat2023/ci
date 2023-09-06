@@ -11,9 +11,7 @@ use function Red2Horse\Mixins\Functions\
     getInstanceMethods
 };
 
-/**
- * Using with TraitSingleton::class only ...
- */
+/** Using with TraitSingleton::class only ... */
 trait TraitCall
 {
 	private object $traitCallInstance;
@@ -27,18 +25,16 @@ trait TraitCall
         'after' => false
     ];
 
-    private string $traitBeforePrefix = 'before_';
-
-    private string $traitAfterPrefix = 'after_';
+    private string $traitBeforePrefix = 'R2h_before_';
+    private string $traitAfterPrefix = 'R2h_after_';
 
     public function run ( string $className = '' )
     {
         $this->traitCallInstance = getInstance( $className );
         $this->traitCallMethods = getInstanceMethods( $className );
-        $this->traitCallback[ 'callback' ] = function( string $name, array $args )
+        $this->traitCallback[ 'callback' ] = function( string $name, $args )
         {
-            getComponents( 'event' )->trigger( $name, $args );
-            // $this->traitCallInstance->event->trigger( $name, $args );
+            return getComponents( 'event' )->trigger( $name, $args );
         };
     }
 
@@ -52,21 +48,21 @@ trait TraitCall
 
             if ( is_callable( $callback ) )
             {
-                $eventArguments = ! empty( $this->traitCallback[ 'arguments' ] )
+                $callbackArgs = ! empty( $this->traitCallback[ 'arguments' ] )
                     ? array_merge( $arguments, $this->traitCallback[ 'arguments' ] )
                     : $arguments;
 
                 if ( $this->traitCallback[ 'before' ] )
                 {
-                    $callback( $beforeName, $eventArguments );
+                    $callback( $beforeName, $callbackArgs );
                 }
 
                 /** @var mixed $run */
-                $run = $this->traitCallInstance->$method( ...$arguments );
+                $run = $this->traitCallInstance->$method( ...$callbackArgs );
 
                 if ( $this->traitCallback[ 'after' ] )
                 {
-                    $callback( $afterName, $eventArguments );
+                    $callback( $afterName, $run );
                 }
 
                 return $run;
@@ -75,9 +71,10 @@ trait TraitCall
             return $this->traitCallInstance->$method( ...$arguments );
         }
 
-        // dd( get_class( $this->traitCallInstance ), $method, $this->traitCallMethods);
-
-        $error = sprintf( '{ ( %s )-> %s() } [ File: %s ] ( Line: %s )', self::class, $method, __FILE__, __LINE__ );
+        $error = sprintf(
+            '{ ( %s )-> %s() } [ File: %s ] ( Line: %s )', 
+            self::class, $method, __FILE__, __LINE__
+        );
         throw new \BadMethodCallException( $error, 403 );
 	}
 

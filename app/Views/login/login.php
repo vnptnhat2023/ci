@@ -1,7 +1,7 @@
 <?php
 if ( ! function_exists( 'r2hI18' ) )
 {
-	function r2hI18 ( string $field, bool $w = true ) : string {
+	function r2hI18 ( string $field, bool $w = false ) : string {
 		$str = lang( "Red2Horse.{$field}" );
 
 		return true === $w ? ucwords( $str ) : ucfirst( $str );
@@ -16,7 +16,7 @@ if ( ! function_exists( 'r2hI18' ) )
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title><?= r2hI18( 'LabelBtnLoginSubmit' ) ?></title>
+		<title><?= r2hI18( 'login' ) ?></title>
 
 		<link rel="stylesheet" href="<?= base_url('public/assets/css/bootstrap.min.css') ?>">
 
@@ -53,11 +53,13 @@ if ( ! function_exists( 'r2hI18' ) )
 
 			.form-box-title
 			{
-				position: absolute;
+				color: wheat;
+				margin-bottom: 50px;
+				/* position: absolute;
 				top: 65px;
 				transform-origin: 0 0;
 				transform: rotate(90deg);
-				text-align: right;
+				text-align: right; */
 			}
 
 			.form-box
@@ -108,7 +110,7 @@ if ( ! function_exists( 'r2hI18' ) )
 
 					<div class="form-box">
 
-						<h3 class="form-box-title"><?= r2hI18( 'LabelBtnLoginSubmit' ) ?></h3>
+						<h3 class="form-box-title"><?= r2hI18( 'login' ) ?></h3>
 
 						<?php
 							if ( isset( $errors[ 0 ] ) ) {
@@ -209,23 +211,19 @@ if ( ! function_exists( 'r2hI18' ) )
 							>
 								<?= r2hI18( 'LabelBtnLoginSubmit' ) ?>
 							</button>
-
-							<button type="reset" class="btn btn-default" style="border-radius: none;" >
-								<?= r2hI18( 'LabelBtnClear' ) ?>
-							</button>
 						</div>
 
-						<div>
+						<div style="margin: 30px 0;">
 							<span class="pull-right">
 								<a href="<?php echo base_url( 'login/forgot' ) ?>">
-									<span><?= r2hI18( 'labelResetPasswordPage' ) ?></span>&nbsp;
-									<span class="glyphicon glyphicon-arrow-right"></span>
+									<span><?= r2hI18( 'resetPassword' ) ?></span>&nbsp;
+									<!-- <span class="glyphicon glyphicon-arrow-right"></span> -->
 								</a>
 							</span>
 
 							<span>
 								<a href="<?php echo base_url() ?>">
-									<span class="glyphicon glyphicon-arrow-left"></span>&nbsp;
+									<!-- <span class="glyphicon glyphicon-arrow-left"></span>&nbsp; -->
 									<span><?= r2hI18( 'labelHomePage' ) ?></span>
 								</a>
 							</span>

@@ -1,9 +1,12 @@
 <?php
 
-$homeLink = anchor( base_url(), 'Back to home.' );
+$homeLink = sprintf( '%s', anchor( base_url(), 'Back to home.' ) );
 
 return [
 	'homeLink' => $homeLink,
+	'login' => 'login',
+	'logout' => 'logout',
+	'resetPassword' => 'reset password',
 
 	'errorCookieUpdate' => 'Validated cookie, when update userId: {0}',
 	'errorNeedLoggedIn' => 'You have not login yet. ',
@@ -18,24 +21,24 @@ return [
 	'successLoggedWithUsername' => 'Hi {0}, you are already logged in. ' . $homeLink,
 	'successLogoutWithUsername' => '{0} you have been logged out. ' . $homeLink,
 	'successLogout' => 'You have been logged out. ' . $homeLink,
-	'successResetPassword' => 'Your password has been successfully reset.',
+	'successResetPassword' => 'Hi {0}, your password has been reset to {1}.',
 
 	'labelUsername' => 'username',
-	'labelUserOrEmail' => 'account name',
-	'labelPassword' => 'account password',
-	'labelEmail' => 'email address',
+	'labelUserOrEmail' => 'email',
+	'labelPassword' => 'password',
+	'labelEmail' => 'email',
 	'labelCaptcha' => 'captcha',
 	'labelRememberMe' => 'remember me',
 	'labelHomePage' => 'home',
-	'labelResetPasswordPage' => 'reset pass',
+	'labelResetPasswordPage' => 'reset password',
 	'LabelBtnLoginSubmit' => 'log in',
-	'LabelBtnResetSubmit' => 'Reset',
+	'LabelBtnResetSubmit' => 'reset',
 	'LabelBtnClear' => 'clear',
 
 	'placeholderUsername' => 'name',
-	'placeholderUserOrEmail' => 'username or email',
+	'placeholderUserOrEmail' => 'name',
 	'placeholderPassword' => 'password',
-	'placeholderCaptcha' => 'captcha code',
+	'placeholderCaptcha' => 'captcha',
 
 	'isAssoc' => 'Data must be an associative array.'
 ];

@@ -1,9 +1,8 @@
 <?php
 declare(strict_types = 1);
-# @Todo: Captcha
+# Event.
 namespace App\Controllers;
 
-use Red2Horse\Mixins\RegistryClass___;
 use Red2Horse\R2h;
 
 class Login extends BaseController
@@ -15,7 +14,7 @@ class Login extends BaseController
 	private ?string $c;
 	private ?string $e;
 
-	private bool $dump = true;
+	private bool $dump = false;
 
 	public function __construct()
 	{
@@ -28,10 +27,7 @@ class Login extends BaseController
 		$this->c = $request->getPostGet('captcha');
 		$this->e = $request->getPostGet('email');
 
-		if ( $this->dump )
-		{
-			d( RegistryClass___::$traitRegistryData );
-		}
+		// d( \Red2Horse\Mixins\RegistryClass___::$traitRegistryData );
 
 		helper( [ 'form', 'form_recaptcha' ] );
 	}
@@ -42,8 +38,11 @@ class Login extends BaseController
 		$p = $this->p;
 		$r = null !== $this->r;
 		$c = $this->c;
+
 		$this->auth->login( $u, $p, $r, $c );
+
 		$this->_dumpIt( [ 'username' => $u, 'password' => $p, 'captcha' => $c, 'remember_me' => $r ] );
+
 		return view( 'login/login', (array) $this->auth->getMessage() );
 	}
 
@@ -52,22 +51,28 @@ class Login extends BaseController
 		$u = $this->u;
 		$e = $this->e;
 		$c = $this->c;
+
 		$this->_dumpIt( [ 'username' => $u, 'email' => $e, 'captcha' => $c ] );
+
 		$this->auth->requestPassword( $u, $e, $c );
+
 		return view( 'login/forgot', (array) $this->auth->getMessage() );
 	}
 
 	public function logout ()
 	{
 		$this->auth->logout();
-		return view( 'login/login', (array) $this->auth->getMessage() );
+		return view( 'login/login', ( array ) $this->auth->getMessage() );
 	}
 
 	private function _dumpIt( array $form ) : void
 	{
 		if ( $this->dump )
 		{
-			d( $this->auth->getMessage( $form = [ 'form' => $form ] ) );
+			// d( $this->auth->getMessage( $form = [ 'form' => $form ] ) );
+			echo '<pre>';
+			var_dump( $this->auth->getMessage()->result );
+			echo '</pre>';
 		}
 	}
 }

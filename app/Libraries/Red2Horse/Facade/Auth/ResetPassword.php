@@ -24,6 +24,37 @@ class ResetPassword
 		return getInstance( Utility::class ) ->typeChecker( 'forget', $u, null, $e, $c );
 	}
 
+	public function alreadyLoggedIn ( array $userData )
+	{
+		$message = getInstance( Message::class );
+		$message::$successfully = true;
+		$message::$success[] = getComponents( 'common' ) ->lang(
+			'Red2Horse.successLoggedWithUsername',
+			[ $userData[ 'username' ] ]
+		);
+	}
+
+	/**
+	 * Not using...
+	 */
+	public function resetPasswordSuccess ( array $userData ) : void
+	{
+		if ( ! $userEmail = explode( '@', $userData[ 'email' ] ) )
+		{
+			getComponents( 'common' )->log_message( 'error', "{$userEmail} email INVALID !" );
+			throw new \ErrorException( 'email INVALID', 403 );
+		}
+
+		$email = str_repeat( '*', strlen( $userEmail[ 0 ] ) ) . '@' . $userEmail[ 1 ];
+		$message = getInstance( Message::class );
+		$message::$successfully = true;
+		$message::$success[] = getComponents( 'common' )
+			->lang(
+				'Red2Horse.successResetPassword',
+				[ $userData[ 'username' ], $email ]
+			);
+	}
+
 	public function forgetHandler ( string $u = null, string $e = null, string $c = null ) : bool
 	{
 		self::$username = $u; self::$email = $e; self::$captcha = $c;

@@ -6,32 +6,31 @@ namespace Red2Horse\Facade\Auth;
 
 use Red2Horse\Mixins\
 {
-	TraitSingleton,
-	TraitCall
+	TraitSingleton
 };
 
 use function Red2Horse\Mixins\Functions\
 {
-	callClass
+    getInstance
 };
 
 class Red2Horse
 {
-	use TraitSingleton, TraitCall;
+	use TraitSingleton;
 
 	public function login ( string $u = null, string $p = null, bool $r = false, string $c = null ) : bool
 	{
-		return callClass( Authentication::class, false )->login( $u, $p, $r, $c );
+		return getInstance( Authentication::class )->login( $u, $p, $r, $c );
 	}
 
 	public function logout () : bool
 	{
-		return callClass( Authentication::class, false )->logout();
+		return getInstance( Authentication::class )->logout();
 	}
 
 	public function requestPassword ( string $u = null, string $e = null, string $c = null ) : bool
 	{
-		return callClass( ResetPassword::class, false )->requestPassword( $u, $e, $c );
+		return getInstance( ResetPassword::class )->requestPassword( $u, $e, $c );
 	}
 
 	/**
@@ -40,58 +39,58 @@ class Red2Horse
 	 */
 	public function getUserdata ( string $key = null )
 	{
-		return callClass( Authentication::class, false )->getUserdata( $key );
+		return getInstance( Authentication::class )->getUserdata( $key );
+	}
+
+	public function isLogged ( bool $withCookie = false ) : bool
+	{
+		return getInstance( Authentication::class )->isLogged( $withCookie );
 	}
 
 	public function getHashPass ( string $password ) : string
 	{
-		return callClass( Password::class, false )->getHashPass( $password );
+		return getInstance( Password::class )->getHashPass( $password );
 	}
 
 	public function getVerifyPass ( string $p, string $hashed ) : bool
 	{
-		return callClass( Password::class, false )->getVerifyPass( $p, $hashed );
+		return getInstance( Password::class )->getVerifyPass( $p, $hashed );
 	}
 
 	/** @return object|array */
 	public function getResult ()
 	{
-		return callClass( Message::class, false )->getResult();
+		return getInstance( Message::class )->getResult();
 	}
 
 	public function getMessage ( array $add = [], bool $asObject = true )
 	{
-		return callClass( Message::class, false )->getMessage( $add, $asObject );
+		return getInstance( Message::class )->getMessage( $add, $asObject );
 	}
 
 	public function withPermission ( array $data, bool $or = true ) : bool
 	{
-		return callClass( Authorization::class, false )->run( $data );
+		return getInstance( Authorization::class )->run( $data );
 	}
 
 	# @Todo: late
 	public function withGroup( array $data ) : bool
 	{
-		return callClass( Authorization::class, false )->run( $data );
+		return getInstance( Authorization::class )->run( $data );
 	}
 
 	public function withRole ( array $role, bool $or = true ) : bool
 	{
-		return callClass( Authorization::class, false )->run( $role );
-	}
-
-	public function isLogged ( bool $withCookie = false ) : bool
-	{
-		return callClass( Authentication::class, false )->isLogged( $withCookie );
+		return getInstance( Authorization::class )->run( $role );
 	}
 
 	public function regenerateSession ( array $userData ) : bool
 	{
-		return callClass( SessionHandle::class, false )->regenerateSession( $userData );
+		return getInstance( SessionHandle::class )->regenerateSession( $userData );
 	}
 
 	public function regenerateCookie () : void
 	{
-		callClass( CookieHandle::class, false )->regenerateCookie();
+		getInstance( CookieHandle::class )->regenerateCookie();
 	}
 }

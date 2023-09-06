@@ -1,89 +1,98 @@
 <?php
+
 declare( strict_types = 1 );
 namespace Red2Horse\Adapter\CodeIgniter\Event;
 
 use CodeIgniter\Events\Events;
 
-class EventAdapter implements EventAdapterInterface {
+final class EventAdapter implements EventAdapterInterface
+{
     private bool $init = false;
 
-    /** Class::Events */
-    public string $eventHelper = 'r2hEvents';
+    private static self $instance;
+
     /**
      * @property string[] $data
      */
     private array $events = [
-        'R2hBeforeLogin',
-        'R2hAfterLogin',
+        'r2h_before_get_message',
+        'r2h_after_get_message',
 
-        'R2hBeforeLogout',
-        'R2hAfterLogout'
+        'r2h_before_is_logged',
+        'r2h_after_is_logged',
+
+        'r2h_before_get_result',
+        'r2h_after_get_result',
+
+        'r2h_before_login',
+        'r2h_after_login',
+
+        'r2h_before_logout',
+        'r2h_after_logout',
+
+        'r2h_before_request_password',
+        'r2h_after_request_password',
     ];
 
-    public function trigger ( string $name, array ...$args ) : bool
+    public static function getInstance () : self
+    {
+        $instance = isset( self::$instance ) ? self::$instance : new self;
+        return $instance;
+    }
+
+    public function trigger ( string $name, ...$args ) : bool
     {
         $this->init();
-
-        $search = [' ', '\\', '/', '\'', '"'];
-        $replace = [''];
-        $subject = ucwords( str_replace( [ '-', '_' ], ' ', $name ) );
-        /** @var string $name CamelCase */
-        $name = str_replace( $search, $replace, $subject );
-
+        $name = strtolower( trim( preg_replace( '/([A-Z]){1}/', '_$1', $name ), '_' ) );
         return Events::trigger( $name, ...$args );
     }
 
-    /**
-     * Adapter only
-     */
-    public function init() : void
+    public function init () : void
     {
         if ( $this->init || empty( $this->events ) ) { return; }
 
         $this->init = true;
-        helper( 'event' );
-        $eventHelper = new $this->eventHelper;
-
-        $i = 100;
 
         /** @var string $event */
-        foreach( $this->events as $eventName )
+        foreach( $this->events as $event )
         {
-            if ( ! method_exists( $eventHelper, $eventName ) )
-            {
-                $err = sprintf( '[ERROR] Invalid method trigger %s::%s', $this->eventHelper, $eventName );
-                log_message( 'error', $err );
-            }
-
-            // echo '<p> class: ' . __CLASS__ . ' event name: ' . $eventName . '</p>';
-            // echo '<p> class event name: ' . $eventName . '</p>';
-            Events::on( $eventName, [ $eventHelper, $eventName ],  $i--);
+            Events::on( $event, [ $this, $event ] );
         }
     }
 
-    public function reInit() : self
+    public function reInit () : self
     {
         $this->init = false;
         $this->init();
         return $this;
     }
 
-    public function getEvents() : array
+    public function getEvents () : array
     {
         return $this->events;
     }
 
-    public function setEvent( array $events ) : bool
+    public function setEvent ( array $events ) : bool
     {
         if ( empty( $events ) ) { return false; }
         $this->events = $events;
+        $this->reInit();
         return true;
     }
 
-    public function addEvent( array $events ) : bool
+    public function addEvent ( array $events ) : bool
     {
         if ( isAssoc( $events ) ) { return false; }
         $this->events = array_merge( $this->events, $events);
+        $this->reInit();
         return true;
+    }
+
+    public function __call ( $methodName, $args )
+    {
+        if ( in_array( $methodName, $this->events ) )
+        {
+            // d( $args, $methodName );
+        }
     }
 }

@@ -20,7 +20,8 @@ class Red2HorseSession extends Session
 
 		$auth = \Config\Services::Red2HorseAuth();
 
-		if ( $auth->isLogged() ) {
+		if ( $auth->isLogged() )
+		{
 			Events::trigger( 'Red2HorseAuthRegenerate', $auth->getUserdata() );
 		}
 	}

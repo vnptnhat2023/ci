@@ -11,21 +11,31 @@
 
 if ( ! function_exists( 'ci_captcha' ) )
 {
-	function ci_captcha ( $chars_length = 5, $width = 100, $height = 32 )
+	function ci_captcha ( int $chars_length = 5, int $width = 100, int $height = 32, int $expiration = 3600 ) : string
 	{
 		helper( 'text' );
+		$session = \Config\Services::session();
+
+		if ( $captcha = $session->get( 'ci_captcha' ) )
+		{
+			$expired = microtime( true ) - $captcha[ 'captcha_time' ];
+			
+			if ( $expired < $expiration )
+			{
+				return $captcha[ 'image' ];
+			}
+		}
 
 		$path = 'public/assets/captcha/';
 		$string = strtolower( random_string( 'alnum', $chars_length ) );
-		$data = [
+		$data = [# font_path
 			'word' => $string,
 			'img_path' => ROOTPATH . $path,
 			'img_url' => base_url( $path ),
-			// 'font_path' => BASEPATH . '/fonts/texb.ttf',
 			'font_size' => 16,
 			'img_width' => $width,
 			'img_height' => $height,
-			'expiration' => 10,
+			'expiration' => $expiration,
 			'colors'=> [
 				'background' => [ 255, 255, 255 ],
 				'border' => [ 255, 255, 255 ],
@@ -34,19 +44,20 @@ if ( ! function_exists( 'ci_captcha' ) )
 			]
 		];
 
-		$imageRendered = ci_create_captcha( $data );
+		if ( $imageRendered = ci_create_captcha( $data ) )
+		{
+			$sessionData = [
+				'ip_address' => \Config\Services::request() ->getIPAddress(),
+				'captcha_time'  => $imageRendered[ 'time' ],
+				'word' => $imageRendered[ 'word' ],
+				'image' => $imageRendered[ 'image' ],
+				'filename' => $imageRendered[ 'filename' ]
+			];
+	
+			$session->set( 'ci_captcha', $sessionData );
+		}
 
-		$sessionData = [
-			'captcha_time'  => $imageRendered[ 'time' ],
-			'ip_address' => \Config\Services::request() ->getIPAddress(),
-			'word' => $imageRendered[ 'word' ]
-		];
-
-		\Config\Services::session()->setFlashdata( 'ci_captcha', $sessionData );
-
-		// d( Services::session()->getFlashdata('ci_captcha') );
-
-		return $imageRendered['image'];
+		return $imageRendered[ 'image' ] ?? '';
 	}
 }
 

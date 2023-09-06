@@ -8,17 +8,23 @@ class Registry
 {
 	protected static array $data = [];
 
-	public static function set ( string $key, $value )
+	/**
+	 * @param mixed $value
+	 */
+	final public static function set ( string $key, $value ) : void
 	{
 		self::$data[ $key ] = $value;
 	}
 
-	public static function get ( string $key )
+	/**
+	 * @return mixed
+	 */
+	final public static function get ( string $key )
 	{
 		return self::$data[ $key ] ?? null;
 	}
 
-	final public static function delete ( string $key )
+	final public static function delete ( string $key ) : bool
 	{
 		if ( array_key_exists( $key, self::$data ) ) {
 			unset( self::$data[ $key ] );
