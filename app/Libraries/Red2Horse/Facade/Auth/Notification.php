@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 
 namespace Red2Horse\Facade\Auth;
 
-use Red2Horse\Mixins\TraitSingleton;
+use Red2Horse\Mixins\Traits\TraitSingleton;
 
 use function Red2Horse\Mixins\Functions\getInstance;
 

@@ -2,8 +2,9 @@
 declare(strict_types = 1);
 namespace Red2Horse\Facade\Event;
 
-use Red2Horse\{
-    Mixins\TraitSingleton
+use Red2Horse\
+{
+    Mixins\Traits\TraitSingleton
 };
 
 class EventFacade implements EventFacadeInterface

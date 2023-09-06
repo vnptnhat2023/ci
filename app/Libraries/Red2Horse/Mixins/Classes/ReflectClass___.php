@@ -1,11 +1,15 @@
 <?php
+
 declare( strict_types = 1 );
-namespace Red2Horse\Mixins;
+namespace Red2Horse\Mixins\Classes;
+
+use Red2Horse\Mixins\Interfaces\ReflectClass___Interface;
+
 /**
  * Reflections public method only
  */
-class ReflectClass___ {
-
+class ReflectClass___ implements ReflectClass___Interface
+{
     protected object $ins;
 
     /** @param object|string $int */
@@ -15,7 +19,7 @@ class ReflectClass___ {
     }
 
     /** @return mixed the method result. */
-    function getMethod ( string $method, array $args = [] )
+    public function getMethod ( string $method, array $args = [] )
     {
         $reflection = new \ReflectionMethod( $this->ins, $method );
         $pass = [];
@@ -31,7 +35,7 @@ class ReflectClass___ {
     /**
      * @return array <string, result>[] key: name, value: result
      */
-    function getMethods ()
+    public function getMethods () : array
     {
         $methods = ( new \ReflectionClass( $this->ins ) )->getMethods( \ReflectionMethod::IS_PUBLIC );
         $pass = [];

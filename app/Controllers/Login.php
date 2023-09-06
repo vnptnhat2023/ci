@@ -27,7 +27,7 @@ class Login extends BaseController
 		$this->c = $request->getPostGet('captcha');
 		$this->e = $request->getPostGet('email');
 
-		// d( \Red2Horse\Mixins\RegistryClass___::$traitRegistryData );
+		// d( \Red2Horse\Mixins\Classes\RegistryClass___::$traitRegistryData );
 
 		helper( [ 'form', 'form_recaptcha' ] );
 	}

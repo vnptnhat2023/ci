@@ -6,7 +6,7 @@ namespace Red2Horse\Facade\Auth;
 
 use Red2Horse\{
 	Facade\Auth\Config,
-	Mixins\TraitSingleton
+	Mixins\Traits\TraitSingleton
 };
 
 use function Red2Horse\Mixins\Functions\getInstance;

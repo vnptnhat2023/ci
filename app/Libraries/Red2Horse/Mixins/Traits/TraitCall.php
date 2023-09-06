@@ -2,7 +2,7 @@
 
 declare( strict_types = 1 );
 
-namespace Red2Horse\Mixins;
+namespace Red2Horse\Mixins\Traits;
 
 use function Red2Horse\Mixins\Functions\
 {
@@ -28,11 +28,11 @@ trait TraitCall
     private string $traitBeforePrefix = 'R2h_before_';
     private string $traitAfterPrefix = 'R2h_after_';
 
-    public function run ( string $className = '' )
+    public function run ( string $className = '' ) : void
     {
         $this->traitCallInstance = getInstance( $className );
         $this->traitCallMethods = getInstanceMethods( $className );
-        $this->traitCallback[ 'callback' ] = function( string $name, $args )
+        $this->traitCallback[ 'callback' ] = function( string $name, $args ) : bool
         {
             return getComponents( 'event' )->trigger( $name, $args );
         };
@@ -54,6 +54,7 @@ trait TraitCall
 
                 if ( $this->traitCallback[ 'before' ] )
                 {
+                    /** @var bool $callback */
                     $callback( $beforeName, $callbackArgs );
                 }
 
@@ -62,6 +63,7 @@ trait TraitCall
 
                 if ( $this->traitCallback[ 'after' ] )
                 {
+                    /** @var bool $callback */
                     $callback( $afterName, $run );
                 }
 

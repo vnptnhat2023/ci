@@ -5,7 +5,7 @@ namespace Red2Horse\Facade\Auth;
 
 use Red2Horse\{
 	Facade\Config\ConfigFacade,
-	Mixins\TraitSingleton
+	Mixins\Traits\TraitSingleton
 };
 
 /**

@@ -17,7 +17,7 @@ use Red2Horse\Facade\{
 	Auth\Config
 };
 
-use Red2Horse\Mixins\TraitSingleton;
+use Red2Horse\Mixins\Traits\TraitSingleton;
 
 use function Red2Horse\Mixins\Functions\getInstance;
 

@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 namespace Red2Horse;
 
 use Red2Horse\{
-    Mixins\TraitSingleton,
+    Mixins\Traits\TraitSingleton,
     Facade\Auth\Config,
     Facade\Auth\Red2Horse
 };

@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Functions;
 
 use Red2Horse\Facade\Auth\Config;
-use Red2Horse\Mixins\
+use Red2Horse\Mixins\Classes\
 {
     RegistryClass___ as Registry,
     CallClass___ as Call
@@ -120,7 +120,7 @@ function callClass ( string $className, bool $getShared = true, array $arguments
     {
         $instance = new class( $className, $arguments )
         {
-            use \Red2Horse\Mixins\TraitCall;
+            use \Red2Horse\Mixins\Traits\TraitCall;
 
             public function __construct( string $className, array $arguments )
             {

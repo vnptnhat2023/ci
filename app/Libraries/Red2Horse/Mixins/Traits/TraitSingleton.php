@@ -1,9 +1,12 @@
 <?php
+
 declare( strict_types = 1 );
-namespace Red2Horse\Mixins;
+namespace Red2Horse\Mixins\Traits;
+
+use Red2Horse\Mixins\Classes\RegistryClass___;
 
 /**
- * Using with TraitRegistry::class only
+ * @use with TraitRegistry::class only
  */
 trait TraitSingleton
 {
@@ -24,6 +27,7 @@ trait TraitSingleton
 			'methods' => self::_getMPs(),
 			'instance' => $instance
 		];
+
 		RegistryClass___::set( self::class, $values );
 
 		return $instance;
@@ -37,9 +41,7 @@ trait TraitSingleton
 	 * @return mixed array */
 	final public static function _getMPs( array $value = [], bool $intersect = false, bool $MPs = true ) : array
 	{
-		$MPs = $MPs
-			? get_class_methods( static::class )
-			: get_class_vars( static::class );
+		$MPs = $MPs ? get_class_methods( static::class ) : get_class_vars( static::class );
 
 		if ( empty( $MPs ) )
 		{

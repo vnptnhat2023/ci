@@ -1,10 +1,16 @@
 <?php
 
 declare( strict_types = 1 );
-namespace Red2Horse\Mixins;
+namespace Red2Horse\Mixins\Classes;
 
-class CallClass___ {
+use Red2Horse\Mixins\Interfaces\CallClass___Interface;
+use Red2Horse\Mixins\Traits\{
+    TraitCall,
+    TraitSingleton
+};
 
+class CallClass___ implements CallClass___Interface
+{
     use TraitCall, TraitSingleton;
 
     public function __construct( $className = null, array $arguments = [] )

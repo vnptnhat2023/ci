@@ -2,7 +2,7 @@
 declare( strict_types = 1 );
 namespace Red2Horse\Facade\Config;
 
-use Red2Horse\Mixins\TraitSingleton;
+use Red2Horse\Mixins\Traits\TraitSingleton;
 
 class ConfigFacade implements ConfigFacadeInterface
 {
