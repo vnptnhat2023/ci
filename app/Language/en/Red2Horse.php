@@ -24,7 +24,7 @@ return [
 	'successResetPassword' => 'Hi {0}, your password has been reset to {1}.',
 
 	'labelUsername' => 'username',
-	'labelUserOrEmail' => 'email',
+	'labelUserOrEmail' => 'name',
 	'labelPassword' => 'password',
 	'labelEmail' => 'email',
 	'labelCaptcha' => 'captcha',
@@ -36,7 +36,7 @@ return [
 	'LabelBtnClear' => 'clear',
 
 	'placeholderUsername' => 'name',
-	'placeholderUserOrEmail' => 'name',
+	'placeholderUserOrEmail' => 'email',
 	'placeholderPassword' => 'password',
 	'placeholderCaptcha' => 'captcha',
 

@@ -1,0 +1,106 @@
+
+Deprecated: The each() function is deprecated. This message will be suppressed on further calls in C:\Program Files\Sublime 4\Data\Packages\PHPTools\php.tools\codeFormatter.php on line 54
+
+Call Stack:
+    0.0057     742728   1. {main}() C:\Program Files\Sublime 4\Data\Packages\PHPTools\php.tools\codeFormatter.php:0
+    0.0066     755896   2. CodeFormatter->formatCode($source = '<?php\r\n\r\ndeclare( strict_types = 1 );\r\nnamespace Red2Horse\\Mixins\\Traits;\r\n\r\nuse Red2Horse\\Mixins\\Classes\\Registry\\RegistryClass___;\r\n\r\n/**\r\n * @use with TraitRegistry::class only\r\n */\r\ntrait TraitSingleton\r\n{\r\n\r\n\t/** @return static */\r\n\tfinal public static function getInstance( $params = null, ...$args )\r\n\t{\r\n\t\tif ( $data = RegistryClass___::get( self::class ) )\r\n\t\t{\r\n\t\t\t/** @var object $instance */\r\n\t\t\t$instance = $data[ \'instance\' ];\r\n\t\t\treturn $instance;\r\n\t\t}\r\n\r\n\t\t$instance = new self( $params, ...$args'...) C:\Program Files\Sublime 4\Data\Packages\PHPTools\php.tools\codeFormatter.php:1736
+    0.0068     758456   3. AddMissingCurlyBraces->format($source = '<?php\r\n\r\ndeclare( strict_types = 1 );\r\nnamespace Red2Horse\\Mixins\\Traits;\r\n\r\nuse Red2Horse\\Mixins\\Classes\\Registry\\RegistryClass___;\r\n\r\n/**\r\n * @use with TraitRegistry::class only\r\n */\r\ntrait TraitSingleton\r\n{\r\n\r\n\t/** @return static */\r\n\tfinal public static function getInstance( $params = null, ...$args )\r\n\t{\r\n\t\tif ( $data = RegistryClass___::get( self::class ) )\r\n\t\t{\r\n\t\t\t/** @var object $instance */\r\n\t\t\t$instance = $data[ \'instance\' ];\r\n\t\t\treturn $instance;\r\n\t\t}\r\n\r\n\t\t$instance = new self( $params, ...$args'...) C:\Program Files\Sublime 4\Data\Packages\PHPTools\php.tools\codeFormatter.php:326
+    0.0068     758456   4. AddMissingCurlyBraces->addBraces($source = '<?php\r\n\r\ndeclare( strict_types = 1 );\r\nnamespace Red2Horse\\Mixins\\Traits;\r\n\r\nuse Red2Horse\\Mixins\\Classes\\Registry\\RegistryClass___;\r\n\r\n/**\r\n * @use with TraitRegistry::class only\r\n */\r\ntrait TraitSingleton\r\n{\r\n\r\n\t/** @return static */\r\n\tfinal public static function getInstance( $params = null, ...$args )\r\n\t{\r\n\t\tif ( $data = RegistryClass___::get( self::class ) )\r\n\t\t{\r\n\t\t\t/** @var object $instance */\r\n\t\t\t$instance = $data[ \'instance\' ];\r\n\t\t\treturn $instance;\r\n\t\t}\r\n\r\n\t\t$instance = new self( $params, ...$args'...) C:\Program Files\Sublime 4\Data\Packages\PHPTools\php.tools\codeFormatter.php:41
+    0.0070     953520   5. each($arr = [0 => [0 => 382, 1 => '<?php\r\n', 2 => 1], 1 => [0 => 385, 1 => '\r\n', 2 => 2], 2 => [0 => 332, 1 => 'declare', 2 => 3], 3 => '(', 4 => [0 => 385, 1 => ' ', 2 => 3], 5 => [0 => 311, 1 => 'strict_types', 2 => 3], 6 => [0 => 385, 1 => ' ', 2 => 3], 7 => '=', 8 => [0 => 385, 1 => ' ', 2 => 3], 9 => [0 => 309, 1 => '1', 2 => 3], 10 => [0 => 385, 1 => ' ', 2 => 3], 11 => ')', 12 => ';', 13 => [0 => 385, 1 => '\r\n', 2 => 3], 14 => [0 => 391, 1 => 'namespace', 2 => 4], 15 => [0 => 385, 1 => ' ', 2 => 4], 16 => [0 => 311, 1 => 'Red2Horse', 2 => 4], 17 => [0 => 393, 1 => '\\', 2 => 4], 18 => [0 => 311, 1 => 'Mixins', 2 => 4], 19 => [0 => 393, 1 => '\\', 2 => 4], 20 => [0 => 311, 1 => 'Traits', 2 => 4], 21 => ';', 22 => [0 => 385, 1 => '\r\n\r\n', 2 => 4], 23 => [0 => 350, 1 => 'use', 2 => 6], 24 => [0 => 385, 1 => ' ', 2 => 6], 25 => [0 => 311, 1 => 'Red2Horse', 2 => 6], 26 => [0 => 393, 1 => '\\', 2 => 6], 27 => [0 => 311, 1 => 'Mixins', 2 => 6], 28 => [0 => 393, 1 => '\\', 2 => 6], 29 => [0 => 311, 1 => 'Classes', 2 => 6], 30 => [0 => 393, 1 => '\\', 2 => 6], 31 => [0 => 311, 1 => 'Registry', 2 => 6], 32 => [0 => 393, 1 => '\\', 2 => 6], 33 => [0 => 311, 1 => 'RegistryClass___', 2 => 6], 34 => ';', 35 => [0 => 385, 1 => '\r\n\r\n', 2 => 6], 36 => [0 => 381, 1 => '/**\r\n * @use with TraitRegistry::class only\r\n */', 2 => 8], 37 => [0 => 385, 1 => '\r\n', 2 => 10], 38 => [0 => 365, 1 => 'trait', 2 => 11], 39 => [0 => 385, 1 => ' ', 2 => 11], 40 => [0 => 311, 1 => 'TraitSingleton', 2 => 11], 41 => [0 => 385, 1 => '\r\n', 2 => 11], 42 => '{', 43 => [0 => 385, 1 => '\r\n\r\n\t', 2 => 12], 44 => [0 => 381, 1 => '/** @return static */', 2 => 14], 45 => [0 => 385, 1 => '\r\n\t', 2 => 14], 46 => [0 => 355, 1 => 'final', 2 => 15], 47 => [0 => 385, 1 => ' ', 2 => 15], 48 => [0 => 358, 1 => 'public', 2 => 15], 49 => [0 => 385, 1 => ' ', 2 => 15], 50 => [0 => 353, 1 => 'static', 2 => 15], 51 => [0 => 385, 1 => ' ', 2 => 15], 52 => [0 => 342, 1 => 'function', 2 => 15], 53 => [0 => 385, 1 => ' ', 2 => 15], 54 => [0 => 311, 1 => 'getInstance', 2 => 15], 55 => '(', 56 => [0 => 385, 1 => ' ', 2 => 15], 57 => [0 => 312, 1 => '$params', 2 => 15], 58 => [0 => 385, 1 => ' ', 2 => 15], 59 => '=', 60 => [0 => 385, 1 => ' ', 2 => 15], 61 => [0 => 311, 1 => 'null', 2 => 15], 62 => ',', 63 => [0 => 385, 1 => ' ', 2 => 15], 64 => [0 => 394, 1 => '...', 2 => 15], 65 => [0 => 312, 1 => '$args', 2 => 15], 66 => [0 => 385, 1 => ' ', 2 => 15], 67 => ')', 68 => [0 => 385, 1 => '\r\n\t', 2 => 15], 69 => '{', 70 => [0 => 385, 1 => '\r\n\t\t', 2 => 16], 71 => [0 => 322, 1 => 'if', 2 => 17], 72 => [0 => 385, 1 => ' ', 2 => 17], 73 => '(', 74 => [0 => 385, 1 => ' ', 2 => 17], 75 => [0 => 312, 1 => '$data', 2 => 17], 76 => [0 => 385, 1 => ' ', 2 => 17], 77 => '=', 78 => [0 => 385, 1 => ' ', 2 => 17], 79 => [0 => 311, 1 => 'RegistryClass___', 2 => 17], 80 => [0 => 390, 1 => '::', 2 => 17], 81 => [0 => 311, 1 => 'get', 2 => 17], 82 => '(', 83 => [0 => 385, 1 => ' ', 2 => 17], 84 => [0 => 311, 1 => 'self', 2 => 17], 85 => [0 => 390, 1 => '::', 2 => 17], 86 => [0 => 364, 1 => 'class', 2 => 17], 87 => [0 => 385, 1 => ' ', 2 => 17], 88 => ')', 89 => [0 => 385, 1 => ' ', 2 => 17], 90 => ')', 91 => [0 => 385, 1 => '\r\n\t\t', 2 => 17], 92 => '{', 93 => [0 => 385, 1 => '\r\n\t\t\t', 2 => 18], 94 => [0 => 381, 1 => '/** @var object $instance */', 2 => 19], 95 => [0 => 385, 1 => '\r\n\t\t\t', 2 => 19], 96 => [0 => 312, 1 => '$instance', 2 => 20], 97 => [0 => 385, 1 => ' ', 2 => 20], 98 => '=', 99 => [0 => 385, 1 => ' ', 2 => 20], 100 => [0 => 312, 1 => '$data', 2 => 20], 101 => '[', 102 => [0 => 385, 1 => ' ', 2 => 20], 103 => [0 => 315, 1 => '\'instance\'', 2 => 20], 104 => [0 => 385, 1 => ' ', 2 => 20], 105 => ']', 106 => ';', 107 => [0 => 385, 1 => '\r\n\t\t\t', 2 => 20], 108 => [0 => 345, 1 => 'return', 2 => 21], 109 => [0 => 385, 1 => ' ', 2 => 21], 110 => [0 => 312, 1 => '$instance', 2 => 21], 111 => ';', 112 => [0 => 385, 1 => '\r\n\t\t', 2 => 21], 113 => '}', 114 => [0 => 385, 1 => '\r\n\r\n\t\t', 2 => 22], 115 => [0 => 312, 1 => '$instance', 2 => 24], 116 => [0 => 385, 1 => ' ', 2 => 24], 117 => '=', 118 => [0 => 385, 1 => ' ', 2 => 24], 119 => [0 => 304, 1 => 'new', 2 => 24], 120 => [0 => 385, 1 => ' ', 2 => 24], 121 => [0 => 311, 1 => 'self', 2 => 24], 122 => '(', 123 => [0 => 385, 1 => ' ', 2 => 24], 124 => [0 => 312, 1 => '$params', 2 => 24], 125 => ',', 126 => [0 => 385, 1 => ' ', 2 => 24], 127 => [0 => 394, 1 => '...', 2 => 24], ...]) C:\Program Files\Sublime 4\Data\Packages\PHPTools\php.tools\codeFormatter.php:54
+
+<?php
+
+declare(strict_types = 1);
+namespace Red2Horse\Mixins\Traits;
+
+use Red2Horse\Mixins\Classes\Registry\RegistryClass___;
+
+/**
+ * @use with TraitRegistry::class only
+ */
+trait TraitSingleton {
+
+	/** @return static */
+	final public static
+function getInstance($params = null, ...$args) {
+		if ($data = RegistryClass___::get(self::class )) {
+			/** @var object $instance */
+			$instance = $data['instance'];
+			return $instance;
+		}
+
+		$instance = new self($params, ...$args);
+		$values   = [
+			// 'properties' => self::_getMPs( [], false, false ),
+			'methods'  => self::_getMPs(),
+			'instance' => $instance
+		];
+
+		RegistryClass___::set(self::class , $values);
+
+		return $instance;
+	}
+
+	/**
+	 * @example All properties : ([], false, false), all methods : (default)
+	 * @param string[] $value
+	 * @param bool $intersect true : ( array_diff : except ), false : array_intersect ( only )
+	 * @param bool $MPs true : methods, false : properties
+	 * @return mixed array */
+	final public static function _getMPs(array $value = [], bool $intersect = false, bool $MPs = true):array
+	{
+		$MPs = $MPs?get_class_methods(static ::class ):get_class_vars(static ::class );
+
+		if (empty($MPs)) {
+			return [];
+		}
+
+		$isAssoc = array_keys($MPs) !== range(0, count($MPs)-1);
+
+		if ($isAssoc) {
+			$MPs = array_keys($MPs);
+		}
+
+		if ($intersect) {
+			$data = array_intersect($value, $MPs);
+		} else {
+			$except = [
+				'__construct',
+				'__destruct',
+				'__call',
+				'__callStatic',
+				'__get',
+				'__set',
+				'__isset',
+				'__unset',
+				'__sleep',
+				'__wakeup',
+				'__serialize',
+				'__unserialize',
+				'__toString',
+				'__invoke',
+				'__set_state',
+				'__clone',
+				'__debugInfo',
+				'__debugBacktrace',
+				'_getData',
+				'_getMPs',
+				'getInstance'
+			];
+			$data = array_diff($MPs, $value, $except);
+		}
+
+		return array_values($data);
+	}
+
+	final private function __clone() {}
+
+	public function __debugInfo() {
+		return call_user_func('get_object_vars', $this);
+	}
+
+	public function __debugBacktrace(int $limit = 20):array
+	{
+		return debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT, $limit);
+	}
+}

@@ -5,10 +5,10 @@ namespace Red2Horse\Mixins\Traits;
 
 trait TraitRegistry {
 
-    /** @var <string, <string, string>[]>[] $traitRegistryData */
     public static array $traitRegistryData = [];
 
-    final public static function set ( string $key, array $value, bool $override = false ) : bool
+    /** @param mixed @value */
+    final public static function set ( string $key, $value, bool $override = false ) : bool
     {
         if ( $override || empty( self::$traitRegistryData[ $key ] ) )
         {
@@ -19,7 +19,7 @@ trait TraitRegistry {
         return false;
     }
 
-    /** @return null|array */
+    /** @return mixed */
     final public static function get ( string $key )
     {
         return self::$traitRegistryData[ $key ] ?? null;
@@ -34,5 +34,10 @@ trait TraitRegistry {
         }
 
         return false;
+    }
+
+    public static function _debugInfo() : array
+    {
+        return self::$traitRegistryData;
     }
 }

@@ -3,13 +3,13 @@
 declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Trait;
 
-
 /**
  *  @from https://www.php.net/manual/en/closure.bindto.php
  * ```php
-    $foo = new class {
-        $privateValue;
-    };
+$foo = new class
+{
+    $privateValue;
+};
     $foo->A = fn() => $this->privateValue;
  * ```
  */
@@ -22,7 +22,7 @@ trait TraitBindTo
             return call_user_func( $this->$name, $args );
         }
 
-        throw new \RuntimeException( "Method {$name} does not exist." );
+        throw new \RuntimeException( "Method { $name } does not exist." );
     }
     
     public function __set ( $name, \Closure $value )

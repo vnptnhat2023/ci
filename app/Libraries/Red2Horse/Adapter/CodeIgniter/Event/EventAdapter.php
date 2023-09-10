@@ -4,6 +4,13 @@ declare( strict_types = 1 );
 namespace Red2Horse\Adapter\CodeIgniter\Event;
 
 use CodeIgniter\Events\Events;
+use Red2Horse\Facade\Auth\Message;
+use Red2Horse\Mixins\Classes\Registry\RegistryClass;
+use Red2Horse\Mixins\Classes\Registry\RegistryEventClass;
+
+use function Red2Horse\Mixins\Functions\getClass;
+use function Red2Horse\Mixins\Functions\getInstance;
+use function Red2Horse\Mixins\Functions\setClass;
 
 final class EventAdapter implements EventAdapterInterface
 {
@@ -12,7 +19,7 @@ final class EventAdapter implements EventAdapterInterface
     private static self $instance;
 
     /**
-     * @property string[] $data
+     * @var string[] $events
      */
     private array $events = [
         'r2h_before_get_message',
@@ -34,6 +41,8 @@ final class EventAdapter implements EventAdapterInterface
         'r2h_after_request_password',
     ];
 
+    private array $triggered = [];
+
     public static function getInstance () : self
     {
         $instance = isset( self::$instance ) ? self::$instance : new self;
@@ -43,6 +52,7 @@ final class EventAdapter implements EventAdapterInterface
     public function trigger ( string $name, ...$args ) : bool
     {
         $this->init();
+        $this->triggered[] = $name;
         $name = strtolower( trim( preg_replace( '/([A-Z]){1}/', '_$1', $name ), '_' ) );
         return Events::trigger( $name, ...$args );
     }
@@ -88,11 +98,29 @@ final class EventAdapter implements EventAdapterInterface
         return true;
     }
 
-    public function __call ( $methodName, $args )
+    private function r2h_before_login ( $username, $password, $remember, $captcha ) : array
+    {
+        // $username .= '___%*)@(%____';
+        // $mes = var_export( func_get_args(), true );
+        // $m = getInstance( Message::class, RegistryClass::class );
+        // $m::$success[] = $mes;
+        return [ $username, $password, $remember, $captcha ];
+    }
+
+    public function __call ( string $methodName, array $args )
     {
         if ( in_array( $methodName, $this->events ) )
         {
-            // d( $args, $methodName );
+            $args = reset( $args );
+
+            if ( $methodName === 'r2h_before_login' )
+            {
+                $args = $this->r2h_before_login( ...$args );
+            }
+
+            $evName = $this->triggered[ array_key_last( $this->triggered ) ];
+
+            setClass( $evName, $args, false, RegistryEventClass::class );
         }
     }
 }

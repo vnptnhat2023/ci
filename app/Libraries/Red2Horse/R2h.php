@@ -3,11 +3,13 @@
 declare( strict_types = 1 );
 namespace Red2Horse;
 
-use Red2Horse\{
+use Red2Horse\
+{
     Mixins\Traits\TraitSingleton,
     Facade\Auth\Config,
     Facade\Auth\Red2Horse
 };
+use Red2Horse\Mixins\Classes\Registry\RegistryClass;
 
 use function Red2Horse\Mixins\Functions\
 {
@@ -17,7 +19,8 @@ use function Red2Horse\Mixins\Functions\
 define( 'R2H_PATH', __DIR__ );
 
 $functions_path = realpath( R2H_PATH . '/Mixins/Functions' );
-require_once( $functions_path . '/Functions.php' );
+require_once( $functions_path . '/FunctionCall.php' );
+require_once( $functions_path . '/FunctionClass.php' );
 
 class R2h
 {
@@ -36,6 +39,6 @@ class R2h
     public function __call ( string $name, array $arguments = [] )
     {
         $setting = [ 'traitCallback' => [ 'before' => true, 'after' => true ] ];
-        return callClass( Red2Horse::class, true, $setting ) ->__call( $name, $arguments );
+        return callClass( Red2Horse::class, RegistryClass::class, true, $setting ) ->__call( $name, $arguments );
     }
 }

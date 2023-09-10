@@ -14,7 +14,7 @@ class Login extends BaseController
 	private ?string $c;
 	private ?string $e;
 
-	private bool $dump = false;
+	private bool $dump = true;
 
 	public function __construct()
 	{
@@ -26,8 +26,6 @@ class Login extends BaseController
 		$this->r = null !== $request->getPostGet('remember_me');
 		$this->c = $request->getPostGet('captcha');
 		$this->e = $request->getPostGet('email');
-
-		// d( \Red2Horse\Mixins\Classes\RegistryClass___::$traitRegistryData );
 
 		helper( [ 'form', 'form_recaptcha' ] );
 	}
@@ -69,10 +67,13 @@ class Login extends BaseController
 	{
 		if ( $this->dump )
 		{
-			// d( $this->auth->getMessage( $form = [ 'form' => $form ] ) );
-			echo '<pre>';
-			var_dump( $this->auth->getMessage()->result );
-			echo '</pre>';
+			// d( _debugInfo( RegistryClass::class ), 'RegistryClass' );
+			// d( _debugInfo( RegistryEventClass::class ), 'RegistryEventClass' );
+			d( $this->auth->getMessage( $form ) );
+			// d( $this->auth->getMessage() );
+			// echo '<pre>';
+			// var_dump( $this->auth->getMessage()->result );
+			// echo '</pre>';
 		}
 	}
 }

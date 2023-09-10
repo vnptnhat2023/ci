@@ -47,14 +47,18 @@ class Message
 	/**
 	 * @return array|object
 	 */
-	public function getMessage ( array $addMore = [], bool $asObject = true )
+	public function getMessage ( array $addMore = [], bool $asObject = true, bool $getConfig = false )
 	{
 		$message = [
 			'success' => self::$success,
 			'errors' => self::$errors,
-			'result' => $this->getResult(),
-			'config' => get_object_vars( getInstance( Config::class ) )
+			'result' => $this->getResult()
 		];
+
+		if ( $getConfig )
+		{
+			$message[ 'config' ] = get_object_vars( getInstance( Config::class ) );
+		}
 
 		if ( ! empty( $addMore ) )
 		{

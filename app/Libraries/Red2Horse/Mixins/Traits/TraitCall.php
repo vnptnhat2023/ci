@@ -1,11 +1,14 @@
 <?php
 
 declare( strict_types = 1 );
-
 namespace Red2Horse\Mixins\Traits;
+
+use Red2Horse\Mixins\Classes\Registry\RegistryEventClass;
+use Throwable;
 
 use function Red2Horse\Mixins\Functions\
 {
+    getClass,
     getComponents,
     getInstance,
     getInstanceMethods
@@ -30,6 +33,7 @@ trait TraitCall
 
     public function run ( string $className = '' ) : void
     {
+        $this->traitCallback[ 'arguments' ] = [ 123 ];
         $this->traitCallInstance = getInstance( $className );
         $this->traitCallMethods = getInstanceMethods( $className );
         $this->traitCallback[ 'callback' ] = function( string $name, $args ) : bool
@@ -38,32 +42,56 @@ trait TraitCall
         };
     }
 
-    public function __call ( string $method = '', array $arguments )
+    public function __call ( string $method, array $arguments )
     {
         if ( in_array( $method, $this->traitCallMethods, true ) )
         {
             $beforeName = $this->traitBeforePrefix . $method;
             $afterName = $this->traitAfterPrefix . $method;
-            $callback = $this->traitCallback[ 'callback' ] ?? false;
+            $callback = $this->traitCallback[ 'callback' ] ?? null;
 
             if ( is_callable( $callback ) )
             {
-                $callbackArgs = ! empty( $this->traitCallback[ 'arguments' ] )
-                    ? array_merge( $arguments, $this->traitCallback[ 'arguments' ] )
-                    : $arguments;
-
-                if ( $this->traitCallback[ 'before' ] )
+                $callbackArgs = $arguments;
+                
+                if ( ! empty( $this->traitCallback[ 'arguments' ] ) )
                 {
-                    /** @var bool $callback */
-                    $callback( $beforeName, $callbackArgs );
+                    if ( isset( $arguments[ 0 ] ) && is_array( $arguments[ 0 ] ) )
+                    {
+                        $common = getComponents( 'common' );
+
+                        if ( $common->isAssocArray( $this->traitCallback[ 'arguments' ] ) )
+                        {
+                            $merge = array_merge( $arguments[ 0 ], $this->traitCallback[ 'arguments' ] );
+                            $callbackArgs = [ $merge ];
+                        }
+                        else
+                        {
+                            log_message(
+                                'warning', $common->lang( 'isAssoc' ) 
+                                    . sprintf( ' File: %s, Line: %s', __FILE__, __LINE__ )
+                            );
+                        }
+                    }
+                    else
+                    {
+                        $callbackArgs = empty( $arguments )
+                            ? $arguments
+                            : array_merge( $arguments, $this->traitCallback[ 'arguments' ] );
+                    }
                 }
 
+                if ( $this->traitCallback[ 'before' ] && $callback( $beforeName, $callbackArgs ) )
+                {
+                    $callbackArgs = getClass( $beforeName, '', RegistryEventClass::class );
+                }
+
+                // dd($callbackArgs);
                 /** @var mixed $run */
                 $run = $this->traitCallInstance->$method( ...$callbackArgs );
 
                 if ( $this->traitCallback[ 'after' ] )
                 {
-                    /** @var bool $callback */
                     $callback( $afterName, $run );
                 }
 
@@ -73,10 +101,7 @@ trait TraitCall
             return $this->traitCallInstance->$method( ...$arguments );
         }
 
-        $error = sprintf(
-            '{ ( %s )-> %s() } [ File: %s ] ( Line: %s )', 
-            self::class, $method, __FILE__, __LINE__
-        );
+        $error = sprintf( '{ ( %s )-> %s() } [ File: %s ] ( Line: %s )', self::class, $method, __FILE__, __LINE__ );
         throw new \BadMethodCallException( $error, 403 );
 	}
 

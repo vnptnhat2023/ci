@@ -32,7 +32,7 @@ class Logger extends BaseConfig
 	| your log files will fill up very fast.
 	|
 	*/
-	public $threshold = 9; # default: 3
+	public $threshold = 0; # default: 3
 
 	/*
 	|--------------------------------------------------------------------------
