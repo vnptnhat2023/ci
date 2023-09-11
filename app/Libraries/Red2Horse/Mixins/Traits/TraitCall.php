@@ -4,7 +4,6 @@ declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Traits;
 
 use Red2Horse\Mixins\Classes\Registry\RegistryEventClass;
-use Throwable;
 
 use function Red2Horse\Mixins\Functions\
 {
@@ -33,7 +32,6 @@ trait TraitCall
 
     public function run ( string $className = '' ) : void
     {
-        $this->traitCallback[ 'arguments' ] = [ 123 ];
         $this->traitCallInstance = getInstance( $className );
         $this->traitCallMethods = getInstanceMethods( $className );
         $this->traitCallback[ 'callback' ] = function( string $name, $args ) : bool
@@ -86,13 +84,12 @@ trait TraitCall
                     $callbackArgs = getClass( $beforeName, '', RegistryEventClass::class );
                 }
 
-                // dd($callbackArgs);
                 /** @var mixed $run */
-                $run = $this->traitCallInstance->$method( ...$callbackArgs );
+                $run = $this->traitCallInstance->{ $method }( ...$callbackArgs );
 
-                if ( $this->traitCallback[ 'after' ] )
+                if ( $this->traitCallback[ 'after' ] && $callback( $afterName, $run ) )
                 {
-                    $callback( $afterName, $run );
+                    $run = getClass( $afterName, '', RegistryEventClass::class );
                 }
 
                 return $run;
@@ -101,7 +98,11 @@ trait TraitCall
             return $this->traitCallInstance->$method( ...$arguments );
         }
 
-        $error = sprintf( '{ ( %s )-> %s() } [ File: %s ] ( Line: %s )', self::class, $method, __FILE__, __LINE__ );
+        $error = sprintf(
+            '{ ( %s )-> %s() } [ File: %s ] ( Line: %s )',
+            self::class, $method, __FILE__, __LINE__
+        );
+
         throw new \BadMethodCallException( $error, 403 );
 	}
 

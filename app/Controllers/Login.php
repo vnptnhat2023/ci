@@ -14,7 +14,7 @@ class Login extends BaseController
 	private ?string $c;
 	private ?string $e;
 
-	private bool $dump = true;
+	private bool $dump = false;
 
 	public function __construct()
 	{
@@ -32,16 +32,11 @@ class Login extends BaseController
 
 	public function index()
 	{
-		$u = $this->u;
-		$p = $this->p;
-		$r = null !== $this->r;
-		$c = $this->c;
-
+		$u = $this->u; $p = $this->p; $r = $this->r; $c = $this->c;
 		$this->auth->login( $u, $p, $r, $c );
-
 		$this->_dumpIt( [ 'username' => $u, 'password' => $p, 'captcha' => $c, 'remember_me' => $r ] );
 
-		return view( 'login/login', (array) $this->auth->getMessage() );
+		return view( 'login/login', ( array ) $this->auth->getMessage() );
 	}
 
 	public function forgot ()
@@ -54,7 +49,7 @@ class Login extends BaseController
 
 		$this->auth->requestPassword( $u, $e, $c );
 
-		return view( 'login/forgot', (array) $this->auth->getMessage() );
+		return view( 'login/forgot', ( array ) $this->auth->getMessage() );
 	}
 
 	public function logout ()
@@ -67,13 +62,7 @@ class Login extends BaseController
 	{
 		if ( $this->dump )
 		{
-			// d( _debugInfo( RegistryClass::class ), 'RegistryClass' );
-			// d( _debugInfo( RegistryEventClass::class ), 'RegistryEventClass' );
 			d( $this->auth->getMessage( $form ) );
-			// d( $this->auth->getMessage() );
-			// echo '<pre>';
-			// var_dump( $this->auth->getMessage()->result );
-			// echo '</pre>';
 		}
 	}
 }

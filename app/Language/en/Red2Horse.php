@@ -12,7 +12,7 @@ return [
 	'errorNeedLoggedIn' => 'You have not login yet. ',
 	'errorIncorrectInformation' => 'Incorrect information.',
 	'errorNotReadyYet' => 'The current account is in status `{0}` has not been activated yet.',
-	'errorThrottleLimitedTime' => 'Please try to login again after {num} {type}',
+	'errorThrottleLimitedTime' => 'Please try to login after {number} {minutes}',
 
 	'noteDenyRequestPassword' => 'You are logged in, so you are not authorized to use this function.',
 	'noteLoggedInAnotherPlatform' => 'Your account has been logged-in with another platform.',

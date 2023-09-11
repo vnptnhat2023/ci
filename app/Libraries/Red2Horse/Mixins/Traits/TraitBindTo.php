@@ -25,8 +25,14 @@ trait TraitBindTo
         throw new \RuntimeException( "Method { $name } does not exist." );
     }
     
-    public function __set ( $name, \Closure $value )
+    public function __set ( $name, $value )
     {
-        $this->$name = is_callable( $value ) ? $value->bindTo( $this, $this ) : $value;
+        if ( is_callable( $value ) )
+        {
+            /** @var \Closure $value */
+            $this->$name =  $value->bindTo( $this, $this );
+        }
+
+        $this->$name =  $value;
     }
 }

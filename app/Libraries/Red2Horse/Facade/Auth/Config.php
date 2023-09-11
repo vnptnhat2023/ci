@@ -198,7 +198,7 @@ class Config
 			...$columns
 		];
 
-		if ( true === $join ) {
+		if ( $join ) {
 			# user_group
 			$columns[] = 'user_group.id as group_id';
 			$columns[] = 'user_group.name as group_name';

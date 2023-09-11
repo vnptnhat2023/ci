@@ -6,14 +6,16 @@ namespace Red2Horse;
 use Red2Horse\
 {
     Mixins\Traits\TraitSingleton,
+    Mixins\Classes\Registry\RegistryClass,
     Facade\Auth\Config,
     Facade\Auth\Red2Horse
 };
-use Red2Horse\Mixins\Classes\Registry\RegistryClass;
 
 use function Red2Horse\Mixins\Functions\
 {
-    callClass, getComponents, setClass
+    callClass,
+    getComponents,
+    setClass
 };
 
 define( 'R2H_PATH', __DIR__ );
@@ -36,9 +38,16 @@ class R2h
         getComponents( 'throttle' )->config( ...$throttle );
     }
 
-    public function __call ( string $name, array $arguments = [] )
+    public function __call ( string $methodName, array $arguments = [] )
     {
-        $setting = [ 'traitCallback' => [ 'before' => true, 'after' => true ] ];
-        return callClass( Red2Horse::class, RegistryClass::class, true, $setting ) ->__call( $name, $arguments );
+        $setting = [
+            'traitCallback' => [
+                'before' => true,
+                'after' => true
+            ]
+        ];
+
+        return callClass( Red2Horse::class, RegistryClass::class, true, $setting )
+            ->__call( $methodName, $arguments );
     }
 }

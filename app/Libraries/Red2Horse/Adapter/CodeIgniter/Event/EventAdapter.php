@@ -4,12 +4,8 @@ declare( strict_types = 1 );
 namespace Red2Horse\Adapter\CodeIgniter\Event;
 
 use CodeIgniter\Events\Events;
-use Red2Horse\Facade\Auth\Message;
-use Red2Horse\Mixins\Classes\Registry\RegistryClass;
 use Red2Horse\Mixins\Classes\Registry\RegistryEventClass;
 
-use function Red2Horse\Mixins\Functions\getClass;
-use function Red2Horse\Mixins\Functions\getInstance;
 use function Red2Horse\Mixins\Functions\setClass;
 
 final class EventAdapter implements EventAdapterInterface
@@ -52,9 +48,16 @@ final class EventAdapter implements EventAdapterInterface
     public function trigger ( string $name, ...$args ) : bool
     {
         $this->init();
+
         $this->triggered[] = $name;
         $name = strtolower( trim( preg_replace( '/([A-Z]){1}/', '_$1', $name ), '_' ) );
-        return Events::trigger( $name, ...$args );
+        
+        if ( in_array( $name, $this->events ) )
+        {
+            return Events::trigger( $name, ...$args );
+        }
+
+        return false;
     }
 
     public function init () : void
@@ -98,6 +101,7 @@ final class EventAdapter implements EventAdapterInterface
         return true;
     }
 
+    /** Event: r2h_before_login */
     private function r2h_before_login ( $username, $password, $remember, $captcha ) : array
     {
         // $username .= '___%*)@(%____';
@@ -112,14 +116,12 @@ final class EventAdapter implements EventAdapterInterface
         if ( in_array( $methodName, $this->events ) )
         {
             $args = reset( $args );
-
             if ( $methodName === 'r2h_before_login' )
             {
                 $args = $this->r2h_before_login( ...$args );
             }
 
             $evName = $this->triggered[ array_key_last( $this->triggered ) ];
-
             setClass( $evName, $args, false, RegistryEventClass::class );
         }
     }

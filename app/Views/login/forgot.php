@@ -5,7 +5,18 @@ function r2hI18 ( string $field, bool $w = false ) : string
 	$str = lang( "Red2Horse.{$field}" );
 	return $w ? ucwords( $str ) : ucfirst( $str );
 }
-
+function bgColor () : string
+{
+	$arr = [
+		'lemonchiffon',
+		'beige',
+		'cadetblue',
+		'burlywood',
+		'lightgoldenrodyellow',
+		'khaki'
+	];
+	return $arr[ random_int( 0, 5 ) ];
+}
 ?>
 
 <!DOCTYPE html>
@@ -26,6 +37,7 @@ function r2hI18 ( string $field, bool $w = false ) : string
 			{
 				font-family: cursive, monospace, sans-serif;
 				/* background-image: url(https://source.unsplash.com/random); */
+				background-color: <?= bgColor() ?>;
 				background-repeat: no-repeat;
 				background-position: center center;
 				background-size: cover;
@@ -126,93 +138,101 @@ function r2hI18 ( string $field, bool $w = false ) : string
 						<h2 class="form-box-title"><?= r2hI18( 'resetPassword' ) ?></h2>
 
 						<?php
-							if ( isset( $errors[0] ) ) {
+							if ( ! empty( $message->errors ) )
+							{
 								echo '<div class="alert alert-danger">';
-								foreach ($errors as $error) { echo "<p>{$error}</p>"; }
+								foreach ( $message->errors as $error ) { echo "<p>{$error}</p>"; }
 								echo '</div>';
 							}
 
-							if ( isset( $success[0] ) ) {
+							if ( ! empty( $message->success ) )
+							{
 								echo '<div class="alert alert-success">';
-								foreach ($success as $success) { echo "<p>{$success}</p>"; }
+								foreach ( $message->success as $success ) { echo "<p>{$success}</p>"; }
 								echo '</div>';
 							}
 						?>
 
-						<?php if ( ! $result->successfully && ! $result->limited ) : ?>
+						<!-- Form -->
+						<?php if ( $result->show->form ) : ?>
 
-						<div class="form-group" :class="{'has-warning': errors.has('username')}">
-							<label for="username"><?= r2hI18( 'labelUsername', false ) ?></label>
+							<div class="form-group" :class="{'has-warning': errors.has('username')}">
+								<label for="username"><?= r2hI18( 'labelUsername', false ) ?></label>
 
-							<input
-							type="text"
-							class="form-control"
-							maxlength="32"
-							v-validate="'required|min:5|max:32'"
-							data-vv-as="<?= r2hI18( 'labelUsername', false ) ?>"
-							name="username"
-							id="username"
-							placeholder="<?= r2hI18( 'labelUsername', false ) ?>"
-							value="<?php echo set_value('username') ?>"
-							autocomplete="off" spellcheck="false">
-
-							<span v-show="errors.has('username')" class="help-block">{{ errors.first('username') }}</span>
-						</div>
-
-						<div class="form-group" :class="{'has-warning': errors.has('email')}">
-
-							<label for="email"><?= r2hI18( 'labelEmail', false ) ?></label>
-
-							<input type="email"
-							class="form-control"
-							maxlength="64"
-							v-validate="'required|min:5|max:64|email'"
-							data-vv-as="<?= r2hI18( 'labelEmail', false ) ?>"
-							name="email"
-							id="email"
-							placeholder="<?= r2hI18( 'labelEmail', false ) ?>"
-							value="<?php echo set_value('email') ?>"
-							autocomplete="off" spellcheck="false">
-
-							<span v-show="errors.has('email')" class="help-block">{{ errors.first('email') }}</span>
-
-						</div>
-
-						<?php if ( $result->showCaptcha ) : helper( 'captcha' ); ?>
-
-						<div class="form-group">
-							<label for="captcha"><?= r2hI18( 'labelCaptcha', false ) ?></label>
-
-							<div class="input-group">
-								<input type="text"
+								<input
+								type="text"
 								class="form-control"
-								id="captcha"
-								name="captcha"
-								placeholder="<?= r2hI18( 'placeholderCaptcha', false ) ?>">
+								maxlength="32"
+								v-validate="'required|min:5|max:32'"
+								data-vv-as="<?= r2hI18( 'labelUsername', false ) ?>"
+								name="username"
+								id="username"
+								placeholder="<?= r2hI18( 'labelUsername', false ) ?>"
+								value="<?= set_value('username') ?>"
+								autocomplete="off" spellcheck="false">
 
-								<span class="input-group-addon"
-								style="margin: 0; padding: 0;">
-									<?= ci_captcha() ?>
-								</span>
+								<span v-show="errors.has('username')" class="help-block">{{ errors.first('username') }}</span>
 							</div>
-						</div>
 
-						<?php endif ?>
+							<div class="form-group" :class="{'has-warning': errors.has('email')}">
 
-						<div class="form-group">
-							<button
-							type="submit"
-							class="btn btn-primary"
-							:disabled="errors.has('username') || errors.has('email')"><?= r2hI18( 'LabelBtnResetSubmit' ) ?></button>
-						</div>
+								<label for="email"><?= r2hI18( 'labelEmail', false ) ?></label>
 
-						<div style="margin: 30px 0;">
-							<a href="<?php echo base_url('login') ?>">
-								<!-- <span class="glyphicon glyphicon-arrow-left"></span>&nbsp; -->
-								<span><?= r2hI18( 'login' ) ?></span>
-							</a>
-						</div>
+								<input type="email"
+								class="form-control"
+								maxlength="64"
+								v-validate="'required|min:5|max:64|email'"
+								data-vv-as="<?= r2hI18( 'labelEmail', false ) ?>"
+								name="email"
+								id="email"
+								placeholder="<?= r2hI18( 'labelEmail', false ) ?>"
+								value="<?= set_value('email') ?>"
+								autocomplete="off" spellcheck="false">
+
+								<span v-show="errors.has('email')" class="help-block">{{ errors.first('email') }}</span>
+
+							</div>
+
+							<!-- Form captcha -->
+							<?php if ( $result->show->captcha ) : helper( 'captcha' ); ?>
+
+								<div class="form-group">
+									<label for="captcha"><?= r2hI18( 'labelCaptcha', false ) ?></label>
+
+									<div class="input-group">
+										<input type="text"
+										class="form-control"
+										id="captcha"
+										name="captcha"
+										placeholder="<?= r2hI18( 'placeholderCaptcha', false ) ?>">
+
+										<span class="input-group-addon"
+										style="margin: 0; padding: 0;">
+											<?= ci_captcha() ?>
+										</span>
+									</div>
+								</div>
+
+							<?php endif ?>
+							<!-- End form captcha -->
+
+							<div class="form-group">
+								<button
+								type="submit"
+								class="btn btn-primary"
+								:disabled="errors.has('username') || errors.has('email')"><?= r2hI18( 'LabelBtnResetSubmit' ) ?></button>
+							</div>
+
+							<div style="margin: 30px 0;">
+								<a href="<?= base_url('login') ?>">
+									<!-- <span class="glyphicon glyphicon-arrow-left"></span>&nbsp; -->
+									<span><?= r2hI18( 'login' ) ?></span>
+								</a>
+							</div>
+
 						<?php endif; ?>
+						<!-- End form -->
+
 					</div>
 					<?php echo form_close() ?>
 
@@ -221,8 +241,8 @@ function r2hI18 ( string $field, bool $w = false ) : string
 		</div>
 
 		<script>
-			Vue.use(VeeValidate,{locale: 'vi'})
-			new Vue({el:'#forget-password-page'})
+			Vue.use( VeeValidate, { locale: 'vi' } );
+			new Vue( { el: '#forget-password-page' } );
 		</script>
 	</body>
 </html>

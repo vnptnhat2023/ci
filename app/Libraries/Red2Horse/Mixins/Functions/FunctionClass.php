@@ -5,6 +5,16 @@ namespace Red2Horse\Mixins\Functions;
 
 use Red2Horse\Mixins\Classes\Registry\RegistryClass as RegClass;
 
+/**
+ * namespace Red2Horse\Mixins\Functions\FunctionClass.php
+ * 
+ * classInit
+ * getInstance
+ * getComponents
+ * getInstanceMethods
+ * callClass
+ */
+
 function classInit( string $classNamespace, string $state, bool $getShared ) : object
 {
     return $state::selfInstance() ->init( $classNamespace, $getShared );
@@ -16,12 +26,12 @@ function getInstance ( string $classNamespace, string $state = RegClass::class, 
 }
 
 /**
- * @param string $className Class name only ( not contain namespace )
+ * @param string $class Class name only ( not contain namespace )
  * @param bool $getShared For adapter only
  */
-function getComponents ( string $className, string $state = RegClass::class, bool $getShared = true ) : object
+function getComponents ( string $class, string $state = RegClass::class, bool $getShared = true ) : object
 {
-    return classInit( $className, $state, $getShared ) ->getComponents();
+    return classInit( $class, $state, $getShared ) ->getComponents();
 }
 
 function getInstanceMethods ( string $classNamespace, string $state = RegClass::class, bool $getShared = true ) : array

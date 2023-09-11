@@ -24,34 +24,62 @@ class Message
 	public static array $errors = [];
 	public static array $success = [];
 
-	/**
-	 * Depend on static property $returnType
-	 * @return array|object
-	 */
-	public function getResult ()
+	/** @return array */
+	public function getResult () : array
 	{
 		$throttle = getComponents( 'throttle' );
+		$limited = $throttle->limited();
+		$attempts = $throttle->getAttempts();
+		$captcha = $throttle->showCaptcha();
 
-		return [
-			'incorrectResetPassword' => self::$incorrectResetPassword,
-			'incorrectLoggedIn' => self::$incorrectLoggedIn,
-			'successfully' => self::$successfully,
-			'hasBanned' => self::$hasBanned,
-			'accountInactive' => self::$accountInactive,
-			'attempt' => $throttle->getAttempts(),
-			'showCaptcha' => $throttle->showCaptcha(),
-			'limited' => $throttle->limited()
+		/** Auth status */
+		// $reset = self::$incorrectResetPassword;
+		// $login = self::$incorrectLoggedIn;
+
+		// /** Account status */
+		// $suspend = self::$hasBanned;
+		// $active = ! self::$accountInactive;
+
+		/** @var bool $success */
+		$success = self::$successfully;
+		
+
+		$resultMessage = [
+			// 'auth_status' => [
+			// 	'reset' => $reset,
+			// 	'login' => $login,
+			// ],
+
+			// 'account_status' => [
+			// 	'suspend' => $suspend,
+			// 	'active' => ! $active
+			// ],
+			
+			'throttle_status' => [
+				'limited' => $limited,
+				'attempts' => $attempts,
+			],
+
+			'show' => [
+				'form' => ! $limited && ! $success,
+				'captcha' => $captcha,
+			]
 		];
+
+		return $resultMessage;
 	}
 
 	/**
-	 * @return array|object
+	 * @return mixed array|object
 	 */
-	public function getMessage ( array $addMore = [], bool $asObject = true, bool $getConfig = false )
+	public function getMessage ( array $add = [], bool $asObject = true, bool $getConfig = false )
 	{
 		$message = [
-			'success' => self::$success,
-			'errors' => self::$errors,
+			'message' => [
+				'success' => self::$success,
+				'errors' => self::$errors,
+			],
+			
 			'result' => $this->getResult()
 		];
 
@@ -60,22 +88,23 @@ class Message
 			$message[ 'config' ] = get_object_vars( getInstance( Config::class ) );
 		}
 
-		if ( ! empty( $addMore ) )
+		if ( ! empty( $add ) )
 		{
-			$message = array_merge( $message, $addMore );
+			$add = [ 'added' => $add ];
+			$message = array_merge( $message, $add );
 		}
 
 		return ( $asObject ) ? json_decode( json_encode( $message ) ) : $message;
 	}
 
-	/** @read_more getMessage */
-	public function denyMultiLogin ( bool $throttle = true, array $addMore = [], $getReturn = true )
+	/** @return mixed array|object|void */
+	public function denyMultiLogin ( bool $throttle = true, array $add = [], $getReturn = true )
 	{
 		! $throttle ?: getComponents( 'throttle' )->throttle();
 		self::$incorrectLoggedIn = true;
 
 		$errors[] = getComponents( 'common' )->lang( 'Red2Horse.noteLoggedInAnotherPlatform' );
-		self::$errors = [ ...$errors, ...array_values( $addMore ) ];
+		self::$errors = [ ...$errors, ...array_values( $add ) ];
 
 		if ( $getReturn )
 		{
@@ -83,20 +112,20 @@ class Message
 		}
 	}
 
-	/** @read_more getMessage */
-	public function incorrectInfo ( bool $throttle = true, array $addMore = [] )
+	/** @return mixed array|object */
+	public function incorrectInfo ( bool $throttle = true, array $add = [] )
 	{
 		! $throttle ?: getComponents( 'throttle' )->throttle();
 		self::$incorrectLoggedIn = true;
 
 		$errors[] = getComponents( 'common' )->lang( 'Red2Horse.errorIncorrectInformation' );
-		self::$errors = [ ...$errors, ...array_values( $addMore ) ];
+		self::$errors = [ ...$errors, ...array_values( $add ) ];
 
 		return $this->getMessage();
 	}
 
 	/**
-	 * @return array|object|void
+	 * @return mixed array|object|void
 	 */
 	public function denyStatus ( string $status, bool $throttle = true, $getReturn = true )
 	{
