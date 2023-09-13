@@ -7,7 +7,6 @@ use Red2Horse\
 {
     Mixins\Traits\TraitSingleton,
     Mixins\Classes\Registry\RegistryClass,
-    Facade\Auth\Config,
     Facade\Auth\Red2Horse
 };
 
@@ -15,26 +14,29 @@ use function Red2Horse\Mixins\Functions\
 {
     callClass,
     getComponents,
+    getConfig,
     setClass
 };
 
 define( 'R2H_PATH', __DIR__ );
 
+$config_path = realpath( R2H_PATH . '/Config' );
 $functions_path = realpath( R2H_PATH . '/Mixins/Functions' );
+
+require_once( $config_path . '/Constants.php' );
 require_once( $functions_path . '/FunctionCall.php' );
 require_once( $functions_path . '/FunctionClass.php' );
+
 
 class R2h
 {
     use TraitSingleton;
-
-    public function __construct ( ?Config $config = null )
+    public function __construct ( ?\Closure $config = null )
 	{
-        $config = $config ?? Config::getInstance();
-        $configData = [ 'methods' => $config::_getMPs(), 'instance' => $config ];
-		setClass( Config::class, $configData, true );
+        $config = null === $config ? getConfig() : $config();
 
-        $throttle = array_values( ( array ) $config->throttle );
+		setClass( Config::class, [ 'methods' => $config::_getMPs(), 'instance' => $config ], true );
+        $throttle = array_values( ( array ) getConfig( 'throttle' )->throttle );
         getComponents( 'throttle' )->config( ...$throttle );
     }
 
@@ -43,7 +45,7 @@ class R2h
         $setting = [
             'traitCallback' => [
                 'before' => true,
-                'after' => true
+                'after' => false
             ]
         ];
 

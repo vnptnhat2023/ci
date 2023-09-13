@@ -15,6 +15,19 @@ function bgColor () : string
 		'lightgoldenrodyellow',
 		'khaki'
 	];
+	$arr2 = [
+		'coral',
+		'currentCikir',
+		'chocolate',
+		'lightcoral',
+		'darkseagreen',
+		'darkkhaki'
+	];
+	
+	if ( (int) date('H') < 12 )
+	{
+		return $arr2[ random_int( 0, 5 ) ];
+	}
 	return $arr[ random_int( 0, 5 ) ];
 }
 ?>

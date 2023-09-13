@@ -9,6 +9,7 @@ use function Red2Horse\Mixins\Functions\
 {
     getClass,
     getComponents,
+    getConfig,
     getInstance,
     getInstanceMethods
 };
@@ -18,20 +19,27 @@ trait TraitCall
 {
 	private object $traitCallInstance;
 
-	private array $traitCallMethods = [];
+	private array $traitCallMethods;
     
     private array $traitCallback = [
         'callback' => null,
-        'arguments' => [],
-        'before' => false,
-        'after' => false
+        'arguments' => []
     ];
 
-    private string $traitBeforePrefix = 'R2h_before_';
-    private string $traitAfterPrefix = 'R2h_after_';
+    private bool $traitUseBefore;
+    private bool $traitUseAfter;
+    private string $traitBeforePrefix;
+    private string $traitAfterPrefix;
 
     public function run ( string $className = '' ) : void
     {
+        $callConfig = getConfig( 'CallClass' );
+
+        $this->traitUseBefore ??= $callConfig->traitUseBefore;
+        $this->traitUseAfter ??= $callConfig->traitUseAfter;
+        $this->traitBeforePrefix ??= $callConfig->traitBeforePrefix;
+        $this->traitAfterPrefix ??= $callConfig->traitAfterPrefix;
+
         $this->traitCallInstance = getInstance( $className );
         $this->traitCallMethods = getInstanceMethods( $className );
         $this->traitCallback[ 'callback' ] = function( string $name, $args ) : bool
@@ -65,7 +73,7 @@ trait TraitCall
                         }
                         else
                         {
-                            log_message(
+                            $common->log_message(
                                 'warning', $common->lang( 'isAssoc' ) 
                                     . sprintf( ' File: %s, Line: %s', __FILE__, __LINE__ )
                             );
@@ -79,7 +87,7 @@ trait TraitCall
                     }
                 }
 
-                if ( $this->traitCallback[ 'before' ] && $callback( $beforeName, $callbackArgs ) )
+                if ( $this->traitUseBefore && $callback( $beforeName, $callbackArgs ) )
                 {
                     $callbackArgs = getClass( $beforeName, '', RegistryEventClass::class );
                 }
@@ -87,7 +95,7 @@ trait TraitCall
                 /** @var mixed $run */
                 $run = $this->traitCallInstance->{ $method }( ...$callbackArgs );
 
-                if ( $this->traitCallback[ 'after' ] && $callback( $afterName, $run ) )
+                if ( $this->traitUseAfter && $callback( $afterName, $run ) )
                 {
                     $run = getClass( $afterName, '', RegistryEventClass::class );
                 }

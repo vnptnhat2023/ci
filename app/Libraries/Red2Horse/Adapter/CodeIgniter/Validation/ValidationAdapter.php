@@ -4,8 +4,9 @@ declare( strict_types = 1 );
 
 namespace Red2Horse\Adapter\Codeigniter\Validation;
 
-use Red2Horse\Facade\Auth\Config;
 use Config\Services;
+
+use function Red2Horse\Mixins\Functions\getConfig;
 
 /**
  * @package Red2ndHorseAuth
@@ -64,7 +65,7 @@ class ValidationAdapter implements ValidationAdapterInterface
 
 	public function ruleStore() : array
 	{
-		$config = Config::getInstance();
+		$config = getConfig( 'validation' );
 
 		$generalRules = [
 			$config::USERNAME => [

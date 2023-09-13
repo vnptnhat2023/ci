@@ -14,11 +14,11 @@ use Red2Horse\Facade\{
 	Database\ThrottleFacadeInterface as throttleModel,
 	Database\UserFacadeInterface as userModel,
 	Common\CommonFacadeInterface as common,
-	Auth\Config
 };
 
 use Red2Horse\Mixins\Traits\TraitSingleton;
 
+use function Red2Horse\Mixins\Functions\getConfig;
 use function Red2Horse\Mixins\Functions\getInstance;
 
 class AuthComponentBuilder
@@ -43,7 +43,7 @@ class AuthComponentBuilder
 
 	public function build ( array $builder )
 	{
-		$config = getInstance( Config::class );
+		$config = getConfig();
 
 		foreach ( $builder as $class => $component )
 		{

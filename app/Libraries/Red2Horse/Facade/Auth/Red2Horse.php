@@ -63,6 +63,7 @@ class Red2Horse
 		return getInstance( Message::class )->getResult();
 	}
 
+	/** @return mixed */
 	public function getMessage ( array $add = [], bool $asObject = true )
 	{
 		return getInstance( Message::class )->getMessage( $add, $asObject );

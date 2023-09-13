@@ -1,0 +1,265 @@
+
+Deprecated: The each() function is deprecated. This message will be suppressed on further calls in C:\Program Files\Sublime 4\Data\Packages\PHPTools\php.tools\codeFormatter.php on line 54
+
+Call Stack:
+    0.0040     742648   1. {main}() C:\Program Files\Sublime 4\Data\Packages\PHPTools\php.tools\codeFormatter.php:0
+    0.0047     761448   2. CodeFormatter->formatCode($source = '<?php\r\n\r\nfunction r2hI18 ( string $field, bool $w = false ) : string\r\n{\r\n\t$str = lang( "Red2Horse.{$field}" );\r\n\treturn $w ? ucwords( $str ) : ucfirst( $str );\r\n}\r\nfunction bgColor () : string\r\n{\r\n\t$arr = [\r\n\t\t\'lemonchiffon\',\r\n\t\t\'beige\',\r\n\t\t\'cadetblue\',\r\n\t\t\'burlywood\',\r\n\t\t\'lightgoldenrodyellow\',\r\n\t\t\'khaki\'\r\n\t];\r\n\t$arr2 = [\r\n\t\t\'coral\',\r\n\t\t\'currentCikir\',\r\n\t\t\'chocolate\',\r\n\t\t\'lightcoral\',\r\n\t\t\'darkseagreen\',\r\n\t\t\'darkkhaki\'\r\n\t];\r\n\t\r\n\tif ( (int) date(\'H\') < 12 )\r\n\t{\r\n\t\treturn $arr2[ random_int( 0, 5 ) ];\r\n\t}\r\n\tre'...) C:\Program Files\Sublime 4\Data\Packages\PHPTools\php.tools\codeFormatter.php:1736
+    0.0056     769640   3. AddMissingCurlyBraces->format($source = '<?php\r\n\r\nfunction r2hI18 ( string $field, bool $w = false ) : string\r\n{\r\n\t$str = lang( "Red2Horse.{$field}" );\r\n\treturn $w ? ucwords( $str ) : ucfirst( $str );\r\n}\r\nfunction bgColor () : string\r\n{\r\n\t$arr = [\r\n\t\t\'lemonchiffon\',\r\n\t\t\'beige\',\r\n\t\t\'cadetblue\',\r\n\t\t\'burlywood\',\r\n\t\t\'lightgoldenrodyellow\',\r\n\t\t\'khaki\'\r\n\t];\r\n\t$arr2 = [\r\n\t\t\'coral\',\r\n\t\t\'currentCikir\',\r\n\t\t\'chocolate\',\r\n\t\t\'lightcoral\',\r\n\t\t\'darkseagreen\',\r\n\t\t\'darkkhaki\'\r\n\t];\r\n\t\r\n\tif ( (int) date(\'H\') < 12 )\r\n\t{\r\n\t\treturn $arr2[ random_int( 0, 5 ) ];\r\n\t}\r\n\tre'...) C:\Program Files\Sublime 4\Data\Packages\PHPTools\php.tools\codeFormatter.php:326
+    0.0056     769640   4. AddMissingCurlyBraces->addBraces($source = '<?php\r\n\r\nfunction r2hI18 ( string $field, bool $w = false ) : string\r\n{\r\n\t$str = lang( "Red2Horse.{$field}" );\r\n\treturn $w ? ucwords( $str ) : ucfirst( $str );\r\n}\r\nfunction bgColor () : string\r\n{\r\n\t$arr = [\r\n\t\t\'lemonchiffon\',\r\n\t\t\'beige\',\r\n\t\t\'cadetblue\',\r\n\t\t\'burlywood\',\r\n\t\t\'lightgoldenrodyellow\',\r\n\t\t\'khaki\'\r\n\t];\r\n\t$arr2 = [\r\n\t\t\'coral\',\r\n\t\t\'currentCikir\',\r\n\t\t\'chocolate\',\r\n\t\t\'lightcoral\',\r\n\t\t\'darkseagreen\',\r\n\t\t\'darkkhaki\'\r\n\t];\r\n\t\r\n\tif ( (int) date(\'H\') < 12 )\r\n\t{\r\n\t\treturn $arr2[ random_int( 0, 5 ) ];\r\n\t}\r\n\tre'...) C:\Program Files\Sublime 4\Data\Packages\PHPTools\php.tools\codeFormatter.php:41
+    0.0059    1000496   5. each($arr = [0 => [0 => 382, 1 => '<?php\r\n', 2 => 1], 1 => [0 => 385, 1 => '\r\n', 2 => 2], 2 => [0 => 342, 1 => 'function', 2 => 3], 3 => [0 => 385, 1 => ' ', 2 => 3], 4 => [0 => 311, 1 => 'r2hI18', 2 => 3], 5 => [0 => 385, 1 => ' ', 2 => 3], 6 => '(', 7 => [0 => 385, 1 => ' ', 2 => 3], 8 => [0 => 311, 1 => 'string', 2 => 3], 9 => [0 => 385, 1 => ' ', 2 => 3], 10 => [0 => 312, 1 => '$field', 2 => 3], 11 => ',', 12 => [0 => 385, 1 => ' ', 2 => 3], 13 => [0 => 311, 1 => 'bool', 2 => 3], 14 => [0 => 385, 1 => ' ', 2 => 3], 15 => [0 => 312, 1 => '$w', 2 => 3], 16 => [0 => 385, 1 => ' ', 2 => 3], 17 => '=', 18 => [0 => 385, 1 => ' ', 2 => 3], 19 => [0 => 311, 1 => 'false', 2 => 3], 20 => [0 => 385, 1 => ' ', 2 => 3], 21 => ')', 22 => [0 => 385, 1 => ' ', 2 => 3], 23 => ':', 24 => [0 => 385, 1 => ' ', 2 => 3], 25 => [0 => 311, 1 => 'string', 2 => 3], 26 => [0 => 385, 1 => '\r\n', 2 => 3], 27 => '{', 28 => [0 => 385, 1 => '\r\n\t', 2 => 4], 29 => [0 => 312, 1 => '$str', 2 => 5], 30 => [0 => 385, 1 => ' ', 2 => 5], 31 => '=', 32 => [0 => 385, 1 => ' ', 2 => 5], 33 => [0 => 311, 1 => 'lang', 2 => 5], 34 => '(', 35 => [0 => 385, 1 => ' ', 2 => 5], 36 => '"', 37 => [0 => 314, 1 => 'Red2Horse.', 2 => 5], 38 => [0 => 389, 1 => '{', 2 => 5], 39 => [0 => 312, 1 => '$field', 2 => 5], 40 => '}', 41 => '"', 42 => [0 => 385, 1 => ' ', 2 => 5], 43 => ')', 44 => ';', 45 => [0 => 385, 1 => '\r\n\t', 2 => 5], 46 => [0 => 345, 1 => 'return', 2 => 6], 47 => [0 => 385, 1 => ' ', 2 => 6], 48 => [0 => 312, 1 => '$w', 2 => 6], 49 => [0 => 385, 1 => ' ', 2 => 6], 50 => '?', 51 => [0 => 385, 1 => ' ', 2 => 6], 52 => [0 => 311, 1 => 'ucwords', 2 => 6], 53 => '(', 54 => [0 => 385, 1 => ' ', 2 => 6], 55 => [0 => 312, 1 => '$str', 2 => 6], 56 => [0 => 385, 1 => ' ', 2 => 6], 57 => ')', 58 => [0 => 385, 1 => ' ', 2 => 6], 59 => ':', 60 => [0 => 385, 1 => ' ', 2 => 6], 61 => [0 => 311, 1 => 'ucfirst', 2 => 6], 62 => '(', 63 => [0 => 385, 1 => ' ', 2 => 6], 64 => [0 => 312, 1 => '$str', 2 => 6], 65 => [0 => 385, 1 => ' ', 2 => 6], 66 => ')', 67 => ';', 68 => [0 => 385, 1 => '\r\n', 2 => 6], 69 => '}', 70 => [0 => 385, 1 => '\r\n', 2 => 7], 71 => [0 => 342, 1 => 'function', 2 => 8], 72 => [0 => 385, 1 => ' ', 2 => 8], 73 => [0 => 311, 1 => 'bgColor', 2 => 8], 74 => [0 => 385, 1 => ' ', 2 => 8], 75 => '(', 76 => ')', 77 => [0 => 385, 1 => ' ', 2 => 8], 78 => ':', 79 => [0 => 385, 1 => ' ', 2 => 8], 80 => [0 => 311, 1 => 'string', 2 => 8], 81 => [0 => 385, 1 => '\r\n', 2 => 8], 82 => '{', 83 => [0 => 385, 1 => '\r\n\t', 2 => 9], 84 => [0 => 312, 1 => '$arr', 2 => 10], 85 => [0 => 385, 1 => ' ', 2 => 10], 86 => '=', 87 => [0 => 385, 1 => ' ', 2 => 10], 88 => '[', 89 => [0 => 385, 1 => '\r\n\t\t', 2 => 10], 90 => [0 => 315, 1 => '\'lemonchiffon\'', 2 => 11], 91 => ',', 92 => [0 => 385, 1 => '\r\n\t\t', 2 => 11], 93 => [0 => 315, 1 => '\'beige\'', 2 => 12], 94 => ',', 95 => [0 => 385, 1 => '\r\n\t\t', 2 => 12], 96 => [0 => 315, 1 => '\'cadetblue\'', 2 => 13], 97 => ',', 98 => [0 => 385, 1 => '\r\n\t\t', 2 => 13], 99 => [0 => 315, 1 => '\'burlywood\'', 2 => 14], 100 => ',', 101 => [0 => 385, 1 => '\r\n\t\t', 2 => 14], 102 => [0 => 315, 1 => '\'lightgoldenrodyellow\'', 2 => 15], 103 => ',', 104 => [0 => 385, 1 => '\r\n\t\t', 2 => 15], 105 => [0 => 315, 1 => '\'khaki\'', 2 => 16], 106 => [0 => 385, 1 => '\r\n\t', 2 => 16], 107 => ']', 108 => ';', 109 => [0 => 385, 1 => '\r\n\t', 2 => 17], 110 => [0 => 312, 1 => '$arr2', 2 => 18], 111 => [0 => 385, 1 => ' ', 2 => 18], 112 => '=', 113 => [0 => 385, 1 => ' ', 2 => 18], 114 => '[', 115 => [0 => 385, 1 => '\r\n\t\t', 2 => 18], 116 => [0 => 315, 1 => '\'coral\'', 2 => 19], 117 => ',', 118 => [0 => 385, 1 => '\r\n\t\t', 2 => 19], 119 => [0 => 315, 1 => '\'currentCikir\'', 2 => 20], 120 => ',', 121 => [0 => 385, 1 => '\r\n\t\t', 2 => 20], 122 => [0 => 315, 1 => '\'chocolate\'', 2 => 21], 123 => ',', 124 => [0 => 385, 1 => '\r\n\t\t', 2 => 21], 125 => [0 => 315, 1 => '\'lightcoral\'', 2 => 22], 126 => ',', 127 => [0 => 385, 1 => '\r\n\t\t', 2 => 22], ...]) C:\Program Files\Sublime 4\Data\Packages\PHPTools\php.tools\codeFormatter.php:54
+
+<?php
+
+function r2hI18(string $field, bool $w = false):string {
+	$str = lang("Red2Horse.{$field}");
+	return $w?ucwords($str):ucfirst($str);
+}
+function bgColor():string {
+	$arr = [
+		'lemonchiffon',
+		'beige',
+		'cadetblue',
+		'burlywood',
+		'lightgoldenrodyellow',
+		'khaki'
+	];
+	$arr2 = [
+		'coral',
+		'currentCikir',
+		'chocolate',
+		'lightcoral',
+		'darkseagreen',
+		'darkkhaki'
+	];
+
+	if ((int) date('H') < 12) {
+		return $arr2[random_int(0, 5)];
+	}
+	return $arr[random_int(0, 5)];
+}
+?>
+
+<!DOCTYPE html>
+<html lang="">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title><?=r2hI18(lang('resetPassword'), true)?></title>
+
+		<link rel="stylesheet" href="<?=base_url('public/assets/css/bootstrap.min.css')?>">
+
+		<script src="<?=base_url('public/assets/js/vue@2.6.11.min.js')?>"></script>
+		<script src="<?=base_url('public/assets/js/vee-validate.min.js ')?>"></script>
+
+		<style>
+			body
+			{
+				font-family: cursive, monospace, sans-serif;
+				/* background-image: url(https://source.unsplash.com/random); */
+				background-color: <?=bgColor()?>;
+				background-repeat: no-repeat;
+				background-position: center center;
+				background-size: cover;
+				margin: 0px;
+				padding: 0px;
+				min-height: 100vh;
+			}
+
+			.form-box .alert
+			{
+				background: none;
+			}
+
+			.alert .alert-success
+			{
+				border-color: #506950;
+			}
+
+			.alert .alert-danger
+			{
+				border-color: #dd7472;
+			}
+
+			.form-box-title
+			{
+				color: wheat;
+				margin-bottom: 50px;
+				/* position: absolute;
+				top: 65px;
+				transform-origin: 0 0;
+				transform: rotate(90deg);
+				text-align: right; */
+			}
+
+			.form-box
+			{
+				background: rgba(0,0,0,.8);
+				background-repeat: no-repeat;
+				background-position: center center;
+				opacity: .9;
+				margin-top: 80px;
+				padding: 40px;
+				border-radius: 3.5px;
+			}
+
+			/*.form-box
+			{
+				top: 50%;
+				left: 50%;
+				position: absolute;
+				width: 500px;
+				margin-top: 100px;
+				background: rgba(0,0,0,.8);
+				margin-left: -250px;
+				padding: 20px 30px;
+				line-height: 50px;
+			}*/
+
+			.form-box .form-group label
+			{
+				color: #fff;
+			}
+
+			.form-box .form-group input
+			{
+				border-radius: 0px;
+				/*height: 35px;*/
+				background: none;
+				color: #fff;
+			}
+
+			.submit-btn
+			{
+				border-radius: 0px;
+				background: #fff!important;
+				color: red!important;
+				padding: 10px 25px;
+				font-weight: 600
+			}
+		</style>
+		<!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+		<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+		<!--[if lt IE 9]>
+			<script src="https://oss.maxcdn.com/libs/html5shiv/3.7.2/html5shiv.min.js"></script>
+			<script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+		<![endif]-->
+	</head>
+	<body>
+		<div class="container">
+			<div class="row">
+				<div class="col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3"
+				id="forget-password-page">
+
+<?=form_open(base_url('login/forgot'), '@submit="submit($event)"')?>
+
+					<div class="form-box">
+
+						<h2 class="form-box-title"><?=r2hI18('resetPassword')?></h2>
+
+<?php
+if (!empty($message->errors)) {
+	echo '<div class="alert alert-danger">';
+	foreach ($message->errors as $error) {echo "<p>{$error}</p>";}
+	echo '</div>';
+}
+
+if (!empty($message->success)) {
+	echo '<div class="alert alert-success">';
+	foreach ($message->success as $success) {echo "<p>{$success}</p>";}
+	echo '</div>';
+}
+?>
+<!-- Form -->
+<?php if ($result->show->form):?>
+
+							<div class="form-group" :class="{'has-warning': errors.has('username')}">
+								<label for="username"><?=r2hI18('labelUsername', false)?></label>
+
+								<input
+								type="text"
+								class="form-control"
+								maxlength="32"
+								v-validate="'required|min:5|max:32'"
+								data-vv-as="<?=r2hI18('labelUsername', false)?>"
+								name="username"
+								id="username"
+								placeholder="<?=r2hI18('labelUsername', false)?>"
+								value="<?=set_value('username')?>"
+								autocomplete="off" spellcheck="false">
+
+								<span v-show="errors.has('username')" class="help-block">{{ errors.first('username') }}</span>
+							</div>
+
+							<div class="form-group" :class="{'has-warning': errors.has('email')}">
+
+								<label for="email"><?=r2hI18('labelEmail', false)?></label>
+
+								<input type="email"
+								class="form-control"
+								maxlength="64"
+								v-validate="'required|min:5|max:64|email'"
+								data-vv-as="<?=r2hI18('labelEmail', false)?>"
+								name="email"
+								id="email"
+								placeholder="<?=r2hI18('labelEmail', false)?>"
+								value="<?=set_value('email')?>"
+								autocomplete="off" spellcheck="false">
+
+								<span v-show="errors.has('email')" class="help-block">{{ errors.first('email') }}</span>
+
+							</div>
+
+							<!-- Form captcha -->
+<?php if ($result->show->captcha):helper('captcha');?>
+
+								<div class="form-group">
+									<label for="captcha"><?=r2hI18('labelCaptcha', false)?></label>
+
+									<div class="input-group">
+										<input type="text"
+										class="form-control"
+										id="captcha"
+										name="captcha"
+										placeholder="<?=r2hI18('placeholderCaptcha', false)?>">
+
+										<span class="input-group-addon"
+										style="margin: 0; padding: 0;">
+<?=ci_captcha()?>
+</span>
+									</div>
+								</div>
+
+<?php endif?>
+							<!-- End form captcha -->
+
+							<div class="form-group">
+								<button
+								type="submit"
+								class="btn btn-primary"
+								:disabled="errors.has('username') || errors.has('email')"><?=r2hI18('LabelBtnResetSubmit')?></button>
+							</div>
+
+							<div style="margin: 30px 0;">
+								<a href="<?=base_url('login')?>">
+									<!-- <span class="glyphicon glyphicon-arrow-left"></span>&nbsp; -->
+									<span><?=r2hI18('login')?></span>
+								</a>
+							</div>
+
+<?php endif;?>
+<!-- End form -->
+
+					</div>
+<?php echo form_close()?>
+
+				</div>
+			</div>
+		</div>
+
+		<script>
+			Vue.use( VeeValidate, { locale: 'vi' } );
+			new Vue( { el: '#forget-password-page' } );
+		</script>
+	</body>
+</html>

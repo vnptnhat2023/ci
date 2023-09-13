@@ -6,9 +6,11 @@ namespace Red2Horse\Facade\Auth;
 
 use Red2Horse\Mixins\Traits\TraitSingleton;
 
-use function Red2Horse\Mixins\Functions\{
+use function Red2Horse\Mixins\Functions\
+{
 	getComponents,
-	getInstance
+    getConfig,
+    getInstance
 };
 
 class CookieHandle
@@ -18,22 +20,20 @@ class CookieHandle
 	public function regenerateCookie () : void
 	{
 		$cookieValue = password_hash( session_id(), PASSWORD_DEFAULT );
-		$ttl = (string) getInstance( Config::class ) ->sessionTimeToUpdate;
-		$cookieName = getInstance( Config::class ) ->cookie . '_test';
+		$ttl = ( string ) getConfig( 'session' ) ->sessionTimeToUpdate;
+		$cookieName = getConfig( 'cookie' ) ->cookie . '_test';
 
 		getComponents( 'cookie' )->set_cookie( $cookieName , $cookieValue, $ttl );
 	}
 
 	public function cookieHandler () : bool
 	{
-		$config = getInstance( Config::class );
-
-		if ( ! $config->useRememberMe )
+		if ( ! getConfig()->useRememberMe )
 		{
 			return false;
 		}
 
-		$userCookie = getComponents( 'cookie' )->get_cookie( $config->cookie );
+		$userCookie = getComponents( 'cookie' )->get_cookie( getConfig( 'cookie' )->cookie );
 
 		if ( empty( $userCookie ) || ! is_string( $userCookie ) )
 		{
@@ -42,9 +42,9 @@ class CookieHandle
 
 		$separate = explode( ':', $userCookie, 2 );
 
-		$incorrectCookie = function() use( $config ) : bool
+		$incorrectCookie = function() : bool
 		{
-			getComponents( 'cookie' )->delete_cookie( $config->cookie );
+			getComponents( 'cookie' )->delete_cookie( getConfig( 'cookie' )->cookie );
 			return false;
 		};
 
@@ -57,7 +57,7 @@ class CookieHandle
 		$token = $separate[ 1 ];
 
 		$user = getComponents( 'user' )
-			->getUserWithGroup( $config->getColumString(), [ 'selector' => $selector ] );
+			->getUserWithGroup( getConfig( 'sql' )->getColumString(), [ 'selector' => $selector ] );
 
 		if ( empty( $user ) )
 		{
@@ -101,7 +101,7 @@ class CookieHandle
 			? json_decode( $user[ 'permission' ], true )
 			: [];
 
-		getComponents( 'session' )->set( $config->session, $user );
+		getComponents( 'session' )->set( getConfig( 'session' )->session, $user );
 
 		$this->regenerateCookie();
 
@@ -110,7 +110,7 @@ class CookieHandle
 
 	public function setCookie ( int $userId, array $updateData = [], string $logError = null ) : void
 	{
-		if ( ! getInstance( Config::class )->useRememberMe )
+		if ( ! getConfig()->useRememberMe )
 		{
 			return;
 		}
@@ -142,8 +142,8 @@ class CookieHandle
 
 		if ( $updatedSuccess )
 		{
-			$ttl = time() + getInstance( Config::class )->ttl;
-			setcookie( getInstance( Config::class )->cookie, $cookieValue, $ttl, '/' );
+			$ttl = time() + getConfig( 'cookie' )->ttl;
+			setcookie( getConfig( 'cookie' )->cookie, $cookieValue, $ttl, '/' );
 		}
 		else
 		{

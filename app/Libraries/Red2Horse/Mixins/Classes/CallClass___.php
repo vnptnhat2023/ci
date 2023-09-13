@@ -15,8 +15,8 @@ class CallClass___ implements CallClass___Interface
 
     public function __construct( $className = null, array $arguments = [] )
     {
-        $this->traitCallback[ 'before' ] = $arguments[ 'traitCallback' ][ 'before' ] ?? false;
-        $this->traitCallback[ 'after' ] = $arguments[ 'traitCallback' ][ 'after' ] ?? false;
+        $this->traitUseBefore = $arguments[ 'traitCallback' ][ 'before' ] ?? false;
+        $this->traitUseAfter = $arguments[ 'traitCallback' ][ 'after' ] ?? false;
 
         $this->run( $className );
     }

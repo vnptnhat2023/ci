@@ -6,9 +6,11 @@ namespace Red2Horse\Facade\Auth;
 
 use Red2Horse\Mixins\Traits\TraitSingleton;
 
-use function Red2Horse\Mixins\Functions\{
+use function Red2Horse\Mixins\Functions\
+{
 	getComponents,
-	getInstance
+    getConfig,
+    getInstance
 };
 
 class ResetPassword
@@ -41,8 +43,8 @@ class ResetPassword
 	{
 		if ( ! $userEmail = explode( '@', $userData[ 'email' ] ) )
 		{
-			getComponents( 'common' )->log_message( 'error', "{$userEmail} email INVALID !" );
-			throw new \ErrorException( 'email INVALID', 403 );
+			getComponents( 'common' )->log_message( 'error', "{$userEmail[ 0 ]} email INVALID !" );
+			throw new \ErrorException( 'Invalid Email', 403 );
 		}
 
 		$email = str_repeat( '*', strlen( $userEmail[ 0 ] ) ) . '@' . $userEmail[ 1 ];
@@ -59,18 +61,18 @@ class ResetPassword
 	{
 		self::$username = $u; self::$email = $e; self::$captcha = $c;
 
-		$config = getInstance( Config::class );
+		$configValidation = getConfig( 'validation' );
 		$validation = getComponents( 'validation' );
 
 		$group = getComponents( 'throttle' )->showCaptcha() 
-			? $config::FORGET_WITH_CAPTCHA 
-			: $config::FORGET;
+			? $configValidation::FORGET_WITH_CAPTCHA 
+			: $configValidation::FORGET;
 
-		$rules = $validation->getRules( $config->ruleGroup[ $group ] );
+		$rules = $validation->getRules( $configValidation->ruleGroup[ $group ] );
 
 		$data = [
-			$config::USERNAME => self::$username,
-			$config::EMAIL => self::$email
+			$configValidation::USERNAME => self::$username,
+			$configValidation::EMAIL => self::$email
 		];
 
 		$message = getInstance( Message::class );
@@ -82,7 +84,7 @@ class ResetPassword
 		}
 
 		$find_user = getComponents( 'user' )
-			->getUserWithGroup( getInstance( Config::class )->getColumString(), $data );
+			->getUserWithGroup( getConfig( 'sql' )->getColumString(), $data );
 
 		if ( empty( $find_user ) )
 		{

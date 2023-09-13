@@ -14,7 +14,7 @@ class Login extends BaseController
 	private ?string $c;
 	private ?string $e;
 
-	private bool $dump = false;
+	private bool $dump = true;
 
 	public function __construct()
 	{

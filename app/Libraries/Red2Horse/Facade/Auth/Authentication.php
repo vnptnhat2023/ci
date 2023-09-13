@@ -6,9 +6,11 @@ namespace Red2Horse\Facade\Auth;
 
 use Red2Horse\Mixins\Traits\TraitSingleton;
 
-use function Red2Horse\Mixins\Functions\{
+use function Red2Horse\Mixins\Functions\
+{
 	getComponents,
-	getInstance
+    getConfig,
+    getInstance
 };
 
 class Authentication
@@ -38,15 +40,14 @@ class Authentication
 	public function logout () : bool
 	{
 		$message = getInstance( Message::class );
-		$config = getInstance( Config::class );
 		$common = getComponents( 'common' );
 		$session = getComponents( 'session' );
 
 		$message::$successfully = true;
 
-		getComponents( 'cookie' ) ->delete_cookie( $config->cookie );
+		getComponents( 'cookie' ) ->delete_cookie( getConfig( 'cookie' )->cookie );
 
-		if ( $session->has( $config->session ) )
+		if ( $session->has( getConfig('session')->session ) )
 		{
 			$session->destroy();
 			$message::$success[] = $common->lang( 'Red2Horse.successLogout' );
@@ -74,10 +75,10 @@ class Authentication
 
 		if ( empty( $key ) )
 		{
-			return getComponents( 'session' )->get( getInstance( Config::class )->session );
+			return getComponents( 'session' )->get( getConfig( 'session' )->session );
 		}
 
-		$userData = getComponents( 'session' )->get( getInstance( Config::class )->session );
+		$userData = getComponents( 'session' )->get( getConfig( 'session' )->session );
 
 		return $userData[ $key ] ?? null;
 	}
@@ -88,7 +89,7 @@ class Authentication
 	 */
 	public function isLogged ( bool $withCookie = false ) : bool
 	{
-		if ( getComponents( 'session' )->has( getInstance( Config::class )->session ) ) 
+		if ( getComponents( 'session' )->has( getConfig( 'session' )->session ) ) 
 		{
 			return true;
 		}
@@ -104,35 +105,35 @@ class Authentication
 	private function loginInvalid ()
 	{
 		$validation = getComponents( 'validation' );
-		$config = getInstance( Config::class );
+		$configValidation = getConfig( 'validation' );
 
 		if ( getComponents( 'throttle' )->showCaptcha() )
 		{
 			$data = [
-				$config::USERNAME => self::$username,
-				$config::PASSWORD => self::$password,
-				$config::CAPTCHA => self::$captcha
+				$configValidation::USERNAME => self::$username,
+				$configValidation::PASSWORD => self::$password,
+				$configValidation::CAPTCHA => self::$captcha
 			];
 
 			$ruleCaptcha = [
-				$config::CAPTCHA => $validation->getRules( $config::CAPTCHA )
+				$configValidation::CAPTCHA => $validation->getRules( $configValidation::CAPTCHA )
 			];
 
 			if ( ! $validation->isValid( $data, $ruleCaptcha ) )
 			{
-				$errorCaptcha = $validation->getErrors( $config::CAPTCHA );
+				$errorCaptcha = $validation->getErrors( $configValidation::CAPTCHA );
 				return getInstance( Message::class )->incorrectInfo( true, $errorCaptcha );
 			}
 		}
 
 		$incorrectInfo = false;
-		$ruleUsername = [ $config::USERNAME => $validation->getRules( 'username' ) ];
-		$data = [ $config::USERNAME => self::$username ];
+		$ruleUsername = [ $configValidation::USERNAME => $validation->getRules( 'username' ) ];
+		$data = [ $configValidation::USERNAME => self::$username ];
 
 		if ( ! $validation->isValid( $data, $ruleUsername ) )
 		{
 			$validation->reset();
-			$ruleEmail = [ $config::USERNAME => $validation->getRules( 'email' ) ];
+			$ruleEmail = [ $configValidation::USERNAME => $validation->getRules( 'email' ) ];
 			$incorrectInfo = ! $validation->isValid( $data, $ruleEmail );
 		}
 
@@ -149,7 +150,7 @@ class Authentication
 		];
 
 		$userData = getComponents( 'user' )->getUserWithGroup(
-			getInstance( Config::class )->getColumString( [ 'password' ] ),
+			getConfig( 'sql' )->getColumString( [ 'password' ] ),
 			$userDataArgs
 		);
 
@@ -205,7 +206,7 @@ class Authentication
 		$this->setLoggedInSuccess( $userData );
 
 		# --- Set session
-		getComponents( 'session' )->set( getInstance( Config::class )->session, $userData );
+		getComponents( 'session' )->set( getConfig( 'session' )->session, $userData );
 
 		# --- Set cookie
 		$userId = ( int ) $userData[ 'id' ];
@@ -239,13 +240,13 @@ class Authentication
 
 	public function isMultiLogin ( ?string $session_id = null ) : bool
 	{
-		if ( ! getInstance( Config::class )->useMultiLogin )
+		if ( ! getConfig()->useMultiLogin )
 		{
 			return true;
 		}
 
-		$pathFile = getInstance( Config::class )->sessionSavePath;
-		$pathFile .= '/' . getInstance( Config::class )->sessionCookieName . $session_id;
+		$pathFile = getConfig( 'session' )->sessionSavePath;
+		$pathFile .= '/' . getConfig( 'session' )->sessionCookieName . $session_id;
 		$date = getComponents( 'common' )->get_file_info( $pathFile, 'date' );
 
 		if ( empty( $date ) )
@@ -253,7 +254,7 @@ class Authentication
 			return true;
 		}
 
-		$cookieName = getInstance( Config::class )->sessionCookieName . '_test';
+		$cookieName = getConfig( 'session' )->sessionCookieName . '_test';
 
 		if ( $hash = getComponents( 'cookie' ) ->get_cookie( $cookieName ) )
 		{
@@ -268,7 +269,7 @@ class Authentication
 		}
 
 		$time = ( time() - $date[ 'date' ] );
-		$sessionExp = ( int ) getInstance( Config::class )->sessionExpiration;
+		$sessionExp = ( int ) getConfig( 'session' )->sessionExpiration;
 
 		if ( $sessionExp > 0 )
 		{
@@ -277,7 +278,7 @@ class Authentication
 
 		if ( $sessionExp === 0 )
 		{
-			return getInstance( Config::class )->sessionTimeToUpdate > $time;
+			return getConfig( 'session' )->sessionTimeToUpdate > $time;
 		}
 
 		getInstance( Message::class )::$errors[] = 'else';

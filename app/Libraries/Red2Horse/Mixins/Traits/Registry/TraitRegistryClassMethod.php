@@ -6,10 +6,12 @@ namespace Red2Horse\Mixins\Traits\Registry;
 use Red2Horse\Mixins\Classes\Registry\RegistryClass;
 use Red2Horse\Mixins\Classes\Registry\RegistryClass___;
 
+/** State switch */
 trait TraitRegistryClassMethod
 {
     private string $keyName;
 
+    /** Set switch state */
     private function configRegistryClassMethod___( string $keyName = RegistryClass___::class )
     {
         $this->keyName = $keyName;
@@ -33,6 +35,7 @@ trait TraitRegistryClassMethod
     }
 
     /**
+     * @throws \Error
      * @return array|null
      */
     public function instanceData ( string $className )
@@ -54,7 +57,7 @@ trait TraitRegistryClassMethod
         }
         catch ( \Throwable $th )
         {
-            throw $th;
+            throw new \Error( $th->getMessage(), 403 );
         }
     }
 

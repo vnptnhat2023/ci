@@ -9,13 +9,24 @@ function bgColor () : string
 {
 	$arr = [
 		'lemonchiffon',
-		'beige',
 		'cadetblue',
-		'burlywood',
 		'lightgoldenrodyellow',
 		'khaki'
 	];
-	return $arr[ random_int( 0, 5 ) ];
+	$arr2 = [
+		'coral',
+		'currentColor',
+		'chocolate',
+		'lightcoral',
+		'darkseagreen',
+		'darkkhaki'
+	];
+	
+	if ( (int) date('H') < 12 )
+	{
+		return $arr2[ random_int( 0, count( $arr2 ) - 1 ) ];
+	}
+	return $arr[ random_int( 0, count( $arr ) - 1 ) ];
 }
 
 ?>
@@ -125,20 +136,28 @@ function bgColor () : string
 
 						<!-- Message -->
 						<?php
-							if ( ! empty( $message->errors ) ) {
-
+							if ( ! empty( $message->errors ) )
+							{
 								echo '<div class="alert alert-danger">';
-									foreach ( $message->errors as $error ) { echo "<p>{$error}</p>"; }
-								echo '</div>';
 
+								foreach ( $message->errors as $error )
+								{
+									echo "<p>{$error}</p>";
+								}
+
+								echo '</div>';
 							}
 
-							if ( ! empty( $message->success ) ) {
-
+							if ( ! empty( $message->success ) )
+							{
 								echo '<div class="alert alert-success">';
-									foreach ( $message->success as $success ) { echo "<p>{$success}</p>"; }
-								echo '</div>';
 
+								foreach ($message->success as $success )
+								{
+									echo "<p>{$success}</p>";
+								}
+
+								echo '</div>';
 							}
 						?>
 						<!-- End message -->

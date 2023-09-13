@@ -1,8 +1,11 @@
 <?php
+
 declare( strict_types = 1 );
 namespace Red2Horse\Facade\Auth;
+
 use Red2Horse\Mixins\Traits\TraitSingleton;
 
+use function Red2Horse\Mixins\Functions\getConfig;
 use function Red2Horse\Mixins\Functions\getInstance;
 
 /**
@@ -27,7 +30,7 @@ class Authorization
 		// $this->userPerm = $this->_getSessionData( $this->config->permKey );
 		$this->userPerm = $this->_getSessionData( 'permKey' );
 
-		$this->configPerm = getInstance( Config::class )->userRouteGates;
+		$this->configPerm = getConfig( 'authorization' )->userRouteGates;
 		$this->sessionPerm = $this->userPerm;
 	}
 
@@ -87,7 +90,7 @@ class Authorization
 
 	private function _isAdmin () : bool
 	{
-		$config = getInstance( Config::class );
+		$config = getConfig();
 		$isAdmin = ( $this->userRole === $config->adminRole ) ||
 		isset( $this->userPerm[ 0 ] ) &&
 		( $this->userPerm[ 0 ] === $config->adminGate );

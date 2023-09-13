@@ -3,9 +3,10 @@
 declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Classes\Registry;
 
-use Red2Horse\Facade\Auth\Config;
 use Red2Horse\Mixins\Classes\CallClass___;
 use Red2Horse\Mixins\Traits\Registry\TraitRegistryClassMethod;
+
+use function Red2Horse\Mixins\Functions\getConfig;
 
 final class RegistryClass extends RegistryClass___
 {
@@ -21,6 +22,9 @@ final class RegistryClass extends RegistryClass___
         $this->configRegistryClassMethod___( $state );
     }
 
+    /**
+     * Singleton itself
+     */
     public static function selfInstance ( string $state = self::class ) : self
     {
         self::$instance = isset( self::$instance ) ? self::$instance : new self( $state );
@@ -57,7 +61,8 @@ final class RegistryClass extends RegistryClass___
      */
     public function getComponents () : object
     {
-        $config = $this->instanceData( Config::class )[ 'instance' ];
+        $config = $this->instanceData( \Red2Horse\Config\BaseConfig::class )[ 'instance' ];
+        // $config = getConfig();
         $name = ucfirst( $this->className );
         $facadeName = $config->facade( $name );
 
@@ -70,6 +75,7 @@ final class RegistryClass extends RegistryClass___
         {
             $adapterName = $config->adapter( $name );
         }
+        // dd( $adapterName, $facadeName );
 
         if ( $this->getShared && method_exists( $adapterName, 'getInstance' ) )
         {
@@ -83,7 +89,7 @@ final class RegistryClass extends RegistryClass___
         return $facadeName::getInstance( $adapterInstance );
     }
 
-    public function getInstanceMethods ( ) : array
+    public function getInstanceMethods () : array
     {
         if ( $this->getShared )
         {
@@ -97,7 +103,7 @@ final class RegistryClass extends RegistryClass___
     /**
      * @param bool $getShared true: callClass___ class; false: anonymous class
      */
-    public function callClass (array $arguments = [] ) : object
+    public function callClass ( array $arguments = [] ) : object
     {
         if ( $this->getShared )
         {
@@ -110,8 +116,9 @@ final class RegistryClass extends RegistryClass___
 
             public function __construct( string $className, array $arguments )
             {
-                $this->traitCallback[ 'before' ] = $arguments[ 'traitCallback' ][ 'before' ] ?? false;
-                $this->traitCallback[ 'after' ] = $arguments[ 'traitCallback' ][ 'after' ] ?? false;
+                $this->traitUseBefore = $arguments[ 'traitCallback' ][ 'before' ] ?? false;
+                $this->traitUseAfter = $arguments[ 'traitCallback' ][ 'after' ] ?? false;
+
                 $this->run( $className );
             }
         };

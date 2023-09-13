@@ -8,7 +8,8 @@ use Red2Horse\Mixins\Traits\TraitSingleton;
 
 use function Red2Horse\Mixins\Functions\{
 	getComponents,
-	getInstance
+    getConfig,
+    getInstance
 };
 
 class Utility
@@ -52,7 +53,7 @@ class Utility
 		if ( getComponents( 'throttle' )->limited() )
 		{
 			$errArg = [
-				'number' => gmdate( 'i', getInstance( Config::class )->throttle->timeoutAttempts ),
+				'number' => gmdate( 'i', getConfig( 'throttle' )->throttle->timeoutAttempts ),
 				'minutes' => 'minutes'
 			];
 			$errStr = getComponents( 'common' )->lang( 'Red2Horse.errorThrottleLimitedTime', $errArg );

@@ -3,9 +3,9 @@
 declare ( strict_types = 1 );
 namespace Red2Horse\Mixins\Traits;
 
-trait TraitRegistry {
-
-    public static array $traitRegistryData = [];
+trait TraitRegistry
+{
+    private static array $traitRegistryData = [];
 
     /** @param mixed @value */
     final public static function set ( string $key, $value, bool $override = false ) : bool

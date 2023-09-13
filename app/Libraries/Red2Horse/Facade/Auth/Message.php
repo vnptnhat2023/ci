@@ -8,7 +8,7 @@ use Red2Horse\Mixins\Traits\TraitSingleton;
 
 use function Red2Horse\Mixins\Functions\{
 	getComponents,
-	getInstance
+    getConfig
 };
 
 class Message
@@ -85,7 +85,7 @@ class Message
 
 		if ( $getConfig )
 		{
-			$message[ 'config' ] = get_object_vars( getInstance( Config::class ) );
+			$message[ 'config' ] = get_object_vars( getConfig() );
 		}
 
 		if ( ! empty( $add ) )

@@ -39,6 +39,8 @@ final class EventAdapter implements EventAdapterInterface
 
     private array $triggered = [];
 
+    private bool $manyTrigger = false;
+
     public static function getInstance () : self
     {
         $instance = isset( self::$instance ) ? self::$instance : new self;
@@ -48,6 +50,11 @@ final class EventAdapter implements EventAdapterInterface
     public function trigger ( string $name, ...$args ) : bool
     {
         $this->init();
+
+        if ( ! $this->manyTrigger && in_array( $name, $this->triggered ) )
+        {
+            return false;
+        }
 
         $this->triggered[] = $name;
         $name = strtolower( trim( preg_replace( '/([A-Z]){1}/', '_$1', $name ), '_' ) );
@@ -71,6 +78,11 @@ final class EventAdapter implements EventAdapterInterface
         {
             Events::on( $event, [ $this, $event ] );
         }
+    }
+
+    public function enableManyTrigger ( bool $isEnabled ) : void
+    {
+        $this->manyTrigger = $isEnabled;
     }
 
     public function reInit () : self
@@ -104,10 +116,6 @@ final class EventAdapter implements EventAdapterInterface
     /** Event: r2h_before_login */
     private function r2h_before_login ( $username, $password, $remember, $captcha ) : array
     {
-        // $username .= '___%*)@(%____';
-        // $mes = var_export( func_get_args(), true );
-        // $m = getInstance( Message::class, RegistryClass::class );
-        // $m::$success[] = $mes;
         return [ $username, $password, $remember, $captcha ];
     }
 

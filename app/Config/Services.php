@@ -1,8 +1,10 @@
 <?php
+
 declare( strict_types = 1 );
 namespace Config;
 
-use CodeIgniter\{
+use CodeIgniter\
+{
 	Config\Services as CoreServices,
 	Session\Session
 };
@@ -15,25 +17,19 @@ use App\Libraries\{
 use Red2Horse\{
 	R2h,
 	Adapter\CodeIgniter\System\Red2HorseSession,
-	Facade\Auth\Config
+	// Facade\Auth\Config
 };
 
 class Services extends CoreServices
 {
-	public static function Red2HorseAuth ( bool $getShared = true , ?Config $config = null ) : R2h
+	public static function Red2HorseAuth ( bool $getShared = true /*, ?Config $config = null*/ ) : R2h
 	{
 		if ( $getShared )
 		{
 			return static::getSharedInstance( 'Red2HorseAuth' );
 		}
 
-		if ( $config === null )
-		{
-			$config = Config::getInstance();
-			$config->throttle->captchaAttempts = 3;
-		}
-
-		return new R2h( $config );
+		return new R2h();
 	}
 
 	public static function Extension ( bool $getShared = true ) : Extension
