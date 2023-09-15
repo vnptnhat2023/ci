@@ -10,11 +10,7 @@ use function Red2Horse\Mixins\Functions\getComponents;
 class Authorization
 {
 	use TraitSingleton;
-    /*
-	|--------------------------------------------------------------------------
-	| User Authorization
-	|--------------------------------------------------------------------------
-	*/
+
 	public array $userRouteGates;
 	public array $userPermission;
 	public array $userRole;

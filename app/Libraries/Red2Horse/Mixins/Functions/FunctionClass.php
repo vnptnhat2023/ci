@@ -3,6 +3,7 @@
 declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Functions;
 
+use Red2Horse\Config\ConstantNamespace;
 use Red2Horse\Mixins\Classes\Registry\RegistryClass as RegClass;
 
 function classInit( string $classNamespace, string $state, bool $getShared ) : object
@@ -16,14 +17,16 @@ function classInit( string $classNamespace, string $state, bool $getShared ) : o
  */
 function getConfig ( ?string $name = null ) : object
 {
+    $configNamespace = ConstantNamespace::LIST_NAMESPACE['CONFIG_NAMESPACE'];
+
     if ( null === $name )
     {
-        return getInstance( R2H_CONFIG_NAMESPACE . 'BaseConfig' );
+        return getInstance( $configNamespace . 'BaseConfig' );
     }
 
     if ( false === strpos( $name, '\\' ) )
     {
-        $name = R2H_CONFIG_NAMESPACE . ucfirst( $name );
+        $name = $configNamespace . ucfirst( $name );
         return getInstance( $name );
     }
 
@@ -37,8 +40,10 @@ function getConfig ( ?string $name = null ) : object
  */
 function setConfig ( ?string $classNamespace = null, \Closure $callback )
 {
-    $config = null === $classNamespace
-        ? getInstance( R2H_CONFIG_NAMESPACE . 'BaseConfig' )
+    $configNamespace = ConstantNamespace::LIST_NAMESPACE['CONFIG_NAMESPACE'];
+
+    $config = ( null === $classNamespace )
+        ? getInstance( $configNamespace . 'BaseConfig' )
         : getInstance( $classNamespace );
 
     $changed = $callback( $config );
@@ -88,8 +93,9 @@ function getInstanceMethods ( string $classNamespace, string $state = RegClass::
 
 /**
  * @param bool $getShared true: callClass___ class; false: anonymous class
+ * @return mixed
  */
-function callClass ( string $classNamespace, string $state = RegClass::class, bool $getShared = true, array $arguments = [] ) : object
+function callClass ( string $classNamespace, string $state = RegClass::class, bool $getShared = true, array $arguments = [] )
 {
     return classInit( $classNamespace, $state, $getShared ) ->callClass( $arguments );
 }

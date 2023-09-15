@@ -8,24 +8,20 @@ use Red2Horse\Mixins\Traits\TraitSingleton;
 class Validation
 {
 	use TraitSingleton;
-    /*
-	|--------------------------------------------------------------------------
-	| Rules of validation groups
-	|--------------------------------------------------------------------------
-	*/
-	# --- Form input name
+
+	# Form input name
 	public const USERNAME = 'username';
 	public const PASSWORD = 'password';
 	public const EMAIL = 'email';
 	public const CAPTCHA = 'captcha';
 
-	# --- form input group
+	# Form input group
 	public const LOGIN = 'login';
 	public const LOGIN_WITH_CAPTCHA = 'login_captcha';
 	public const FORGET = 'forget';
 	public const FORGET_WITH_CAPTCHA = 'forget_captcha';
 
-	# --- rule groups
+	# Rule groups
 	public array $ruleGroup = [
 		self::LOGIN => [
 			self::USERNAME,

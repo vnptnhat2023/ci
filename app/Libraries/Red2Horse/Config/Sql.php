@@ -8,15 +8,48 @@ use Red2Horse\Mixins\Traits\TraitSingleton;
 class Sql
 {
 	use TraitSingleton;
-    /*
-	|--------------------------------------------------------------------------
-	| SQL syntax select user columns names
-	|--------------------------------------------------------------------------
-	*/
-	public function getColumString ( array $columns = [], bool $join = true ) : string
+
+	/** Select & import */
+	public array $tableUser = [
+
+		'tables' => [
+			'user' => 'user',
+			'user_group' => 'user_group'
+		],
+
+		'user' => [
+			// keys => alias keys
+			'id' => 'id',
+			'username' => 'username',
+			'email' => 'email',
+			'status' => 'status',
+			'last_activity' => 'last_activity',
+			'last_login' => 'last_login',
+			'created_at' => 'created_at',
+			'updated_at' => 'updated_at',
+			'session_id' => 'session_id',
+			'selector' => 'selector',
+			'token' => 'token',
+
+			// Sql
+			'group_id' => 'group_id',
+			'password' => 'password',
+			'deleted_at' => 'deleted_at'
+		],
+
+		'user_group' => [
+			// keys => alias keys
+			'id' => [ 'id', 'as', 'group_id' ],
+			'name' => [ 'name', 'as', 'group_name' ],
+			'permission' => 'permission',
+			'role' => 'role',
+			'deleted_at' => 'deleted_at'// Import only
+		]
+	];
+
+	/*public function getColumString ( array $columns = [], bool $join = true ) : string
 	{
-		$columns = [
-			# user
+		$columns = [ # user
 			'user.id',
 			'user.username',
 			'user.email',
@@ -31,8 +64,8 @@ class Sql
 			...$columns
 		];
 
-		if ( $join ) {
-			# user_group
+		if ( $join )
+		{ # user_group
 			$columns[] = 'user_group.id as group_id';
 			$columns[] = 'user_group.name as group_name';
 			$columns[] = 'user_group.permission';
@@ -40,5 +73,5 @@ class Sql
 		}
 
 		return implode( ',', $columns );
-	}
+	}*/
 }

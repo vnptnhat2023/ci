@@ -9,11 +9,7 @@ use Red2Horse\Mixins\Traits\TraitSingleton;
 class CallClass
 {
 	use TraitSingleton;
-    /*
-	|--------------------------------------------------------------------------
-	| CallClass
-	|--------------------------------------------------------------------------
-	*/
+
     public bool $traitUseBefore = false;
     public bool $traitUseAfter = false;
     public string $traitBeforePrefix = 'R2h_before_';

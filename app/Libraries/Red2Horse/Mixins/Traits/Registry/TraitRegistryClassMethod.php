@@ -3,8 +3,11 @@
 declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Traits\Registry;
 
-use Red2Horse\Mixins\Classes\Registry\RegistryClass;
-use Red2Horse\Mixins\Classes\Registry\RegistryClass___;
+use Red2Horse\Mixins\Classes\Registry\
+{
+    RegistryClass___,
+    RegistryClass
+};
 
 /** State switch */
 trait TraitRegistryClassMethod

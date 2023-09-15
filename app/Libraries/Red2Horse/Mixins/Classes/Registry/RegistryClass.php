@@ -3,10 +3,12 @@
 declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Classes\Registry;
 
-use Red2Horse\Mixins\Classes\CallClass___;
-use Red2Horse\Mixins\Traits\Registry\TraitRegistryClassMethod;
-
-use function Red2Horse\Mixins\Functions\getConfig;
+use Red2Horse\Mixins\
+{
+    Classes\CallClass___,
+    Traits\Registry\TraitRegistryClassMethod,
+    function Functions\ComponentNamespace
+};
 
 final class RegistryClass extends RegistryClass___
 {
@@ -36,7 +38,7 @@ final class RegistryClass extends RegistryClass___
         $this->getShared = $getShared;
         $this->className = $className;
 
-        $this->configRegistryClassMethod___( parent::class );
+        $this->configRegistryClassMethod___( self::class );
 
         return $this;
     }
@@ -46,6 +48,11 @@ final class RegistryClass extends RegistryClass___
      */
     public function getInstance ()
     {
+        if ( self::class == $this->className )
+        {
+            return self::selfInstance();
+        }
+
         if ( $this->getShared )
         {
             $classData = $this->instanceData( $this->className );
@@ -61,21 +68,18 @@ final class RegistryClass extends RegistryClass___
      */
     public function getComponents () : object
     {
-        $config = $this->instanceData( \Red2Horse\Config\BaseConfig::class )[ 'instance' ];
-        // $config = getConfig();
         $name = ucfirst( $this->className );
-        $facadeName = $config->facade( $name );
+        $facadeName = ComponentNamespace( $name );
 
         if ( in_array( $name, [ 'User', 'Throttle' ], true ) )
         {
-            $adapterName = $config->adapter( 'Database', $name );
-            $facadeName = $config->facade( 'Database', $name );
+            $adapterName = ComponentNamespace( 'Database', 'adapter', $name );
+            $facadeName = ComponentNamespace( 'Database', 'facade', $name );
         }
         else
         {
-            $adapterName = $config->adapter( $name );
+            $adapterName = ComponentNamespace( $name, 'adapter' );
         }
-        // dd( $adapterName, $facadeName );
 
         if ( $this->getShared && method_exists( $adapterName, 'getInstance' ) )
         {
@@ -102,27 +106,30 @@ final class RegistryClass extends RegistryClass___
 
     /**
      * @param bool $getShared true: callClass___ class; false: anonymous class
+     * @return mixed
      */
-    public function callClass ( array $arguments = [] ) : object
+    public function callClass ( array $arguments = [] )
     {
         if ( $this->getShared )
         {
-            return CallClass___::getInstance( $this->className, $arguments );
+            $instance = CallClass___::getInstance( $this->className, $arguments );
         }
-        
-        $instance = new class( $this->className, $arguments )
+        else
         {
-            use \Red2Horse\Mixins\Traits\TraitCall;
-
-            public function __construct( string $className, array $arguments )
+            $instance = new class( $this->className, $arguments )
             {
-                $this->traitUseBefore = $arguments[ 'traitCallback' ][ 'before' ] ?? false;
-                $this->traitUseAfter = $arguments[ 'traitCallback' ][ 'after' ] ?? false;
+                use \Red2Horse\Mixins\Traits\TraitCall;
 
-                $this->run( $className );
-            }
-        };
+                public function __construct( string $className, array $arguments )
+                {
+                    $this->traitUseBefore = $arguments[ 'traitCallback' ][ 'before' ] ?? false;
+                    $this->traitUseAfter = $arguments[ 'traitCallback' ][ 'after' ] ?? false;
 
-        return $instance;
+                    $this->run( $className );
+                }
+            };
+        }
+
+        return $instance->__call( $arguments[ 'method_name' ], $arguments[ 'arguments' ] );
     }
 }

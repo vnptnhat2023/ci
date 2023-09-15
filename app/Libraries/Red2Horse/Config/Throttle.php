@@ -8,11 +8,7 @@ use Red2Horse\Mixins\Traits\TraitSingleton;
 class Throttle
 {
 	use TraitSingleton;
-    /*
-	|--------------------------------------------------------------------------
-	| Throttle
-	|--------------------------------------------------------------------------
-	*/
+
     private const THROTTLE = [
 		'type' => 1,
 		'captchaAttempts' => 5,

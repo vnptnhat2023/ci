@@ -150,7 +150,7 @@ class Authentication
 		];
 
 		$userData = getComponents( 'user' )->getUserWithGroup(
-			getConfig( 'sql' )->getColumString( [ 'password' ] ),
+			\Red2Horse\Mixins\Functions\sqlGetColumns( [ 'password' ] ),
 			$userDataArgs
 		);
 

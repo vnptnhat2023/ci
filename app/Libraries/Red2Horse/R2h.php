@@ -18,24 +18,32 @@ use function Red2Horse\Mixins\Functions\
     setClass
 };
 
-define( 'R2H_PATH', __DIR__ );
+/** Path: base */
+const R2H_BASE_PATH = __DIR__;
 
-$config_path = realpath( R2H_PATH . '/Config' );
-$functions_path = realpath( R2H_PATH . '/Mixins/Functions' );
+/** Paths: configs, functions */
+$config_path = realpath( \Red2Horse\R2H_BASE_PATH . '/Config' );
+$functions_path = realpath( \Red2Horse\R2H_BASE_PATH . '/Mixins/Functions' );
 
-require_once( $config_path . '/Constants.php' );
-require_once( $functions_path . '/FunctionCall.php' );
-require_once( $functions_path . '/FunctionClass.php' );
+/** Configs */
+require_once realpath( $config_path . '/ConstantNamespace.php' );
 
+/** Functions */
+require_once realpath( $functions_path . '/FunctionCall.php' );
+require_once realpath( $functions_path . '/FunctionClass.php' );
+require_once realpath( $functions_path . '/FunctionNamespace.php' );
+require_once realpath( $functions_path . '/FunctionSql.php' );
 
 class R2h
 {
     use TraitSingleton;
     public function __construct ( ?\Closure $config = null )
 	{
-        $config = null === $config ? getConfig() : $config();
+        $config = ( null === $config ) ? getConfig() : $config();
 
-		setClass( Config::class, [ 'methods' => $config::_getMPs(), 'instance' => $config ], true );
+        $configData = [ 'methods' => $config::_getMPs(), 'instance' => $config ];
+		setClass( Config::class, $configData, true );
+
         $throttle = array_values( ( array ) getConfig( 'throttle' )->throttle );
         getComponents( 'throttle' )->config( ...$throttle );
     }
@@ -43,13 +51,14 @@ class R2h
     public function __call ( string $methodName, array $arguments = [] )
     {
         $setting = [
+            'method_name' => $methodName,
+            'arguments' => $arguments,
             'traitCallback' => [
                 'before' => true,
                 'after' => false
             ]
         ];
 
-        return callClass( Red2Horse::class, RegistryClass::class, true, $setting )
-            ->__call( $methodName, $arguments );
+        return callClass( Red2Horse::class, RegistryClass::class, true, $setting );
     }
 }

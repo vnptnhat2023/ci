@@ -6,7 +6,7 @@ namespace Red2Horse\Mixins\Traits;
 use Red2Horse\Mixins\Classes\Registry\RegistryClass___;
 
 /**
- * @use with TraitRegistry::class only
+ * Use with TraitRegistry::class only
  */
 trait TraitSingleton
 {

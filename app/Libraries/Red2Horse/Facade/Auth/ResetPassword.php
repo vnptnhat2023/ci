@@ -84,7 +84,7 @@ class ResetPassword
 		}
 
 		$find_user = getComponents( 'user' )
-			->getUserWithGroup( getConfig( 'sql' )->getColumString(), $data );
+			->getUserWithGroup( \Red2Horse\Mixins\Functions\sqlGetColumns(), $data );
 
 		if ( empty( $find_user ) )
 		{

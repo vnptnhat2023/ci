@@ -8,11 +8,7 @@ use Red2Horse\Mixins\Traits\TraitSingleton;
 class Cookie
 {
 	use TraitSingleton;
-    /*
-	|--------------------------------------------------------------------------
-	| Cookie
-	|--------------------------------------------------------------------------
-	*/
+
 	private const COOKIE_NAME = 'r2h';
 	private const TIME_TO_LIFE = 604800;
 

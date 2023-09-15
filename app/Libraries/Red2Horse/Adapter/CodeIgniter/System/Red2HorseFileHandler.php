@@ -283,14 +283,14 @@ class Red2HorseFileHandler extends BaseHandler implements \SessionHandlerInterfa
 		if ($this->close())
 		{
 			return is_file($this->filePath . $session_id)
-				? (unlink($this->filePath . $session_id) && $this->destroyCookie()) : true;
+				? (@unlink($this->filePath . $session_id) && $this->destroyCookie()) : true;
 		}
 		elseif ($this->filePath !== null)
 		{
 			clearstatcache();
 
 			return is_file($this->filePath . $session_id)
-				? (unlink($this->filePath . $session_id) && $this->destroyCookie()) : true;
+				? (@unlink($this->filePath . $session_id) && $this->destroyCookie()) : true;
 		}
 
 		return false;

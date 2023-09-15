@@ -10,11 +10,7 @@ use function Red2Horse\Mixins\Functions\getComponents;
 class Session
 {
 	use TraitSingleton;
-    /*
-	|--------------------------------------------------------------------------
-	| Session
-	|--------------------------------------------------------------------------
-	*/
+
     private const SESSION_NAME = 'r2h';
 
 	public string $session = self::SESSION_NAME;

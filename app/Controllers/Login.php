@@ -1,6 +1,7 @@
 <?php
+
 declare(strict_types = 1);
-# Event.
+
 namespace App\Controllers;
 
 use Red2Horse\R2h;
@@ -13,8 +14,6 @@ class Login extends BaseController
 	private bool $r;
 	private ?string $c;
 	private ?string $e;
-
-	private bool $dump = true;
 
 	public function __construct()
 	{
@@ -32,23 +31,13 @@ class Login extends BaseController
 
 	public function index()
 	{
-		$u = $this->u; $p = $this->p; $r = $this->r; $c = $this->c;
-		$this->auth->login( $u, $p, $r, $c );
-		$this->_dumpIt( [ 'username' => $u, 'password' => $p, 'captcha' => $c, 'remember_me' => $r ] );
-
+		$this->auth->login( $this->u, $this->p, $this->r, $this->c );
 		return view( 'login/login', ( array ) $this->auth->getMessage() );
 	}
 
 	public function forgot ()
 	{
-		$u = $this->u;
-		$e = $this->e;
-		$c = $this->c;
-
-		$this->_dumpIt( [ 'username' => $u, 'email' => $e, 'captcha' => $c ] );
-
-		$this->auth->requestPassword( $u, $e, $c );
-
+		$this->auth->requestPassword( $this->u, $this->e, $this->c );
 		return view( 'login/forgot', ( array ) $this->auth->getMessage() );
 	}
 
@@ -56,13 +45,5 @@ class Login extends BaseController
 	{
 		$this->auth->logout();
 		return view( 'login/login', ( array ) $this->auth->getMessage() );
-	}
-
-	private function _dumpIt( array $form ) : void
-	{
-		if ( $this->dump )
-		{
-			d( $this->auth->getMessage( $form ) );
-		}
 	}
 }

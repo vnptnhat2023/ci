@@ -56,8 +56,10 @@ class CookieHandle
 		$selector = $separate[ 0 ];
 		$token = $separate[ 1 ];
 
-		$user = getComponents( 'user' )
-			->getUserWithGroup( getConfig( 'sql' )->getColumString(), [ 'selector' => $selector ] );
+		$user = getComponents( 'user' ) ->getUserWithGroup(
+			\Red2Horse\Mixins\Functions\sqlGetColumns(),
+			[ 'selector' => $selector ]
+		);
 
 		if ( empty( $user ) )
 		{

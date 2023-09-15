@@ -6,7 +6,8 @@ namespace Red2Horse\Facade\Auth;
 
 use Red2Horse\Mixins\Traits\TraitSingleton;
 
-use function Red2Horse\Mixins\Functions\{
+use function Red2Horse\Mixins\Functions\
+{
 	getComponents,
     getConfig
 };
@@ -33,28 +34,17 @@ class Message
 		$captcha = $throttle->showCaptcha();
 
 		/** Auth status */
-		// $reset = self::$incorrectResetPassword;
-		// $login = self::$incorrectLoggedIn;
-
+		// $reset = self::$incorrectResetPassword; $login = self::$incorrectLoggedIn;
 		// /** Account status */
-		// $suspend = self::$hasBanned;
-		// $active = ! self::$accountInactive;
+		// $suspend = self::$hasBanned; $active = ! self::$accountInactive;
 
 		/** @var bool $success */
 		$success = self::$successfully;
-		
+
 
 		$resultMessage = [
-			// 'auth_status' => [
-			// 	'reset' => $reset,
-			// 	'login' => $login,
-			// ],
-
-			// 'account_status' => [
-			// 	'suspend' => $suspend,
-			// 	'active' => ! $active
-			// ],
-			
+			// 'auth_status' => [ 'reset' => $reset, 'login' => $login ],
+			// 'account_status' => [ 'suspend' => $suspend, 'active' => ! $active ],
 			'throttle_status' => [
 				'limited' => $limited,
 				'attempts' => $attempts,
