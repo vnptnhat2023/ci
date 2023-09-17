@@ -36,6 +36,11 @@ trait TraitRegistry
         return false;
     }
 
+    final static public function has ( string $key )
+    {
+        return array_key_exists( $key, self::$traitRegistryData );
+    }
+
     public static function _debugInfo() : array
     {
         return self::$traitRegistryData;

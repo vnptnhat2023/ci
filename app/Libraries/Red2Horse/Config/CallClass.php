@@ -5,7 +5,6 @@ namespace Red2Horse\Config;
 
 use Red2Horse\Mixins\Traits\TraitSingleton;
 
-/** Only set in {setConfig} function. */
 class CallClass
 {
 	use TraitSingleton;

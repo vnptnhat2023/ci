@@ -25,6 +25,11 @@ trait TraitRegistryClassMethod
         return $this->keyName::delete( $className );
     }
 
+    public function hasClass ( string $className ) : bool
+    {
+        return $this->keyName::has( $className );
+    }
+
     public function getClass ( string $className, string $classKey = '' )
     {
         $classData = $this->instanceData( $className );
@@ -67,6 +72,7 @@ trait TraitRegistryClassMethod
     /** @param mixed $value */
     public function setClass ( string $className, $value, bool $override = false ) : bool
     {
-        return $this->keyName::set( $className, $value, $override );
+        $isset = $this->keyName::set( $className, $value, $override );
+        return $isset;
     }
 }

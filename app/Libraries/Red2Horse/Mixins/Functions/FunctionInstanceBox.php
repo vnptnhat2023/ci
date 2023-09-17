@@ -5,6 +5,8 @@ namespace Red2Horse\Mixins\Functions;
 
 use Red2Horse\Mixins\Classes\Registry\RegistryClass as RegClass;
 
+defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access not allowed.' );
+
 /** @return object $state */
 function RegInstance( string $state ) : object
 {
@@ -27,6 +29,11 @@ function instanceData ( string $classNamespace, string $state = RegClass::class 
 function getClass ( string $classNamespace, string $key = '', string $state = RegClass::class )
 {
     return RegInstance( $state ) ->getClass( $classNamespace, $key );
+}
+
+function hasClass ( string $classNamespace, string $key = '', string $state = RegClass::class )
+{
+    return RegInstance( $state ) ->hasClass( $classNamespace, $key );
 }
 
 /** @param mixed $value */

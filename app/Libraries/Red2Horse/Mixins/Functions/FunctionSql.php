@@ -1,13 +1,15 @@
 <?php
 
-declare(strict_types=1);
+declare( strict_types=1 );
 namespace Red2Horse\Mixins\Functions;
+
+defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access not allowed.' );
 
 function sqlFromUserGroups () : string
 {
     $configSql = getConfig( 'sql' );
-    $tableUserGroupName = $configSql->tableUser[ 'tables' ][ 'user_group' ];
-    $userGroup = $configSql->tableUser[ $tableUserGroupName ];
+    $tableUserGroupName = $configSql->table[ 'tables' ][ 'user_group' ];
+    $userGroup = $configSql->table[ $tableUserGroupName ];
 
     extract( $userGroup );
 
@@ -27,8 +29,8 @@ function sqlFromUserGroups () : string
 function sqlFromUsers () : string
 {
     $configSql = getConfig( 'sql' );
-    $tableUserName = $configSql->tableUser[ 'tables' ][ 'user' ];
-    $userField = $configSql->tableUser[ $tableUserName ];
+    $tableUserName = $configSql->table[ 'tables' ][ 'user' ];
+    $userField = $configSql->table[ $tableUserName ];
     extract( $userField );
 
     $userSql = "DROP TABLE IF EXISTS `{$tableUserName}`;
@@ -59,8 +61,8 @@ function sqlFromUsers () : string
 function sqlGetColumns ( array $addColumns = [], bool $join = true ) : string
 {
     $configSql = getConfig( 'sql' );
-    $tableUser = $configSql->tableUser[ 'tables' ][ 'user' ];
-    $userField = $configSql->tableUser[ $tableUser ];
+    $tableUser = $configSql->table[ 'tables' ][ 'user' ];
+    $userField = $configSql->table[ $tableUser ];
     extract( $userField );
     
     $columns = [ # user
@@ -80,8 +82,8 @@ function sqlGetColumns ( array $addColumns = [], bool $join = true ) : string
 
     if ( $join )
     { # user_group
-        $tableUserGroupName = $configSql->tableUser[ 'tables' ][ 'user_group' ];
-        $userGroup = $configSql->tableUser[ $tableUserGroupName ];
+        $tableUserGroupName = $configSql->table[ 'tables' ][ 'user_group' ];
+        $userGroup = $configSql->table[ $tableUserGroupName ];
 
         extract( $userGroup );
 

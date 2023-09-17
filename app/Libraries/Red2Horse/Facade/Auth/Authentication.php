@@ -110,30 +110,30 @@ class Authentication
 		if ( getComponents( 'throttle' )->showCaptcha() )
 		{
 			$data = [
-				$configValidation::USERNAME => self::$username,
-				$configValidation::PASSWORD => self::$password,
-				$configValidation::CAPTCHA => self::$captcha
+				$configValidation::$username => self::$username,
+				$configValidation::$password => self::$password,
+				$configValidation::$captcha => self::$captcha
 			];
 
 			$ruleCaptcha = [
-				$configValidation::CAPTCHA => $validation->getRules( $configValidation::CAPTCHA )
+				$configValidation::$captcha => $validation->getRules( $configValidation::$captcha )
 			];
 
 			if ( ! $validation->isValid( $data, $ruleCaptcha ) )
 			{
-				$errorCaptcha = $validation->getErrors( $configValidation::CAPTCHA );
+				$errorCaptcha = $validation->getErrors( $configValidation::$captcha );
 				return getInstance( Message::class )->incorrectInfo( true, $errorCaptcha );
 			}
 		}
 
 		$incorrectInfo = false;
-		$ruleUsername = [ $configValidation::USERNAME => $validation->getRules( 'username' ) ];
-		$data = [ $configValidation::USERNAME => self::$username ];
+		$ruleUsername = [ $configValidation::$username => $validation->getRules( 'username' ) ];
+		$data = [ $configValidation::$username => self::$username ];
 
 		if ( ! $validation->isValid( $data, $ruleUsername ) )
 		{
 			$validation->reset();
-			$ruleEmail = [ $configValidation::USERNAME => $validation->getRules( 'email' ) ];
+			$ruleEmail = [ $configValidation::$username => $validation->getRules( 'email' ) ];
 			$incorrectInfo = ! $validation->isValid( $data, $ruleEmail );
 		}
 

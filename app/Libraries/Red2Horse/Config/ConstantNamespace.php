@@ -15,6 +15,7 @@ class ConstantNamespace
     public const LIST_NAMESPACE = [
         'CONFIG_NAMESPACE' => self::BASE_NAMESPACE . 'Config\\',
         'FACADE_NAMESPACE' => self::BASE_NAMESPACE . 'Facade\\',
-        'ADAPTER_NAMESPACE' => self::BASE_NAMESPACE . 'Adapter\\' . self::ADAPTER_NAME
+        'ADAPTER_NAMESPACE' => self::BASE_NAMESPACE . 'Adapter\\' . self::ADAPTER_NAME,
+        'FUNCTION_NAMESPACE' => self::BASE_NAMESPACE . 'Mixins\\Functions\\',
     ];
 }

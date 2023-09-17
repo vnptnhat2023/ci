@@ -64,15 +64,15 @@ class ResetPassword
 		$configValidation = getConfig( 'validation' );
 		$validation = getComponents( 'validation' );
 
-		$group = getComponents( 'throttle' )->showCaptcha() 
-			? $configValidation::FORGET_WITH_CAPTCHA 
-			: $configValidation::FORGET;
+		$groups = getComponents( 'throttle' )->showCaptcha() 
+			? [ $configValidation::$username, $configValidation::$email, $configValidation::$captcha ]
+			: [ $configValidation::$username, $configValidation::$email ];
 
-		$rules = $validation->getRules( $configValidation->ruleGroup[ $group ] );
+		$rules = $validation->getRules( $groups );
 
 		$data = [
-			$configValidation::USERNAME => self::$username,
-			$configValidation::EMAIL => self::$email
+			$configValidation::$username => self::$username,
+			$configValidation::$email => self::$email
 		];
 
 		$message = getInstance( Message::class );

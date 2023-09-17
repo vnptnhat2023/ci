@@ -13,43 +13,36 @@ use Red2Horse\
 use function Red2Horse\Mixins\Functions\
 {
     callClass,
-    getComponents,
-    getConfig,
-    setClass
+    functionNamespace,
+    initConfig
 };
 
-/** Path: base */
 const R2H_BASE_PATH = __DIR__;
 
-/** Paths: configs, functions */
-$config_path = realpath( \Red2Horse\R2H_BASE_PATH . '/Config' );
-$functions_path = realpath( \Red2Horse\R2H_BASE_PATH . '/Mixins/Functions' );
+defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access not allowed.' );
 
-/** Configs */
-require_once realpath( $config_path . '/ConstantNamespace.php' );
+if ( ! $functions_path = realpath( \Red2Horse\R2H_BASE_PATH . '/Mixins/Functions' ) )
+{
+    throw new \Error( 'Invalid path .', 403 );
+}
 
-/** Functions */
-require_once realpath( $functions_path . '/FunctionCall.php' );
-require_once realpath( $functions_path . '/FunctionClass.php' );
-require_once realpath( $functions_path . '/FunctionNamespace.php' );
-require_once realpath( $functions_path . '/FunctionSql.php' );
+require_once realpath( $functions_path . '/RequireOnce.php' );
 
 class R2h
 {
     use TraitSingleton;
-    public function __construct ( ?\Closure $config = null )
+    public function __construct ()
 	{
-        $config = ( null === $config ) ? getConfig() : $config();
-
-        $configData = [ 'methods' => $config::_getMPs(), 'instance' => $config ];
-		setClass( Config::class, $configData, true );
-
-        $throttle = array_values( ( array ) getConfig( 'throttle' )->throttle );
-        getComponents( 'throttle' )->config( ...$throttle );
+        initConfig();
     }
 
-    public function __call ( string $methodName, array $arguments = [] )
+    public function __call ( string $methodName, array $arguments )
     {
+        if ( function_exists( $functionName = functionNamespace( $methodName ) ) )
+        {
+            return call_user_func( $functionName, ...$arguments );
+        }
+
         $setting = [
             'method_name' => $methodName,
             'arguments' => $arguments,

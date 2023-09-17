@@ -1,36 +1,35 @@
 <?php
 
 declare( strict_types = 1 );
-
 namespace Red2Horse\Facade\Database;
 
 use Red2Horse\Mixins\Traits\TraitSingleton;
+use function Red2Horse\Mixins\Functions\getConfig;
 
 class ThrottleFacade implements ThrottleFacadeInterface
 {
 	use TraitSingleton;
 
-	protected $throttle;
+	protected ThrottleFacadeInterface $throttle;
 
-	public function __construct( ThrottleFacadeInterface $throttle )
+	public function __construct ( ThrottleFacadeInterface $throttle )
 	{
 		$this->throttle = $throttle;
+		$this->init();
 	}
 
-	public function config (
-		int $type,
-		int $captchaAttempts,
-		int $maxAttempts,
-		int $timeoutAttempts
-	) : self
+	public function init () : void
 	{
-		$this->throttle->config(
-			$type,
-			$captchaAttempts,
-			$maxAttempts,
-			$timeoutAttempts
-		);
+		if ( getConfig( 'BaseConfig' )->useThrottle )
+        {
+            $throttle = array_values( ( array ) getConfig( 'throttle' )->throttle );
+            $this->config( ...$throttle );
+        }
+	}
 
+	public function config ( int $type, int $captchaAttempts, int $maxAttempts, int $timeoutAttempts ) : self
+	{
+		$this->throttle->config( $type, $captchaAttempts, $maxAttempts, $timeoutAttempts );
 		return $this;
 	}
 

@@ -225,18 +225,21 @@ function bgColor () : string
 								<?php endif ?>
 								<!-- Captcha form -->
 							
-
-							<div class="form-group">
-								<div class="checkbox">
-									<label>
-										<input
-										type="checkbox"
-										name="remember_me"
-										value="1" <?= set_checkbox( 'remember_me', '1' ); ?>>
-										<span><?= r2hI18( 'labelRememberMe' ) ?></span>
-									</label>
-								</div>
-							</div>
+								<!-- Remember me checkbox -->
+								<?php if ( $result->show->remember_me ) : ?>
+									<div class="form-group">
+										<div class="checkbox">
+											<label>
+												<input
+												type="checkbox"
+												name="remember_me"
+												value="1" <?= set_checkbox( 'remember_me', '1' ); ?>>
+												<span><?= r2hI18( 'labelRememberMe' ) ?></span>
+											</label>
+										</div>
+									</div>
+								<?php endif; ?>
+								<!-- End remember me checkbox -->
 
 							<div class="form-group">
 								<button

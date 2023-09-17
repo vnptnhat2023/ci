@@ -6,42 +6,34 @@ namespace Red2Horse\Adapter\CodeIgniter\Database;
 
 class ThrottleAdapter implements ThrottleAdapterInterface
 {
-	protected ThrottleModelAdapter $throttle;
-
-	public function __construct ()
-	{
-		$this->throttle = model( ThrottleModelAdapter::class );
-	}
-
 	public function config ( int $type, int $limit_one, int $limit, int $timeout ) : self
 	{
-		$this->throttle->config( $type, $limit_one, $limit, $timeout );
-
+		model( ThrottleModelAdapter::class )->config( $type, $limit_one, $limit, $timeout );
 		return $this;
 	}
 
 	public function getAttempts () : int
 	{
-		return $this->throttle->getAttempts();
+		return model( ThrottleModelAdapter::class )->getAttempts();
 	}
 
 	public function showCaptcha () : bool
 	{
-		return $this->throttle->showCaptcha();
+		return model( ThrottleModelAdapter::class )->showCaptcha();
 	}
 
 	public function limited (): bool
 	{
-		return $this->throttle->limited();
+		return model( ThrottleModelAdapter::class )->limited();
 	}
 
 	public function throttle () : int
 	{
-		return $this->throttle->throttle();
+		return model( ThrottleModelAdapter::class )->throttle();
 	}
 
 	public function cleanup () : void
 	{
-		$this->throttle->throttle_cleanup();
+		model( ThrottleModelAdapter::class )->throttle_cleanup();
 	}
 }

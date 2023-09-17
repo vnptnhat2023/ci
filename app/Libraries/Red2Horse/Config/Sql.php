@@ -10,7 +10,7 @@ class Sql
 	use TraitSingleton;
 
 	/** Select & import */
-	public array $tableUser = [
+	public array $table = [
 
 		'tables' => [
 			'user' => 'user',
@@ -50,18 +50,9 @@ class Sql
 	/*public function getColumString ( array $columns = [], bool $join = true ) : string
 	{
 		$columns = [ # user
-			'user.id',
-			'user.username',
-			'user.email',
-			'user.status',
-			'user.last_activity',
-			'user.last_login',
-			'user.created_at',
-			'user.updated_at',
-			'user.session_id',
-			'user.selector',
-			'user.token',
-			...$columns
+			'user.id', 'user.username', 'user.email', 'user.status', 'user.last_activity',
+			'user.last_login', 'user.created_at', 'user.updated_at', 'user.session_id',
+			'user.selector', 'user.token', ...$columns
 		];
 
 		if ( $join )

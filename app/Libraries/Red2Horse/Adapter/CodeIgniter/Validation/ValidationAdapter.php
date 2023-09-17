@@ -36,22 +36,27 @@ class ValidationAdapter implements ValidationAdapterInterface
 
 	/**
 	 * @param string|array $needed
-	 * @return string|array
+	 * @return mixed string|array
 	 */
-	public function getRules ( $needed )
+	public function getRules ( $keys )
 	{
 		$generalRules = $this->ruleStore();
 
-		if ( is_string( $needed ) ) {
-			$result = dot_array_search( $needed, $generalRules );
+		if ( is_string( $keys ) )
+		{
+			$result = dot_array_search( $keys, $generalRules );
 		}
 
-		if ( is_array( $needed ) ) {
+		if ( is_array( $keys ) )
+		{
 			$result = [];
 
-			foreach ( $needed as $need ) {
-				if ( isset( $generalRules[ $need ] ) )
-				$result[ $need ] = $generalRules[ $need ];
+			foreach ( $keys as $key )
+			{
+				if ( isset( $generalRules[ $key ] ) )
+				{
+					$result[ $key ] = $generalRules[ $key ];
+				}
 			}
 		}
 
@@ -68,21 +73,21 @@ class ValidationAdapter implements ValidationAdapterInterface
 		$config = getConfig( 'validation' );
 
 		$generalRules = [
-			$config::USERNAME => [
+			$config::$username => [
 				'label' => lang( 'Red2Horse.labelUsername' ),
 				'rules' => 'trim|required|min_length[5]|max_length[32]|alpha_dash'
 			],
-			$config::PASSWORD => [
+			$config::$password => [
 				'label' => lang( 'Red2Horse.labelPassword' ),
 				'rules' => 'trim|required|min_length[5]|max_length[32]|alpha_numeric_punct'
 			],
-			$config::EMAIL => [
+			$config::$email => [
 				'label' => lang( 'Red2Horse.labelEmail' ),
-				'rules' => 'trim|required|min_length[5]|max_length[128]|valid_email'
+				'rules' => 'trim|required|min_length[5]|max_length[64]|valid_email'
 			],
-			$config::CAPTCHA => [
+			$config::$captcha => [
 				'label' => lang( 'Red2Horse.labelCaptcha' ),
-				'rules' => 'trim|required|min_length[5]|ci_captcha'
+				'rules' => 'trim|required|min_length[5]|max_length[32]|alpha_numeric_punct|ci_captcha'
 			]
 		];
 

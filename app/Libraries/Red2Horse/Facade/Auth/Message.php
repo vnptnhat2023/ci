@@ -33,28 +33,45 @@ class Message
 		$attempts = $throttle->getAttempts();
 		$captcha = $throttle->showCaptcha();
 
-		/** Auth status */
-		// $reset = self::$incorrectResetPassword; $login = self::$incorrectLoggedIn;
-		// /** Account status */
-		// $suspend = self::$hasBanned; $active = ! self::$accountInactive;
+		$suspend = self::$hasBanned;
+		$active = ! self::$accountInactive;
 
 		/** @var bool $success */
 		$success = self::$successfully;
 
+		$baseConfig = getConfig( 'BaseConfig' );
+		$configValidation = getConfig( 'Validation' );
 
 		$resultMessage = [
 			// 'auth_status' => [ 'reset' => $reset, 'login' => $login ],
-			// 'account_status' => [ 'suspend' => $suspend, 'active' => ! $active ],
-			'throttle_status' => [
-				'limited' => $limited,
-				'attempts' => $attempts,
+			'account_status' => [
+				'suspend' => $suspend,
+				'active' => ! $active
 			],
 
 			'show' => [
 				'form' => ! $limited && ! $success,
-				'captcha' => $captcha,
+				'remember_me' => $baseConfig->useRememberMe,
+				'captcha' => false,
+				'attempts' => $attempts
+			],
+
+			'validation' => [
+				$configValidation::$username,
+				$configValidation::$email,
+				$configValidation::$password,
+				$configValidation::$captcha
 			]
 		];
+
+		if ( $baseConfig->useThrottle )
+		{
+			$resultMessage[ 'throttle_status' ] = [
+				'limited' => $limited,
+			];
+
+			$resultMessage[ 'show' ][ 'captcha' ] = $captcha;
+		}
 
 		return $resultMessage;
 	}

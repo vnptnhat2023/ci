@@ -84,11 +84,11 @@ class CommonFacade implements CommonFacadeInterface
 						break;
 				}
 
-				return substr( str_shuffle( str_repeat( $pool, ceil( $len / strlen( $pool ) ) ) ), 0, $len );
+				return substr( str_shuffle( str_repeat( $pool, (int) ceil(  $len / strlen( $pool ) ) ) ), 0, $len );
 			case 'md5':
-				return md5( uniqid( mt_rand(), true ) );
+				return md5( uniqid( ( string ) mt_rand(), true ) );
 			case 'sha1':
-				return sha1( uniqid( mt_rand(), true ) );
+				return sha1( uniqid( ( string ) mt_rand(), true ) );
 			case 'crypto':
 				return bin2hex( random_bytes( $len / 2 ) );
 		}

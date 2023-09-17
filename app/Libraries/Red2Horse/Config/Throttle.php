@@ -5,6 +5,8 @@ namespace Red2Horse\Config;
 
 use Red2Horse\Mixins\Traits\TraitSingleton;
 
+use function Red2Horse\Mixins\Functions\getComponents;
+
 class Throttle
 {
 	use TraitSingleton;
@@ -21,5 +23,10 @@ class Throttle
 	public function __construct ()
 	{
 		$this->throttle = ( object ) self::THROTTLE;
+	}
+
+	public function reInit () : void
+	{
+		getComponents( 'throttle' )->init();
 	}
 }

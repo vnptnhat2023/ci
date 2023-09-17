@@ -9,10 +9,7 @@ class BaseConfig
 {
 	use TraitSingleton;
 
-	public bool $useRememberMe = true;
+	public bool $useRememberMe = false;
+	public bool $useThrottle = false;// ->captcha
 	public bool $useMultiLogin = false;
-
-	public function __construct ()
-	{
-	}
 }
