@@ -6,6 +6,8 @@ namespace Red2Horse\Facade\Mail;
 
 use Red2Horse\Mixins\Traits\TraitSingleton;
 
+defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
+
 class MailFacade implements MailFacadeInterface
 {
 	use TraitSingleton;

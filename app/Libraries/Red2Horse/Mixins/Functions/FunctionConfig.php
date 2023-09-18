@@ -5,7 +5,7 @@ namespace Red2Horse\Mixins\Functions;
 
 use Red2Horse\Mixins\Classes\Registry\RegistryClass as Reg;
 
-defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access not allowed.' );
+defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
 function initConfig()
 {
@@ -17,19 +17,17 @@ function initConfig()
  * @param ?string $name null: base config
  * @throws \Error
  */
-function getConfig ( ?string $name = null, bool $getShared = true ) : object
+function getConfig ( string $name = '', bool $getShared = true ) : object
 {
-    $config = \Red2Horse\Config\ConstantNamespace::LIST_NAMESPACE;
-    $configNamespace = $config[ 'CONFIG_NAMESPACE' ];
-
-    if ( null === $name )
+    if ( '' === $name )
     {
-        return getInstance( $configNamespace . 'BaseConfig', Reg::class, $getShared );
+        return getInstance( configNamespace( 'BaseConfig' ), Reg::class, $getShared );
     }
 
+    # Class name
     if ( false === strpos( $name, '\\' ) )
     {
-        $name = $configNamespace . ucfirst( $name );
+        $name = configNamespace( $name );
         return getInstance( $name, Reg::class, $getShared );
     }
 
@@ -80,6 +78,5 @@ function setConfig ( ?string $name = null, \Closure $callback, bool $getShared =
 
 function hasConfig ( string $name ) : bool
 {
-    $namespace = \Red2Horse\Config\ConstantNamespace::LIST_NAMESPACE[ 'CONFIG_NAMESPACE' ];
-    return hasClass( $namespace . ucfirst( $name ) );
+    return hasClass( configNamespace( $name ) );
 }

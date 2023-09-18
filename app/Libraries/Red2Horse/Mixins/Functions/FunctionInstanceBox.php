@@ -3,22 +3,21 @@
 declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Functions;
 
-use Red2Horse\Mixins\Classes\Registry\RegistryClass as RegClass;
-
-defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access not allowed.' );
+defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
 /** @return object $state */
 function RegInstance( string $state ) : object
 {
+    $state = registryNamespace( $state );
     return $state::selfInstance();
 }
 
 /**
  * @return mixed array|null
  */
-function instanceData ( string $classNamespace, string $state = RegClass::class )
+function instanceData ( string $name, string $state = 'RegistryClass' )
 {
-    return RegInstance( $state ) ->InstanceData( $classNamespace );
+    return RegInstance( $state ) ->InstanceData( $name );
 }
 
 /**
@@ -26,25 +25,25 @@ function instanceData ( string $classNamespace, string $state = RegClass::class 
  * @return mixed array|object ( call )
  * @throws $th
  */
-function getClass ( string $classNamespace, string $key = '', string $state = RegClass::class )
+function getClass ( string $name, string $key = '', string $state = 'RegistryClass' )
 {
-    return RegInstance( $state ) ->getClass( $classNamespace, $key );
+    return RegInstance( $state ) ->getClass( $name, $key );
 }
 
-function hasClass ( string $classNamespace, string $key = '', string $state = RegClass::class )
+function hasClass ( string $name, string $key = '', string $state = 'RegistryClass' )
 {
-    return RegInstance( $state ) ->hasClass( $classNamespace, $key );
+    return RegInstance( $state ) ->hasClass( $name, $key );
 }
 
 /** @param mixed $value */
-function setClass ( string $classNamespace, $value, bool $override = false, string $state = RegClass::class ) : bool
+function setClass ( string $name, $value, bool $override = false, string $state = 'RegistryClass' ) : bool
 {
-    return RegInstance( $state ) ->setClass( $classNamespace, $value, $override );
+    return RegInstance( $state ) ->setClass( $name, $value, $override );
 }
 
-function delClass ( string $classNamespace, string $state = RegClass::class ) : bool
+function delClass ( string $name, string $state = 'RegistryClass' ) : bool
 {
-    return RegInstance( $state ) ->delClass( $classNamespace );
+    return RegInstance( $state ) ->delClass( $name );
 }
 
 function _debugInfo( string $state ) : array

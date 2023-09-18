@@ -9,14 +9,18 @@ use Red2Horse\Mixins\Traits\{
     TraitSingleton
 };
 
+use function Red2Horse\Mixins\Functions\getConfig;
+
+defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
+
 class CallClass___ implements CallClass___Interface
 {
     use TraitCall, TraitSingleton;
 
     public function __construct( $className = null, array $arguments = [] )
     {
-        $this->traitUseBefore = $arguments[ 'traitCallback' ][ 'before' ] ?? false;
-        $this->traitUseAfter = $arguments[ 'traitCallback' ][ 'after' ] ?? false;
+        // $this->traitUseBefore = $arguments[ 'traitCallback' ][ 'before' ] ?? getConfig( 'CallClass' )->traitUseBefore;
+        // $this->traitUseAfter = $arguments[ 'traitCallback' ][ 'after' ] ?? getConfig( 'CallClass' )->traitUseAfter;
 
         $this->run( $className );
     }

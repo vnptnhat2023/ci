@@ -10,6 +10,10 @@ use Red2Horse\Mixins\
     function Functions\ComponentNamespace
 };
 
+use function Red2Horse\Mixins\Functions\getConfig;
+
+defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
+
 final class RegistryClass extends RegistryClass___
 {
     use TraitRegistryClassMethod;
@@ -122,8 +126,10 @@ final class RegistryClass extends RegistryClass___
 
                 public function __construct( string $className, array $arguments )
                 {
-                    $this->traitUseBefore = $arguments[ 'traitCallback' ][ 'before' ] ?? false;
-                    $this->traitUseAfter = $arguments[ 'traitCallback' ][ 'after' ] ?? false;
+                    // $this->traitUseBefore = $arguments[ 'traitCallback' ][ 'before' ]
+                    //     ?? getConfig( 'CallClass' )->traitUseBefore;
+                    // $this->traitUseAfter = $arguments[ 'traitCallback' ][ 'after' ]
+                    //     ?? getConfig( 'CallClass' )->traitUseAfter;
 
                     $this->run( $className );
                 }

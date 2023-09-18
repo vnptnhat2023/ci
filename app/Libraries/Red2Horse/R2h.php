@@ -19,11 +19,11 @@ use function Red2Horse\Mixins\Functions\
 
 const R2H_BASE_PATH = __DIR__;
 
-defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access not allowed.' );
+defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
 if ( ! $functions_path = realpath( \Red2Horse\R2H_BASE_PATH . '/Mixins/Functions' ) )
 {
-    throw new \Error( 'Invalid path .', 403 );
+    throw new \Error( 'Path not found .', 404 );
 }
 
 require_once realpath( $functions_path . '/RequireOnce.php' );
@@ -45,11 +45,7 @@ class R2h
 
         $setting = [
             'method_name' => $methodName,
-            'arguments' => $arguments,
-            'traitCallback' => [
-                'before' => true,
-                'after' => false
-            ]
+            'arguments' => $arguments
         ];
 
         return callClass( Red2Horse::class, RegistryClass::class, true, $setting );

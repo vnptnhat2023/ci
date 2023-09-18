@@ -12,6 +12,8 @@ use function Red2Horse\Mixins\Functions\getInstance;
  * @todo filter->not [ or, and, except]
  * admin
  * */
+defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
+
 class Authorization
 {
 	use TraitSingleton;

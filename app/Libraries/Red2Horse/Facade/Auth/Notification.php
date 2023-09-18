@@ -1,12 +1,12 @@
 <?php
 
 declare( strict_types = 1 );
-
 namespace Red2Horse\Facade\Auth;
 
 use Red2Horse\Mixins\Traits\TraitSingleton;
-
 use function Red2Horse\Mixins\Functions\getInstance;
+
+defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
 class Notification
 {

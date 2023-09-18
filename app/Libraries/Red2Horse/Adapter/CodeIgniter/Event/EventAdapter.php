@@ -8,6 +8,8 @@ use Red2Horse\Mixins\Classes\Registry\RegistryEventClass;
 
 use function Red2Horse\Mixins\Functions\setClass;
 
+defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
+
 final class EventAdapter implements EventAdapterInterface
 {
     private bool $init = false;

@@ -10,6 +10,8 @@ use Red2Horse\Mixins\Traits\{
     TraitRegistry
 };
 
+defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
+
 class RegistryEventClass implements RegistryClass___Interface
 {
     use TraitRegistry, TraitRegistryClassMethod;

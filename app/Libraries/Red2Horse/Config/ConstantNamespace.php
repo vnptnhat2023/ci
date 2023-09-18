@@ -4,6 +4,8 @@ declare( strict_types = 1 );
 namespace Red2Horse\Config;
 use Red2Horse\Mixins\Traits\TraitSingleton;
 
+defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
+
 class ConstantNamespace
 {
     use TraitSingleton;
@@ -17,5 +19,6 @@ class ConstantNamespace
         'FACADE_NAMESPACE' => self::BASE_NAMESPACE . 'Facade\\',
         'ADAPTER_NAMESPACE' => self::BASE_NAMESPACE . 'Adapter\\' . self::ADAPTER_NAME,
         'FUNCTION_NAMESPACE' => self::BASE_NAMESPACE . 'Mixins\\Functions\\',
+        'REGISTRY_NAMESPACE' => self::BASE_NAMESPACE . 'Mixins\\Classes\\Registry\\',
     ];
 }

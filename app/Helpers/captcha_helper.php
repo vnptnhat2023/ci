@@ -11,12 +11,7 @@
 
 if ( ! function_exists( 'ci_captcha' ) )
 {
-	function ci_captcha (
-		int $chars_length = 5,
-		int $width = 100,
-		int $height = 32,
-		int $expiration = 3600
-	) : string
+	function ci_captcha ( int $chars_length = 5, int $width = 100, int $height = 32, int $expiration = 3600 ) : string
 	{
 		helper( 'text' );
 		$session = \Config\Services::session();
@@ -32,7 +27,7 @@ if ( ! function_exists( 'ci_captcha' ) )
 		}
 
 		$path = 'public/assets/captcha/';
-		$string = strtolower( random_string( 'alnum', $chars_length ) );
+		$string = strtoupper( random_string( 'alnum', $chars_length ) );
 		$data = [# font_path
 			'word' => $string,
 			'img_path' => ROOTPATH . $path,

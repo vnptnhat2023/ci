@@ -7,6 +7,8 @@ use Red2Horse\Mixins\Traits\TraitSingleton;
 
 use function Red2Horse\Mixins\Functions\getComponents;
 
+defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
+
 class Throttle
 {
 	use TraitSingleton;
@@ -19,6 +21,8 @@ class Throttle
 	];
 
 	public object $throttle;
+
+	public bool $useThrottle = false;
 
 	public function __construct ()
 	{

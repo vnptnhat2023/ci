@@ -5,6 +5,8 @@ namespace Red2Horse\Mixins\Classes;
 
 use Red2Horse\Mixins\Interfaces\ReflectClass___Interface;
 
+defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
+
 /**
  * Reflections public method only
  */

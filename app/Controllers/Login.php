@@ -35,19 +35,48 @@ class Login extends BaseController
 			'BaseConfig',
 			static function( $config ) {
 				$config->useMultiLogin = false;
-				$config->useThrottle = true;
 				$config->useRememberMe = true;
-
 				return $config;
 			}
 		);
 
 		$this->auth->setConfig(
 			'throttle',
-			function ( $throttle ) {
-				$throttle->throttle->captchaAttempts = 2;
-
+			static function ( $throttle )
+			{
+				$throttle->useThrottle = true;
+				$throttle->throttle->captchaAttempts = 3;
 				return $throttle;
+			}
+		);
+
+		$this->auth->setConfig(
+			'CallClass',
+			static function ( $callClass )
+			{
+				$callClass->traitUseBefore = false;
+				$callClass->traitUseAfter = true;
+				return $callClass;
+			}
+		);
+
+		$this->auth->setConfig(
+			'Cookie',
+			static function ( $cookie )
+			{
+				$cookie->cookie = 'abc';
+				$cookie->ttl = 600;
+				return $cookie;
+			}
+		);
+
+		$this->auth->setConfig(
+			'session',
+			static function ( $session )
+			{
+				$session->session = 'abc';
+				$session->sessionTimeToUpdate = 600;
+				return $session;
 			}
 		);
 	}

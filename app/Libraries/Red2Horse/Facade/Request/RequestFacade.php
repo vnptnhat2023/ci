@@ -6,6 +6,8 @@ namespace Red2Horse\Facade\Request;
 
 use Red2Horse\Mixins\Traits\TraitSingleton;
 
+defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
+
 class RequestFacade implements RequestFacadeInterface
 {
 	use TraitSingleton;

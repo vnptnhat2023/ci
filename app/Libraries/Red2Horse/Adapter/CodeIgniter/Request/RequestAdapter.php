@@ -1,15 +1,12 @@
 <?php
 
 declare( strict_types = 1 );
-
 namespace Red2Horse\Adapter\Codeigniter\Request;
 
 use Config\Services;
 
-/**
- * @package Red2ndHorseAuth
- * @author Red2Horse
- */
+defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
+
 class RequestAdapter implements RequestAdapterInterface
 {
 	public function post ( $index = null, $filter = null, $flags = null )

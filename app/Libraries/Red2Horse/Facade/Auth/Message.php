@@ -12,6 +12,8 @@ use function Red2Horse\Mixins\Functions\
     getConfig
 };
 
+defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
+
 class Message
 {
 	use TraitSingleton;
@@ -28,19 +30,20 @@ class Message
 	/** @return array */
 	public function getResult () : array
 	{
-		$throttle = getComponents( 'throttle' );
-		$limited = $throttle->limited();
-		$attempts = $throttle->getAttempts();
-		$captcha = $throttle->showCaptcha();
+		$baseConfig = getConfig( 'BaseConfig' );
+		$configThrottle = getConfig( 'Throttle' );
+		$configValidation = getConfig( 'Validation' );
+		$throttleComponent = getComponents( 'throttle' );
+
+		$limited = $configThrottle->useThrottle ? $throttleComponent->limited() : false;
+		$attempts = $throttleComponent->getAttempts();
+		$captcha = $throttleComponent->showCaptcha();
 
 		$suspend = self::$hasBanned;
 		$active = ! self::$accountInactive;
 
 		/** @var bool $success */
 		$success = self::$successfully;
-
-		$baseConfig = getConfig( 'BaseConfig' );
-		$configValidation = getConfig( 'Validation' );
 
 		$resultMessage = [
 			// 'auth_status' => [ 'reset' => $reset, 'login' => $login ],
@@ -64,7 +67,7 @@ class Message
 			]
 		];
 
-		if ( $baseConfig->useThrottle )
+		if ( $configThrottle->useThrottle )
 		{
 			$resultMessage[ 'throttle_status' ] = [
 				'limited' => $limited,

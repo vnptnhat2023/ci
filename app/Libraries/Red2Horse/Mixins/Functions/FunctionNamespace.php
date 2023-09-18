@@ -3,21 +3,50 @@
 declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Functions;
 
-use Red2Horse\Config\ConstantNamespace as CTNS;
+use Red2Horse\Config\ConstantNamespace;
 
-defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access not allowed.' );
+defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
-function configNamespace( string $name ) : string
+function configNamespace ( string $name = '' ) : string
 {
-    return CTNS::LIST_NAMESPACE[ 'CONFIG_NAMESPACE' ] . ucfirst( $name );
+    return formatFunctionNamespace( $name, 'CONFIG_NAMESPACE' );
 }
 
-function functionNamespace( string $name ) : string
+function functionNamespace ( string $name = '' ) : string
 {
-    return CTNS::LIST_NAMESPACE[ 'FUNCTION_NAMESPACE' ] . ucfirst( $name );
+    return formatFunctionNamespace( $name, 'FUNCTION_NAMESPACE' );
 }
 
-function ComponentNamespace( string $name, string $type = 'facade', ?string $diff = null ) : string
+function registryNamespace ( string $name = '', string $prefix = '\\' ) : string
+{
+    return formatFunctionNamespace( $name, 'REGISTRY_NAMESPACE' );
+}
+
+/** @return mixed array|string */
+function formatFunctionNamespace ( string $name = '', string $configNamespace, string $prefix = '', string $suffix = '' )
+{
+    $configNamespaces = ConstantNamespace::LIST_NAMESPACE;
+
+    if ( '' === $name )
+    {
+        return $configNamespaces;
+    }
+
+    if ( false === strpos( $name, '\\' ) )
+    {
+        $name = sprintf(
+            '%s%s%s%s',
+            $prefix,
+            $configNamespaces[ strtoupper( $configNamespace ) ],
+            ucfirst( trim( $name ) ),
+            $suffix
+        );
+    }
+
+    return $name;
+}
+
+function ComponentNamespace ( string $name, string $type = 'facade', ?string $diff = null ) : string
 {
     if ( ! in_array( $type, [ 'facade', 'adapter' ] ) )
     {
@@ -25,12 +54,12 @@ function ComponentNamespace( string $name, string $type = 'facade', ?string $dif
     }
 
     $ucfirstType = ucfirst( $type == 'facade' ? 'facade' : 'adapter' );
-    $name = ucfirst( $name );
-    $diff = ( null === $diff ) ? null : ucfirst( $diff );
+    $name = ucfirst( trim( $name ) );
+    $diff = ( null === $diff ) ? null : ucfirst( trim( $diff ) );
 
     return sprintf(
         '%s%s\\%s%s',
-        CTNS::LIST_NAMESPACE[ strtoupper( $type ) . '_NAMESPACE' ],
+        ConstantNamespace::LIST_NAMESPACE[ strtoupper( $type ) . '_NAMESPACE' ],
         $name,
         $diff ?? $name,
         $ucfirstType

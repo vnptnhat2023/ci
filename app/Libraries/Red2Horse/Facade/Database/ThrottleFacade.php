@@ -6,6 +6,8 @@ namespace Red2Horse\Facade\Database;
 use Red2Horse\Mixins\Traits\TraitSingleton;
 use function Red2Horse\Mixins\Functions\getConfig;
 
+defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
+
 class ThrottleFacade implements ThrottleFacadeInterface
 {
 	use TraitSingleton;
@@ -20,7 +22,7 @@ class ThrottleFacade implements ThrottleFacadeInterface
 
 	public function init () : void
 	{
-		if ( getConfig( 'BaseConfig' )->useThrottle )
+		if ( getConfig( 'Throttle' )->useThrottle )
         {
             $throttle = array_values( ( array ) getConfig( 'throttle' )->throttle );
             $this->config( ...$throttle );

@@ -13,6 +13,8 @@ use function Red2Horse\Mixins\Functions\
     getInstance
 };
 
+defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
+
 class CookieHandle
 {
 	use TraitSingleton;
@@ -20,7 +22,7 @@ class CookieHandle
 	public function regenerateCookie () : void
 	{
 		$cookieValue = password_hash( session_id(), PASSWORD_DEFAULT );
-		$ttl = ( string ) getConfig( 'session' ) ->sessionTimeToUpdate;
+		$ttl = ( string ) getConfig( 'cookie' ) ->cookie;
 		$cookieName = getConfig( 'cookie' ) ->cookie . '_test';
 
 		getComponents( 'cookie' )->set_cookie( $cookieName , $cookieValue, $ttl );

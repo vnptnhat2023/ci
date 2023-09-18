@@ -1,16 +1,16 @@
 <?php
 
-defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access not allowed.' );
+defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
 /** Config ConstantNamespace */
-require_once realpath(\Red2Horse\R2H_BASE_PATH . '/Config/ConstantNamespace.php');
+require_once realpath( \Red2Horse\R2H_BASE_PATH . '/Config/ConstantNamespace.php' );
 
-require_once realpath($functions_path . '/FunctionInstanceBox.php');
-require_once realpath($functions_path . '/FunctionInstance.php');
+require_once realpath( $functions_path . '/FunctionInstanceBox.php' );
+require_once realpath( $functions_path . '/FunctionInstance.php' );
 
-require_once realpath($functions_path . '/FunctionNamespace.php');
-require_once realpath($functions_path . '/FunctionConfig.php');
-require_once realpath($functions_path . '/FunctionSql.php');
+require_once realpath( $functions_path . '/FunctionNamespace.php' );
+require_once realpath( $functions_path . '/FunctionConfig.php' );
+require_once realpath( $functions_path . '/FunctionSql.php' );
 
 
 if (!function_exists('http_response_code')) {

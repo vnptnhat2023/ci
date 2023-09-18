@@ -3,7 +3,7 @@
 declare( strict_types=1 );
 namespace Red2Horse\Mixins\Functions;
 
-defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access not allowed.' );
+defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
 function sqlFromUserGroups () : string
 {
