@@ -34,6 +34,21 @@ class UserFacade implements UserFacadeInterface
 	 */
 	public function updateUser ( $where, array $data ) : bool
 	{
-		return $this->user->updateUser( $where, $data );
+		if ( ! $u = $this->user->updateUser( $where, $data ) )
+		{
+			throw new \Error( 'Can not updated to database ! ' . __FILE__, __LINE__ );
+		}
+
+		return $u;
+	}
+
+	public function updateUserGroup ( $where, array $data ) : bool
+	{
+		if ( ! $u = $this->user->updateUserGroup( $where, $data ) )
+		{
+			throw new \Error( 'Can not updated to database ! ' . __FILE__, __LINE__ );
+		}
+
+		return $u;
 	}
 }

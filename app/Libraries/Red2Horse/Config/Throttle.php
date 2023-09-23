@@ -22,7 +22,7 @@ class Throttle
 
 	public object $throttle;
 
-	public bool $useThrottle = false;
+	public bool $useThrottle = true;
 
 	public function __construct ()
 	{

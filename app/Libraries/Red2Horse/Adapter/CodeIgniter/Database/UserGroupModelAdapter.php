@@ -6,18 +6,16 @@ namespace Red2Horse\Adapter\CodeIgniter\Database;
 
 use CodeIgniter\Model;
 
-class UserModelAdapter extends Model
+class UserGroupModelAdapter extends Model
 {
-	public $table = 'user';
+	public $table = 'user_group';
 	protected $primaryKey = 'id';
 	protected $returnType = 'array';
 
 	protected $allowedFields = [
-		'last_activity',
-		'last_login',
-		'password',
-		'session_id',
-		'selector',
-		'token'
+		'name',
+		'role',
+		'permission',
+		'deleted_at'
 	];
 }

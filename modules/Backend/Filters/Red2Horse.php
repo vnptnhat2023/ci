@@ -11,24 +11,22 @@ use Config\Services;
 
 class Red2Horse implements FilterInterface
 {
-  public function before( req $request, $args = null )
-  {
+	public function before( req $request, $args = null )
+	{
 		$auth = Services::Red2HorseAuth();
-
 		$isValidRole = $auth->withRole( ( array ) $args );
 
-		if ( false === $isValidRole )
+		if ( ! $isValidRole )
 		{
-			$isValidPem = $auth->withPermission( ( array ) $args );
-
-			if ( false === $isValidPem ) {
+			if ( ! $auth->withPermission( ( array ) $args ) )
+			{
 				throw PageNotFoundException::forPageNotFound();
 			}
 		}
-  }
+	}
 
-  public function after( req $request, res $response, $args = null )
-  {
-  }
+	public function after( req $request, res $response, $args = null )
+	{
+	}
 
 }

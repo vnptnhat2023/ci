@@ -29,6 +29,18 @@ function bgColor () : string
 	return $arr[ random_int( 0, count( $arr ) - 1 ) ];
 }
 
+function fontFamily () : string
+{
+	$arr = [
+		'Courier New',
+		'monospace',
+		'garamond',
+		'dubai',
+		'bahnschrift'
+	];
+	return $arr[ random_int( 0, count( $arr ) - 1 ) ] ;
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -47,7 +59,7 @@ function bgColor () : string
 		<style>
 			body
 			{
-				font-family: cursive, monospace, sans-serif;
+				font-family:  <?= fontFamily() ?>, cursive, monospace, sans-serif;
 				/* background-image: url(https://source.unsplash.com/random); */
 				background-color: <?= bgColor() ?>;
 				background-repeat: no-repeat;
@@ -128,9 +140,17 @@ function bgColor () : string
 				<div class="col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3"
 				id="login-page">
 
-					<?= form_open( base_url( 'login' ) ) ?>
+					<?= form_open( base_url( '/login' ) ) ?>
 
 					<div class="form-box">
+						<!-- <div class="pull-right">
+							<span class="languages">
+								<a href="<?= current_url() . '/?lang=en' ?>">En</a>
+							</span>&nbsp;
+							<span class="languages">
+								<a href="<?= current_url() . '/?lang=vi' ?>">Vi</a>
+							</span>
+						</div> -->
 
 						<h3 class="form-box-title"><?= r2hI18( 'login' ) ?></h3>
 

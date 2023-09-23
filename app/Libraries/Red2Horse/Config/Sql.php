@@ -12,7 +12,7 @@ class Sql
 	use TraitSingleton;
 
 	/** Select & import */
-	public array $table = [
+	public array $tables = [
 
 		'tables' => [
 			'user' => 'user',

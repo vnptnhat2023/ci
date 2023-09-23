@@ -16,20 +16,19 @@ use App\Libraries\{
 
 use Red2Horse\{
 	R2h,
-	Adapter\CodeIgniter\System\Red2HorseSession,
-	// Facade\Auth\Config
+	Adapter\CodeIgniter\System\Red2HorseSession
 };
 
 class Services extends CoreServices
 {
-	public static function Red2HorseAuth ( bool $getShared = true /*, ?Config $config = null*/ ) : R2h
+	public static function Red2HorseAuth ( bool $getShared = true ) : R2h
 	{
 		if ( $getShared )
 		{
 			return static::getSharedInstance( 'Red2HorseAuth' );
 		}
 
-		return new R2h();
+		return R2h::getInstance();
 	}
 
 	public static function Extension ( bool $getShared = true ) : Extension

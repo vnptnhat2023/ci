@@ -17,11 +17,8 @@ class CallClass___ implements CallClass___Interface
 {
     use TraitCall, TraitSingleton;
 
-    public function __construct( $className = null, array $arguments = [] )
+    public function __construct( $className = null, array $arguments )
     {
-        // $this->traitUseBefore = $arguments[ 'traitCallback' ][ 'before' ] ?? getConfig( 'CallClass' )->traitUseBefore;
-        // $this->traitUseAfter = $arguments[ 'traitCallback' ][ 'after' ] ?? getConfig( 'CallClass' )->traitUseAfter;
-
         $this->run( $className );
     }
 }

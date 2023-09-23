@@ -3,9 +3,11 @@
 declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Functions;
 
+use Red2Horse\Mixins\Classes\Registry\RegistryClass;
+
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
-/** @return object $state */
+/** @return RegistryClass */
 function RegInstance( string $state ) : object
 {
     $state = registryNamespace( $state );
@@ -30,9 +32,9 @@ function getClass ( string $name, string $key = '', string $state = 'RegistryCla
     return RegInstance( $state ) ->getClass( $name, $key );
 }
 
-function hasClass ( string $name, string $key = '', string $state = 'RegistryClass' )
+function hasClass ( string $name, string $state = 'RegistryClass' ) : bool
 {
-    return RegInstance( $state ) ->hasClass( $name, $key );
+    return RegInstance( $state ) ->hasClass( $name );
 }
 
 /** @param mixed $value */

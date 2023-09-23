@@ -27,6 +27,8 @@ class Message
 	public static array $errors = [];
 	public static array $success = [];
 
+	private function __construct () {}
+
 	/** @return array */
 	public function getResult () : array
 	{
@@ -108,7 +110,7 @@ class Message
 	}
 
 	/** @return mixed array|object|void */
-	public function denyMultiLogin ( bool $throttle = true, array $add = [], $getReturn = true )
+	public function errorMultiLogin ( bool $throttle = true, array $add = [], $getReturn = true )
 	{
 		! $throttle ?: getComponents( 'throttle' )->throttle();
 		self::$incorrectLoggedIn = true;
@@ -123,7 +125,7 @@ class Message
 	}
 
 	/** @return mixed array|object */
-	public function incorrectInfo ( bool $throttle = true, array $add = [] )
+	public function errorInformation ( bool $throttle = true, array $add = [] )
 	{
 		! $throttle ?: getComponents( 'throttle' )->throttle();
 		self::$incorrectLoggedIn = true;
@@ -137,7 +139,7 @@ class Message
 	/**
 	 * @return mixed array|object|void
 	 */
-	public function denyStatus ( string $status, bool $throttle = true, $getReturn = true )
+	public function errorAccountStatus ( string $status, bool $throttle = true, $getReturn = true )
 	{
 		! $throttle ?: getComponents( 'throttle' )->throttle();
 		self::$hasBanned = ( $status === 'banned' );

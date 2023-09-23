@@ -28,4 +28,5 @@ interface UserFacadeInterface
 	 * @return bool
 	 */
 	public function updateUser ( $where, array $data ) : bool;
+	public function updateUserGroup ( $where, array $data ) : bool;
 }

@@ -4,99 +4,121 @@ declare( strict_types = 1 );
 namespace Red2Horse\Facade\Auth;
 
 use Red2Horse\Mixins\Traits\TraitSingleton;
+use function Red2Horse\Mixins\Functions\
+{
+    getComponents,
+    getConfig,
+    getInstance,
+    getVerifyPass
+};
 
-use function Red2Horse\Mixins\Functions\getConfig;
-use function Red2Horse\Mixins\Functions\getInstance;
-
-/**
- * @todo filter->not [ or, and, except]
- * admin
- * */
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
-class Authorization
+final class Authorization
 {
 	use TraitSingleton;
-	protected array $userRole;
-	protected array $userPerm;
-	private array $roleList = [];
-	private array $permissionList = [];
-	protected array $prefix = ['!', 'NOT'];
-	private array $configPerm = [];
-	private array $sessionPerm = [];
+	private array $sessionData;
 
-	public function __construct ()
+	private function __construct () {}
+
+	/**
+	 * @throws \Error Unauthorized, 401
+	 * @param string $condition [ or, !or, not_or, and, !and, not_and ]
+	 */
+	public function withSession ( string $sessKey, array $data, string $condition = 'or' ) : bool
 	{
-		// $this->userRole = $this->_getSessionData( $this->config->roleKey );
-		$this->userRole = $this->_getSessionData( 'role' );
-		// $this->userPerm = $this->_getSessionData( $this->config->permKey );
-		$this->userPerm = $this->_getSessionData( 'permKey' );
+		$this->sessionData = $this->_getUserData( ( array ) $sessKey );
 
-		$this->configPerm = getConfig( 'authorization' )->userRouteGates;
-		$this->sessionPerm = $this->userPerm;
+		if ( ! $this->sessionData )
+		{
+			throw new \Error( 'Unauthorized.', 401 );
+		}
+
+		return $this->_run( $data, $condition );
 	}
 
 	/**
-	 * @param array<string> $data
+	 * @param array $args
 	 * @param string $k [ or, and, except; Default or ]
+	 * @throws \Error
 	 */
-	public function run ( array $data, string $k = 'or' ) : bool
+	private function _run ( array $args, string $condition = 'or' ) : bool
 	{
-		if ( ! $this->_check1( $data ) ) { return false; }
-		if ( $this->_isAdmin() ) { return true; }
+		if ( ! $this->_unauthorized( $args ) )
+		{
+			return false;
+		}
 
-		switch ($k) {
-			case 'except': return $this->_useExcept( $data );
-			case 'and': return $this->_useAnd( $data );
-			default: return $this->_useOr( $data );
+		$configTables = getConfig( 'Sql' )->tables;
+		$usernameData = $configTables[ $configTables[ 'tables' ][ 'user' ] ][ 'username' ];
+		$usernameSess = $this->_getUserData( [ $usernameData ] );
+
+		if ( empty( $usernameSess[ 0 ] ) )
+		{
+			throw new \Error( 'Unauthorized' , 401 );
+		}
+
+		$userDataArgs = [ $usernameData => $usernameSess[ 0 ] ];
+		$userData = getComponents( 'user' )->getUserWithGroup(
+			\Red2Horse\Mixins\Functions\sqlGetColumn( [ 'id' ] ),
+			$userDataArgs
+		);
+
+		if ( ! getComponents( 'common' )->valid_json( $userData[ 'role' ] ) )
+		{
+			throw new \Error( 'Invalid json format .', 406 );
+		}
+
+		$roleData = json_decode( $userData[ 'role' ], true );
+		if ( ! getVerifyPass( $this->sessionData[ 'hash' ], $roleData[ 'hash' ] ) )
+		{
+			throw new \Error( 'Unauthorized', 401 );
+		}
+
+		switch ( $condition )
+		{
+			case '!and': case 'not_and': return ! $this->_and( $args );
+			case '!or': case 'not_or': return ! $this->_or( $args );
+			case 'and': return $this->_and( $args );
+			default: return $this->_or( $args );
 		}
 	}
 
-	private function _useOr (array $data) : bool
+	private function _or ( array $args ) : bool
 	{
-		if ( $data === $this->sessionPerm ) { return true; }
-		return empty( array_diff( $data, $this->sessionPerm ) );
-	}
+		if ( $args == $this->sessionData )
+		{
+			return true;
+		}
+		
+		$diff = array_diff( $args, $this->sessionData );
 
-	private function _useAnd (array $data) : bool
-	{
-		if ( $data === $this->sessionPerm ) { return true; }
+		if ( count( $diff ) != count( $args ) )
+		{
+			return true;
+		}
+
 		return false;
 	}
 
-	private function _useExcept (array $data) : bool
+	private function _and ( array $args ) : bool
 	{
-		if ( $data === $this->sessionPerm ) { return true; }
-		return empty( array_diff( $data, $this->sessionPerm ) );
+		return $args == $this->sessionData;
 	}
 
-	private function _check1( array $data ) : bool
+	private function _getUserData ( array $args ) : array
 	{
-		$passed = false;
-		if ( empty( $this->userRole[ 0] ) || empty( $this->userPerm[ 0] ) ) {
-			$passed = false;
+		$userData = [];
+		foreach ( $args as $key )
+		{
+			$userData = ( array ) getInstance( Authentication::class )->getUserdata( $key );
 		}
 
-		if ( empty( $data ) ) {
-			$passed = false;
-		}
-
-		return $passed;
+		return $userData;
 	}
 
-	private function _getSessionData ( $key = 'permission' ) : array
+	private function _unauthorized( array $args ) : bool
 	{
-		$sessionData = ( array ) getInstance( Authentication::class )->getUserdata( $key );
-		return empty( $sessionData ) ? [] : $sessionData;
-	}
-
-	private function _isAdmin () : bool
-	{
-		$config = getConfig();
-		$isAdmin = ( $this->userRole === $config->adminRole ) ||
-		isset( $this->userPerm[ 0 ] ) &&
-		( $this->userPerm[ 0 ] === $config->adminGate );
-
-		return ( bool ) $isAdmin;
+		return ! empty( $this->sessionData ) || ! empty( $args );
 	}
 }

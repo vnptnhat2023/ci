@@ -7,7 +7,7 @@ use Red2Horse\Mixins\Classes\Registry\RegistryClass as Reg;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
-function initConfig()
+function initConfig() : void
 {
     getConfig( 'BaseConfig' );
     getComponents( 'Throttle' );
@@ -15,6 +15,7 @@ function initConfig()
 
 /**
  * @param ?string $name null: base config
+//  * @return object|\Red2Horse\Mixins\Traits\TraitSingleton
  * @throws \Error
  */
 function getConfig ( string $name = '', bool $getShared = true ) : object
@@ -36,10 +37,10 @@ function getConfig ( string $name = '', bool $getShared = true ) : object
 }
 
 /**
- * @return object
+ * @return \Red2Horse\Mixins\Traits\TraitSingleton
  * @throws \Error
  */
-function setConfig ( ?string $name = null, \Closure $callback, bool $getShared = true )
+function setConfig ( ?string $name = null, \Closure $callback, bool $getShared = true ) : object
 {
     $config = getConfig( $name, $getShared );
     $changed = $callback( $config );

@@ -28,10 +28,11 @@ if ( ! $functions_path = realpath( \Red2Horse\R2H_BASE_PATH . '/Mixins/Functions
 
 require_once realpath( $functions_path . '/RequireOnce.php' );
 
+/** @todo [ SERIALIZE, INVOKE ] */
 class R2h
 {
     use TraitSingleton;
-    public function __construct ()
+    private function __construct ()
 	{
         initConfig();
     }
@@ -42,12 +43,7 @@ class R2h
         {
             return call_user_func( $functionName, ...$arguments );
         }
-
-        $setting = [
-            'method_name' => $methodName,
-            'arguments' => $arguments
-        ];
-
+        $setting = [ 'method_name' => $methodName, 'arguments' => $arguments ];
         return callClass( Red2Horse::class, RegistryClass::class, true, $setting );
     }
 }

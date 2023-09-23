@@ -10,7 +10,8 @@ use Red2Horse\Mixins\Traits\
 
 use function Red2Horse\Mixins\Functions\
 {
-    getInstance
+    getInstance,
+    withSession
 };
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
@@ -18,6 +19,8 @@ defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 class Red2Horse
 {
 	use TraitSingleton;
+
+	private function __construct () {}
 
 	public function login ( string $u = null, string $p = null, bool $r = false, string $c = null ) : bool
 	{
@@ -70,20 +73,14 @@ class Red2Horse
 		return getInstance( Message::class )->getMessage( $add, $asObject );
 	}
 
-	public function withPermission ( array $data, bool $or = true ) : bool
+	public function withPermission ( array $data, string $condition = 'or' ) : bool
 	{
-		return getInstance( Authorization::class )->run( $data );
+		return withSession( 'permission', $data, $condition );
 	}
 
-	# @Todo: late
-	public function withGroup( array $data ) : bool
+	public function withRole ( array $data, string $condition = 'or' ) : bool
 	{
-		return getInstance( Authorization::class )->run( $data );
-	}
-
-	public function withRole ( array $role, bool $or = true ) : bool
-	{
-		return getInstance( Authorization::class )->run( $role );
+		return withSession( 'role', $data, $condition );
 	}
 
 	public function regenerateSession ( array $userData ) : bool

@@ -22,6 +22,8 @@ class ResetPassword
 	private static ?string $email;
 	private static ?string $captcha;
 
+	private function __construct () {}
+
 	public function requestPassword ( string $u = null, string $e = null, string $c = null ) : bool
 	{
 		return getInstance( Utility::class ) ->typeChecker( 'forget', $u, null, $e, $c );
@@ -80,7 +82,7 @@ class ResetPassword
 
 		if ( ! $validation->isValid( $data, $rules ) )
 		{
-			$message ->incorrectInfo( true, array_values( $validation->getErrors() ) );
+			$message ->errorInformation( true, array_values( $validation->getErrors() ) );
 			return false;
 		}
 
@@ -89,7 +91,7 @@ class ResetPassword
 
 		if ( empty( $find_user ) )
 		{
-			$message->incorrectInfo();
+			$message->errorInformation();
 			return false;
 		}
 

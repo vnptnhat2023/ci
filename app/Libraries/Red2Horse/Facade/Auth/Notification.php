@@ -12,6 +12,8 @@ class Notification
 {
 	use TraitSingleton;
 
+	private function __construct () {}
+
 	public function mailSender ( string $randomPw ) : bool
 	{
 		$mail = getInstance( 'mail' );

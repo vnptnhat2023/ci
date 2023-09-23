@@ -114,23 +114,23 @@ trait TraitCall
         throw new \BadMethodCallException( $error, 403 );
 	}
 
-    public function trigger ( \Closure $closure, string $event, array $eventData )
-	{
-		if ( ! isset( $closure->{ $event } ) || empty( $closure->{ $event } ) )
-		{
-			return $eventData;
-		}
+    // public function trigger ( \Closure $closure, string $event, array $eventData )
+	// {
+	// 	if ( ! isset( $closure->{ $event } ) || empty( $closure->{ $event } ) )
+	// 	{
+	// 		return $eventData;
+	// 	}
 
-		foreach ( $closure->{ $event } as $callback )
-		{
-			if ( ! method_exists( $closure, $callback ) )
-			{
-				throw new \Exception( 'Invalid Method Triggered', 403 );
-			}
+	// 	foreach ( $closure->{ $event } as $callback )
+	// 	{
+	// 		if ( ! method_exists( $closure, $callback ) )
+	// 		{
+	// 			throw new \Exception( 'Invalid Method Triggered', 403 );
+	// 		}
 
-			$eventData = $closure->{ $callback }( $eventData );
-		}
+	// 		$eventData = $closure->{ $callback }( $eventData );
+	// 	}
 
-		return $eventData;
-	}
+	// 	return $eventData;
+	// }
 }

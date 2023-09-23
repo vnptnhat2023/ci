@@ -10,7 +10,7 @@ class ValidCap
 		$ss = \Config\Services::session() ->get( 'ci_captcha' );
 		$ss[ 'word' ] ??= null;
 
-		return $ss[ 'word' ] === $str;
+		return strtoupper( $ss[ 'word' ] ) === $str;
 	}
 
 }

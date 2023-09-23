@@ -1,7 +1,6 @@
 <?php
 
 declare( strict_types = 1 );
-
 namespace App\Controllers;
 
 class Login extends BaseController
@@ -31,54 +30,20 @@ class Login extends BaseController
 
 	private function _setting ()
 	{
-		$this->auth->setConfig(
-			'BaseConfig',
-			static function( $config ) {
-				$config->useMultiLogin = false;
-				$config->useRememberMe = true;
-				return $config;
-			}
-		);
+		// dd( $this->auth->getHashPass( $this->auth->getRandomString( 'administrator' ) ) );
+		// $rd = $this->auth->getRandomString( 'guest' ); dd( $rd );
+		$this->auth->setConfig ( 'BaseConfig', static function( $baseConfig )
+		{
+			$baseConfig->useRememberMe = true;
+			return $baseConfig;
+		} );
 
-		$this->auth->setConfig(
-			'throttle',
-			static function ( $throttle )
-			{
-				$throttle->useThrottle = true;
-				$throttle->throttle->captchaAttempts = 3;
-				return $throttle;
-			}
-		);
-
-		$this->auth->setConfig(
-			'CallClass',
-			static function ( $callClass )
-			{
-				$callClass->traitUseBefore = false;
-				$callClass->traitUseAfter = true;
-				return $callClass;
-			}
-		);
-
-		$this->auth->setConfig(
-			'Cookie',
-			static function ( $cookie )
-			{
-				$cookie->cookie = 'abc';
-				$cookie->ttl = 600;
-				return $cookie;
-			}
-		);
-
-		$this->auth->setConfig(
-			'session',
-			static function ( $session )
-			{
-				$session->session = 'abc';
-				$session->sessionTimeToUpdate = 600;
-				return $session;
-			}
-		);
+		$this->auth->setConfig( 'throttle', static function ( $throttle )
+		{
+			$throttle->throttle->captchaAttempts = 2;
+			$throttle->useThrottle = true;
+			return $throttle;
+		} );
 	}
 
 	public function index ()

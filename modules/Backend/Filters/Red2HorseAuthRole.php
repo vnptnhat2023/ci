@@ -16,7 +16,8 @@ class Red2HorseAuthRole implements FilterInterface
 		$args = ( array ) $args;
 		$isValid = Services::Red2HorseAuth()->withRole( $args );
 
-    if ( false === $isValid ) {
+    if ( ! $isValid )
+    {
       throw PageNotFoundException::forPageNotFound();
 		}
   }

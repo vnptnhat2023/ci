@@ -1,7 +1,6 @@
 <?php
 
 declare( strict_types = 1 );
-
 namespace Red2Horse\Facade\Auth;
 
 use Red2Horse\Mixins\Traits\TraitSingleton;
@@ -10,7 +9,9 @@ use function Red2Horse\Mixins\Functions\
 {
 	getComponents,
     getConfig,
-    getInstance
+    getHashPass,
+    getInstance,
+    getRandomString
 };
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
@@ -24,10 +25,7 @@ class Authentication
 	private static ?string $captcha = null;
 	private static bool $rememberMe = false;
 
-	public function __construct()
-	{
-
-	}
+	private function __construct () {}
 
 	public function login ( string $u = null, string $p = null, bool $r = false, string $c = null ) : bool
 	{
@@ -44,10 +42,10 @@ class Authentication
 		$message = getInstance( Message::class );
 		$common = getComponents( 'common' );
 		$session = getComponents( 'session' );
-
+		$cookie = getComponents( 'cookie' );
 		$message::$successfully = true;
 
-		getComponents( 'cookie' ) ->delete_cookie( getConfig( 'cookie' )->cookie );
+		$cookie->delete_cookie( getConfig( 'cookie' )->cookie );
 
 		if ( $session->has( getConfig('session')->session ) )
 		{
@@ -75,14 +73,10 @@ class Authentication
 			return false;
 		}
 
-		if ( empty( $key ) )
-		{
-			return getComponents( 'session' )->get( getConfig( 'session' )->session );
-		}
+		$session = getComponents( 'session' );
+		$userData = $session->get( getConfig( 'session' )->session );
 
-		$userData = getComponents( 'session' )->get( getConfig( 'session' )->session );
-
-		return $userData[ $key ] ?? null;
+		return empty( $key ) ? $userData : $userData[ $key ] ?? null;
 	}
 
 	/**
@@ -124,7 +118,7 @@ class Authentication
 			if ( ! $validation->isValid( $data, $ruleCaptcha ) )
 			{
 				$errorCaptcha = $validation->getErrors( $configValidation::$captcha );
-				return getInstance( Message::class )->incorrectInfo( true, $errorCaptcha );
+				return getInstance( Message::class )->errorInformation( true, $errorCaptcha );
 			}
 		}
 
@@ -139,7 +133,7 @@ class Authentication
 			$incorrectInfo = ! $validation->isValid( $data, $ruleEmail );
 		}
 
-		! $incorrectInfo ?: getInstance( Message::class )->incorrectInfo( true );
+		! $incorrectInfo ?: getInstance( Message::class )->errorInformation( true );
 
 		return $incorrectInfo;
 	}
@@ -156,27 +150,29 @@ class Authentication
 			$userDataArgs
 		);
 
+		$message = getInstance( Message::class );
+
 		if ( empty( $userData ) )
 		{
-			return [ 'error' => getInstance( Message::class )->incorrectInfo() ];
+			return [ 'error' => $message->errorInformation() ];
 		}
 
-		$verifyPassword = Password::getInstance()
+		$verifyPassword = getInstance( Password::class )
 			->getVerifyPass( self::$password, $userData[ 'password' ] );
 
 		if ( ! $verifyPassword )
 		{
-			return [ 'error' => getInstance( Message::class )->incorrectInfo() ];
+			return [ 'error' => $message->errorInformation() ];
 		}
 
 		if ( 'active' !== $userData[ 'status' ] )
 		{
-			return [ 'error' => getInstance( Message::class )->denyStatus( $userData['status'] ) ];
+			return [ 'error' => $message->errorAccountStatus( $userData['status'] ) ];
 		}
 
 		if ( ! $this->isMultiLogin( $userData[ 'session_id' ] ) )
 		{
-			getInstance( Message::class )->denyMultiLogin( true, [], false );
+			$message->errorMultiLogin( true, [], false );
 			return [ 'error' => false ];
 		}
 
@@ -208,7 +204,25 @@ class Authentication
 		$this->setLoggedInSuccess( $userData );
 
 		# --- Set session
-		getComponents( 'session' )->set( getConfig( 'session' )->session, $userData );
+		if ( ! getComponents( 'common' )->valid_json( $userData[ 'role' ] ) )
+		{
+			throw new \Error( 'Role: Invalid json format !', 406 );
+		}
+
+		$roleJson = json_decode( $userData[ 'role' ], true );
+		
+		if ( ! array_key_exists( 'role', $roleJson ) || ! array_key_exists( 'hash', $roleJson ) )
+		{
+			throw new \Error( 'Role: Invalid json format !', 406 );
+		}
+
+		$roleString = $roleJson[ 'role' ];
+		$roleHash = getRandomString( $roleString );
+		$roleData = [ 'role' => $roleString, 'hash' => $roleHash ];
+		$userData[ 'role' ] = $roleData;
+
+		$session = getComponents( 'session' );
+		$session->set( getConfig( 'session' )->session, $userData );
 
 		# --- Set cookie
 		$userId = ( int ) $userData[ 'id' ];
@@ -217,7 +231,17 @@ class Authentication
 		{
 			getInstance( CookieHandle::class )->setCookie( $userId );
 		}
-		else if ( ! $this->loggedInUpdateData( $userId ) )
+
+		$roleDB = [ 'role' => $roleString, 'hash' => getHashPass( $roleHash ) ];
+		$updateGroupData = [ 'role' => json_encode( $roleDB ) ];
+
+		if ( ! $this->loggedInUpdateData( $userId, $updateGroupData, 'user_group' ) )
+		{
+			getComponents( 'common' )
+				->log_message( 'error', "{ $userId } Logged-in, but update failed" );
+		}
+
+		if ( ! $this->loggedInUpdateData( $userId ) )
 		{
 			getComponents( 'common' )
 				->log_message( 'error', "{ $userId } Logged-in, but update failed" );
@@ -247,8 +271,9 @@ class Authentication
 			return true;
 		}
 
-		$pathFile = getConfig( 'session' )->sessionSavePath;
-		$pathFile .= '/' . getConfig( 'session' )->sessionCookieName . $session_id;
+		$session = getComponents( 'session' );
+		$pathFile = $session->sessionSavePath;
+		$pathFile .= '/' . $session->sessionCookieName . $session_id;
 		$date = getComponents( 'common' )->get_file_info( $pathFile, 'date' );
 
 		if ( empty( $date ) )
@@ -256,7 +281,7 @@ class Authentication
 			return true;
 		}
 
-		$cookieName = getConfig( 'session' )->sessionCookieName . '_test';
+		$cookieName = $session->sessionCookieName . '_test';
 
 		if ( $hash = getComponents( 'cookie' ) ->get_cookie( $cookieName ) )
 		{
@@ -271,7 +296,7 @@ class Authentication
 		}
 
 		$time = ( time() - $date[ 'date' ] );
-		$sessionExp = ( int ) getConfig( 'session' )->sessionExpiration;
+		$sessionExp = ( int ) $session->sessionExpiration;
 
 		if ( $sessionExp > 0 )
 		{
@@ -280,7 +305,7 @@ class Authentication
 
 		if ( $sessionExp === 0 )
 		{
-			return getConfig( 'session' )->sessionTimeToUpdate > $time;
+			return $session->sessionTimeToUpdate > $time;
 		}
 
 		getInstance( Message::class )::$errors[] = 'else';
@@ -292,31 +317,54 @@ class Authentication
 	 * @throws \Exception
 	 * @return boolean
 	 */
-	public function loggedInUpdateData ( int $userId, array $updateData = [] )
+	public function loggedInUpdateData ( int $userId, array $updateData = [], ?string $tableArg = 'user' ) : bool
 	{
+		$common = getComponents( 'common' );
 		if ( $userId <= 0 )
 		{
 			$errArg = [ 'field' => 'user_id', 'param' => $userId ];
 			throw new \Exception(
-				getComponents( 'common' )->lang( 'Validation.greater_than', $errArg ),
+				$common->lang( 'Validation.greater_than', $errArg ),
 				1
 			);
 		}
 
-		$isAssocData = getComponents( 'common' )->isAssocArray( $updateData );
+		$isAssocData = $common->isAssocArray( $updateData );
 
 		if ( ! empty( $updateData ) && ! $isAssocData )
 		{
-			throw new \Exception( getComponents( 'common' )->lang( 'Red2Horse.isAssoc' ), 1 );
+			throw new \Exception( $common->lang( 'Red2Horse.isAssoc' ), 1 );
 		}
 
-		$data = [
-			'last_login' => getComponents( 'request' )->getIPAddress(),
-			'last_activity' => date( 'Y-m-d H:i:s' ),
-			'session_id' => session_id()
-		];
-		$data = array_merge( $data, $updateData );
+		if ( null !== $tableArg )
+		{
+			$configSql = getConfig( 'Sql' );
+			$tables = $configSql->tables[ 'tables' ];
 
-		return getComponents( 'user' )->updateUser( $userId, $data );
+			if ( $tableArg == $tables[ 'user'] )
+			{
+				$data = [
+					'last_login' => getComponents( 'request' )->getIPAddress(),
+					'last_activity' => date( 'Y-m-d H:i:s' ),
+					'session_id' => session_id()
+				];
+				$data = array_merge( $data, $updateData );
+
+				return getComponents( 'user' )->updateUser( $userId, $data );
+			}
+
+			if ( empty( $updateData ) )
+			{
+				return false;
+			}
+
+			if ( $tableArg == $tables[ 'user_group' ] )
+			{
+				return getComponents( 'user' )->updateUserGroup( $userId, $updateData );
+			}
+			// return getComponents( $table )->updateUser( $userId, $updateData );
+		}
+
+		return false;
 	}
 }

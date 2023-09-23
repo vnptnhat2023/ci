@@ -49,7 +49,7 @@ if ( ! function_exists( 'ci_captcha' ) )
 			$sessionData = [
 				'ip_address' => \Config\Services::request() ->getIPAddress(),
 				'captcha_time'  => $imageRendered[ 'time' ],
-				'word' => $imageRendered[ 'word' ],
+				'word' => strtoupper( $imageRendered[ 'word' ] ),
 				'image' => $imageRendered[ 'image' ],
 				'filename' => $imageRendered[ 'filename' ]
 			];
@@ -254,7 +254,8 @@ if ( ! function_exists('ci_create_captcha'))
 		$defaultColor = [
 			'background'	=> array(255,255,255),
 			'border'	=> array(153,102,102),
-			'text'		=> array(204,153,153),
+			// 'text'		=> array(204,153,153),
+			'text'		=> array(204,130,130),
 			'grid'		=> array(255,182,182)
 		];
 		is_array($colors) OR $colors = $defaultColor;#$defaults['colors'];

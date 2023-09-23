@@ -30,6 +30,18 @@ function bgColor () : string
 	}
 	return $arr[ random_int( 0, 5 ) ];
 }
+
+function fontFamily () : string
+{
+	$arr = [
+		'Courier New',
+		'monospace',
+		'garamond',
+		'dubai',
+		'bahnschrift'
+	];
+	return $arr[ random_int( 0, count( $arr ) - 1 ) ] ;
+}
 ?>
 
 <!DOCTYPE html>
@@ -48,7 +60,7 @@ function bgColor () : string
 		<style>
 			body
 			{
-				font-family: cursive, monospace, sans-serif;
+				font-family: <?= fontFamily () ?>, cursive, monospace, sans-serif;
 				/* background-image: url(https://source.unsplash.com/random); */
 				background-color: <?= bgColor() ?>;
 				background-repeat: no-repeat;
@@ -147,6 +159,15 @@ function bgColor () : string
 					<?= form_open( base_url( 'login/forgot' ) , '@submit="submit($event)"' ) ?>
 
 					<div class="form-box">
+
+						<!-- <div class="pull-right">
+							<span class="languages">
+								<a href="<?= current_url() . '/?lang=en' ?>">En</a>
+							</span>&nbsp;
+							<span class="languages">
+								<a href="<?= current_url() . '/?lang=vi' ?>">Vi</a>
+							</span>
+						</div> -->
 
 						<h2 class="form-box-title"><?= r2hI18( 'resetPassword' ) ?></h2>
 

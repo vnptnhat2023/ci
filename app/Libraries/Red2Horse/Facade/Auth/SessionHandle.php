@@ -16,6 +16,8 @@ class SessionHandle
 {
 	use TraitSingleton;
 
+	private function __construct () {}
+
 	public function regenerateSession ( array $userData ) : bool
 	{
 		if ( ! getInstance( Authentication::class )->isLogged() )

@@ -5,14 +5,10 @@ namespace Red2Horse\Mixins\Traits;
 
 use Red2Horse\Mixins\Classes\Registry\RegistryClass___;
 
-/**
- * Use with TraitRegistry::class only
- */
 trait TraitSingleton
 {
-
-	/** @return static */
-	final public static function getInstance( $params = null, ...$args )
+	/** @return static|self */
+	final public static function getInstance( $params = null, ...$args ) : object
 	{
 		if ( $data = RegistryClass___::get( self::class ) )
 		{

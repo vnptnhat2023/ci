@@ -11,8 +11,8 @@ class CallClass
 {
 	use TraitSingleton;
 
-    public bool $traitUseBefore = false;
-    public bool $traitUseAfter = false;
+    public bool $traitUseBefore = true;
+    public bool $traitUseAfter = true;
     public string $traitBeforePrefix = 'R2h_before_';
     public string $traitAfterPrefix = 'R2h_after_';
 

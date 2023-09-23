@@ -10,8 +10,6 @@ use Red2Horse\Mixins\
     function Functions\ComponentNamespace
 };
 
-use function Red2Horse\Mixins\Functions\getConfig;
-
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
 final class RegistryClass extends RegistryClass___
@@ -48,7 +46,7 @@ final class RegistryClass extends RegistryClass___
     }
 
     /**
-     * @return object (new $this->className)
+     * @return self|\Red2Horse\Mixins\Traits\TraitSingleton
      */
     public function getInstance ()
     {
@@ -69,6 +67,7 @@ final class RegistryClass extends RegistryClass___
     /**
      * @param string $name name only ( not namespace )
      * @param bool $getShared adapter only
+     * @return object|\Red2Horse\Mixins\Traits\TraitSingleton
      */
     public function getComponents () : object
     {
@@ -126,11 +125,6 @@ final class RegistryClass extends RegistryClass___
 
                 public function __construct( string $className, array $arguments )
                 {
-                    // $this->traitUseBefore = $arguments[ 'traitCallback' ][ 'before' ]
-                    //     ?? getConfig( 'CallClass' )->traitUseBefore;
-                    // $this->traitUseAfter = $arguments[ 'traitCallback' ][ 'after' ]
-                    //     ?? getConfig( 'CallClass' )->traitUseAfter;
-
                     $this->run( $className );
                 }
             };

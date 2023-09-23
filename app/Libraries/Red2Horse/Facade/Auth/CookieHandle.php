@@ -19,6 +19,8 @@ class CookieHandle
 {
 	use TraitSingleton;
 
+	private function __construct () {}
+
 	public function regenerateCookie () : void
 	{
 		$cookieValue = password_hash( session_id(), PASSWORD_DEFAULT );
@@ -30,7 +32,7 @@ class CookieHandle
 
 	public function cookieHandler () : bool
 	{
-		if ( ! getConfig()->useRememberMe )
+		if ( ! getConfig( 'BaseConfig' )->useRememberMe )
 		{
 			return false;
 		}
@@ -79,7 +81,7 @@ class CookieHandle
 		# Check status
 		if ( in_array( $user[ 'status' ] , [ 'inactive', 'banned' ] ) )
 		{
-			getInstance( Message::class ) ->denyStatus( $user[ 'status' ], false, false );
+			getInstance( Message::class ) ->errorAccountStatus( $user[ 'status' ], false, false );
 			return $incorrectCookie();
 		}
 
@@ -88,7 +90,7 @@ class CookieHandle
 
 		if ( ! $isMultiLogin )
 		{
-			getInstance( Message::class )->denyMultiLogin( true, [], false );
+			getInstance( Message::class )->errorMultiLogin( true, [], false );
 			return false;
 		}
 
