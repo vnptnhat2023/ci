@@ -50,19 +50,33 @@ final class Authorization
 		}
 
 		$configTables = getConfig( 'Sql' )->tables;
-		$usernameData = $configTables[ $configTables[ 'tables' ][ 'user' ] ][ 'username' ];
-		$usernameSess = $this->_getUserData( [ $usernameData ] );
+		$userTable = $configTables[ $configTables[ 'tables' ][ 'user' ] ];
+		$usernameId = $userTable[ 'id' ];
+		/** @var array<int, int> @usernameSess */
+		$usernameSess = $this->_getUserData( [ $usernameId ] );
 
 		if ( empty( $usernameSess[ 0 ] ) )
 		{
 			throw new \Error( 'Unauthorized' , 401 );
 		}
 
-		$userDataArgs = [ $usernameData => $usernameSess[ 0 ] ];
-		$userData = getComponents( 'user' )->getUserWithGroup(
-			\Red2Horse\Mixins\Functions\sqlGetColumn( [ 'id' ] ),
-			$userDataArgs
-		);
+		$userDataArgs = [ "{$configTables[ 'tables' ][ 'user' ]}.{$usernameId}" => $usernameSess[ 0 ] ];
+		$cachePath = getConfig( 'cache' )->getCacheName( 'get_user_with_group_user_id' );
+		getComponents( 'cache' )->cacheAdapterConfig->storePath .= $cachePath;
+
+		if ( ! $cacheData = getComponents( 'cache' )->get( 'get_user_with_group_user_id' ) )
+		{
+			/** @var array $userData */
+			$userData = getComponents( 'user' )->getUserWithGroup(
+				\Red2Horse\Mixins\Functions\sqlGetColumn( [ 'id'  => 'user_id' ] ),
+				$userDataArgs
+			);
+
+			$cacheData[ $usernameSess[ 0 ] ] = $userData;
+			getComponents( 'cache' )->set( 'get_user_with_group_user_id', $cacheData, 2592000 );
+		}
+
+		$userData = $cacheData[ $usernameSess[ 0 ] ];
 
 		if ( ! getComponents( 'common' )->valid_json( $userData[ 'role' ] ) )
 		{

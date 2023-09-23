@@ -10,9 +10,9 @@ return [
 	'inPermission' => '{field} không chứa trong danh sách quyền.',
 
 	'homeLink' => $homeLink,
-	'login' => 'Đăng nhập - NM',
+	'login' => 'Đăng nhập - lnbl',
 	'logout' => 'Thoát',
-	'resetPassword' => 'Quên mật khẩu - NM',
+	'resetPassword' => 'Quên mật khẩu - lnbl',
 
 	'number' => 'một ít',
 

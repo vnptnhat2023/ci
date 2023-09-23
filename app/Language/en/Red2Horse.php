@@ -4,9 +4,9 @@ $homeLink = sprintf( '%s', anchor( base_url(), 'Back to home.' ) );
 
 return [
 	'homeLink' => $homeLink,
-	'login' => 'login ln',
-	'logout' => 'logout ln',
-	'resetPassword' => 'reset password ln',
+	'login' => 'login lnbl',
+	'logout' => 'logout lnbl',
+	'resetPassword' => 'reset password lnbl',
 
 	'errorCookieUpdate' => 'Validated cookie, when update userId: {0}',
 	'errorNeedLoggedIn' => 'You have not login yet. ',

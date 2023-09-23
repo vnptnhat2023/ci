@@ -69,16 +69,27 @@ function sqlGetColumn ( array $userColumns, bool $join = true ) : string
     $tableUser = $configSql->tables[ 'tables' ][ 'user' ];
     $userFields = $configSql->tables[ $tableUser ];
 
-    $diffs = array_diff( $userColumns, array_keys( $userFields ) );
+    $test = ( getComponents( 'common' )->isAssocArray( $userColumns ) )
+        ? array_keys( $userColumns )
+        : $userColumns;
+
+    $diffs = array_diff( $test, array_keys( $userFields ) );
     if ( ! empty( $diffs ) )
     {
         throw new \Error( 'Not Acceptable' , 406 );
-    }
+    } 
 
     $uCols = '';
-    foreach ( $userColumns as $value )
+    foreach ( $userColumns as $key => $value )
     {
-        $uCols .= sprintf( '%s.%s,', $tableUser, $value );
+        if ( is_string( $key ) )
+        {
+            $uCols .= sprintf( '%s.%s as %s,', $tableUser, $key, $value );
+        }
+        else
+        {
+            $uCols .= sprintf( '%s.%s,', $tableUser, $value );
+        }
     }
 
     if ( $join )
@@ -95,7 +106,9 @@ function sqlGetColumn ( array $userColumns, bool $join = true ) : string
     }
 
     $userGroup = implode( ',', $columns );
-    return $uCols . $userGroup;
+    $str = $uCols . $userGroup;
+
+    return $str;
 }
 
 function sqlGetColumns ( array $addColumns = [], bool $join = true ) : string

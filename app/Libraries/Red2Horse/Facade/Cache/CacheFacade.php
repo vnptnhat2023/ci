@@ -13,10 +13,17 @@ class CacheFacade implements CacheFacadeInterface
 	use TraitSingleton;
 
 	protected CacheFacadeInterface $cache;
+	public object $cacheAdapterConfig;
 
 	public function __construct ( CacheFacadeInterface $cache )
 	{
 		$this->cache = $cache;
+		$this->cacheAdapterConfig = $cache->getCacheAdapterConfig();
+	}
+
+	public function getCacheAdapterConfig() : object
+	{
+		return $this->cacheAdapterConfig;
 	}
 
 	public function get ( string $key )
