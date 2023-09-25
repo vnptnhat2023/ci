@@ -7,7 +7,8 @@ use Red2Horse\Mixins\Traits\TraitSingleton;
 use function Red2Horse\Mixins\Functions\
 {
 	getComponents,
-	getInstance
+    getField,
+    getInstance
 };
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
@@ -25,13 +26,15 @@ class SessionHandle
 			return false;
 		}
 
+		$userID = getField( 'id', 'user' );
 		$isUpdated = getComponents( 'user' ) ->updateUser(
-			$userData[ 'id' ],
-			[ 'session_id' => session_id() ]
+			$userID,
+			[ getField( 'session_id', 'user' ) => session_id() ]
 		);
 
-		if ( ! $isUpdated ) {
-			$errStr = "The session_id: {$userData[ 'id' ]} update failed";
+		if ( ! $isUpdated )
+		{
+			$errStr = "The session_id: {$userID} update failed";
 			getComponents( 'common' ) ->log_message( 'error', $errStr );
 
 			return false;

@@ -31,6 +31,11 @@ class CacheFacade implements CacheFacadeInterface
 		return $this->cache->get( $key );
 	}
 
+	public function delete ( string $key )
+	{
+		return $this->cache->delete( $key );
+	}
+
 	public function set ( string $key, $value, $timeToLife = 86400 )
 	{
 		return $this->cache->set( $key, $value, $timeToLife );

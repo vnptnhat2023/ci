@@ -8,7 +8,9 @@ use function Red2Horse\Mixins\Functions\
 {
     getComponents,
     getConfig,
+    getField,
     getInstance,
+    getTable,
     getVerifyPass
 };
 
@@ -40,7 +42,6 @@ final class Authorization
 	/**
 	 * @param array $args
 	 * @param string $k [ or, and, except; Default or ]
-	 * @throws \Error
 	 */
 	private function _run ( array $args, string $condition = 'or' ) : bool
 	{
@@ -49,45 +50,66 @@ final class Authorization
 			return false;
 		}
 
-		$configTables = getConfig( 'Sql' )->tables;
-		$userTable = $configTables[ $configTables[ 'tables' ][ 'user' ] ];
-		$usernameId = $userTable[ 'id' ];
 		/** @var array<int, int> @usernameSess */
-		$usernameSess = $this->_getUserData( [ $usernameId ] );
+		$usernameSess = $this->_getUserData( [ getField( 'id', 'user' ) ] );
 
 		if ( empty( $usernameSess[ 0 ] ) )
 		{
-			throw new \Error( 'Unauthorized' , 401 );
+			getComponents( 'common' )->log_message( 'error', __FILE__ . __LINE__ . 'Not logged in, ...' );
+			return false;
 		}
 
-		$userDataArgs = [ "{$configTables[ 'tables' ][ 'user' ]}.{$usernameId}" => $usernameSess[ 0 ] ];
-		$cachePath = getConfig( 'cache' )->getCacheName( 'get_user_with_group_user_id' );
-		getComponents( 'cache' )->cacheAdapterConfig->storePath .= $cachePath;
+		$userDataArgs = [
+			sprintf( '%s.%s', getTable( 'user' ), getField( 'id', 'user' ) ) => $usernameSess[ 0 ],
+		];
 
-		if ( ! $cacheData = getComponents( 'cache' )->get( 'get_user_with_group_user_id' ) )
+		$cacheConfig = getConfig( 'cache' );
+		$cachePath = $cacheConfig->getCacheName( $cacheConfig->userGroupId );
+		$cacheComponent = getComponents( 'cache' );
+		$cacheComponent->cacheAdapterConfig->storePath .= $cachePath;
+
+		if ( ! $cacheConfig->enabled )
 		{
-			/** @var array $userData */
-			$userData = getComponents( 'user' )->getUserWithGroup(
-				\Red2Horse\Mixins\Functions\sqlGetColumn( [ 'id'  => 'user_id' ] ),
+			$cacheComponent->delete( $cacheConfig->userGroupId );
+		}
+
+		$userData = $cacheComponent->get( $cacheConfig->userGroupId );
+
+		if ( ! $userData )
+		{
+			/** @var array $userDB */
+			$userDB = getComponents( 'user' )->getUserWithGroup(
+				\Red2Horse\Mixins\Functions\sqlGetColumn( [ getField( 'id', 'user' )  => 'user_id' ] ),
 				$userDataArgs
 			);
 
-			$cacheData[ $usernameSess[ 0 ] ] = $userData;
-			getComponents( 'cache' )->set( 'get_user_with_group_user_id', $cacheData, 2592000 );
+			unset( $userData );
+			$userData[ $usernameSess[ 0 ] ] = json_decode( $userDB[ getField( 'role', 'user_group' ) ], true );
+			/** Set cache from DB */
+			$cacheComponent->set( $cacheConfig->userGroupId, $userData, $cacheConfig->cacheTTL );
 		}
+		
+		$userData = $userData[ $usernameSess[ 0 ] ];
 
-		$userData = $cacheData[ $usernameSess[ 0 ] ];
-
-		if ( ! getComponents( 'common' )->valid_json( $userData[ 'role' ] ) )
+		if ( empty( $userData ) )
 		{
-			throw new \Error( 'Invalid json format .', 406 );
+			getComponents( 'common' )->log_message( 
+				'error', __FILE__ . __LINE__ . 'Invalid data format.'
+			);
+
+			return false;
 		}
 
-		$roleData = json_decode( $userData[ 'role' ], true );
-		if ( ! getVerifyPass( $this->sessionData[ 'hash' ], $roleData[ 'hash' ] ) )
+		if ( ! getVerifyPass( $this->sessionData[ 'hash' ], $userData[ 'hash' ] ) )
 		{
-			throw new \Error( 'Unauthorized', 401 );
+			getComponents( 'common' )->log_message( 
+				'error', __FILE__ . __LINE__ . 'Unauthorized.'
+			);
+
+			return false;
 		}
+
+		unset( $this->sessionData[ 'hash' ] );
 
 		switch ( $condition )
 		{

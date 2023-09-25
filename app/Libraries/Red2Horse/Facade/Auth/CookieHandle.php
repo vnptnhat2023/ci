@@ -1,16 +1,16 @@
 <?php
 
 declare( strict_types = 1 );
-
 namespace Red2Horse\Facade\Auth;
 
 use Red2Horse\Mixins\Traits\TraitSingleton;
-
 use function Red2Horse\Mixins\Functions\
 {
 	getComponents,
     getConfig,
-    getInstance
+    getInstance,
+    getUserField,
+    getUserGroupField
 };
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
@@ -62,7 +62,7 @@ class CookieHandle
 
 		$user = getComponents( 'user' ) ->getUserWithGroup(
 			\Red2Horse\Mixins\Functions\sqlGetColumns(),
-			[ 'selector' => $selector ]
+			[ getUserField( 'selector' ) => $selector ]
 		);
 
 		if ( empty( $user ) )
@@ -70,8 +70,8 @@ class CookieHandle
 			return $incorrectCookie();
 		}
 
-		$isValid = hash_equals( $user[ 'token' ], hash( 'sha256', $token ) );
-		$isUserIp = $user[ 'last_login' ] == getComponents( 'request' )->getIPAddress();
+		$isValid = hash_equals( $user[ getUserField( 'token' ) ], hash( 'sha256', $token ) );
+		$isUserIp = $user[ getUserField( 'last_login' ) ] == getComponents( 'request' )->getIPAddress();
 
 		if ( ! $isValid || ! $isUserIp )
 		{
@@ -79,14 +79,16 @@ class CookieHandle
 		}
 
 		# Check status
-		if ( in_array( $user[ 'status' ] , [ 'inactive', 'banned' ] ) )
+		if ( in_array( $user[ getUserField( 'status' ) ] , [ 'inactive', 'banned' ] ) )
 		{
-			getInstance( Message::class ) ->errorAccountStatus( $user[ 'status' ], false, false );
+			getInstance( Message::class )->errorAccountStatus(
+				$user[ getUserField( 'status' ) ], false, false
+			);
 			return $incorrectCookie();
 		}
 
 		# @Todo: declare inside the config file: is using this feature
-		$isMultiLogin = getInstance( Authentication::class ) ->isMultiLogin( $user[ 'session_id' ] );
+		$isMultiLogin = getInstance( Authentication::class ) ->isMultiLogin( $user[ getUserField( 'session_id' ) ] );
 
 		if ( ! $isMultiLogin )
 		{
@@ -96,15 +98,15 @@ class CookieHandle
 
 		# Refresh cookie
 		$this->setCookie(
-			(int) $user[ 'id' ],
+			(int) $user[ getUserField( 'id' ) ],
 			[],
-			getComponents( 'common' )->lang('errorCookieUpdate', [ $user[ 'id' ] ])
+			getComponents( 'common' )->lang('errorCookieUpdate', [ $user[ getUserField( 'id' ) ] ])
 		);
 
-		$isJson = getComponents( 'common' )->valid_json( $user[ 'permission' ] );
+		$isJson = getComponents( 'common' )->valid_json( $user[ getUserGroupField( 'permission' ) ] );
 
-		$user[ 'permission' ] = $isJson
-			? json_decode( $user[ 'permission' ], true )
+		$user[ getUserGroupField( 'permission' ) ] = $isJson
+			? json_decode( $user[ getUserGroupField( 'permission' ) ], true )
 			: [];
 
 		getComponents( 'session' )->set( getConfig( 'session' )->session, $user );

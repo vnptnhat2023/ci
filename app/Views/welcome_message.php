@@ -208,9 +208,10 @@
 				<button onclick="toggleMenu();">&#9776;</button>
 			</li>
 			<li class="menu-item hidden"><a href="#">Home</a></li>
-			<li class="menu-item hidden"><a href="/login">Login</a></li>
-			<li class="menu-item hidden"><a href="/login/logout">Logout</a></li>
-			<li class="menu-item hidden"><a href="/login/forgot">Reset Password</a></li>
+			<li class="menu-item hidden"><a href="<?= base_url('/backend'); ?>">Backend</a></li>
+			<li class="menu-item hidden"><a href="<?= base_url('/login'); ?>">Login</a></li>
+			<li class="menu-item hidden"><a href="<?= base_url('/login/logout'); ?>">Logout</a></li>
+			<li class="menu-item hidden"><a href="<?= base_url('/login/forgot'); ?>">Reset Password</a></li>
 			<li class="menu-item hidden"><a href="http://localhost/docs/" target="_blank">Docs</a>
 			</li>
 			<li class="menu-item hidden"><a href="https://forum.codeigniter.com/" target="_blank">Community</a></li>

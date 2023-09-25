@@ -9,6 +9,7 @@ interface CacheFacadeInterface
 	public function getCacheAdapterConfig () : object;
 
 	public function get ( string $key );
+	public function delete ( string $key );
 
 	public function set ( string $key, $value, int $timeToLife = 86400 );
 

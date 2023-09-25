@@ -24,6 +24,11 @@ class CacheAdapter implements CacheAdapterInterface
 		return cache()->get( $key );
 	}
 
+	public function delete ( string $key )
+	{
+		return cache()->delete( $key );
+	}
+
 	public function set ( string $key, $value, int $timeToLife = 86400 )
 	{
 		return cache()->save( $key, $value, $timeToLife );

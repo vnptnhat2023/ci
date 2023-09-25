@@ -11,7 +11,11 @@ use function Red2Horse\Mixins\Functions\
     getConfig,
     getHashPass,
     getInstance,
-    getRandomString
+    getRandomString,
+    getTable,
+	getField,
+    getUserField,
+    getUserGroupField
 };
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
@@ -141,12 +145,12 @@ class Authentication
 	private function loginAfterValidation () : array
 	{
 		$userDataArgs = [
-			'user.username' => self::$username,
-			'user.email' => self::$username
+			sprintf( '%s.%s', getTable( 'user'), getUserField( 'username' ) ) => self::$username,
+			sprintf( '%s.%s', getTable( 'user'), getUserField( 'email' ) ) => self::$username
 		];
 
 		$userData = getComponents( 'user' )->getUserWithGroup(
-			\Red2Horse\Mixins\Functions\sqlGetColumns( [ 'password' ] ),
+			\Red2Horse\Mixins\Functions\sqlGetColumns( [ getUserField( 'password' ) ] ),
 			$userDataArgs
 		);
 
@@ -158,29 +162,29 @@ class Authentication
 		}
 
 		$verifyPassword = getInstance( Password::class )
-			->getVerifyPass( self::$password, $userData[ 'password' ] );
+			->getVerifyPass( self::$password, $userData[ getUserField( 'password' ) ] );
 
 		if ( ! $verifyPassword )
 		{
 			return [ 'error' => $message->errorInformation() ];
 		}
 
-		if ( 'active' !== $userData[ 'status' ] )
+		if ( 'active' !== $userData[ getUserField( 'status' ) ] )
 		{
-			return [ 'error' => $message->errorAccountStatus( $userData['status'] ) ];
+			return [ 'error' => $message->errorAccountStatus( $userData[ getUserField( 'status' ) ] ) ];
 		}
 
-		if ( ! $this->isMultiLogin( $userData[ 'session_id' ] ) )
+		if ( ! $this->isMultiLogin( $userData[ getUserField( 'session_id' ) ] ) )
 		{
 			$message->errorMultiLogin( true, [], false );
 			return [ 'error' => false ];
 		}
 
-		unset( $userData[ 'password' ] );
+		unset( $userData[ getUserField( 'password' ) ] );
 
-		$isValidJson = getComponents( 'common' )->valid_json( $userData[ 'permission' ] );
-		$userData[ 'permission' ] = ( $isValidJson )
-			? json_decode( $userData[ 'permission' ], true )
+		$isValidJson = getComponents( 'common' )->valid_json( $userData[ getUserGroupField( 'permission' ) ] );
+		$userData[ getUserGroupField( 'permission' ) ] = ( $isValidJson )
+			? json_decode( $userData[ getUserGroupField( 'permission' ) ], true )
 			: [];
 
 		return $userData;
@@ -200,60 +204,105 @@ class Authentication
 			return false;
 		}
 
-		# --- Set response success to true
+		/** Set response success to true */
 		$this->setLoggedInSuccess( $userData );
 
-		# --- Set session
-		if ( ! getComponents( 'common' )->valid_json( $userData[ 'role' ] ) )
+		$userData[ getUserField( 'id' ) ] = ( int ) $userData[ getUserField( 'id' ) ];
+		$userId = $userData[ getUserField( 'id' ) ];
+
+		if ( getComponents( 'cache' )->isSupported() )
 		{
-			throw new \Error( 'Role: Invalid json format !', 406 );
+			$this->roleHandle( $userData );
+		}
+		else
+		{
+			getComponents( 'session' )->set( getConfig( 'session' )->session, $userData );
 		}
 
-		$roleJson = json_decode( $userData[ 'role' ], true );
-		
-		if ( ! array_key_exists( 'role', $roleJson ) || ! array_key_exists( 'hash', $roleJson ) )
-		{
-			throw new \Error( 'Role: Invalid json format !', 406 );
-		}
-
-		$roleString = $roleJson[ 'role' ];
-		$roleHash = getRandomString( $roleString );
-		$roleData = [ 'role' => $roleString, 'hash' => $roleHash ];
-		$userData[ 'role' ] = $roleData;
-
-		$session = getComponents( 'session' );
-		$session->set( getConfig( 'session' )->session, $userData );
-
-		# --- Set cookie
-		$userId = ( int ) $userData[ 'id' ];
-
+		/** Set cookie */
 		if ( self::$rememberMe )
 		{
 			getInstance( CookieHandle::class )->setCookie( $userId );
 		}
 
-		$roleDB = [ 'role' => $roleString, 'hash' => getHashPass( $roleHash ) ];
-		$updateGroupData = [ 'role' => json_encode( $roleDB ) ];
-
-		if ( ! $this->loggedInUpdateData( $userId, $updateGroupData, 'user_group' ) )
-		{
-			getComponents( 'common' )
-				->log_message( 'error', "{ $userId } Logged-in, but update failed" );
-		}
-
+		/** Sql update */
 		if ( ! $this->loggedInUpdateData( $userId ) )
 		{
 			getComponents( 'common' )
 				->log_message( 'error', "{ $userId } Logged-in, but update failed" );
 		}
 
+		/** Generate cookie */
 		getInstance( CookieHandle::class )->regenerateCookie();
-		# --- End cookie set
 
-		# --- Clean old throttle attempts
+		/** Clean old throttle attempts */
 		getComponents( 'throttle' )->cleanup();
 
 		return true;
+	}
+
+	private function roleHandle ( array $userData ) : void
+	{
+		/** DB or session */
+		if ( ! getComponents( 'common' )->valid_json( $userData[ getUserGroupField( 'role' ) ] ) )
+		{
+			throw new \Error( 'Role: Invalid json format !', 406 );
+		}
+
+		$roleJson = json_decode( $userData[ getUserGroupField( 'role' ) ], true );
+		
+		if ( ! array_key_exists( getUserGroupField( 'role' ), $roleJson ) || ! array_key_exists( 'hash', $roleJson ) )
+		{
+			throw new \Error( 'Role: Invalid json format !', 406 );
+		}
+		/** end */
+
+		/** Cache config */
+		$cacheConfig = getConfig( 'cache' );
+		$cacheName = $cacheConfig->userGroupId;
+		$cachePath = $cacheConfig->getCacheName( $cacheName );
+
+		$cacheComponent = getComponents( 'cache' );
+		$cacheComponent->cacheAdapterConfig->storePath .= $cachePath;
+		/** End cache config */
+
+		$roleField = getUserGroupField( 'role' );
+		// if ( $cacheConfig->enabled && $cacheData = $cacheComponent->get( $cacheName ) )
+		// {
+		// 	$sessId = ( int ) getField( 'id', 'user' );
+		// 	$userData[ $roleField ] = $cacheData[ $sessId ];
+		// 	getComponents( 'session' )->set( getConfig( 'session' )->session, $userData );
+		// }
+		// else
+		// {
+			$roleString = $roleJson[ $roleField ];
+			$randomString = getRandomString( $roleString );
+			$roleData = [ $roleField => $roleString, 'hash' => $randomString ];
+			$userData[ $roleField ] = $roleData;
+
+			$roleDB = [ $roleField => $roleString, 'hash' => getHashPass( $randomString ) ];
+			$updateGroupData = [ $roleField => json_encode( $roleDB ) ];
+
+			$userId = $userData[ getField( 'id', 'user' ) ];
+
+			if ( $cacheConfig->enabled && $cachedData = $cacheComponent->get( $cacheName ) )
+			{
+				$cachedData[ $userId ] = $roleDB;
+				$cacheComponent->set( $cacheName, $cachedData, $cacheConfig->cacheTTL );
+			}
+			else
+			{
+				if ( ! $this->loggedInUpdateData( $userId, $updateGroupData, getTable( 'user_group' ) ) )
+				{
+					getComponents( 'common' )
+						->log_message( 'error', "{ $userId } Logged-in, but update failed" );
+
+					throw new \Error( 'Authentication cannot updated.', 406 );
+				}
+			}
+
+			getComponents( 'session' )->set( getConfig( 'session' )->session, $userData );
+		// }
 	}
 
 	public function setLoggedInSuccess ( array $userData ) : void
@@ -261,7 +310,7 @@ class Authentication
 		$message = getInstance( Message::class );
 		$message::$successfully = true;
 		$message::$success[] = getComponents( 'common' )
-			->lang( 'Red2Horse.successLoggedWithUsername', [ $userData[ 'username' ] ] );
+			->lang( 'Red2Horse.successLoggedWithUsername', [ $userData[ getUserField( 'username' ) ] ] );
 	}
 
 	public function isMultiLogin ( ?string $session_id = null ) : bool
@@ -320,6 +369,7 @@ class Authentication
 	public function loggedInUpdateData ( int $userId, array $updateData = [], ?string $tableArg = 'user' ) : bool
 	{
 		$common = getComponents( 'common' );
+
 		if ( $userId <= 0 )
 		{
 			$errArg = [ 'field' => 'user_id', 'param' => $userId ];
@@ -338,16 +388,14 @@ class Authentication
 
 		if ( null !== $tableArg )
 		{
-			$configSql = getConfig( 'Sql' );
-			$tables = $configSql->tables[ 'tables' ];
-
-			if ( $tableArg == $tables[ 'user'] )
+			if ( $tableArg == getTable( 'user' ) )
 			{
 				$data = [
-					'last_login' => getComponents( 'request' )->getIPAddress(),
-					'last_activity' => date( 'Y-m-d H:i:s' ),
-					'session_id' => session_id()
+					getUserField( 'last_login' ) 	=> getComponents( 'request' )->getIPAddress(),
+					getUserField( 'last_activity' ) => date( 'Y-m-d H:i:s' ),
+					getUserField( 'session_id' ) 	=> session_id()
 				];
+
 				$data = array_merge( $data, $updateData );
 
 				return getComponents( 'user' )->updateUser( $userId, $data );
@@ -358,11 +406,10 @@ class Authentication
 				return false;
 			}
 
-			if ( $tableArg == $tables[ 'user_group' ] )
+			if ( $tableArg == getTable( 'user_group' ) )
 			{
 				return getComponents( 'user' )->updateUserGroup( $userId, $updateData );
 			}
-			// return getComponents( $table )->updateUser( $userId, $updateData );
 		}
 
 		return false;

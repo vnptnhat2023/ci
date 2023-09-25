@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Red2Horse\Adapter\CodeIgniter\Database;
 
 use function Red2Horse\Mixins\Functions\getConfig;
+use function Red2Horse\Mixins\Functions\getTable;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
@@ -26,8 +27,7 @@ class UserAdapter implements UserAdapterInterface
 	 */
 	public function updateUser ( $where, array $data ) : bool
 	{
-		$config = getConfig( 'Sql' );
-		$tableUser = $config->tables[ 'tables' ][ 'user' ];
+		$tableUser = getTable( 'user' );
 		$model = model( UserModelAdapter::class );
 		$model->table = $tableUser;
 
@@ -36,8 +36,7 @@ class UserAdapter implements UserAdapterInterface
 
 	public function updateUserGroup ( $where, array $data ) : bool
 	{
-		$config = getConfig( 'Sql' );
-		$tableUserGroup = $config->tables[ 'tables' ][ 'user_group' ];
+		$tableUserGroup = getTable( 'user_group' );
 		$model = model( UserGroupModelAdapter::class );
 		$model->table = $tableUserGroup;
 

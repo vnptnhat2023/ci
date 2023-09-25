@@ -9,7 +9,8 @@ use function Red2Horse\Mixins\Functions\
 {
 	getComponents,
     getConfig,
-    getInstance
+    getInstance,
+	getUserField
 };
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
@@ -35,7 +36,7 @@ class ResetPassword
 		$message::$successfully = true;
 		$message::$success[] = getComponents( 'common' ) ->lang(
 			'Red2Horse.successLoggedWithUsername',
-			[ $userData[ 'username' ] ]
+			[ $userData[ getUserField( 'username' ) ] ]
 		);
 	}
 
@@ -44,7 +45,7 @@ class ResetPassword
 	 */
 	public function resetPasswordSuccess ( array $userData ) : void
 	{
-		if ( ! $userEmail = explode( '@', $userData[ 'email' ] ) )
+		if ( ! $userEmail = explode( '@', $userData[ getUserField( 'email' ) ] ) )
 		{
 			getComponents( 'common' )->log_message( 'error', "{$userEmail[ 0 ]} email INVALID !" );
 			throw new \ErrorException( 'Invalid Email', 403 );
@@ -56,7 +57,7 @@ class ResetPassword
 		$message::$success[] = getComponents( 'common' )
 			->lang(
 				'Red2Horse.successResetPassword',
-				[ $userData[ 'username' ], $email ]
+				[ $userData[ getUserField( 'username' ) ], $email ]
 			);
 	}
 
@@ -100,8 +101,8 @@ class ResetPassword
 		$hashPw = getInstance( Password::class )->getHashPass( $randomPw );
 
 		$updatePassword = getComponents( 'user' )->updateUser(
-			[ 'username' => $find_user[ 'username' ] ],
-			[ 'password' => $hashPw ]
+			[ getUserField( 'username' ) => $find_user[ getUserField( 'username' ) ] ],
+			[ getUserField( 'password' ) => $hashPw ]
 		);
 
 		$error = 'The system is busy, please come back later';
@@ -115,7 +116,7 @@ class ResetPassword
 		if ( ! getInstance( Notification::class ) ->mailSender( $randomPw ) )
 		{
 			$message::$errors[] = $error;
-			$common->log_message( 'error' , "Cannot sent email: {$find_user[ 'username' ]}" );
+			$common->log_message( 'error' , "Cannot sent email: {$find_user[ getUserField( 'username' ) ]}" );
 			return false;
 		}
 

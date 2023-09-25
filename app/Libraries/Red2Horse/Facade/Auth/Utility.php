@@ -17,6 +17,8 @@ class Utility
 {
 	use TraitSingleton;
 
+	protected array $type = [ 'login', 'forgot', 'forget' ];
+
 	private function __construct () {}
 
 	public function typeChecker
@@ -28,12 +30,12 @@ class Utility
 		string $c = null
 	) : bool
 	{
-		if ( ! in_array( $type, [ 'login', 'forget' ] ) )
+		if ( ! in_array( $type, $this->type ) )
 		{
-			throw new \Exception( 'Invalid type checker."', 403 );
+			throw new \Error( 'Invalid type checker."', 403 );
 		}
 
-		$requestType = ( $type === 'login' ) ? 'password' : 'email';
+		$requestType = ( $type == 'login' ) ? 'password' : 'email';
 
 		$isNullUsername = null === $u;
 		$isNullType = null === $requestType;
@@ -44,7 +46,7 @@ class Utility
 
 		if ( $authentication->isLogged() || $authentication->isLogged( true ) )
 		{
-			$type === 'forget'
+			$type == 'forget'
 				? getInstance( ResetPassword::class )
 					->alreadyLoggedIn( $authentication->getUserdata() )
 				: $authentication
@@ -74,24 +76,4 @@ class Utility
 			? $authentication->loginHandler()
 			: getInstance( ResetPassword::class )->forgetHandler( $u, $e, $c );
 	}
-
-	// public function trigger ( \Closure $closure, string $event, array $eventData )
-	// {
-	// 	if ( ! isset( $closure->{$event} ) || empty( $closure->{$event} ) )
-	// 	{
-	// 		return $eventData;
-	// 	}
-
-	// 	foreach ( $closure->{$event} as $callback )
-	// 	{
-	// 		if ( ! method_exists( $closure, $callback ) )
-	// 		{
-	// 			throw new \Exception( 'Invalid Method Triggered', 403 );
-	// 		}
-
-	// 		$eventData = $closure->{ $callback }( $eventData );
-	// 	}
-
-	// 	return $eventData;
-	// }
 }

@@ -1,20 +1,53 @@
 <?php
 
-declare( strict_types=1 );
+declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Functions;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
-function sqlFromUserGroups () : string
+function getTable ( string $key = 'user_group' ) : string
 {
     $configSql = getConfig( 'sql' );
-    $tableUserGroupName = $configSql->tables[ 'tables' ][ 'user_group' ];
-    $userGroup = $configSql->tables[ $tableUserGroupName ];
+    $tableUser = $configSql->tables[ 'tables' ][ $key ];
+    return $tableUser;
+}
 
+/** @return mixed */
+function getFields ( string $key = 'user_group' )
+{
+    $configSql = getConfig( 'sql' );
+    $key = $configSql->tables[ 'tables' ][ $key ];
+    $fields = $configSql->tables[ $key ];
+    return $fields;
+}
+
+/** @return mixed */
+function getField ( string $key, string $table = 'user_group' )
+{
+    $table = getTable( $table );
+    return getConfig( 'sql' )->tables[ $table ][ $key ];
+}
+
+function getUserField ( string $key )
+{
+    $table = getTable( 'user' );
+    return getConfig( 'sql' )->tables[ $table ][ $key ];
+}
+
+function getUserGroupField ( string $key )
+{
+    $table = getTable( 'user_group' );
+    return getConfig( 'sql' )->tables[ $table ][ $key ];
+}
+
+function sqlFromUserGroups () : string
+{
+    $tableUserGroup = getTable( 'user_group' );
+    $userGroup = getFields( 'user_group' );
     extract( $userGroup );
 
-    $userGroupSql = "DROP TABLE IF EXISTS `{$tableUserGroupName}`;
-    CREATE TABLE IF NOT EXISTS `{$tableUserGroupName}` (
+    $userGroupSql = "DROP TABLE IF EXISTS `{$tableUserGroup}`;
+    CREATE TABLE IF NOT EXISTS `{$tableUserGroup}` (
     `{$id[ 0 ]}` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
     `{$name[ 0 ]}` varchar(64) NOT NULL DEFAULT 'guest',
     `{$role}` varchar(64) NOT NULL DEFAULT 'unknown',
@@ -28,13 +61,12 @@ function sqlFromUserGroups () : string
 
 function sqlFromUsers () : string
 {
-    $configSql = getConfig( 'sql' );
-    $tableUserName = $configSql->tables[ 'tables' ][ 'user' ];
-    $userField = $configSql->tables[ $tableUserName ];
+    $tableUser = getTable( 'user' );
+    $userField = getFields( 'user' );
     extract( $userField );
 
-    $userSql = "DROP TABLE IF EXISTS `{$tableUserName}`;
-        CREATE TABLE IF NOT EXISTS `{$tableUserName}` (
+    $userSql = "DROP TABLE IF EXISTS `{$tableUser}`;
+        CREATE TABLE IF NOT EXISTS `{$tableUser}` (
         `{$id}` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
         `{$group_id}` int(10) UNSIGNED NOT NULL DEFAULT 0,
         `{$username}` varchar(32) NOT NULL DEFAULT 'unknown',
@@ -65,9 +97,8 @@ function sqlGetColumn ( array $userColumns, bool $join = true ) : string
         throw new \Error( 'Empty column variable.' );
     }
 
-    $configSql = getConfig( 'sql' );
-    $tableUser = $configSql->tables[ 'tables' ][ 'user' ];
-    $userFields = $configSql->tables[ $tableUser ];
+    $tableUser = getTable( 'user' );
+    $userFields = getFields( 'user' );
 
     $test = ( getComponents( 'common' )->isAssocArray( $userColumns ) )
         ? array_keys( $userColumns )
@@ -94,15 +125,14 @@ function sqlGetColumn ( array $userColumns, bool $join = true ) : string
 
     if ( $join )
     { # user_group
-        $tableUserGroupName = $configSql->tables[ 'tables' ][ 'user_group' ];
-        $userGroup = $configSql->tables[ $tableUserGroupName ];
-
+        $tableUserGroup = getTable( 'user_group' );
+        $userGroup = getFields( 'user_group' );
         extract( $userGroup );
 
-        $columns[] = "{$tableUserGroupName}.{$id[ 0 ]} {$id[ 1 ]} {$id[ 2 ]}";
-        $columns[] = "{$tableUserGroupName}.{$name[ 0 ]} {$name[ 1 ]} {$name[ 2 ]}";
-        $columns[] = "{$tableUserGroupName}.{$permission}";
-        $columns[] = "{$tableUserGroupName}.{$role}";
+        $columns[] = "{$tableUserGroup}.{$id[ 0 ]} {$id[ 1 ]} {$id[ 2 ]}";
+        $columns[] = "{$tableUserGroup}.{$name[ 0 ]} {$name[ 1 ]} {$name[ 2 ]}";
+        $columns[] = "{$tableUserGroup}.{$permission}";
+        $columns[] = "{$tableUserGroup}.{$role}";
     }
 
     $userGroup = implode( ',', $columns );
@@ -113,9 +143,8 @@ function sqlGetColumn ( array $userColumns, bool $join = true ) : string
 
 function sqlGetColumns ( array $addColumns = [], bool $join = true ) : string
 {
-    $configSql = getConfig( 'sql' );
-    $tableUser = $configSql->tables[ 'tables' ][ 'user' ];
-    $userFields = $configSql->tables[ $tableUser ];
+    $tableUser = getTable( 'user' );
+    $userFields = getFields( 'user' );
     extract( $userFields );
     
     $columns = [ # user
@@ -135,15 +164,14 @@ function sqlGetColumns ( array $addColumns = [], bool $join = true ) : string
 
     if ( $join )
     { # user_group
-        $tableUserGroupName = $configSql->tables[ 'tables' ][ 'user_group' ];
-        $userGroup = $configSql->tables[ $tableUserGroupName ];
-
+        $tableUserGroup = getTable( 'user_group' );
+        $userGroup = getFields( 'user_group' );
         extract( $userGroup );
 
-        $columns[] = "{$tableUserGroupName}.{$id[ 0 ]} {$id[ 1 ]} {$id[ 2 ]}";
-        $columns[] = "{$tableUserGroupName}.{$name[ 0 ]} {$name[ 1 ]} {$name[ 2 ]}";
-        $columns[] = "{$tableUserGroupName}.{$permission}";
-        $columns[] = "{$tableUserGroupName}.{$role}";
+        $columns[] = "{$tableUserGroup}.{$id[ 0 ]} {$id[ 1 ]} {$id[ 2 ]}";
+        $columns[] = "{$tableUserGroup}.{$name[ 0 ]} {$name[ 1 ]} {$name[ 2 ]}";
+        $columns[] = "{$tableUserGroup}.{$permission}";
+        $columns[] = "{$tableUserGroup}.{$role}";
     }
 
     return implode( ',', $columns );
