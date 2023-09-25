@@ -9,11 +9,7 @@ defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
 function withSession ( string $sessKey, array $data, string $condition = 'or' ) : bool
 {
-    $sqlConfig = getConfig( 'sql' );
-    /** @var string $sessKey */
-    $tableUserGroup = $sqlConfig->tables[ 'tables' ][ 'user_group' ];
-    /** @var string $sessKey */
-    $sessKey = $sqlConfig->tables[ $tableUserGroup ][ $sessKey ];
-
-    return getInstance( Authorization::class )->withSession( $sessKey, $data, $condition );
+    /** @var string $sessKey getUserGroupField::role */
+    return getInstance( Authorization::class )
+        ->withSession( getUserGroupField( $sessKey ), $data, $condition );
 }

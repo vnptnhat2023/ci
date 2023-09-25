@@ -15,6 +15,7 @@ class Login extends BaseController
 	public function __construct()
 	{
 		$this->auth = \Config\Services::Red2HorseAuth();
+		// dd( $this->auth->userGroupsToSQL() );
 		$request = \Config\Services::request();
 
 		$this->u = $request->getPostGet( 'username' );

@@ -7,40 +7,35 @@ defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
 function getTable ( string $key = 'user_group' ) : string
 {
-    $configSql = getConfig( 'sql' );
-    $tableUser = $configSql->tables[ 'tables' ][ $key ];
-    return $tableUser;
+    return getConfig( 'sql' )->getTable( $key );
 }
 
-/** @return mixed */
+/**
+ * Or: getColum.
+ * @return mixed
+ */
 function getFields ( string $key = 'user_group' )
 {
-    $configSql = getConfig( 'sql' );
-    $key = $configSql->tables[ 'tables' ][ $key ];
-    $fields = $configSql->tables[ $key ];
-    return $fields;
+    return getConfig( 'sql' )->getColumn( $key );
 }
 
 /** @return mixed */
 function getField ( string $key, string $table = 'user_group' )
 {
-    $table = getTable( $table );
-    return getConfig( 'sql' )->tables[ $table ][ $key ];
+    return getConfig( 'sql' )->getField( $key, $table );
 }
 
 function getUserField ( string $key )
 {
-    $table = getTable( 'user' );
-    return getConfig( 'sql' )->tables[ $table ][ $key ];
+    return getField( $key, 'user' );
 }
 
 function getUserGroupField ( string $key )
 {
-    $table = getTable( 'user_group' );
-    return getConfig( 'sql' )->tables[ $table ][ $key ];
+    return getField( $key, 'user_group' );
 }
 
-function sqlFromUserGroups () : string
+function userGroupsToSQL () : string
 {
     $tableUserGroup = getTable( 'user_group' );
     $userGroup = getFields( 'user_group' );
@@ -59,7 +54,7 @@ function sqlFromUserGroups () : string
     return $userGroupSql;
 }
 
-function sqlFromUsers () : string
+function userToSQL () : string
 {
     $tableUser = getTable( 'user' );
     $userField = getFields( 'user' );

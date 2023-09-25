@@ -5,7 +5,6 @@ namespace Red2Horse\Adapter\CodeIgniter\Event;
 
 use CodeIgniter\Events\Events;
 use Red2Horse\Mixins\Classes\Registry\RegistryEventClass;
-
 use function Red2Horse\Mixins\Functions\setClass;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
@@ -16,9 +15,7 @@ final class EventAdapter implements EventAdapterInterface
 
     private static self $instance;
 
-    /**
-     * @var string[] $events
-     */
+    /** @var string[] $events */
     private array $events = [
         'r2h_before_get_message',
         'r2h_after_get_message',
@@ -126,7 +123,7 @@ final class EventAdapter implements EventAdapterInterface
         if ( in_array( $methodName, $this->events ) )
         {
             $args = reset( $args );
-            if ( $methodName === 'r2h_before_login' )
+            if ( $methodName == 'r2h_before_login' )
             {
                 $args = $this->r2h_before_login( ...$args );
             }
