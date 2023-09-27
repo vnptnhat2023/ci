@@ -175,14 +175,20 @@ function fontFamily () : string
 							if ( ! empty( $message->errors ) )
 							{
 								echo '<div class="alert alert-danger">';
-								foreach ( $message->errors as $error ) { echo "<p>{$error}</p>"; }
+								foreach ( $message->errors as $error )
+								{
+									echo "<p>- {$error}</p>";
+								}
 								echo '</div>';
 							}
 
 							if ( ! empty( $message->success ) )
 							{
 								echo '<div class="alert alert-success">';
-								foreach ( $message->success as $success ) { echo "<p>{$success}</p>"; }
+								foreach ( $message->success as $success )
+								{
+									echo "<p>+ {$success}</p>";
+								}
 								echo '</div>';
 							}
 						?>

@@ -21,4 +21,6 @@ class ConstantNamespace
         'FUNCTION_NAMESPACE' => self::BASE_NAMESPACE . 'Mixins\\Functions\\',
         'REGISTRY_NAMESPACE' => self::BASE_NAMESPACE . 'Mixins\\Classes\\Registry\\',
     ];
+
+    private function __construct () {}
 }

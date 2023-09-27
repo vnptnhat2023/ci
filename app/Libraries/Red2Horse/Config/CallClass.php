@@ -16,4 +16,5 @@ class CallClass
     public string $traitBeforePrefix = 'R2h_before_';
     public string $traitAfterPrefix = 'R2h_after_';
 
+    private function __construct () {}
 }

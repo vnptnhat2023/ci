@@ -30,7 +30,7 @@ $routes->group( 'backend', $bapiOptions, function ( RouteCollection $r )
 	$r->get( 'profile/(:num)/edit', 'Profile::show/$1' );
 	$r->put( 'profile/(:num)', 'Profile::update/$1' );
 
-	$r->group( 'user', $options( 'User', [ 'administrator' ] ), function ( RouteCollection $r )
+	$r->group( 'user', $options( 'User', [ 'administrator' ] ), static function ( RouteCollection $r )
 	{
 		$crudOption = [ 'except' => 'update,delete', 'placeholder' => '(:num)' ];
 		$r->resource( 'crud', $crudOption );
@@ -49,7 +49,7 @@ $routes->group( 'backend', $bapiOptions, function ( RouteCollection $r )
 		] );
 	});
 
-	$r->group( 'post', $options( 'Post', [ 'administrator', 'post' ] ), function ( RouteCollection $r )
+	$r->group( 'post', $options( 'Post', [ 'administrator', 'post' ] ), static function ( RouteCollection $r )
 	{
 		$crudOption = [ 'except' => 'new,update,delete', 'placeholder' => '(:num)' ];
 
@@ -64,23 +64,23 @@ $routes->group( 'backend', $bapiOptions, function ( RouteCollection $r )
 		] );
 	});
 
-	$r->group( 'page', $options( 'Page', [ 'page' ], 'permission' ), fn ( RouteCollection $r ) =>
+	$r->group( 'page', $options( 'Page', [ 'page' ], 'permission' ), static fn ( RouteCollection $r ) =>
 		$r->resource( 'crud', [ 'placeholder' => '(:num)', 'except' => 'edit,new,show' ] )
 	);
 
 	$r->group( 'category',
 		$options( 'Category', [ 'category' ], 'permission' ),
-		function ( RouteCollection $r ) {
+		static function ( RouteCollection $r ) {
 			$option = [ 'only' => 'index,create,delete', 'placeholder' => '(:num)' ];
 			$r->resource( 'crud', $option );
 			$r->put( 'crud/(:num)', 'Crud::update/$1' );
 			$r->patch( 'crud/(:dotID)', 'Crud::update/$1' );
 		}
 	);
-
 	$r->group( 'general_group',
+
 		$options ( 'GeneralGroup', [ 'general_group' ], 'permission' ),
-		function ( RouteCollection $r ) {
+		static function ( RouteCollection $r ) {
 			$r->post( 'crud', 'Crud::create' );
 			$r->delete( 'crud/(:num)', 'Crud::delete/$1' );
 			$r->put( 'crud/(:num)', 'Crud::update/$1' );
@@ -90,7 +90,7 @@ $routes->group( 'backend', $bapiOptions, function ( RouteCollection $r )
 
 	$r->group( 'general_item',
 		$options ( 'GeneralItem', [ 'general_item' ], 'permission' ),
-		function ( RouteCollection $r ) {
+		static function ( RouteCollection $r ) {
 			$r->post( 'crud', 'Crud::create' );
 			$r->delete( 'crud/(:num)', 'Crud::delete/$1' );
 			$r->put( 'crud/(:num)', 'Crud::update/$1' );

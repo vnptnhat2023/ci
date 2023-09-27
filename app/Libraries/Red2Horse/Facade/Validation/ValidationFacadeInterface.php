@@ -6,18 +6,16 @@ namespace Red2Horse\Facade\Validation;
 
 interface ValidationFacadeInterface
 {
+	public function ruleStore() : array;
 	public function isValid ( array $data, array $rules) : bool;
 
 	public function getErrors ( string $field = null ) : array;
 
 	/**
-	 * @param string|array|null $needed
-	 * @string single rule
-	 * @array multiple rules, array NOT associative
-	 * @null all rules
+	 * @param string|array|null $key
 	 * @return string|array
 	 */
-	public function getRules ( $needed );
+	public function getRules ( $key = null );
 
 	/**
 	 * Clear all rules and data

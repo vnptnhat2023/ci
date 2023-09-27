@@ -29,9 +29,15 @@ class ValidationFacade implements ValidationFacadeInterface
 		return $this->validate->getErrors( $field );
 	}
 
-	public function getRules( $needed )
+	/** @param null|string|array $keys */
+	public function getRules( $key = null )
 	{
-		return $this->validate->getRules( $needed );
+		return $this->validate->getRules( $key );
+	}
+
+	public function ruleStore() : array
+	{
+		return $this->validate->ruleStore();
 	}
 
 	public function reset() : void

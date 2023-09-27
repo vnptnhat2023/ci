@@ -24,7 +24,7 @@ class Throttle
 
 	public bool $useThrottle = true;
 
-	public function __construct ()
+	private function __construct ()
 	{
 		$this->throttle = ( object ) self::THROTTLE;
 	}

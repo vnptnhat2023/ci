@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Classes;
 
 use Red2Horse\Mixins\Interfaces\ReflectClass___Interface;
+use Red2Horse\Mixins\Traits\TraitSingleton;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
@@ -12,6 +13,7 @@ defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
  */
 class ReflectClass___ implements ReflectClass___Interface
 {
+    use TraitSingleton;
     protected object $ins;
 
     /** @param object|string $int */

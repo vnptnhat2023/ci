@@ -49,7 +49,7 @@ function fontFamily () : string
 		<meta charset="utf-8">
 		<meta http-equiv="X-UA-Compatible" content="IE=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title><?= r2hI18( 'login' ) ?></title>
+		<title><?= r2hI18( 'seed' ) ?></title>
 
 		<link rel="stylesheet" href="<?= base_url('public/assets/css/bootstrap.min.css') ?>">
 
@@ -140,7 +140,7 @@ function fontFamily () : string
 				<div class="col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3"
 				id="login-page">
 
-					<?= form_open( base_url( '/login' ) ) ?>
+					<?= form_open( base_url( '/login/seed' ) ) ?>
 
 					<div class="form-box">
 						<!-- <div class="pull-right">
@@ -152,7 +152,7 @@ function fontFamily () : string
 							</span>
 						</div> -->
 
-						<h3 class="form-box-title"><?= r2hI18( 'login' ) ?></h3>
+						<h3 class="form-box-title"><?= r2hI18( 'seed' ) ?></h3>
 
 						<!-- Message -->
 						<?php
@@ -183,92 +183,28 @@ function fontFamily () : string
 						<!-- End message -->
 
 						<!-- Form -->
-						<?php if ( $result->show->form ) : ?>
+						<?php if ( $result->show->form && ! empty( $added->postKeys ) ) : ?>
 
-								<div class="form-group" :class="{'has-warning': errors.has( 'username' )}">
-									<label for="username"><?= r2hI18( 'labelUserOrEmail' ) ?></label>
+							<?php foreach( $added->postKeys as $postKey ) : ?>
 
-									<input type="text" class="form-control"
-									v-validate="'required|min:5|max:128'"
-									data-vv-as="<?= r2hI18( 'labelUserOrEmail' ) ?>"
-									name="username"
-									id="username"
-									placeholder="<?= r2hI18( 'placeholderUserOrEmail', false) ?>"
-									maxlength="128"
-									value="<?= set_value( 'username' ) ?>"
-									autocomplete="off"
-									spellcheck="false">
+                                <div class="form-group">
 
-									<span v-show="errors.has( 'username' )" class="help-block">{{ errors.first( 'username' ) }}</span>
-								</div>
+                                    <label for="<?= strtolower( $postKey ) ?>" class="form-input">
+                                        <?= str_replace( '_', ' ', ucwords( $postKey ) ) ?>
+                                    </label>
 
-								<div class="form-group" :class="{'has-warning': errors.has( 'password' )}">
-									<label for="password"><?= r2hI18( 'labelPassword' ) ?></label>
+                                    <input type="text" class="form-control" 
+                                        placeholder="<?= ucwords( $postKey ) ?>"
+                                        name="<?= strtolower( $postKey ) ?>"
+                                        id="<?= strtolower( $postKey ) ?>"
+                                        value="<?= set_value( sprintf( '%s', strtolower( $postKey ) ) ) ?>">
+                                </div>
 
-									<input type="password"
-									class="form-control"
-									maxlength="32"
-									v-validate="'required|min:5|max:64'"
-									data-vv-as="<?= r2hI18( 'labelPassword' ) ?>"
-									name="password"
-									id="password"
-									placeholder="<?= r2hI18( 'placeholderPassword', false ) ?>"
-									autocomplete="off"
-									spellcheck="false"
-									value="<?= set_value( 'password' ) ?>">
-
-									<span v-show="errors.has( 'password' )" class="help-block">
-										{{ errors.first( 'password' ) }}
-									</span>
-								</div>
-
-								<!-- Captcha form -->
-								<?php if ( $result->show->captcha ) : helper( 'captcha' ); ?>
-
-									<div class="form-group">
-										<label for="captcha"><?= r2hI18( 'labelCaptcha' ) ?></label>
-
-										<div class="input-group">
-											<input type="text"
-											class="form-control"
-											id="captcha"
-											name="captcha"
-											placeholder="<?= r2hI18( 'placeholderCaptcha', false ) ?>">
-
-											<span class="input-group-addon"
-											style="margin: 0; padding: 0;">
-												<?= ci_captcha() ?>
-											</span>
-										</div>
-									</div>
-
-								<?php endif ?>
-								<!-- Captcha form -->
-							
-								<!-- Remember me checkbox -->
-								<?php if ( $result->show->remember_me ) : ?>
-									<div class="form-group">
-										<div class="checkbox">
-											<label>
-												<input
-												type="checkbox"
-												name="remember_me"
-												value="1" <?= set_checkbox( 'remember_me', '1' ); ?>>
-												<span><?= r2hI18( 'labelRememberMe' ) ?></span>
-											</label>
-										</div>
-									</div>
-								<?php endif; ?>
-								<!-- End remember me checkbox -->
-
-							<div class="form-group">
-								<button
-								type="submit"
-								class="btn btn-primary"
-								style="border-radius: none;"
-								:disabled="errors.has( 'username' ) || errors.has( 'password' )"
-								>
-									<?= r2hI18( 'LabelBtnLoginSubmit' ) ?>
+							<?php endforeach; ?>
+                            <div class="form-group">
+								<button type="submit" class="btn btn-primary" style="border-radius: none;"
+								:disabled="errors.has( 'username' ) || errors.has( 'password' )">
+									<?= r2hI18( 'LabelBtnSubmit' ) ?>
 								</button>
 							</div>
 

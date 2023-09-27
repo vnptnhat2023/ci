@@ -6,6 +6,7 @@ return [
 	'homeLink' => $homeLink,
 	'login' => 'login lnbl',
 	'logout' => 'logout lnbl',
+	'seed' => 'Seeder lnbl',
 	'resetPassword' => 'reset password lnbl',
 
 	'errorCookieUpdate' => 'Validated cookie, when update userId: {0}',
@@ -22,6 +23,7 @@ return [
 	'successLogoutWithUsername' => '{0} you have been logged out. ' . $homeLink,
 	'successLogout' => 'You have been logged out. ' . $homeLink,
 	'successResetPassword' => 'Hi {0}, your password has been reset to {1}.',
+	'successSeeder' => 'Seeder success.',
 
 	'labelUsername' => 'username',
 	'labelUserOrEmail' => 'name',
@@ -34,11 +36,30 @@ return [
 	'LabelBtnLoginSubmit' => 'log in',
 	'LabelBtnResetSubmit' => 'reset',
 	'LabelBtnClear' => 'clear',
+	'LabelBtnSubmit' => 'Submit',
 
-	'placeholderUsername' => 'name',
+	'groupId' => 'group id',
+	'labelUserGroupName' => 'group name',
+	'labelGroupPermission' => 'permission',
+	'labelGroupRole' => 'role',
+	'labelGroupDeletedAt' => 'delete at',
+
+	'placeholderUsername' => 'user name',
 	'placeholderUserOrEmail' => 'email',
 	'placeholderPassword' => 'password',
 	'placeholderCaptcha' => 'captcha',
 
-	'isAssoc' => 'Data must be an associative array.'
+	'isAssoc' => 'Data must be an associative array.',
+
+	'id' => 'id',
+	'status' => 'status',
+	'activity' => 'activity',
+	'last_login' => 'last login',
+	'created_at' => 'created at',
+	'updated_at' => 'updated at',
+	'deleted_at' => 'deleted at',
+	'session_id' => 'session id',
+	'selector' => 'selector',
+	'token' => 'token',
+	'ci_captcha' => 'Incorrect Captcha',
 ];

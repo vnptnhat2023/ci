@@ -14,18 +14,18 @@ function classInit( string $classNamespace, string $state, bool $getShared ) : o
     return $state::selfInstance() ->init( $classNamespace, $getShared );
 }
 
-// /**
+/**
 //  * @return \Red2Horse\Mixins\Traits\TraitSingleton
-//  */
+ */
 function getInstance ( string $classNamespace, string $state = 'RegistryClass', bool $getShared = true ) : object
 {
     return classInit( $classNamespace, $state, $getShared ) ->getInstance();
 }
 
-// /**
-//  * @param bool $getShared For adapter only
-//  * @return \Red2Horse\Mixins\Traits\TraitSingleton
-//  */
+/**
+ * @param bool $getShared For adapter only
+ * @return \Red2Horse\Mixins\Traits\TraitSingleton
+ */
 function getComponents ( string $classNamespace, string $state = 'RegistryClass', bool $getShared = true ) : object
 {
     return classInit( $classNamespace, $state, $getShared ) ->getComponents();

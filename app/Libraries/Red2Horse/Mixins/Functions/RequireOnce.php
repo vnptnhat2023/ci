@@ -11,6 +11,7 @@ require_once realpath( $functions_path . '/FunctionInstance.php' );
 require_once realpath( $functions_path . '/FunctionNamespace.php' );
 require_once realpath( $functions_path . '/FunctionConfig.php' );
 require_once realpath( $functions_path . '/FunctionSql.php' );
+require_once realpath( $functions_path . '/FunctionSqlExport.php' );
 require_once realpath( $functions_path . '/FunctionAuthorization.php' );
 require_once realpath( $functions_path . '/FunctionPassword.php' );
 

@@ -22,7 +22,7 @@ class Session
 	public int $sessionTimeToUpdate = 0;
 	public array $sessionKey;
 
-	public function __construct ()
+	private function __construct ()
 	{
 		$configFacade = getComponents( 'config' );
 		

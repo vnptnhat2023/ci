@@ -31,8 +31,6 @@ class Login extends BaseController
 
 	private function _setting ()
 	{
-		// dd( $this->auth->getHashPass( $this->auth->getRandomString( 'administrator' ) ) );
-		// $rd = $this->auth->getRandomString( 'guest' ); dd( $rd );
 		$this->auth->setConfig ( 'BaseConfig', static function( $baseConfig )
 		{
 			$baseConfig->useRememberMe = true;
@@ -63,5 +61,12 @@ class Login extends BaseController
 	{
 		$this->auth->logout();
 		return view( 'login/login', ( array ) $this->auth->getMessage() );
+	}
+
+	public function seed ()
+	{
+		$seed = $this->auth->seedUserGroup();
+		$msg = $this->auth->getMessage( [ 'postKeys' => $seed[ 'intersect' ] ] );
+		return view( 'login/seed', ( array ) $msg );
 	}
 }

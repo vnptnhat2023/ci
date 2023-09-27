@@ -13,4 +13,6 @@ class BaseConfig
 
 	public bool $useRememberMe = false;
 	public bool $useMultiLogin = false;
+
+	private function __construct () {}
 }

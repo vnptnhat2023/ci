@@ -17,4 +17,5 @@ class Cookie
 	public string $cookie = self::COOKIE_NAME;
 	public int $ttl = self::TIME_TO_LIFE;
 
+	private function __construct () {}
 }

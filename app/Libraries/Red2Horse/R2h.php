@@ -9,11 +9,15 @@ use Red2Horse\
     Mixins\Classes\Registry\RegistryClass,
     Facade\Auth\Red2Horse
 };
+use Red2Horse\Mixins\Classes\SqlClassExport;
 
 use function Red2Horse\Mixins\Functions\
 {
     callClass,
     functionNamespace,
+    getColumn,
+    getComponents,
+    getInstance,
     initConfig
 };
 
