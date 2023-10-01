@@ -48,5 +48,15 @@ return [
 	'placeholderPassword' => 'Mật khẩu',
 	'placeholderCaptcha' => 'Xác nhận',
 
-	'isAssoc' => 'Dữ liệu phải là mảng hai chiều.'
+	'id' => 'Chỉ mục',
+	'status' => 'trạng thái',
+	'activity' => 'kích hoạt khi',
+	'last_login' => 'đăng nhập lần cuối',
+	'created_at' => 'đã tạo khi',
+	'updated_at' => 'đã sửa khi',
+	'deleted_at' => 'đã xóa khi',
+	'session_id' => 'session id',
+	'selector' => 'selector',
+	'token' => 'dòng chữ ngẫu nhiên',
+	'ci_captcha' => 'Sai chữ ngẫu nhiên',
 ];

@@ -3,7 +3,17 @@
 declare( strict_types = 1 );
 namespace Red2Horse\Config;
 
-use Red2Horse\Mixins\Traits\TraitSingleton;
+use Red2Horse\Mixins\
+{
+	Classes\SqlClass,
+	Traits\TraitSingleton
+};
+
+use function Red2Horse\Mixins\Functions\
+{
+	getComponents,
+	getInstance
+};
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
@@ -11,27 +21,45 @@ class Validation
 {
 	use TraitSingleton;
 
-	/** User table */
-	public static string $id = 'id';
-	public static string $username = 'username';
-	public static string $password = 'password';
-	public static string $email = 'email';
-	public static string $status = 'status';
-	public static string $lastActivity = 'last_activity';
-	public static string $lastLogin = 'last_login';
-	public static string $createdAt = 'created_at';
-	public static string $updatedAt = 'updated_at';
-	public static string $sessionId = 'session_id';
-	public static string $selector = 'selector';
-	public static string $token = 'token';
-	public static $captcha = 'captcha';
+	/** User columns */
+	protected string $user_id = 'id';
+	protected string $user_groupId = 'group_id';
+	protected string $user_username = 'username';
+	protected string $user_password = 'password';
+	protected string $user_email = 'email';
+	protected string $user_status = 'status';
+	protected string $user_lastActivity = 'last_activity';
+	protected string $user_lastLogin = 'last_login';
+	protected string $user_createdAt = 'created_at';
+	protected string $user_updatedAt = 'updated_at';
+	protected string $user_deletedAt = 'deleted_at';
+	protected string $user_sessionId = 'session_id';
+	protected string $user_selector = 'selector';
+	protected string $user_token = 'token';
+	protected string $user_captcha = 'captcha';
 
-	/** User group table */
-	public static string $groupId = 'id';
-	public static string $groupName = 'name';
-	public static string $groupPermission = 'permission';
-	public static string $groupRole = 'role';
-	public static string $groupDeletedAt = 'deleted_at';
+	/** User group columns */
+	protected string $userGroup_id = 'id';
+	protected string $userGroup_name = 'name';
+	protected string $userGroup_permission = 'permission';
+	protected string $userGroup_role = 'role';
+	protected string $userGroup_deletedAt = 'deleted_at';
 
 	private function __construct () {}
+
+	public function reInit() : void
+	{
+		getInstance( SqlClass::class )->reInit();
+		getComponents( 'validation' )->reInit();
+	}
+
+	public function __set( $key, $value )
+	{
+		$this->$key = strtolower( $value );
+	}
+
+	public function __get ($name )
+	{
+		return $this->$name;
+	}
 }

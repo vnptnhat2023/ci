@@ -15,10 +15,10 @@ namespace Red2Horse\Facade\Database;
  */
 interface UserFacadeInterface
 {
-	/**
-	 * Fetch a user row
-	 */
-	// public function getUser ( string $select, array $where ) : array;
+	/** @return mixed false|string|object */
+	public function query ( string $str, array $data, bool $getString = true );
+
+	public function querySimple ( string $str );
 
 	public function getUserWithGroup ( string $select, array $where ) : array;
 

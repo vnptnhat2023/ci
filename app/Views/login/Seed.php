@@ -8,12 +8,36 @@ function r2hI18 ( string $field, bool $w = false ) : string {
 function bgColor () : string
 {
 	$arr = [
+		'black',
+		'blue',
+		'green',
+		'yellow',
+		'orange',
+		'purple',
+		'pink',
+		'red',
+		'gray',
+		'grey',
+		'lemon',
+		'grass',
 		'lemonchiffon',
 		'cadetblue',
 		'lightgoldenrodyellow',
 		'khaki'
 	];
 	$arr2 = [
+		'black',
+		'blue',
+		'green',
+		'yellow',
+		'orange',
+		'purple',
+		'pink',
+		'red',
+		'gray',
+		'grey',
+		'lemon',
+		'grass',
 		'coral',
 		'currentColor',
 		'chocolate',
@@ -140,7 +164,7 @@ function fontFamily () : string
 				<div class="col-md-4 col-md-offset-4 col-sm-6 col-sm-offset-3"
 				id="login-page">
 
-					<?= form_open( base_url( '/login/seed' ) ) ?>
+					<?= form_open( current_url() ) ?>
 
 					<div class="form-box">
 						<!-- <div class="pull-right">
@@ -156,15 +180,23 @@ function fontFamily () : string
 
 						<!-- Message -->
 						<?php
+							if ( ! empty( $message->normal ) )
+							{
+								echo '<div class="alert alert-info">';
+								foreach ( $message->normal as $normal )
+								{
+									echo "<p>- {$normal}</p>";
+								}
+								echo '</div>';
+							}
+
 							if ( ! empty( $message->errors ) )
 							{
 								echo '<div class="alert alert-danger">';
-
 								foreach ( $message->errors as $error )
 								{
 									echo "<p>- {$error}</p>";
 								}
-
 								echo '</div>';
 							}
 
@@ -194,10 +226,12 @@ function fontFamily () : string
                                     </label>
 
                                     <input type="text" class="form-control" 
-                                        placeholder="<?= ucwords( $postKey ) ?>"
+                                        placeholder="<?= sprintf( '%s', ucwords( str_replace( '_', ' ', $postKey ) ) ) ?>"
                                         name="<?= strtolower( $postKey ) ?>"
                                         id="<?= strtolower( $postKey ) ?>"
-                                        value="<?= set_value( sprintf( '%s', strtolower( $postKey ) ) ) ?>">
+                                        value="<?= set_value( sprintf( '%s', strtolower( $postKey ) ) ) ?>"
+										autocomplete="off"
+										spellcheck="false">
                                 </div>
 
 							<?php endforeach; ?>

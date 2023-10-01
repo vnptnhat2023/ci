@@ -79,7 +79,7 @@ final class Authorization
 		{
 			/** @var array $userDB */
 			$userDB = getComponents( 'user' )->getUserWithGroup(
-				\Red2Horse\Mixins\Functions\sqlGetColumn( [ getField( 'id', 'user' )  => 'user_id' ] ),
+				\Red2Horse\Mixins\Functions\sqlSelectColumn( [ getField( 'id', 'user' )  => 'user_id' ] ),
 				$userDataArgs
 			);
 

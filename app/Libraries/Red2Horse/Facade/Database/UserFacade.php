@@ -17,10 +17,16 @@ class UserFacade implements UserFacadeInterface
 		$this->user = $user;
 	}
 
-	// public function getUser ( string $select, array $where ) : array
-	// {
-	// 	return $this->user->getUser( $select, $where );
-	// }
+	/** @return mixed false|string|object */
+	public function query ( string $str, array $data, bool $getString = true )
+	{
+		return $this->user->query( $str, $data, $getString );
+	}
+
+	public function querySimple ( string $str )
+	{
+		return $this->user->querySimple( $str );
+	}
 
 	public function getUserWithGroup ( string $select, array $where ) : array
 	{

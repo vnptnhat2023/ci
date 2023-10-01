@@ -15,15 +15,22 @@ return [
 	'errorNotReadyYet' => 'The current account is in status `{0}` has not been activated yet.',
 	'errorThrottleLimitedTime' => 'Please try to login after {number} {minutes}',
 
+	/** Database */
+	'errorDatabaseConnect' => 'cannot connect to db.',
+	'errorDatabaseNotDefined' => 'Database not defined.',
+	'errorCreatingDatabase' => 'The database : "{0}" is already exist or have an error when creating database.',
+	'successCreatedDatabase' => 'Database: {0} has been created.',
+
 	'noteDenyRequestPassword' => 'You are logged in, so you are not authorized to use this function.',
 	'noteLoggedInAnotherPlatform' => 'Your account has been logged-in with another platform.',
 
+	'success' => '{0} successfully.',
 	'successLogged' => 'You are already logged in. ' . $homeLink,
 	'successLoggedWithUsername' => 'Hi {0}, you are already logged in. ' . $homeLink,
 	'successLogoutWithUsername' => '{0} you have been logged out. ' . $homeLink,
 	'successLogout' => 'You have been logged out. ' . $homeLink,
 	'successResetPassword' => 'Hi {0}, your password has been reset to {1}.',
-	'successSeeder' => 'Seeder success.',
+	'successSeeder' => 'Seeder successfully.',
 
 	'labelUsername' => 'username',
 	'labelUserOrEmail' => 'name',

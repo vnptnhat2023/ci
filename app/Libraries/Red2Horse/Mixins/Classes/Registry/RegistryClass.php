@@ -69,7 +69,7 @@ final class RegistryClass extends RegistryClass___
      * @param bool $getShared adapter only
      * @return object|\Red2Horse\Mixins\Traits\TraitSingleton
      */
-    public function getComponents () : object
+    public function getComponents ( bool $getAdapter = false ) : object
     {
         $name = ucfirst( $this->className );
         $facadeName = ComponentNamespace( $name );
@@ -91,6 +91,11 @@ final class RegistryClass extends RegistryClass___
         else
         {
             $adapterInstance = new $adapterName;
+        }
+
+        if ( $getAdapter )
+        {
+            return $adapterInstance;
         }
 
         return $facadeName::getInstance( $adapterInstance );

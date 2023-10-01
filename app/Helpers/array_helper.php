@@ -27,29 +27,30 @@ function arrayHasDupes ( array $input_array ) : bool
  * - Take on internet
  * - https://stackoverflow.com/questions/8840319/build-a-tree-from-a-flat-array-in-php
 */
-function buildTree ( array &$elements, $parentId = 0, bool $flat = false )
+function buildTree ( array & $elements, $parentId = 0, bool $flat = false )
 {
 	$branch = [];
 
-	foreach ( $elements as &$element )
+	foreach ( $elements as & $element )
 	{
-    if ( $element['parent_id'] == $parentId ) {
+    if ( $element[ 'parent_id' ] == $parentId )
+    {
+      $children = buildTree( $elements, $element[ 'id' ] );
 
-      $children = buildTree( $elements, $element['id'] );
-
-      if ( $children ) {
-        if ( true === $flat )
+      if ( $children )
+      {
+        if ( $flat )
         {
           $cKey = key( $children );
           $branch[ $cKey ] = $children[ $cKey ];
         }
         else
         {
-          $element['children'] = $children;
+          $element[ 'children' ] = $children;
         }
       }
 
-      $branch[ $element['id'] ] = $element;
+      $branch[ $element[ 'id' ] ] = $element;
       unset( $element );
     }
 	}

@@ -7,7 +7,7 @@ use Red2Horse\Mixins\Classes\Registry\RegistryClass as Reg;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
-function initConfig() : void
+function initConfig () : void
 {
     getConfig( 'BaseConfig' );
     getComponents( 'Throttle' );

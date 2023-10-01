@@ -26,6 +26,7 @@ class Message
 
 	public static array $errors = [];
 	public static array $success = [];
+	public static array $info = [];
 
 	private function __construct () {}
 
@@ -62,10 +63,10 @@ class Message
 			],
 
 			'validation' => [
-				$configValidation::$username,
-				$configValidation::$email,
-				$configValidation::$password,
-				$configValidation::$captcha
+				$configValidation->user_username,
+				$configValidation->user_email,
+				$configValidation->user_password,
+				$configValidation->user_captcha
 			]
 		];
 
@@ -90,8 +91,9 @@ class Message
 			'message' => [
 				'success' => self::$success,
 				'errors' => self::$errors,
+				'normal' => self::$info
 			],
-			
+
 			'result' => $this->getResult()
 		];
 

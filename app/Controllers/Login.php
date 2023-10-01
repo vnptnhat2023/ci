@@ -15,7 +15,6 @@ class Login extends BaseController
 	public function __construct()
 	{
 		$this->auth = \Config\Services::Red2HorseAuth();
-		// dd( $this->auth->userGroupsToSQL() );
 		$request = \Config\Services::request();
 
 		$this->u = $request->getPostGet( 'username' );
@@ -61,12 +60,5 @@ class Login extends BaseController
 	{
 		$this->auth->logout();
 		return view( 'login/login', ( array ) $this->auth->getMessage() );
-	}
-
-	public function seed ()
-	{
-		$seed = $this->auth->seedUserGroup();
-		$msg = $this->auth->getMessage( [ 'postKeys' => $seed[ 'intersect' ] ] );
-		return view( 'login/seed', ( array ) $msg );
 	}
 }

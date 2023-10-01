@@ -46,10 +46,9 @@ class Authentication
 		$message = getInstance( Message::class );
 		$common = getComponents( 'common' );
 		$session = getComponents( 'session' );
-		$cookie = getComponents( 'cookie' );
 		$message::$successfully = true;
 
-		$cookie->delete_cookie( getConfig( 'cookie' )->cookie );
+		getComponents( 'cookie' )->delete_cookie( getConfig( 'cookie' )->cookie );
 
 		if ( $session->has( getConfig('session')->session ) )
 		{
@@ -89,7 +88,7 @@ class Authentication
 	 */
 	public function isLogged ( bool $withCookie = false ) : bool
 	{
-		if ( getComponents( 'session' )->has( getConfig( 'session' )->session ) ) 
+		if ( getComponents( 'session' )->has( getConfig( 'session' )->session ) )
 		{
 			return true;
 		}
@@ -104,37 +103,37 @@ class Authentication
 
 	private function loginInvalid ()
 	{
-		$validation = getComponents( 'validation' );
+		$validationComponent = getComponents( 'validation' );
 		$configValidation = getConfig( 'validation' );
 
 		if ( getComponents( 'throttle' )->showCaptcha() )
 		{
 			$data = [
-				$configValidation::$username => self::$username,
-				$configValidation::$password => self::$password,
-				$configValidation::$captcha => self::$captcha
+				$configValidation->user_username => self::$username,
+				$configValidation->user_password => self::$password,
+				$configValidation->user_captcha => self::$captcha
 			];
 
 			$ruleCaptcha = [
-				$configValidation::$captcha => $validation->getRules( $configValidation::$captcha )
+				$configValidation->user_captcha => $validationComponent->getRules( $configValidation->user_captcha )
 			];
 
-			if ( ! $validation->isValid( $data, $ruleCaptcha ) )
+			if ( ! $validationComponent->isValid( $data, $ruleCaptcha ) )
 			{
-				$errorCaptcha = $validation->getErrors( $configValidation::$captcha );
+				$errorCaptcha = $validationComponent->getErrors( $configValidation->user_captcha );
 				return getInstance( Message::class )->errorInformation( true, $errorCaptcha );
 			}
 		}
 
 		$incorrectInfo = false;
-		$ruleUsername = [ $configValidation::$username => $validation->getRules( 'username' ) ];
-		$data = [ $configValidation::$username => self::$username ];
+		$ruleUsername = [ $configValidation->user_username => $validationComponent->getRules( 'username' ) ];
+		$data = [ $configValidation->user_username => self::$username ];
 
-		if ( ! $validation->isValid( $data, $ruleUsername ) )
+		if ( ! $validationComponent->isValid( $data, $ruleUsername ) )
 		{
-			$validation->reset();
-			$ruleEmail = [ $configValidation::$username => $validation->getRules( 'email' ) ];
-			$incorrectInfo = ! $validation->isValid( $data, $ruleEmail );
+			$validationComponent->reset();
+			$ruleEmail = [ $configValidation->user_username => $validationComponent->getRules( 'email' ) ];
+			$incorrectInfo = ! $validationComponent->isValid( $data, $ruleEmail );
 		}
 
 		! $incorrectInfo ?: getInstance( Message::class )->errorInformation( true );
@@ -150,7 +149,7 @@ class Authentication
 		];
 
 		$userData = getComponents( 'user' )->getUserWithGroup(
-			\Red2Horse\Mixins\Functions\sqlGetColumns( [ getUserField( 'password' ) ] ),
+			\Red2Horse\Mixins\Functions\sqlSelectColumns( [ getUserField( 'password' ) ] ),
 			$userDataArgs
 		);
 
@@ -182,7 +181,8 @@ class Authentication
 
 		unset( $userData[ getUserField( 'password' ) ] );
 
-		$isValidJson = getComponents( 'common' )->valid_json( $userData[ getUserGroupField( 'permission' ) ] );
+		$isValidJson = getComponents( 'common' )
+			->valid_json( $userData[ getUserGroupField( 'permission' ) ] );
 		$userData[ getUserGroupField( 'permission' ) ] = ( $isValidJson )
 			? json_decode( $userData[ getUserGroupField( 'permission' ) ], true )
 			: [];
@@ -250,7 +250,7 @@ class Authentication
 		}
 
 		$roleJson = json_decode( $userData[ getUserGroupField( 'role' ) ], true );
-		
+
 		if ( ! array_key_exists( getUserGroupField( 'role' ), $roleJson ) || ! array_key_exists( 'hash', $roleJson ) )
 		{
 			throw new \Error( 'Role: Invalid json format !', 406 );

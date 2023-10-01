@@ -208,9 +208,15 @@
 				<button onclick="toggleMenu();">&#9776;</button>
 			</li>
 			<li class="menu-item hidden"><a href="#">Home</a></li>
-			<li class="menu-item hidden"><a href="<?= base_url('/backend'); ?>">Backend</a></li>
+			
 			<li class="menu-item hidden"><a href="<?= base_url('/login'); ?>">Login</a></li>
+			
+			<?php if ( \Config\Services::Red2HorseAuth()->isLogged() ) : ?>
+			<li class="menu-item hidden"><a href="<?= base_url('/backend'); ?>">Backend</a></li>
+			<li class="menu-item hidden"><a href="<?= base_url('/install/seed'); ?>">Seed</a></li>
 			<li class="menu-item hidden"><a href="<?= base_url('/login/logout'); ?>">Logout</a></li>
+			<?php endif; ?>
+			
 			<li class="menu-item hidden"><a href="<?= base_url('/login/forgot'); ?>">Reset Password</a></li>
 			<li class="menu-item hidden"><a href="http://localhost/docs/" target="_blank">Docs</a>
 			</li>

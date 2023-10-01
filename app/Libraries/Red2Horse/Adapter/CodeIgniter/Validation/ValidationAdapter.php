@@ -58,10 +58,8 @@ class ValidationAdapter implements ValidationAdapterInterface
 
 		if ( empty( $result ) )
 		{
-			throw new \Error(
-				sprintf( 'Error rule not found. %s:%s:%s', __FILE__, __METHOD__, __LINE__ ),
-				404
-			);
+			$error = sprintf( 'Error rule not found. %s:%s:%s', __FILE__, __METHOD__, __LINE__ );
+			throw new \Error( $error, 404 );
 		}
 
 		return $result;
@@ -69,81 +67,89 @@ class ValidationAdapter implements ValidationAdapterInterface
 
 	public function ruleStore() : array
 	{
-		$config = getConfig( 'validation' );
+		$configValidation = getConfig( 'validation' );
 
 		$generalRules = [
 			/** User rules */
-			$config::$id => [
+			$configValidation->user_id => [
 				'label' => lang( 'Red2Horse.id' ),
 				'rules' => 'trim|required|is_natural_no_zero'
 			],
-			$config::$username => [
+			$configValidation->user_groupId => [
+				'label' => lang( 'Red2Horse.groupId' ),
+				'rules' => 'trim|required|is_natural_no_zero'
+			],
+			$configValidation->user_username => [
 				'label' => lang( 'Red2Horse.labelUsername' ),
 				'rules' => 'trim|required|min_length[5]|max_length[32]|alpha_dash'
 			],
-			$config::$password => [
+			$configValidation->user_password => [
 				'label' => lang( 'Red2Horse.labelPassword' ),
 				'rules' => 'trim|required|min_length[5]|max_length[32]|alpha_numeric_punct'
 			],
-			$config::$email => [
+			$configValidation->user_email => [
 				'label' => lang( 'Red2Horse.labelEmail' ),
 				'rules' => 'trim|required|min_length[5]|max_length[64]|valid_email'
 			],
-			$config::$status => [
+			$configValidation->user_status => [
 				'label' => lang( 'Red2Horse.status' ),
 				'rules' => 'in_list[active,inactive,banned]'
 			],
-			$config::$lastActivity => [
+			$configValidation->user_lastActivity => [
 				'label' => lang( 'Red2Horse.activity' ),
 				'rules' => 'permit_empty|exact_length[19]'
 			],
-			$config::$lastLogin => [
+			$configValidation->user_lastLogin => [
 				'label' => lang( 'Red2Horse.last_login' ),
 				'rules' => 'permit_empty|exact_length[19]'
 			],
-			$config::$createdAt => [
+			$configValidation->user_createdAt => [
 				'label' => lang( 'Red2Horse.created_at' ),
 				'rules' => 'permit_empty|exact_length[19]'
 			],
-			$config::$updatedAt => [
+			$configValidation->user_updatedAt => [
 				'label' => lang( 'Red2Horse.updated_at' ),
 				'rules' => 'permit_empty|exact_length[19]'
 			],
-			$config::$sessionId => [
+			$configValidation->user_deletedAt => [
+				'label' => lang( 'Red2Horse.labelGroupDeletedAt' ),
+				'rules' => 'permit_empty|exact_length[19]'
+			],
+			$configValidation->user_sessionId => [
 				'label' => lang( 'Red2Horse.session_id' ),
 				'rules' => 'permit_empty|max_length[128]'
 			],
-			$config::$selector => [
+			$configValidation->user_selector => [
 				'label' => lang( 'Red2Horse.selector' ),
 				'rules' => 'permit_empty|max_length[128]'
 			],
-			$config::$token => [
+			$configValidation->user_token => [
 				'label' => lang( 'Red2Horse.token' ),
 				'rules' => 'permit_empty|max_length[128]'
 			],
-			$config::$captcha => [
+			$configValidation->user_captcha => [
 				'label' => lang( 'Red2Horse.labelCaptcha' ),
 				'rules' => 'trim|required|min_length[5]|max_length[32]|alpha_numeric_punct|ci_captcha'
 			],
 
 			/** User group rules */
-			$config::$groupId => [
+			$configValidation->userGroup_id => [
 				'label' => lang( 'Red2Horse.groupId' ),
 				'rules' => 'trim|required|is_natural_no_zero'
 			],
-			$config::$groupName => [
+			$configValidation->userGroup_name => [
 				'label' => lang( 'Red2Horse.labelUserGroupName' ),
 				'rules' => 'trim|required|min_length[5]|max_length[64]|alpha_numeric_punct'
 			],
-			$config::$groupPermission => [
+			$configValidation->userGroup_permission => [
 				'label' => lang( 'Red2Horse.labelGroupPermission' ),
 				'rules' => 'trim|required|min_length[5]|max_length[512]|alpha_numeric_punct'
 			],
-			$config::$groupRole => [
+			$configValidation->userGroup_role => [
 				'label' => lang( 'Red2Horse.labelGroupRole' ),
-				'rules' => 'trim|required|min_length[5]|max_length[128]|alpha_numeric_punct'
+				'rules' => 'trim|required|min_length[3]|max_length[128]|alpha_numeric_punct'
 			],
-			$config::$groupDeletedAt => [
+			$configValidation->userGroup_deletedAt => [
 				'label' => lang( 'Red2Horse.labelGroupDeletedAt' ),
 				'rules' => 'permit_empty|exact_length[19]'
 			]

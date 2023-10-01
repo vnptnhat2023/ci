@@ -4,14 +4,7 @@ declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Trait;
 
 /**
- *  @from https://www.php.net/manual/en/closure.bindto.php
- * ```php
-$foo = new class
-{
-    $privateValue;
-};
-    $foo->A = fn() => $this->privateValue;
- * ```
+ * @source https://www.php.net/manual/en/closure.bindto.php
  */
 trait TraitBindTo
 {

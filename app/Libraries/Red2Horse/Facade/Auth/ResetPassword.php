@@ -66,29 +66,29 @@ class ResetPassword
 		self::$username = $u; self::$email = $e; self::$captcha = $c;
 
 		$configValidation = getConfig( 'validation' );
-		$validation = getComponents( 'validation' );
+		$validationComponent = getComponents( 'validation' );
 
 		$groups = getComponents( 'throttle' )->showCaptcha() 
-			? [ $configValidation::$username, $configValidation::$email, $configValidation::$captcha ]
-			: [ $configValidation::$username, $configValidation::$email ];
+			? [ $configValidation->user_username, $configValidation->user_email, $configValidation->user_captcha ]
+			: [ $configValidation->user_username, $configValidation->user_email ];
 
-		$rules = $validation->getRules( $groups );
+		$rules = $validationComponent->getRules( $groups );
 
 		$data = [
-			$configValidation::$username => self::$username,
-			$configValidation::$email => self::$email
+			$configValidation->user_username => self::$username,
+			$configValidation->user_email => self::$email
 		];
 
 		$message = getInstance( Message::class );
 
-		if ( ! $validation->isValid( $data, $rules ) )
+		if ( ! $validationComponent->isValid( $data, $rules ) )
 		{
-			$message ->errorInformation( true, array_values( $validation->getErrors() ) );
+			$message ->errorInformation( true, array_values( $validationComponent->getErrors() ) );
 			return false;
 		}
 
 		$find_user = getComponents( 'user' )
-			->getUserWithGroup( \Red2Horse\Mixins\Functions\sqlGetColumns(), $data );
+			->getUserWithGroup( \Red2Horse\Mixins\Functions\sqlSelectColumns(), $data );
 
 		if ( empty( $find_user ) )
 		{

@@ -6,6 +6,8 @@ namespace Red2Horse\Facade\Validation;
 
 use Red2Horse\Mixins\Traits\TraitSingleton;
 
+use function Red2Horse\Mixins\Functions\getComponents;
+
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
 class ValidationFacade implements ValidationFacadeInterface
@@ -17,6 +19,11 @@ class ValidationFacade implements ValidationFacadeInterface
 	public function __construct ( ValidationFacadeInterface $validate )
 	{
 		$this->validate = $validate;
+	}
+
+	public function reInit () : void
+	{
+		$this->validate = getComponents( 'validation', 'RegistryClass', true, true );
 	}
 
 	public function isValid ( array $data, array $rules ) : bool

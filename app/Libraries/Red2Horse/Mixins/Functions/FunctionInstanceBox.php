@@ -8,7 +8,7 @@ use Red2Horse\Mixins\Classes\Registry\RegistryClass;
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
 /** @return RegistryClass */
-function RegInstance( string $state ) : object
+function RegInstance ( string $state ) : object
 {
     $state = registryNamespace( $state );
     return $state::selfInstance();

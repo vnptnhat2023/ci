@@ -8,17 +8,16 @@ use Red2Horse\Mixins\{
     Traits\TraitSingleton
 };
 
+use function Red2Horse\Mixins\Functions\getConfig;
+
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
 class SqlClass implements SqlClassInterface
 {
 	use TraitSingleton;
 
-	private array $defaultTables = [ 'user', 'user_group' ];
-
 	/** Select & import */
 	private array $database = [
-
 		'tables' => [
 			'user' => 'user',
 			'user_group' => 'user_group'
@@ -54,8 +53,58 @@ class SqlClass implements SqlClassInterface
 		]
 	];
 
-	private function __construct () {}
-	
+	private function __construct ()
+	{
+		$this->reInit();
+	}
+
+	public function reInit () : void
+	{
+		$configValidation = getConfig( 'validation' );
+
+		$database = [];
+		$tables = $this->database[ 'tables' ];
+		$userGroupTable = $tables[ 'user_group' ];
+
+		foreach ( $tables as $table )
+		{
+			$fields = array_keys( $this->database[ $table ] );
+
+			foreach ( $fields as $field )
+			{
+				$configField = ( $table == $userGroupTable )
+					? 'userGroup_' . $this->_camelCase( $field )
+					: 'user_' . $this->_camelCase( $field );
+
+				if ( is_array( $this->database[ $table ][ $field ] ) )
+				{
+					$fieldArray = $this->database[ $table ][ $field ];
+					$fieldArray[ 0 ] = $configValidation->$configField;
+					$database[ $table ][ $field ] = $fieldArray;
+				}
+				else
+				{
+					$database[ $table ][ $field ] = $configValidation->$configField;
+				}
+			}
+		}
+
+		$this->database = $database;
+		$this->database[ 'tables' ] = $tables;
+	}
+
+	private function _camelCase ( string $str, bool $ucfirst = false ) : string
+	{
+		$str = str_replace( ' ', '', ucwords( str_replace( [ '-', '_' ], ' ', $str ) ) );
+
+		if ( ! $ucfirst )
+		{
+			$str[ 0 ] = strtolower( $str[ 0 ] );
+		}
+
+		return $str;
+	}
+
 	public function getData ( ?string $key = null )
 	{
 		return ( null === $key ) ? $this->database : $this->database[ $key ];
@@ -64,25 +113,37 @@ class SqlClass implements SqlClassInterface
 	/**
 	 * @throws \Error
 	 */
-	public function getTable( string $key )
+	public function getTable( string $key, bool $getKey = false )
 	{
-		if ( ! $this->database[ 'tables' ][ $key ] )
+		$table = $this->database[ 'tables' ];
+
+		if ( ! array_key_exists( $key, $table ) || empty( $table[ $key ] ) )
 		{
 			throw new \Error( 'Undefined table: ' . $key );
 		}
 
-		return $this->database[ 'tables' ][ $key ];
+		if ( $getKey )
+		{
+			return $key;
+		}
+
+		return $table[ $key ];
+	}
+
+	private function _filter ( string $str ) : string
+	{
+		return strtolower( $str );
 	}
 
 	/** @param mixed $value */
 	public function setTable( string $table, string $name ) : bool
 	{
-		if ( in_array( $table, $this->defaultTables ) )
+		if ( in_array( $table, $this->database[ 'tables' ] ) )
 		{
 			throw new \Error( 'Table name cannot contain [ user or user_group ].' );
 		}
 
-		$this->database[ 'tables' ][ $table ] = $name;
+		$this->database[ 'tables' ][ $table ] = $this->_filter( $name );
 
 		return true;
 	}
@@ -102,7 +163,7 @@ class SqlClass implements SqlClassInterface
 			throw new \Error( 'The key cannot be table.' );
 		}
 
-		$this->database[ $key ] = $value;
+		$this->database[ $key ] = $this->_filter( $value );
 
 		return true;
 	}
@@ -111,7 +172,7 @@ class SqlClass implements SqlClassInterface
 	{
 		$column = $this->database[ $this->getTable( $table ) ];
 		$fn = fn( $value ) => is_array( $value ) && isset( $value[ 0 ] )
-			? $value[ 0 ] 
+			? $value[ 0 ]
 			: $value;
 
 		$column = array_map( $fn, $column );
@@ -134,7 +195,7 @@ class SqlClass implements SqlClassInterface
 			throw new \Error( 'Undefined table: ' . $table );
 		}
 
-		$this->database[ $table ][ $key ] = $value;
+		$this->database[ $table ][ $key ] = $this->_filter( $value );
 
 		return true;
 	}

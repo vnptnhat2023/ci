@@ -8,6 +8,7 @@ require_once realpath( \Red2Horse\R2H_BASE_PATH . '/Config/ConstantNamespace.php
 require_once realpath( $functions_path . '/FunctionInstanceBox.php' );
 require_once realpath( $functions_path . '/FunctionInstance.php' );
 
+require_once realpath( $functions_path . '/FunctionMessage.php' );
 require_once realpath( $functions_path . '/FunctionNamespace.php' );
 require_once realpath( $functions_path . '/FunctionConfig.php' );
 require_once realpath( $functions_path . '/FunctionSql.php' );
