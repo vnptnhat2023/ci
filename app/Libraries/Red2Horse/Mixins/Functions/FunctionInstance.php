@@ -8,10 +8,10 @@ use Red2Horse\Mixins\Classes\Registry\RegistryClass;
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
 /** @return RegistryClass */
-function classInit ( string $classNamespace, string $state, bool $getShared ) : object
+function classInit ( string $name, string $state, bool $getShared ) : object
 {
     $state = registryNamespace( $state );
-    return $state::selfInstance() ->init( $classNamespace, $getShared );
+    return $state::selfInstance() ->init( $name, $getShared );
 }
 
 /**
@@ -26,9 +26,9 @@ function getInstance ( string $classNamespace, string $state = 'RegistryClass', 
  * @param bool $getShared For adapter only
  * @return \Red2Horse\Mixins\Traits\TraitSingleton
  */
-function getComponents ( string $classNamespace, string $state = 'RegistryClass', bool $getShared = true, bool $getAdapter = false ) : object
+function getComponents ( string $name, bool $getShared = true, bool $getAdapter = false ) : object
 {
-    return classInit( $classNamespace, $state, $getShared ) ->getComponents( $getAdapter );
+    return classInit( $name, 'RegistryClass', $getShared ) ->getComponents( $getAdapter );
 }
 
 function getInstanceMethods ( string $classNamespace, string $state = 'RegistryClass', bool $getShared = true ) : array

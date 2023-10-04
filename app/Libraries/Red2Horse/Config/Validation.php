@@ -21,7 +21,7 @@ class Validation
 {
 	use TraitSingleton;
 
-	/** User columns */
+	# User columns
 	protected string $user_id = 'id';
 	protected string $user_groupId = 'group_id';
 	protected string $user_username = 'username';
@@ -38,7 +38,7 @@ class Validation
 	protected string $user_token = 'token';
 	protected string $user_captcha = 'captcha';
 
-	/** User group columns */
+	# User group columns
 	protected string $userGroup_id = 'id';
 	protected string $userGroup_name = 'name';
 	protected string $userGroup_permission = 'permission';

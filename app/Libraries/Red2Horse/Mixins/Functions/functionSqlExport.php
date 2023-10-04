@@ -13,15 +13,20 @@ function sqlClassExportInstance() : SqlClassExport
     return getInstance( SqlClassExport::class );
 }
 
-function sqlSelectColumn ( array $userColumns, bool $join = true ) : string
+/** @param string[] $fields */
+function selectExport ( string $table, array $fields ) : string
 {
-    return sqlClassExportInstance()->sqlSelectColumn( $userColumns, $join );
+    return sqlClassExportInstance()->selectExport( $table, $fields );
 }
 
-function sqlSelectColumns ( array $addColumns = [], bool $join = true ) : string
+/**
+ * @param string[] $table
+ * @param string[]|<string,mixed>[] $columns
+ * ```php $data = [ 'table_name' => [ 'field', [ 'field', 'as', 'alias_field' ] ] ];```
+ */
+function selectExports ( array $data ) : string
 {
-    $str = sqlClassExportInstance()->sqlSelectColumns( $addColumns, $join );
-    return $str;
+    return sqlClassExportInstance()->selectExports( $data );
 }
 
 function createTable ( string $table, bool $query = false ) : string

@@ -10,7 +10,9 @@ use function Red2Horse\Mixins\Functions\
 	getComponents,
     getConfig,
     getInstance,
-	getUserField
+    getTable,
+    getUserField,
+    selectExports
 };
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
@@ -87,8 +89,10 @@ class ResetPassword
 			return false;
 		}
 
-		$find_user = getComponents( 'user' )
-			->getUserWithGroup( \Red2Horse\Mixins\Functions\sqlSelectColumns(), $data );
+		$find_user = getComponents( 'user' ) ->getUserWithGroup(
+			selectExports( [ getTable( 'user' ) => [], getTable( 'user_group' ) => [] ] ),
+			$data 
+		);
 
 		if ( empty( $find_user ) )
 		{

@@ -11,10 +11,5 @@ class CallClass
 {
 	use TraitSingleton;
 
-    public bool $traitUseBefore = true;
-    public bool $traitUseAfter = true;
-    public string $traitBeforePrefix = 'R2h_before_';
-    public string $traitAfterPrefix = 'R2h_after_';
-
     private function __construct () {}
 }

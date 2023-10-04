@@ -15,7 +15,8 @@ use function Red2Horse\Mixins\Functions\
     getTable,
 	getField,
     getUserField,
-    getUserGroupField
+    getUserGroupField,
+    selectExports
 };
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
@@ -149,7 +150,7 @@ class Authentication
 		];
 
 		$userData = getComponents( 'user' )->getUserWithGroup(
-			\Red2Horse\Mixins\Functions\sqlSelectColumns( [ getUserField( 'password' ) ] ),
+			selectExports( [ getTable( 'user' ) => [], getTable( 'user_group' ) => [] ] ),
 			$userDataArgs
 		);
 

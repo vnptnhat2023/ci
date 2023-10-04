@@ -5,6 +5,12 @@ namespace App\Controllers;
 
 use Red2Horse\R2h;
 
+// use function Red2Horse\Mixins\Functions\getColumn;
+// use function Red2Horse\Mixins\Functions\getField;
+// use function Red2Horse\Mixins\Functions\getTable;
+use function Red2Horse\Mixins\Functions\selectExports;
+// use function Red2Horse\Mixins\Functions\sqlSelectColumn;
+
 class Install extends BaseController
 {
     protected R2h $auth;
@@ -19,6 +25,20 @@ class Install extends BaseController
 			$valid->user_password = 'qwe_password';
 			return $valid;
 		} );
+	}
+
+	public function xoa()
+	{
+		// $sql = sqlSelectColumn( [ getField( 'id', 'user' )  => 'user_id' ] );
+		// $data = [ 'user' => [ [ 'id', 'as', 'user_id' ] ], 'user_group' => [] ];
+		$sec = selectExports( [ 'user' => [ [ 'id', 'as', 'user_id' ] ], 'user_group' => [] ] );
+		echo $sec;
+		// dd( $sql, $sec );
+	}
+
+	public function select ()
+	{
+		$this->auth->selectExport();
 	}
 
     public function index ()

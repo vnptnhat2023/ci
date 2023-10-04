@@ -20,6 +20,19 @@ function getUserField ( string $key )
 }
 
 /** @return mixed */
+function getUserFields ( array $keys )
+{
+    return getFields( $keys, 'user' );
+}
+
+/** @return mixed */
+function getUserGroupFields ( array $keys )
+{
+    return getFields( $keys, 'user_group' );
+}
+
+
+/** @return mixed */
 function getUserGroupField ( string $key )
 {
     return getField( $key, 'user_group' );
@@ -30,14 +43,21 @@ function getTable ( string $key = 'user_group', bool $getKey = false ) : string
     return sqlClassInstance()->getTable( $key, $getKey );
 }
 
-function getColumn ( string $key = 'user_group' )
+function getColumn ( string $key = 'user_group', string $userFunc = '' )
 {
-    return sqlClassInstance()->getColumn( $key );
+    $data = sqlClassInstance()->getColumn( $key );
+
+    if ( function_exists( $userFunc ) )
+    {
+        $data = call_user_func( $userFunc, $data );
+    }
+
+    return $data;
 }
 
-function getFields ( array $keys, string $table = 'user_group' )
+function getFields ( array $keys, string $table = 'user_group', bool $columnsFormat = true, $keysFormat = true )
 {
-    return sqlClassInstance()->getFields( $keys, $table );
+    return sqlClassInstance()->getFields( $keys, $table, $columnsFormat, $keysFormat );
 }
 
 /** @return mixed */
@@ -63,6 +83,7 @@ function createDatabase ( string $s, string $u, string $p, string $d, ?int $port
         return false;
     }
 
+    $d = getComponents( 'common' )->esc( $d );
     if ( ! mysqli_query( $conn, "CREATE DATABASE IF NOT EXISTS {$d}" ) )
     {
         $message::$info[] = $common->lang( 'Red2Horse.errorCreatingDatabase', [ $d ] );

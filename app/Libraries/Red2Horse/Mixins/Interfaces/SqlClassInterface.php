@@ -5,6 +5,8 @@ namespace Red2Horse\Mixins\Interfaces;
 
 interface SqlClassInterface
 {
+    public function reInit () : void;
+
     /** @return mixed */
     public function getData ( ?string $key = null );
 
@@ -18,6 +20,7 @@ interface SqlClassInterface
 
     public function setColumn( string $key, string $value ) : bool;
 
+    public function getFields( array $keys, string $table ) : array;
     /** @return mixed */
     public function getField( string $key, string $table )/* : mixed*/;
 

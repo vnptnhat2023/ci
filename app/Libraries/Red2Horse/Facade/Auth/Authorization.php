@@ -11,7 +11,8 @@ use function Red2Horse\Mixins\Functions\
     getField,
     getInstance,
     getTable,
-    getVerifyPass
+    getVerifyPass,
+    selectExports
 };
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
@@ -77,12 +78,13 @@ final class Authorization
 
 		if ( ! $userData )
 		{
+			$selectArray = [
+				getTable( 'user' ) => [ [ getField( 'id', 'user' ), 'as', 'user_id' ] ],
+				getTable( 'user_group' ) => []
+			];
+			$selectStr = selectExports( $selectArray );
 			/** @var array $userDB */
-			$userDB = getComponents( 'user' )->getUserWithGroup(
-				\Red2Horse\Mixins\Functions\sqlSelectColumn( [ getField( 'id', 'user' )  => 'user_id' ] ),
-				$userDataArgs
-			);
-
+			$userDB = getComponents( 'user' )->getUserWithGroup( $selectStr, $userDataArgs );
 			unset( $userData );
 			$userData[ $usernameSess[ 0 ] ] = json_decode( $userDB[ getField( 'role', 'user_group' ) ], true );
 			/** Set cache from DB */

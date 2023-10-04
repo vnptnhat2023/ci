@@ -9,8 +9,10 @@ use function Red2Horse\Mixins\Functions\
 	getComponents,
     getConfig,
     getInstance,
+    getTable,
     getUserField,
-    getUserGroupField
+    getUserGroupField,
+    selectExports
 };
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
@@ -61,7 +63,7 @@ class CookieHandle
 		$token = $separate[ 1 ];
 
 		$user = getComponents( 'user' ) ->getUserWithGroup(
-			\Red2Horse\Mixins\Functions\sqlSelectColumns(),
+			selectExports( [ getTable( 'user' ) => [], getTable( 'user_group' ) => [] ] ),
 			[ getUserField( 'selector' ) => $selector ]
 		);
 

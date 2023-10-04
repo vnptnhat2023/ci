@@ -9,7 +9,7 @@ interface ValidationFacadeInterface
 	public function ruleStore() : array;
 	public function isValid ( array $data, array $rules) : bool;
 
-	public function getErrors ( string $field = null ) : array;
+	public function getErrors ( ?string $field = null ) : array;
 
 	/**
 	 * @param string|array|null $key

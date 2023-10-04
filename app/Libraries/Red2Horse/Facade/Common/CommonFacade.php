@@ -6,6 +6,8 @@ namespace Red2Horse\Facade\Common;
 
 use Red2Horse\Mixins\Traits\TraitSingleton;
 
+use function Red2Horse\Mixins\Functions\getConfig;
+
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
 class CommonFacade implements CommonFacadeInterface
@@ -97,5 +99,23 @@ class CommonFacade implements CommonFacadeInterface
 
 		// 'basic' type treated as default
 		return (string) mt_rand();
+	}
+
+	function camelCase ( string $str, bool $ucfirst = false ) : string
+	{
+		$str = str_replace( ' ', '', ucwords( str_replace( [ '-', '_' ], ' ', $str ) ) );
+
+		if ( ! $ucfirst )
+		{
+			$str[ 0 ] = strtolower( $str[ 0 ] );
+		}
+
+		return $str;
+	}
+
+	public function esc ( string $str ) : string
+	{
+		$isEscape = getConfig( 'sql' )->esc;
+		return $isEscape ? str_replace( ['\'', '\"'], ['\'\'', '\"\"'], $str ) : $str;
 	}
 }

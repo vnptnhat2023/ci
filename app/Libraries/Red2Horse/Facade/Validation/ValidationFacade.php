@@ -23,7 +23,7 @@ class ValidationFacade implements ValidationFacadeInterface
 
 	public function reInit () : void
 	{
-		$this->validate = getComponents( 'validation', 'RegistryClass', true, true );
+		$this->validate = getComponents( 'validation', true, true );
 	}
 
 	public function isValid ( array $data, array $rules ) : bool
@@ -31,7 +31,7 @@ class ValidationFacade implements ValidationFacadeInterface
 		return $this->validate->isValid( $data, $rules );
 	}
 
-	public function getErrors ( string $field = null ) : array
+	public function getErrors ( ?string $field = null ) : array
 	{
 		return $this->validate->getErrors( $field );
 	}

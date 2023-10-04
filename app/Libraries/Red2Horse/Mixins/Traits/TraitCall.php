@@ -3,6 +3,7 @@
 declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Traits;
 
+use Red2Horse\Facade\Auth\Event;
 use Red2Horse\Mixins\Classes\Registry\RegistryEventClass;
 
 use function Red2Horse\Mixins\Functions\
@@ -33,18 +34,18 @@ trait TraitCall
 
     public function run ( string $className = '' ) : void
     {
-        $callConfig = getConfig( 'CallClass' );
+        $eventConfig = getConfig( 'event' );
 
-        $this->traitUseBefore ??= $callConfig->traitUseBefore;
-        $this->traitUseAfter ??= $callConfig->traitUseAfter;
-        $this->traitBeforePrefix ??= $callConfig->traitBeforePrefix;
-        $this->traitAfterPrefix ??= $callConfig->traitAfterPrefix;
+        $this->traitUseBefore ??= $eventConfig->useBefore;
+        $this->traitUseAfter ??= $eventConfig->useAfter;
+        $this->traitBeforePrefix ??= $eventConfig->beforePrefix;
+        $this->traitAfterPrefix ??= $eventConfig->afterPrefix;
 
         $this->traitCallInstance = getInstance( $className );
         $this->traitCallMethods = getInstanceMethods( $className );
         $this->traitCallback[ 'callback' ] = function( string $name, $args ) : bool
         {
-            return getComponents( 'event' )->trigger( $name, $args );
+            return getInstance( Event::class )->trigger( $name, $args );
         };
     }
 

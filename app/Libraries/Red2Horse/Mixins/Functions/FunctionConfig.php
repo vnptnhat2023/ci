@@ -18,9 +18,9 @@ function initConfig () : void
 //  * @return object|\Red2Horse\Mixins\Traits\TraitSingleton
  * @throws \Error
  */
-function getConfig ( string $name = '', bool $getShared = true ) : object
+function getConfig ( ?string $name = null, bool $getShared = true ) : object
 {
-    if ( '' === $name )
+    if ( '' === $name || null === $name )
     {
         return getInstance( configNamespace( 'BaseConfig' ), Reg::class, $getShared );
     }

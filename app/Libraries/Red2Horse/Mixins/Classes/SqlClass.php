@@ -8,7 +8,12 @@ use Red2Horse\Mixins\{
     Traits\TraitSingleton
 };
 
-use function Red2Horse\Mixins\Functions\getConfig;
+use function Red2Horse\Mixins\Functions\
+{
+	getComponents,
+	getConfig,
+	getField
+};
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
@@ -61,6 +66,7 @@ class SqlClass implements SqlClassInterface
 	public function reInit () : void
 	{
 		$configValidation = getConfig( 'validation' );
+		$common = getComponents( 'common' );
 
 		$database = [];
 		$tables = $this->database[ 'tables' ];
@@ -73,8 +79,8 @@ class SqlClass implements SqlClassInterface
 			foreach ( $fields as $field )
 			{
 				$configField = ( $table == $userGroupTable )
-					? 'userGroup_' . $this->_camelCase( $field )
-					: 'user_' . $this->_camelCase( $field );
+					? 'userGroup_' . $common->camelCase( $field )
+					: 'user_' . $common->camelCase( $field );
 
 				if ( is_array( $this->database[ $table ][ $field ] ) )
 				{
@@ -91,18 +97,6 @@ class SqlClass implements SqlClassInterface
 
 		$this->database = $database;
 		$this->database[ 'tables' ] = $tables;
-	}
-
-	private function _camelCase ( string $str, bool $ucfirst = false ) : string
-	{
-		$str = str_replace( ' ', '', ucwords( str_replace( [ '-', '_' ], ' ', $str ) ) );
-
-		if ( ! $ucfirst )
-		{
-			$str[ 0 ] = strtolower( $str[ 0 ] );
-		}
-
-		return $str;
 	}
 
 	public function getData ( ?string $key = null )
@@ -132,6 +126,13 @@ class SqlClass implements SqlClassInterface
 
 	private function _filter ( string $str ) : string
 	{
+		$isEscape = getConfig( 'sql' )->esc;
+
+		if ( $isEscape )
+		{
+			$str = getComponents( 'common' )->esc( $str );
+		}
+
 		return strtolower( $str );
 	}
 
@@ -168,14 +169,25 @@ class SqlClass implements SqlClassInterface
 		return true;
 	}
 
-	public function getFields( array $keys, string $table )
+	public function getFields( array $keys, string $table, bool $columnsFormat = true, bool $keysFormat = true ) : array
 	{
 		$column = $this->database[ $this->getTable( $table ) ];
-		$fn = fn( $value ) => is_array( $value ) && isset( $value[ 0 ] )
-			? $value[ 0 ]
-			: $value;
 
-		$column = array_map( $fn, $column );
+		/** Column */
+		if ( $columnsFormat )
+		{
+			$fn = fn( $value ) => is_array( $value ) && isset( $value[ 0 ] )
+				? $value[ 0 ]
+				: $value;
+
+			$column = array_map( $fn, $column );
+		}
+
+		/** Keys */
+		if ( $keysFormat )
+		{
+			$keys = array_map( fn( string $key ) => getField( $key, $table ), $keys );
+		}
 
 		return array_intersect( $column, $keys );
 	}

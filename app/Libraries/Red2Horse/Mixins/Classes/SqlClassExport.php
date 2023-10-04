@@ -14,6 +14,7 @@ use function Red2Horse\Mixins\Functions\
     getTable,
     getColumn,
     getComponents,
+    getConfig,
     getField,
     getFields,
     getHashPass,
@@ -23,55 +24,24 @@ use function Red2Horse\Mixins\Functions\
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
+/** @todo escape */
 class SqlClassExport
 {
     use TraitSingleton;
-
-    // DROP TABLE IF EXISTS `:user:`;
-    public string $userTemplateTbl = '
-    CREATE TABLE IF NOT EXISTS `:user:` (
-    `:id:` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-    `:group_id:` int(10) UNSIGNED NOT NULL DEFAULT 0,
-    `:username:` varchar(32) NOT NULL DEFAULT "unknown",
-    `:email:` varchar(128) NOT NULL DEFAULT "unknown",
-    `:password:` varchar(64) NOT NULL DEFAULT "unknown",
-    `:status:` enum("active","inactive","banned") NOT NULL DEFAULT "inactive",
-    `:selector:` varchar(255) DEFAULT NULL,
-    `:token:` varchar(255) DEFAULT NULL,
-    `:last_login:` varchar(64) DEFAULT NULL,
-    `:last_activity:` datetime DEFAULT NULL,
-    `:session_id:` varchar(40) DEFAULT NULL,
-    `:created_at:` date DEFAULT NULL,
-    `:updated_at:` date DEFAULT NULL,
-    `:deleted_at:` date DEFAULT NULL,
-    PRIMARY KEY (`:id:`),
-    UNIQUE KEY `:email:` (`:email:`),
-    UNIQUE KEY `:username:` (`:username:`),
-    KEY `:group_id:` (`:group_id:`)
-    ) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4;';
-
-    // DROP TABLE IF EXISTS `:user_group:`;
-    public string $userGroupTemplateTbl = '
-    CREATE TABLE IF NOT EXISTS `:user_group:` (
-    `:id:` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-    `:name:` varchar(64) NOT NULL DEFAULT "guest",
-    `:role:` varchar(64) NOT NULL DEFAULT "unknown",
-    `:permission:` varchar(512) DEFAULT NULL,
-    `:deleted_at:` date DEFAULT NULL,
-    PRIMARY KEY (`:id:`)
-    ) ENGINE=MyISAM AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4;';
 
     private function __construct () { }
 
     /**
      * Seeder
-     * @return array ( intersect ) | ( intersect, sql )
+     * Validate, query with intersect array
+     * @return array [ intersect ] | [ intersect, sql ]
      */
     public function seed ( string $tableName, array $intersect = [], bool $query = false ) : array
     {
         $validation = getComponents( 'validation' );
         $req = getComponents( 'request' );
-        $keys = getFields( $intersect, $tableName );
+        $keys = getFields( $intersect, $tableName, true, false );
+
         $return = [ 'intersect' => $intersect, 'sql' => '' ];
 
         if ( empty( $posts = $req->post() ) ) { return $return; }
@@ -86,34 +56,32 @@ class SqlClassExport
             $rules = $validation->getRules( $keys );
         }
 
-        $user_password = getField( 'password', getTable( 'user' ) );
-        if ( array_key_exists( $user_password, $posts ) )
-        {
-            $posts[ $user_password ] = getHashPass( $posts[ $user_password ] );
-        }
-
         if ( ! $validation->isValid( $posts, $rules ) )
         {
             getInstance( Message::class )::$errors += $validation->getErrors();
             return $return;
         }
 
-        $sql = $this->export( $tableName, $posts );
+        $user_password = getField( 'password', getTable( 'user' ) );
+        if ( array_key_exists( $user_password, $posts ) )
+        {
+            $posts[ $user_password ] = getHashPass( $posts[ $user_password ] );
+        }
+
+        $sql = $this->seedExport( $tableName, $posts );
 
         if ( $query && ! getComponents( 'user' )->querySimple( $sql ) )
         {
             throw new \Error( sprintf( 'Cannot query %s:%s', __METHOD__, __LINE__ ) );
         }
 
-        $message = getInstance( Message::class );
-        $message::$successfully = true;
-        $message::$success[] = getComponents( 'common' )->lang( 'Red2Horse.successSeeder' );
+        setSuccessMessage( ( array ) getComponents( 'common' )->lang( 'Red2Horse.successSeeder' ) );
 
         $return[ 'sql' ] = $sql;
         return $return;
     }
 
-    public function export ( string $tableName, array $data ) : string
+    public function seedExport ( string $tableName, array $data ) : string
     {
         if ( empty( $tableName ) || empty( $data ) )
         {
@@ -121,8 +89,20 @@ class SqlClassExport
             throw new \Error( sprintf( $errorStr ), 406 );
         }
 
-        $columns = implode( ',', array_map( fn( $str ) => "`{$str}`" , array_keys( $data ) ) );
-        $values = implode( ',', array_map( fn( $str ) => "'{$str}'" , array_values( $data ) ) );
+        $common = getComponents( 'common' );
+
+        $escColumns = function ( string $str ) use( $common ) {
+            $str = $common->esc( $str );
+            return "`{$str}`";
+        };
+
+        $escValue = function ( string $str ) use( $common ) {
+            $str = $common->esc( $str );
+            return "'{$str}'";
+        };
+
+        $columns = implode( ',', array_map( $escColumns , array_keys( $data ) ) );
+        $values = implode( ',', array_map( $escValue , array_values( $data ) ) );
 
         $sql = sprintf(
             'INSERT INTO `%s`(%s) VALUES(%s);',
@@ -133,8 +113,6 @@ class SqlClassExport
 
         return $sql;
     }
-    /** End seeder */
-
 
     /**
      * @param bool $query true: ( string + query ); false ( string ) only
@@ -149,10 +127,11 @@ class SqlClassExport
         $vars = array_map( $varsFn, $columns );
         $vars[ $tableKeyName ] = $tableName;
 
-        $tableVarName = sprintf( '%sTemplateTbl', $this->_camelCase( $tableKeyName ) );
+        $tableVarName = sprintf( '%sTemplateTbl', getComponents( 'common' )->camelCase( $tableKeyName ) );
+        $tableTemplate = getConfig( 'sql' )->{ $tableVarName };
 
         $match = function( $match ) use ( $vars ) { return $vars[ $match[ 1 ] ]; };
-        $sqlParser = preg_replace_callback( '/:(.*?):/', $match, $this->{ $tableVarName } );
+        $sqlParser = preg_replace_callback( '/:(.*?):/', $match, $tableTemplate );
 
         if ( $query )
         {
@@ -167,102 +146,128 @@ class SqlClassExport
         return $sqlParser;
     }
 
-    private function _camelCase ( string $str, bool $ucfirst = false ) : string
-	{
-		$str = str_replace( ' ', '', ucwords( str_replace( [ '-', '_' ], ' ', $str ) ) );
-
-		if ( ! $ucfirst )
-		{
-			$str[ 0 ] = strtolower( $str[ 0 ] );
-		}
-
-		return $str;
-	}
-
-    public function sqlSelectColumn ( array $userColumns, bool $join = true ) : string
+    public function selectExport ( string $tbl, array $data ) : string
     {
-        if ( empty( $userColumns ) )
+        $arrayKeyMap = new arrayKeyMap;
+        return $arrayKeyMap( $tbl, $data );
+    }
+
+    /**
+     * @throws \Error
+     * @param \stdClass|array $data
+     */
+    public function selectExports ( array $data ) : string
+    {
+        $data = $this->_selectExportFormat( $data );
+
+        if ( empty( $tables = $data[ 'tables' ] ) )
         {
-            throw new \Error( 'Empty column variable.' );
+            throw new \Error( 'Invalid format data variable.', 406 );
         }
 
-        $tableUser = getTable( 'user' );
-        $userFields = getColumn( 'user' );
+        $fields = [];
 
-        $test = ( getComponents( 'common' )->isAssocArray( $userColumns ) )
-            ? array_keys( $userColumns )
-            : $userColumns;
-
-        $diffs = array_diff( $test, array_keys( $userFields ) );
-        if ( ! empty( $diffs ) )
+        foreach ( $tables as $tbl )
         {
-            throw new \Error( 'Not Acceptable' , 406 );
-        } 
-
-        $uCols = '';
-        foreach ( $userColumns as $key => $value )
-        {
-            if ( is_string( $key ) )
+            if ( empty( $field = $data[ 'data' ][ $tbl ]  ) )
             {
-                $uCols .= sprintf( '%s.%s as %s,', $tableUser, $key, $value );
+                throw new \Error( 'Invalid format data variable.', 406 );
+            }
+            /** @var string[] $fields */
+            $fields[] = $this->selectExport( $tbl, $field );
+        }
+        
+        return implode( ',', $fields );
+    }
+
+    private function _selectExportFormat ( array $data ) : array
+    {
+        $dataTables = [];
+        $dataColumns = [];
+
+        foreach ( $data as $table => $columns )
+        {
+            $dataTables[] = getTable( $table );
+
+            if ( empty( $columns ) )
+            {
+                $dataColumns[ $table ] = getColumn( $table );
+            }
+            else if ( is_array( $columns ) )
+            {
+                foreach ( $columns as $columnElement )
+                {
+                    if ( is_array( $columnElement ) )
+                    {
+                        $columnElement[ 0 ] = getField( $columnElement[ 0 ], $table );
+                        $dataColumns[ $table ][ $columnElement[ 0 ] ] = $columnElement;
+                    }
+                    else
+                    {
+                        $dataColumns[ $table ][ $columnElement ] = getField( $columnElement, $table );
+                    }
+                }
             }
             else
             {
-                $uCols .= sprintf( '%s.%s,', $tableUser, $value );
+                $dataColumns[ $table ] = getFields( $columns, $table, false );
             }
         }
 
-        if ( $join )
-        { # user_group
-            $tableUserGroup = getTable( 'user_group' );
-            $userGroup = getColumn( 'user_group' );
-            extract( $userGroup );
-
-            $columns[] = "{$tableUserGroup}.{$id[ 0 ]} {$id[ 1 ]} {$id[ 2 ]}";
-            $columns[] = "{$tableUserGroup}.{$name[ 0 ]} {$name[ 1 ]} {$name[ 2 ]}";
-            $columns[] = "{$tableUserGroup}.{$permission}";
-            $columns[] = "{$tableUserGroup}.{$role}";
-        }
-
-        $userGroup = implode( ',', $columns );
-        $str = $uCols . $userGroup;
-
-        return $str;
-    }
-
-    public function sqlSelectColumns ( array $addColumns = [], bool $join = true ) : string
-    {
-        $tableUser = getTable( 'user' );
-        $userFields = getColumn( 'user' );
-        extract( $userFields );
-        
-        $columns = [ # user
-            "{$tableUser}.{$id}",
-            "{$tableUser}.{$username}",
-            "{$tableUser}.{$email}",
-            "{$tableUser}.{$status}",
-            "{$tableUser}.{$last_activity}",
-            "{$tableUser}.{$last_login}",
-            "{$tableUser}.{$created_at}",
-            "{$tableUser}.{$updated_at}",
-            "{$tableUser}.{$session_id}",
-            "{$tableUser}.{$selector}",
-            "{$tableUser}.{$token}",
-            ...$addColumns
+        $data = [
+            'tables' => $dataTables,
+            'data' => $dataColumns
         ];
 
-        if ( $join )
-        { # user_group
-            $tableUserGroup = getTable( 'user_group' );
-            $userGroup = getColumn( 'user_group' );
-            extract( $userGroup );
-
-            $columns[] = "{$tableUserGroup}.{$id[ 0 ]} {$id[ 1 ]} {$id[ 2 ]}";
-            $columns[] = "{$tableUserGroup}.{$name[ 0 ]} {$name[ 1 ]} {$name[ 2 ]}";
-            $columns[] = "{$tableUserGroup}.{$permission}";
-            $columns[] = "{$tableUserGroup}.{$role}";
-        }
-
-        return implode( ',', $columns );
+        return $data;
     }
 }
+
+/**
+ * Assign string before elements array.
+ */
+class arrayKeyMap{
+    public string $tbl;
+    public int $limit = 10;
+    public array $map;
+
+    private bool $mapped = false;
+
+    /**
+     * @throws \Error
+     * @return array|string
+     */
+    public function __invoke( string $tbl, array $map, bool $toString = true )
+    {
+        if ( empty( $map ) || '' === $tbl )
+        {
+            throw new \Error( 'The property $map cannot empty.', 406);
+        }
+        $this->tbl = $tbl;
+        $this->map = $map;
+
+        $mapFunc = function ( $value )
+        {
+            if ( is_array( $value ) )
+            {
+                $value = implode( ' ', $value );
+            }
+
+            return sprintf( '%s.%s', $this->tbl, $value );
+        };
+
+        $this->map = array_map( $mapFunc, $this->map );
+        
+        $this->mapped = true;
+        $return = $toString ? $this->__toString() : $this->map;
+        $this->mapped = false;
+
+        return $return;
+    }
+
+    public function __toString () : string
+    { 
+        $this->mapped || $this->__invoke( $this->tbl, $this->map, false );
+        return implode( ',', $this->map );
+    }
+};

@@ -17,9 +17,9 @@ function RegInstance ( string $state ) : object
 /**
  * @return mixed array|null
  */
-function instanceData ( string $name, string $state = 'RegistryClass' )
+function instanceData ( string $classNamespace, string $state = 'RegistryClass' )
 {
-    return RegInstance( $state ) ->InstanceData( $name );
+    return RegInstance( $state ) ->InstanceData( $classNamespace );
 }
 
 /**
@@ -27,25 +27,25 @@ function instanceData ( string $name, string $state = 'RegistryClass' )
  * @return mixed array|object ( call )
  * @throws $th
  */
-function getClass ( string $name, string $key = '', string $state = 'RegistryClass' )
+function getClass ( string $classNamespace, string $key = '', string $state = 'RegistryClass' )
 {
-    return RegInstance( $state ) ->getClass( $name, $key );
+    return RegInstance( $state ) ->getClass( $classNamespace, $key );
 }
 
-function hasClass ( string $name, string $state = 'RegistryClass' ) : bool
+function hasClass ( string $classNamespace, string $state = 'RegistryClass' ) : bool
 {
-    return RegInstance( $state ) ->hasClass( $name );
+    return RegInstance( $state ) ->hasClass( $classNamespace );
 }
 
 /** @param mixed $value */
-function setClass ( string $name, $value, bool $override = false, string $state = 'RegistryClass' ) : bool
+function setClass ( string $classNamespace, $value, bool $override = false, string $state = 'RegistryClass' ) : bool
 {
-    return RegInstance( $state ) ->setClass( $name, $value, $override );
+    return RegInstance( $state ) ->setClass( $classNamespace, $value, $override );
 }
 
-function delClass ( string $name, string $state = 'RegistryClass' ) : bool
+function delClass ( string $classNamespace, string $state = 'RegistryClass' ) : bool
 {
-    return RegInstance( $state ) ->delClass( $name );
+    return RegInstance( $state ) ->delClass( $classNamespace );
 }
 
 function _debugInfo( string $state ) : array
