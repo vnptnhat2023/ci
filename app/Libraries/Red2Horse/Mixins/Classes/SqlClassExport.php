@@ -18,7 +18,7 @@ use function Red2Horse\Mixins\Functions\
     getField,
     getFields,
     getHashPass,
-    getInstance,
+    baseInstance,
     setSuccessMessage,
 };
 
@@ -58,7 +58,7 @@ class SqlClassExport
 
         if ( ! $validation->isValid( $posts, $rules ) )
         {
-            getInstance( Message::class )::$errors += $validation->getErrors();
+            baseInstance( Message::class )::$errors += $validation->getErrors();
             return $return;
         }
 

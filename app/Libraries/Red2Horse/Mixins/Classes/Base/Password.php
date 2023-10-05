@@ -1,7 +1,7 @@
 <?php
 
 declare(strict_types=1);
-namespace Red2Horse\Facade\Auth;
+namespace Red2Horse\Mixins\Classes\Base;
 
 use Red2Horse\Mixins\Traits\TraitSingleton;
 

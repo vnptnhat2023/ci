@@ -12,6 +12,11 @@ function configNamespace ( string $name = '' ) : string
     return formatFunctionNamespace( $name, 'CONFIG_NAMESPACE' );
 }
 
+function baseNamespace ( string $name = '' ) : string
+{
+    return formatFunctionNamespace( $name, 'BASE_NAMESPACE' );
+}
+
 function functionNamespace ( string $name = '' ) : string
 {
     return formatFunctionNamespace( $name, 'FUNCTION_NAMESPACE' );

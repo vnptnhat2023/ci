@@ -1,7 +1,7 @@
 <?php
 
 declare( strict_types = 1 );
-namespace Red2Horse\Facade\Auth;
+namespace Red2Horse\Mixins\Classes\Base;
 
 use Red2Horse\Mixins\Traits\TraitSingleton;
 use function Red2Horse\Mixins\Functions\
@@ -9,7 +9,7 @@ use function Red2Horse\Mixins\Functions\
     getComponents,
     getConfig,
     getField,
-    getInstance,
+    baseInstance,
     getTable,
     getVerifyPass,
     selectExports
@@ -149,7 +149,7 @@ final class Authorization
 		$userData = [];
 		foreach ( $args as $key )
 		{
-			$userData = ( array ) getInstance( Authentication::class )->getUserdata( $key );
+			$userData = ( array ) baseInstance( Authentication::class )->getUserdata( $key );
 		}
 
 		return $userData;

@@ -1,7 +1,7 @@
 <?php
 
 declare( strict_types = 1 );
-namespace Red2Horse\Facade\Auth;
+namespace Red2Horse\Mixins\Classes\Base;
 
 use Red2Horse\Mixins\Traits\TraitSingleton;
 
@@ -10,7 +10,7 @@ use function Red2Horse\Mixins\Functions\
 	getComponents,
     getConfig,
     getHashPass,
-    getInstance,
+    baseInstance,
     getRandomString,
     getTable,
 	getField,
@@ -39,12 +39,12 @@ class Authentication
 		self::$rememberMe = $r;
 		self::$captcha = $c;
 
-		return getInstance( Utility::class )->typeChecker( 'login', $u, $p, null, $c );
+		return baseInstance( Utility::class )->typeChecker( 'login', $u, $p, null, $c );
 	}
 
 	public function logout () : bool
 	{
-		$message = getInstance( Message::class );
+		$message = baseInstance( Message::class );
 		$common = getComponents( 'common' );
 		$session = getComponents( 'session' );
 		$message::$successfully = true;
@@ -96,7 +96,7 @@ class Authentication
 
 		if ( $withCookie )
 		{
-			return getInstance( CookieHandle::class )->cookieHandler();
+			return baseInstance( CookieHandle::class )->cookieHandler();
 		}
 
 		return false;
@@ -122,7 +122,7 @@ class Authentication
 			if ( ! $validationComponent->isValid( $data, $ruleCaptcha ) )
 			{
 				$errorCaptcha = $validationComponent->getErrors( $configValidation->user_captcha );
-				return getInstance( Message::class )->errorInformation( true, $errorCaptcha );
+				return baseInstance( Message::class )->errorInformation( true, $errorCaptcha );
 			}
 		}
 
@@ -137,7 +137,7 @@ class Authentication
 			$incorrectInfo = ! $validationComponent->isValid( $data, $ruleEmail );
 		}
 
-		! $incorrectInfo ?: getInstance( Message::class )->errorInformation( true );
+		! $incorrectInfo ?: baseInstance( Message::class )->errorInformation( true );
 
 		return $incorrectInfo;
 	}
@@ -154,14 +154,14 @@ class Authentication
 			$userDataArgs
 		);
 
-		$message = getInstance( Message::class );
+		$message = baseInstance( Message::class );
 
 		if ( empty( $userData ) )
 		{
 			return [ 'error' => $message->errorInformation() ];
 		}
 
-		$verifyPassword = getInstance( Password::class )
+		$verifyPassword = baseInstance( Password::class )
 			->getVerifyPass( self::$password, $userData[ getUserField( 'password' ) ] );
 
 		if ( ! $verifyPassword )
@@ -213,7 +213,7 @@ class Authentication
 
 		if ( getComponents( 'cache' )->isSupported() )
 		{
-			getInstance( SessionHandle::class )->roleHandle( $userData );
+			baseInstance( SessionHandle::class )->roleHandle( $userData );
 		}
 		else
 		{
@@ -223,7 +223,7 @@ class Authentication
 		/** Set cookie */
 		if ( self::$rememberMe )
 		{
-			getInstance( CookieHandle::class )->setCookie( $userId );
+			baseInstance( CookieHandle::class )->setCookie( $userId );
 		}
 
 		/** Sql update */
@@ -234,7 +234,7 @@ class Authentication
 		}
 
 		/** Generate cookie */
-		getInstance( CookieHandle::class )->regenerateCookie();
+		baseInstance( CookieHandle::class )->regenerateCookie();
 
 		/** Clean old throttle attempts */
 		getComponents( 'throttle' )->cleanup();
@@ -308,7 +308,7 @@ class Authentication
 
 	public function setLoggedInSuccess ( array $userData ) : void
 	{
-		$message = getInstance( Message::class );
+		$message = baseInstance( Message::class );
 		$message::$successfully = true;
 		$message::$success[] = getComponents( 'common' )
 			->lang( 'Red2Horse.successLoggedWithUsername', [ $userData[ getUserField( 'username' ) ] ] );
@@ -358,7 +358,7 @@ class Authentication
 			return $session->sessionTimeToUpdate > $time;
 		}
 
-		getInstance( Message::class )::$errors[] = 'else';
+		baseInstance( Message::class )::$errors[] = 'else';
 
 		return false;
 	}

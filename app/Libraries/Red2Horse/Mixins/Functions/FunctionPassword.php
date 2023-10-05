@@ -9,12 +9,12 @@ defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
 function getHashPass ( string $str ) : string
 {
-    return getInstance( Password::class )->getHashPass( $str );
+    return baseInstance( Password::class )->getHashPass( $str );
 }
 
 function getVerifyPass ( string $password, string $hashed ) : bool
 {
-    return getInstance( Password::class )->getVerifyPass( $password, $hashed );
+    return baseInstance( Password::class )->getVerifyPass( $password, $hashed );
 }
 
 function getRandomString ( string $str ) : string

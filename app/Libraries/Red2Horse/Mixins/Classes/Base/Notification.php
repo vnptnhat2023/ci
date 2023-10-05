@@ -1,10 +1,10 @@
 <?php
 
 declare( strict_types = 1 );
-namespace Red2Horse\Facade\Auth;
+namespace Red2Horse\Mixins\Classes\Base;
 
 use Red2Horse\Mixins\Traits\TraitSingleton;
-use function Red2Horse\Mixins\Functions\getInstance;
+use function Red2Horse\Mixins\Functions\baseInstance;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
@@ -16,7 +16,7 @@ class Notification
 
 	public function mailSender ( string $randomPw ) : bool
 	{
-		$mail = getInstance( 'mail' );
+		$mail = baseInstance( 'mail' );
 
 		$mail
 		// ->setFrom ( 'localhost@example.com', 'Administrator' )

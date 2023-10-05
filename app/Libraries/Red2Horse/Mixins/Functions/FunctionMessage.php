@@ -9,7 +9,7 @@ defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
 function getMessageInstance () : Message
 {
-    return getInstance( Message::class );
+    return baseInstance( Message::class );
 }
 
 function setErrorMessage ( array $msgData ) : void

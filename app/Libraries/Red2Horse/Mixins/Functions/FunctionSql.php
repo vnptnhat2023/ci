@@ -68,7 +68,7 @@ function getField ( string $key, string $table = 'user_group' )
 
 function createDatabase ( string $s, string $u, string $p, string $d, ?int $port = null ) : bool
 {
-    $message = getInstance( Message::class );
+    $message = baseInstance( Message::class );
     $common = getComponents( 'common' );
 
     if ( ! $conn = mysqli_connect( $s, $u, $p, null, $port ) )

@@ -1,14 +1,14 @@
 <?php
 
 declare( strict_types = 1 );
-namespace Red2Horse\Facade\Auth;
+namespace Red2Horse\Mixins\Classes\Base;
 
 use Red2Horse\Mixins\Traits\TraitSingleton;
 use function Red2Horse\Mixins\Functions\
 {
 	getComponents,
     getConfig,
-    getInstance
+    baseInstance
 };
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
@@ -41,13 +41,13 @@ class Utility
 		$isNullType = null === $requestType;
 		$hasRequest = ! $isNullUsername && ! $isNullType;
 
-		$authentication = getInstance( Authentication::class );
-		$message = getInstance( Message::class );
+		$authentication = baseInstance( Authentication::class );
+		$message = baseInstance( Message::class );
 
 		if ( $authentication->isLogged() || $authentication->isLogged( true ) )
 		{
 			$type == 'forget'
-				? getInstance( ResetPassword::class )
+				? baseInstance( ResetPassword::class )
 					->alreadyLoggedIn( $authentication->getUserdata() )
 				: $authentication
 					->setLoggedInSuccess( $authentication->getUserdata() );
@@ -74,6 +74,6 @@ class Utility
 
 		return ( $type === 'login' )
 			? $authentication->loginHandler()
-			: getInstance( ResetPassword::class )->forgetHandler( $u, $e, $c );
+			: baseInstance( ResetPassword::class )->forgetHandler( $u, $e, $c );
 	}
 }

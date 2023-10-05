@@ -20,6 +20,7 @@ class ConstantNamespace
         'ADAPTER_NAMESPACE' => self::BASE_NAMESPACE . 'Adapter\\' . self::ADAPTER_NAME,
         'FUNCTION_NAMESPACE' => self::BASE_NAMESPACE . 'Mixins\\Functions\\',
         'REGISTRY_NAMESPACE' => self::BASE_NAMESPACE . 'Mixins\\Classes\\Registry\\',
+        'BASE_NAMESPACE' => self::BASE_NAMESPACE . 'Mixins\\Classes\\Base\\'
     ];
 
     private function __construct () {}

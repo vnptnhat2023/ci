@@ -31,6 +31,14 @@ function getComponents ( string $name, bool $getShared = true, bool $getAdapter 
     return classInit( $name, 'RegistryClass', $getShared ) ->getComponents( $getAdapter );
 }
 
+/**
+ * @return \Red2Horse\Mixins\Traits\TraitSingleton
+ */
+function BaseInstance ( string $name, bool $getShared = true ) : object
+{
+    return classInit( baseNamespace( $name ), 'RegistryClass', $getShared ) ->getInstance();
+}
+
 function getInstanceMethods ( string $classNamespace, string $state = 'RegistryClass', bool $getShared = true ) : array
 {
     return classInit( $classNamespace, $state, $getShared ) ->getInstanceMethods();

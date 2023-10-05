@@ -1,7 +1,7 @@
 <?php
 
 declare( strict_types = 1 );
-namespace Red2Horse\Facade\Auth;
+namespace Red2Horse\Mixins\Classes\Base;
 
 use Red2Horse\Mixins\Traits\
 {
@@ -10,7 +10,7 @@ use Red2Horse\Mixins\Traits\
 
 use function Red2Horse\Mixins\Functions\
 {
-    getInstance,
+    baseInstance,
     withSession
 };
 
@@ -24,17 +24,17 @@ class Red2Horse
 
 	public function login ( string $u = null, string $p = null, bool $r = false, string $c = null ) : bool
 	{
-		return getInstance( Authentication::class )->login( $u, $p, $r, $c );
+		return baseInstance( Authentication::class )->login( $u, $p, $r, $c );
 	}
 
 	public function logout () : bool
 	{
-		return getInstance( Authentication::class )->logout();
+		return baseInstance( Authentication::class )->logout();
 	}
 
 	public function requestPassword ( string $u = null, string $e = null, string $c = null ) : bool
 	{
-		return getInstance( ResetPassword::class )->requestPassword( $u, $e, $c );
+		return baseInstance( ResetPassword::class )->requestPassword( $u, $e, $c );
 	}
 
 	/**
@@ -43,34 +43,34 @@ class Red2Horse
 	 */
 	public function getUserdata ( string $key = null )
 	{
-		return getInstance( Authentication::class )->getUserdata( $key );
+		return baseInstance( Authentication::class )->getUserdata( $key );
 	}
 
 	public function isLogged ( bool $withCookie = false ) : bool
 	{
-		return getInstance( Authentication::class )->isLogged( $withCookie );
+		return baseInstance( Authentication::class )->isLogged( $withCookie );
 	}
 
 	public function getHashPass ( string $password ) : string
 	{
-		return getInstance( Password::class )->getHashPass( $password );
+		return baseInstance( Password::class )->getHashPass( $password );
 	}
 
 	public function getVerifyPass ( string $p, string $hashed ) : bool
 	{
-		return getInstance( Password::class )->getVerifyPass( $p, $hashed );
+		return baseInstance( Password::class )->getVerifyPass( $p, $hashed );
 	}
 
 	/** @return object|array */
 	public function getResult ()
 	{
-		return getInstance( Message::class )->getResult();
+		return baseInstance( Message::class )->getResult();
 	}
 
 	/** @return mixed */
 	public function getMessage ( array $add = [], bool $asObject = true )
 	{
-		return getInstance( Message::class )->getMessage( $add, $asObject );
+		return baseInstance( Message::class )->getMessage( $add, $asObject );
 	}
 
 	public function withPermission ( array $data, string $condition = 'or' ) : bool
@@ -85,11 +85,11 @@ class Red2Horse
 
 	public function regenerateSession ( array $userData ) : bool
 	{
-		return getInstance( SessionHandle::class )->regenerateSession( $userData );
+		return baseInstance( SessionHandle::class )->regenerateSession( $userData );
 	}
 
 	public function regenerateCookie () : void
 	{
-		getInstance( CookieHandle::class )->regenerateCookie();
+		baseInstance( CookieHandle::class )->regenerateCookie();
 	}
 }

@@ -1,7 +1,7 @@
 <?php
 
 declare( strict_types = 1 );
-namespace Red2Horse\Facade\Auth;
+namespace Red2Horse\Mixins\Classes\Base;
 
 use Red2Horse\Mixins\Traits\TraitSingleton;
 
@@ -9,7 +9,7 @@ use function Red2Horse\Mixins\Functions\
 {
 	getComponents,
     getConfig,
-    getInstance,
+    baseInstance,
     getTable,
     getUserField,
     selectExports
@@ -29,12 +29,12 @@ class ResetPassword
 
 	public function requestPassword ( string $u = null, string $e = null, string $c = null ) : bool
 	{
-		return getInstance( Utility::class ) ->typeChecker( 'forget', $u, null, $e, $c );
+		return baseInstance( Utility::class ) ->typeChecker( 'forget', $u, null, $e, $c );
 	}
 
 	public function alreadyLoggedIn ( array $userData )
 	{
-		$message = getInstance( Message::class );
+		$message = baseInstance( Message::class );
 		$message::$successfully = true;
 		$message::$success[] = getComponents( 'common' ) ->lang(
 			'Red2Horse.successLoggedWithUsername',
@@ -54,7 +54,7 @@ class ResetPassword
 		}
 
 		$email = str_repeat( '*', strlen( $userEmail[ 0 ] ) ) . '@' . $userEmail[ 1 ];
-		$message = getInstance( Message::class );
+		$message = baseInstance( Message::class );
 		$message::$successfully = true;
 		$message::$success[] = getComponents( 'common' )
 			->lang(
@@ -81,7 +81,7 @@ class ResetPassword
 			$configValidation->user_email => self::$email
 		];
 
-		$message = getInstance( Message::class );
+		$message = baseInstance( Message::class );
 
 		if ( ! $validationComponent->isValid( $data, $rules ) )
 		{
@@ -102,7 +102,7 @@ class ResetPassword
 
 		$common = getComponents( 'common' );
 		$randomPw = $common->random_string();
-		$hashPw = getInstance( Password::class )->getHashPass( $randomPw );
+		$hashPw = baseInstance( Password::class )->getHashPass( $randomPw );
 
 		$updatePassword = getComponents( 'user' )->updateUser(
 			[ getUserField( 'username' ) => $find_user[ getUserField( 'username' ) ] ],
@@ -117,7 +117,7 @@ class ResetPassword
 			return false;
 		}
 
-		if ( ! getInstance( Notification::class ) ->mailSender( $randomPw ) )
+		if ( ! baseInstance( Notification::class ) ->mailSender( $randomPw ) )
 		{
 			$message::$errors[] = $error;
 			$common->log_message( 'error' , "Cannot sent email: {$find_user[ getUserField( 'username' ) ]}" );

@@ -3,10 +3,9 @@
 declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Traits;
 
-use Red2Horse\Facade\Auth\Event;
-
 use function Red2Horse\Mixins\Functions\
 {
+    BaseInstance,
     getClass,
     getComponents,
     getConfig,
@@ -44,7 +43,7 @@ trait TraitCall
         $this->traitCallMethods = getInstanceMethods( $className );
         $this->traitCallback[ 'callback' ] = function( string $name, $args ) : bool
         {
-            return getInstance( Event::class )->trigger( $name, $args );
+            return BaseInstance( 'event' )->trigger( $name, $args );
         };
     }
 

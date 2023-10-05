@@ -1,14 +1,14 @@
 <?php
 
 declare( strict_types = 1 );
-namespace Red2Horse\Facade\Auth;
+namespace Red2Horse\Mixins\Classes\Base;
 
 use Red2Horse\Mixins\Traits\TraitSingleton;
 use function Red2Horse\Mixins\Functions\
 {
 	getComponents,
     getConfig,
-    getInstance,
+    baseInstance,
     getTable,
     getUserField,
     getUserGroupField,
@@ -83,18 +83,18 @@ class CookieHandle
 		# Check status
 		if ( in_array( $user[ getUserField( 'status' ) ] , [ 'inactive', 'banned' ] ) )
 		{
-			getInstance( Message::class )->errorAccountStatus(
+			baseInstance( Message::class )->errorAccountStatus(
 				$user[ getUserField( 'status' ) ], false, false
 			);
 			return $incorrectCookie();
 		}
 
 		# @Todo: declare inside the config file: is using this feature
-		$isMultiLogin = getInstance( Authentication::class ) ->isMultiLogin( $user[ getUserField( 'session_id' ) ] );
+		$isMultiLogin = baseInstance( Authentication::class ) ->isMultiLogin( $user[ getUserField( 'session_id' ) ] );
 
 		if ( ! $isMultiLogin )
 		{
-			getInstance( Message::class )->errorMultiLogin( true, [], false );
+			baseInstance( Message::class )->errorMultiLogin( true, [], false );
 			return false;
 		}
 
@@ -113,7 +113,7 @@ class CookieHandle
 
 		if ( getComponents( 'cache' )->isSupported() )
 		{
-			getInstance( SessionHandle::class )->roleHandle( $user );
+			baseInstance( SessionHandle::class )->roleHandle( $user );
 		}
 		else
 		{
@@ -155,7 +155,7 @@ class CookieHandle
 		];
 		$data = array_merge( $data, $updateData );
 
-		$updatedSuccess = getInstance( Authentication::class ) ->loggedInUpdateData( $userId, $data );
+		$updatedSuccess = baseInstance( Authentication::class ) ->loggedInUpdateData( $userId, $data );
 
 		if ( $updatedSuccess )
 		{

@@ -1,7 +1,7 @@
 <?php
 
 declare( strict_types = 1 );
-namespace Red2Horse\Facade\Auth;
+namespace Red2Horse\Mixins\Classes\Base;
 
 use Red2Horse\Mixins\Traits\TraitSingleton;
 use function Red2Horse\Mixins\Functions\
@@ -9,7 +9,7 @@ use function Red2Horse\Mixins\Functions\
 	getComponents,
     getConfig,
     getField,
-    getInstance,
+    baseInstance,
 	getHashPass,
     getRandomString,
     getTable,
@@ -26,7 +26,7 @@ class SessionHandle
 
 	public function regenerateSession ( array $userData ) : bool
 	{
-		if ( ! getInstance( Authentication::class )->isLogged() )
+		if ( ! baseInstance( Authentication::class )->isLogged() )
 		{
 			return false;
 		}
@@ -45,7 +45,7 @@ class SessionHandle
 			return false;
 		}
 
-		getInstance( CookieHandle::class )->regenerateCookie();
+		baseInstance( CookieHandle::class )->regenerateCookie();
 
 		return true;
 	}
@@ -101,7 +101,7 @@ class SessionHandle
 			}
 			else
 			{
-				$updated = getInstance( Authentication::class )->loggedInUpdateData(
+				$updated = baseInstance( Authentication::class )->loggedInUpdateData(
 					$userId,
 					$updateGroupData,
 					getTable( 'user_group' )
