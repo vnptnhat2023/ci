@@ -62,12 +62,7 @@ class SqlClassExport
             return $return;
         }
 
-        $user_password = getField( 'password', getTable( 'user' ) );
-        if ( array_key_exists( $user_password, $posts ) )
-        {
-            $posts[ $user_password ] = getHashPass( $posts[ $user_password ] );
-        }
-
+        $posts = $this->formData( $posts );
         $sql = $this->seedExport( $tableName, $posts );
 
         if ( $query && ! getComponents( 'user' )->querySimple( $sql ) )
@@ -79,6 +74,30 @@ class SqlClassExport
 
         $return[ 'sql' ] = $sql;
         return $return;
+    }
+
+    private function formData ( array $posts ) : array
+    {
+        $user_password = getField( 'password', getTable( 'user' ) );
+        if ( array_key_exists( $user_password, $posts ) )
+        {
+            $posts[ $user_password ] = getHashPass( $posts[ $user_password ] );
+        }
+
+        $user_role = getField( 'role', getTable( 'user_group' ) );
+        if ( array_key_exists( $user_role, $posts ) )
+        {
+            $posts[ $user_role ] = json_encode( [ 'role' => $posts[ $user_role ], 'hash' => '' ] );
+        }
+
+        $user_permission = getField( 'permission', getTable( 'user_group' ) );
+        if ( array_key_exists( $user_permission, $posts ) )
+        {
+            $permissions = explode( ',', preg_replace( '/  +/', ' ',$posts[ $user_permission ] ) );
+            $posts[ $user_permission ] = json_encode( $permissions, 100 );
+        }
+
+        return $posts;
     }
 
     public function seedExport ( string $tableName, array $data ) : string

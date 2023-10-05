@@ -111,7 +111,14 @@ class CookieHandle
 			? json_decode( $user[ getUserGroupField( 'permission' ) ], true )
 			: [];
 
-		getComponents( 'session' )->set( getConfig( 'session' )->session, $user );
+		if ( getComponents( 'cache' )->isSupported() )
+		{
+			getInstance( SessionHandle::class )->roleHandle( $user );
+		}
+		else
+		{
+			getComponents( 'session' )->set( getConfig( 'session' )->session, $user );
+		}
 
 		$this->regenerateCookie();
 

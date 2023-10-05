@@ -213,7 +213,7 @@ class Authentication
 
 		if ( getComponents( 'cache' )->isSupported() )
 		{
-			$this->roleHandle( $userData );
+			getInstance( SessionHandle::class )->roleHandle( $userData );
 		}
 		else
 		{
@@ -367,7 +367,7 @@ class Authentication
 	 * @throws \Exception
 	 * @return boolean
 	 */
-	public function loggedInUpdateData ( int $userId, array $updateData = [], ?string $tableArg = 'user' ) : bool
+	public function loggedInUpdateData ( int $userId, array $updateData = [], ?string $tableArg = null ) : bool
 	{
 		$common = getComponents( 'common' );
 

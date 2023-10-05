@@ -143,7 +143,7 @@ class ValidationAdapter implements ValidationAdapterInterface
 			],
 			$configValidation->userGroup_permission => [
 				'label' => lang( 'Red2Horse.labelGroupPermission' ),
-				'rules' => 'trim|required|min_length[5]|max_length[512]|alpha_numeric_punct'
+				'rules' => 'trim|required|min_length[5]|max_length[512]|perms'
 			],
 			$configValidation->userGroup_role => [
 				'label' => lang( 'Red2Horse.labelGroupRole' ),

@@ -14,8 +14,14 @@ class ValidCap
 		return strtoupper( $ss[ 'word' ] ) === $str;
 	}
 
-	public function r2h_password_hash ( string $str ) : string
+	// public function r2h_password_hash ( string $str ) : string
+	// {
+	// 	return getHashPass( $str );
+	// }
+
+	public function perms ( string $str ) : bool
 	{
-		return getHashPass( $str );
+		return preg_match( '/[a-zA-Z0-9-_\s,]/', $str );
 	}
+	
 }

@@ -4,7 +4,6 @@ declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Traits;
 
 use Red2Horse\Facade\Auth\Event;
-use Red2Horse\Mixins\Classes\Registry\RegistryEventClass;
 
 use function Red2Horse\Mixins\Functions\
 {
@@ -53,8 +52,16 @@ trait TraitCall
     {
         if ( in_array( $method, $this->traitCallMethods, true ) )
         {
-            $beforeName = $this->traitBeforePrefix . $method;
-            $afterName = $this->traitAfterPrefix . $method;
+            $eventConfig = getConfig( 'event' );
+            $beforeName = $eventConfig->getPrefixNamed(
+                $this->traitBeforePrefix,
+                $eventConfig->underString( $method )
+            );
+            $afterName = $eventConfig->getPrefixNamed(
+                $this->traitAfterPrefix,
+                $eventConfig->underString( $method )
+            );
+
             $callback = $this->traitCallback[ 'callback' ] ?? null;
 
             if ( is_callable( $callback ) )
@@ -90,7 +97,7 @@ trait TraitCall
 
                 if ( $this->traitUseBefore && $callback( $beforeName, $callbackArgs ) )
                 {
-                    $callbackArgs = getClass( $beforeName, '', RegistryEventClass::class );
+                    $callbackArgs = getClass( $beforeName, '', 'RegistryEventClass' );
                 }
 
                 /** @var mixed $run */
@@ -98,7 +105,7 @@ trait TraitCall
 
                 if ( $this->traitUseAfter && $callback( $afterName, $run ) )
                 {
-                    $run = getClass( $afterName, '', RegistryEventClass::class );
+                    $run = getClass( $afterName, '', 'RegistryEventClass' );
                 }
 
                 return $run;

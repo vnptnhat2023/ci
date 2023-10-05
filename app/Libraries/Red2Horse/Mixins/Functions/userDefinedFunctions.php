@@ -17,9 +17,15 @@ class UserDefinedFunctions
     }
     
 
-    public function __call($method, $args)
+    public function __call( $methodName, $arguments )
     {
-        // d( $method );
+        // if ( $methodName == 'r2h_after_get_message' )
+        // {
+        //     $arguments[0]->message->success[] = '123';
+        //     $arguments[0]->message->success[] = '321';
+        //     $arguments[0]->message->success[] = '456';
+        // }
+        // d( $methodName, $arguments );
     }
     
 }

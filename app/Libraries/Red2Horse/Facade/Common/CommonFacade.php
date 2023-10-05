@@ -115,7 +115,22 @@ class CommonFacade implements CommonFacadeInterface
 
 	public function esc ( string $str ) : string
 	{
-		$isEscape = getConfig( 'sql' )->esc;
-		return $isEscape ? str_replace( ['\'', '\"'], ['\'\'', '\"\"'], $str ) : $str;
+		if ( getConfig( 'sql' )->esc )
+		{
+			$str = str_replace( ['\'', '\"'], ['\'\'', '\"\"'], $str );
+		}
+
+		return $str;
+	}
+
+	public function esc_html ( string $str ) : string
+	{
+		if ( getConfig( 'sql' )->esc )
+		{
+			$str = str_replace( ['\'\'', '\"\"'], ['\'', '\"'], $str );
+			$str = htmlspecialchars( $str, ENT_QUOTES, 'utf-8' );
+		}
+
+		return $str;
 	}
 }
