@@ -3,7 +3,7 @@
 declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Classes;
 
-use Red2Horse\Facade\Auth\Message;
+use Red2Horse\Mixins\Classes\Base\Message;
 use Red2Horse\
 {
     Mixins\Traits\TraitSingleton

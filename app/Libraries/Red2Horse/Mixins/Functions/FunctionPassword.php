@@ -3,18 +3,16 @@
 declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Functions;
 
-use Red2Horse\Facade\Auth\Password;
-
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
 function getHashPass ( string $str ) : string
 {
-    return baseInstance( Password::class )->getHashPass( $str );
+    return baseInstance( 'password' )->getHashPass( $str );
 }
 
 function getVerifyPass ( string $password, string $hashed ) : bool
 {
-    return baseInstance( Password::class )->getVerifyPass( $password, $hashed );
+    return baseInstance( 'password' )->getVerifyPass( $password, $hashed );
 }
 
 function getRandomString ( string $str ) : string

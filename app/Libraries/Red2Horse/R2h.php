@@ -7,7 +7,7 @@ use Red2Horse\
 {
     Mixins\Traits\TraitSingleton,
     Mixins\Classes\Registry\RegistryClass,
-    Facade\Auth\Red2Horse
+    Mixins\Classes\Base\Red2Horse
 };
 
 use function Red2Horse\Mixins\Functions\

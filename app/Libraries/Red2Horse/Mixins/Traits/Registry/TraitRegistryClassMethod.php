@@ -65,7 +65,7 @@ trait TraitRegistryClassMethod
         }
         catch ( \Throwable $th )
         {
-            throw new \Error( $th->getMessage(), 403 );
+            throw new \Error( $th->getMessage(), 404 );
         }
     }
 
