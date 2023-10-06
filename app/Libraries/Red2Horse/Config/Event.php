@@ -20,6 +20,8 @@ class Event
     public string $prefix = 'R2h';
     public string $beforePrefix = 'before';
     public string $afterPrefix = 'after';
+    
+    public array $events = [];
     protected array $eventReg = [
         'get_message'         => UserDefinedFunctions::class,
         'is_logged'           => UserDefinedFunctions::class,
@@ -28,7 +30,6 @@ class Event
         'logout'              => UserDefinedFunctions::class,
         'request_password'    => UserDefinedFunctions::class
     ];
-    public array $events = [];
 
     private function __construct ()
     {

@@ -5,6 +5,7 @@ defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 /** Config ConstantNamespace */
 require_once realpath( \Red2Horse\R2H_BASE_PATH . '/Config/ConstantNamespace.php' );
 
+require_once realpath( $functions_path . '/FunctionEvent.php' );
 require_once realpath( $functions_path . '/FunctionInstanceBox.php' );
 require_once realpath( $functions_path . '/FunctionInstance.php' );
 

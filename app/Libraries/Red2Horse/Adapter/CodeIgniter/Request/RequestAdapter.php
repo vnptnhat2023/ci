@@ -4,11 +4,14 @@ declare( strict_types = 1 );
 namespace Red2Horse\Adapter\Codeigniter\Request;
 
 use Config\Services;
+use Red2Horse\Mixins\Traits\TraitSingleton;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
 class RequestAdapter implements RequestAdapterInterface
 {
+	use TraitSingleton;
+
 	public function post ( $index = null, $filter = null, $flags = null )
 	{
 		return Services::request()->getPost( $index, $filter, $flags );

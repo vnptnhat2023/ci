@@ -23,6 +23,8 @@ class Event
     private bool $init = false;
     private array $triggered = [];
 
+    private function __construct () {}
+
     public function trigger ( string $name, ...$args ) : bool
     {
         $this->init();

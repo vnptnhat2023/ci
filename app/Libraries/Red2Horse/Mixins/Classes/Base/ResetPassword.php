@@ -3,6 +3,7 @@
 declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Classes\Base;
 
+use Red2Horse\Facade\Validation\ValidationFacadeInterface;
 use Red2Horse\Mixins\Traits\TraitSingleton;
 
 use function Red2Horse\Mixins\Functions\
@@ -12,7 +13,9 @@ use function Red2Horse\Mixins\Functions\
     baseInstance,
     getTable,
     getUserField,
-    selectExports
+    selectExports,
+    setErrorMessage,
+    setSuccessMessage
 };
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
@@ -34,12 +37,10 @@ class ResetPassword
 
 	public function alreadyLoggedIn ( array $userData )
 	{
-		$message = baseInstance( Message::class );
-		$message::$successfully = true;
-		$message::$success[] = getComponents( 'common' ) ->lang(
+		setSuccessMessage( ( array ) getComponents( 'common' )->lang(
 			'Red2Horse.successLoggedWithUsername',
 			[ $userData[ getUserField( 'username' ) ] ]
-		);
+		) );
 	}
 
 	/**
@@ -54,13 +55,11 @@ class ResetPassword
 		}
 
 		$email = str_repeat( '*', strlen( $userEmail[ 0 ] ) ) . '@' . $userEmail[ 1 ];
-		$message = baseInstance( Message::class );
-		$message::$successfully = true;
-		$message::$success[] = getComponents( 'common' )
-			->lang(
-				'Red2Horse.successResetPassword',
-				[ $userData[ getUserField( 'username' ) ], $email ]
-			);
+
+		setSuccessMessage( ( array ) getComponents( 'common' )->lang(
+			'Red2Horse.successResetPassword',
+			[ $userData[ getUserField( 'username' ) ], $email ]
+		) );
 	}
 
 	public function forgetHandler ( string $u = null, string $e = null, string $c = null ) : bool
@@ -68,6 +67,7 @@ class ResetPassword
 		self::$username = $u; self::$email = $e; self::$captcha = $c;
 
 		$configValidation = getConfig( 'validation' );
+		/** @var ValidationFacadeInterface $validationComponent */
 		$validationComponent = getComponents( 'validation' );
 
 		$groups = getComponents( 'throttle' )->showCaptcha() 
@@ -89,10 +89,11 @@ class ResetPassword
 			return false;
 		}
 
-		$find_user = getComponents( 'user' ) ->getUserWithGroup(
-			selectExports( [ getTable( 'user' ) => [], getTable( 'user_group' ) => [] ] ),
-			$data 
-		);
+		$querySelectSql = selectExports( [
+			getTable( 'user' ) => [],
+			getTable( 'user_group' ) => []
+		]);
+		$find_user = getComponents( 'user' ) ->getUserWithGroup( $querySelectSql, $data );
 
 		if ( empty( $find_user ) )
 		{
@@ -113,19 +114,18 @@ class ResetPassword
 
 		if ( ! $updatePassword )
 		{
-			$message::$errors[] = $error;
+			setErrorMessage( $error );
 			return false;
 		}
 
 		if ( ! baseInstance( Notification::class ) ->mailSender( $randomPw ) )
 		{
-			$message::$errors[] = $error;
+			setErrorMessage( $error );
 			$common->log_message( 'error' , "Cannot sent email: {$find_user[ getUserField( 'username' ) ]}" );
 			return false;
 		}
 
-		$message::$successfully = true;
-		$message::$success[] = $common->lang( 'Red2Horse.successResetPassword' );
+		setSuccessMessage( $common->lang( 'Red2Horse.successResetPassword' ) );
 
 		return true;
 	}

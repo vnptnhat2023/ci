@@ -11,12 +11,7 @@ class Test extends BaseController {
 	// use TraitEvents;
 	public function index($a = '')
 	{
-
-		$a = new self;
-		$s = serialize( $a );
-		var_dump( $s );
-		// $u = unserialize( $s );
-		// dd( $u );
+		setcookie( 'abc', 'xyz', 60, null, null, null, null );
 	}
 
 	public function migrate()
@@ -25,8 +20,8 @@ class Test extends BaseController {
 
     try {
         $migrate->latest();
-    } catch (Throwable $e) {
-    	var_dump($e);
+    } catch (\Throwable $e) {
+		var_dump($e);
         // Do something with the error here...
     }
 	}

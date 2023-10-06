@@ -3,7 +3,9 @@
 declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Classes\Base;
 
+use Red2Horse\Config\Validation;
 use Red2Horse\Mixins\Traits\TraitSingleton;
+use Red2Horse\Facade\Validation\ValidationFacadeInterface;
 
 use function Red2Horse\Mixins\Functions\
 {
@@ -16,7 +18,9 @@ use function Red2Horse\Mixins\Functions\
 	getField,
     getUserField,
     getUserGroupField,
-    selectExports
+    selectExports,
+    setErrorMessage,
+    setSuccessMessage
 };
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
@@ -44,24 +48,24 @@ class Authentication
 
 	public function logout () : bool
 	{
-		$message = baseInstance( Message::class );
 		$common = getComponents( 'common' );
 		$session = getComponents( 'session' );
-		$message::$successfully = true;
 
 		getComponents( 'cookie' )->delete_cookie( getConfig( 'cookie' )->cookie );
 
 		if ( $session->has( getConfig('session')->session ) )
 		{
 			$session->destroy();
-			$message::$success[] = $common->lang( 'Red2Horse.successLogout' );
+			setSuccessMessage( $common->lang( 'Red2Horse.successLogout' ) ); 
 			return true;
 		}
 
-		$error = $common ->lang( 'Red2Horse.errorNeedLoggedIn') .
-			$common ->lang( 'Red2Horse.homeLink');
+		$error = sprintf( '%s.%s', 
+			$common ->lang( 'Red2Horse.errorNeedLoggedIn'),
+			$common ->lang( 'Red2Horse.homeLink')
+		);
 
-		$message::$errors[] = $error;
+		setErrorMessage( $error );
 
 		return false;
 	}
@@ -104,7 +108,9 @@ class Authentication
 
 	private function loginInvalid ()
 	{
+		/** @var ValidationFacadeInterface $validationComponent */
 		$validationComponent = getComponents( 'validation' );
+		/** @var Validation $configValidation */
 		$configValidation = getConfig( 'validation' );
 
 		if ( getComponents( 'throttle' )->showCaptcha() )
@@ -308,10 +314,10 @@ class Authentication
 
 	public function setLoggedInSuccess ( array $userData ) : void
 	{
-		$message = baseInstance( Message::class );
-		$message::$successfully = true;
-		$message::$success[] = getComponents( 'common' )
-			->lang( 'Red2Horse.successLoggedWithUsername', [ $userData[ getUserField( 'username' ) ] ] );
+		setSuccessMessage( getComponents( 'common' ) ->lang(
+			'Red2Horse.successLoggedWithUsername',
+			[ $userData[ getUserField( 'username' ) ] ] 
+		) );
 	}
 
 	public function isMultiLogin ( ?string $session_id = null ) : bool
@@ -358,7 +364,7 @@ class Authentication
 			return $session->sessionTimeToUpdate > $time;
 		}
 
-		baseInstance( Message::class )::$errors[] = 'else';
+		setErrorMessage( 'else' );
 
 		return false;
 	}

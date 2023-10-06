@@ -7,26 +7,33 @@ use Red2Horse\Mixins\Classes\Base\Message;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
+/** @todo set: log,throttle */
 function getMessageInstance () : Message
 {
     return baseInstance( Message::class );
 }
 
-function setErrorMessage ( array $msgData ) : void
+/** @param string|array $msgData */
+function setErrorMessage ( $msgData ) : void
 {
+    $msgData = ( array ) $msgData;
     getMessageInstance()::$errors += $msgData;
 }
 
-function setSuccessMessage ( array $msgData, bool $withSuccessfully = true ) : void
+/** @param string|array $msgData */
+function setSuccessMessage ( $msgData, bool $withSuccessfully = true ) : void
 {
+    $msgData = ( array ) $msgData;
     $msg = getMessageInstance();
     $msg::$success += $msgData;
 
     if ( $withSuccessfully ) $msg::$successfully = true;
 }
 
-function setInfoMessage ( array $msgData ) : void
+/** @param string|array $msgData */
+function setInfoMessage ( $msgData ) : void
 {
+    $msgData = ( array ) $msgData;
     getMessageInstance()::$info += $msgData;
 }
 

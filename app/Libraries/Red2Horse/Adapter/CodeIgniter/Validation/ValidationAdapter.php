@@ -4,12 +4,16 @@ declare( strict_types = 1 );
 
 namespace Red2Horse\Adapter\Codeigniter\Validation;
 use Config\Services;
+use Red2Horse\Mixins\Traits\TraitSingleton;
+
 use function Red2Horse\Mixins\Functions\getConfig;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
 class ValidationAdapter implements ValidationAdapterInterface
 {
+	use TraitSingleton;
+	
 	public function isValid ( array $data, array $rules ) : bool
 	{
 		return Services::validation()
