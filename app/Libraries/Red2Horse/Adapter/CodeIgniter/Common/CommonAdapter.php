@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 
 namespace Red2Horse\Adapter\CodeIgniter\Common;
 
-use Red2Horse\Mixins\Traits\TraitSingleton;
+use Red2Horse\Mixins\Traits\Object\TraitSingleton;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
@@ -32,7 +32,12 @@ class CommonAdapter implements CommonAdapterInterface
 
 	public function isAssocArray( array $data ) : bool
 	{
-		return isAssoc( $data );
+		if ( [] === $data )
+		{
+			return false;
+		}
+	
+		return array_keys( $data ) !== range( 0, count( $data ) - 1 );
 	}
 
 	public function log_message( string $level, string $message, array $context = [] )

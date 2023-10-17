@@ -4,23 +4,20 @@ declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Classes\Base;
 
 use Red2Horse\Config\Validation;
-use Red2Horse\Mixins\Traits\TraitSingleton;
+use Red2Horse\Mixins\Traits\Object\TraitSingleton;
 use Red2Horse\Facade\Validation\ValidationFacadeInterface;
 
-use function Red2Horse\Mixins\Functions\
+use function Red2Horse\Mixins\Functions\Config\getConfig;
+use function Red2Horse\Mixins\Functions\Instance\BaseInstance;
+use function Red2Horse\Mixins\Functions\Instance\getComponents;
+use function Red2Horse\Mixins\Functions\Message\setErrorMessage;
+use function Red2Horse\Mixins\Functions\Message\setSuccessMessage;
+use function Red2Horse\Mixins\Functions\Sql\
 {
-	getComponents,
-    getConfig,
-    getHashPass,
-    baseInstance,
-    getRandomString,
-    getTable,
-	getField,
+	getTable,
     getUserField,
     getUserGroupField,
     selectExports,
-    setErrorMessage,
-    setSuccessMessage
 };
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
@@ -43,7 +40,7 @@ class Authentication
 		self::$rememberMe = $r;
 		self::$captcha = $c;
 
-		return baseInstance( Utility::class )->typeChecker( 'login', $u, $p, null, $c );
+		return BaseInstance( Utility::class )->typeChecker( 'login', $u, $p, null, $c );
 	}
 
 	public function logout () : bool
@@ -74,7 +71,7 @@ class Authentication
 	 * @param string|null $key
 	 * @return mixed
 	 */
-	public function getUserdata ( string $key = null )
+	public function getUserdata ( ?string $key = null )
 	{
 		if ( ! $this->isLogged() )
 		{
@@ -110,36 +107,42 @@ class Authentication
 	{
 		/** @var ValidationFacadeInterface $validationComponent */
 		$validationComponent = getComponents( 'validation' );
+
 		/** @var Validation $configValidation */
 		$configValidation = getConfig( 'validation' );
+
+		$keyUsername = getUserField( 'username' );
+		$keyEmail 	 = getUserField( 'email' );
+		$keyPassword = getUserField( 'password' );
+		$keyCaptcha  = $configValidation->user_captcha;
 
 		if ( getComponents( 'throttle' )->showCaptcha() )
 		{
 			$data = [
-				$configValidation->user_username => self::$username,
-				$configValidation->user_password => self::$password,
-				$configValidation->user_captcha => self::$captcha
+				$keyUsername => self::$username,
+				$keyPassword => self::$password,
+				$keyCaptcha => self::$captcha
 			];
 
 			$ruleCaptcha = [
-				$configValidation->user_captcha => $validationComponent->getRules( $configValidation->user_captcha )
+				$keyCaptcha => $validationComponent->getRules( $keyCaptcha )
 			];
 
 			if ( ! $validationComponent->isValid( $data, $ruleCaptcha ) )
 			{
-				$errorCaptcha = $validationComponent->getErrors( $configValidation->user_captcha );
+				$errorCaptcha = $validationComponent->getErrors( $keyCaptcha );
 				return baseInstance( Message::class )->errorInformation( true, $errorCaptcha );
 			}
 		}
 
 		$incorrectInfo = false;
-		$ruleUsername = [ $configValidation->user_username => $validationComponent->getRules( 'username' ) ];
-		$data = [ $configValidation->user_username => self::$username ];
+		$ruleUsername = [ $keyUsername => $validationComponent->getRules( $keyUsername ) ];
+		$data = [ $keyUsername => self::$username ];
 
 		if ( ! $validationComponent->isValid( $data, $ruleUsername ) )
 		{
 			$validationComponent->reset();
-			$ruleEmail = [ $configValidation->user_username => $validationComponent->getRules( 'email' ) ];
+			$ruleEmail = [ $keyUsername => $validationComponent->getRules( $keyEmail ) ];
 			$incorrectInfo = ! $validationComponent->isValid( $data, $ruleEmail );
 		}
 
@@ -243,73 +246,12 @@ class Authentication
 		baseInstance( CookieHandle::class )->regenerateCookie();
 
 		/** Clean old throttle attempts */
-		getComponents( 'throttle' )->cleanup();
+		if ( getConfig( 'throttle' )->useThrottle )
+		{
+			getComponents( 'throttle' )->cleanup();
+		}
 
 		return true;
-	}
-
-	private function roleHandle ( array $userData ) : void
-	{
-		/** DB or session */
-		if ( ! getComponents( 'common' )->valid_json( $userData[ getUserGroupField( 'role' ) ] ) )
-		{
-			throw new \Error( 'Role: Invalid json format !', 406 );
-		}
-
-		$roleJson = json_decode( $userData[ getUserGroupField( 'role' ) ], true );
-
-		if ( ! array_key_exists( getUserGroupField( 'role' ), $roleJson ) || ! array_key_exists( 'hash', $roleJson ) )
-		{
-			throw new \Error( 'Role: Invalid json format !', 406 );
-		}
-		/** end */
-
-		/** Cache config */
-		$cacheConfig = getConfig( 'cache' );
-		$cacheName = $cacheConfig->userGroupId;
-		$cachePath = $cacheConfig->getCacheName( $cacheName );
-
-		$cacheComponent = getComponents( 'cache' );
-		$cacheComponent->cacheAdapterConfig->storePath .= $cachePath;
-		/** End cache config */
-
-		$roleField = getUserGroupField( 'role' );
-		// if ( $cacheConfig->enabled && $cacheData = $cacheComponent->get( $cacheName ) )
-		// {
-		// 	$sessId = ( int ) getField( 'id', 'user' );
-		// 	$userData[ $roleField ] = $cacheData[ $sessId ];
-		// 	getComponents( 'session' )->set( getConfig( 'session' )->session, $userData );
-		// }
-		// else
-		// {
-			$roleString = $roleJson[ $roleField ];
-			$randomString = getRandomString( $roleString );
-			$roleData = [ $roleField => $roleString, 'hash' => $randomString ];
-			$userData[ $roleField ] = $roleData;
-
-			$roleDB = [ $roleField => $roleString, 'hash' => getHashPass( $randomString ) ];
-			$updateGroupData = [ $roleField => json_encode( $roleDB ) ];
-
-			$userId = $userData[ getField( 'id', 'user' ) ];
-
-			if ( $cacheConfig->enabled && $cachedData = $cacheComponent->get( $cacheName ) )
-			{
-				$cachedData[ $userId ] = $roleDB;
-				$cacheComponent->set( $cacheName, $cachedData, $cacheConfig->cacheTTL );
-			}
-			else
-			{
-				if ( ! $this->loggedInUpdateData( $userId, $updateGroupData, getTable( 'user_group' ) ) )
-				{
-					getComponents( 'common' )
-						->log_message( 'error', "{ $userId } Logged-in, but update failed" );
-
-					throw new \Error( 'Authentication cannot updated.', 406 );
-				}
-			}
-
-			getComponents( 'session' )->set( getConfig( 'session' )->session, $userData );
-		// }
 	}
 
 	public function setLoggedInSuccess ( array $userData ) : void
@@ -380,17 +322,14 @@ class Authentication
 		if ( $userId <= 0 )
 		{
 			$errArg = [ 'field' => 'user_id', 'param' => $userId ];
-			throw new \Exception(
-				$common->lang( 'Validation.greater_than', $errArg ),
-				1
-			);
+			throw new \Exception( $common->lang( 'Validation.greater_than', $errArg ), 406 );
 		}
 
 		$isAssocData = $common->isAssocArray( $updateData );
 
 		if ( ! empty( $updateData ) && ! $isAssocData )
 		{
-			throw new \Exception( $common->lang( 'Red2Horse.isAssoc' ), 1 );
+			throw new \Exception( $common->lang( 'Red2Horse.isAssoc' ), 406 );
 		}
 
 		if ( null !== $tableArg )
@@ -416,6 +355,11 @@ class Authentication
 			if ( $tableArg == getTable( 'user_group' ) )
 			{
 				return getComponents( 'user' )->updateUserGroup( $userId, $updateData );
+				// die( var_dump( $updateData ) );
+				// $userGroupId = getUserField( 'group_id' );
+				// $groupId = $this->getUserdata( $userGroupId ); #dd( $this->getUserdata() );
+				// $where = [ $userGroupId => $groupId ];
+				// return sqlClassQueryInstance( getTable( 'user_group' ) ) ->edit( $updateData, $where );
 			}
 		}
 

@@ -39,8 +39,10 @@ class ThrottleModelAdapter extends Model
 		'updated_at'
 	];
 
-	public function __construct ()
+	public function __construct ( ?\CodeIgniter\Database\ConnectionInterface $db = null )
 	{
+		parent::__construct( $db );
+
 		$config = config( 'Cache', false );
 		$config->storePath .= 'Red2HorseAuth';
 

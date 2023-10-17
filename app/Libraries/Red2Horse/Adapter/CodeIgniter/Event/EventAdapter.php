@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 namespace Red2Horse\Adapter\CodeIgniter\Event;
 
 use CodeIgniter\Events\Events;
-use Red2Horse\Mixins\Traits\TraitSingleton;
+use Red2Horse\Mixins\Traits\Object\TraitSingleton;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 

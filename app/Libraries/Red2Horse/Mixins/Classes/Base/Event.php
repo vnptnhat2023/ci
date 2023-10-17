@@ -3,17 +3,11 @@
 declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Classes\Base;
 
-use Red2Horse\Mixins\
-{
-    Traits\TraitSingleton
-};
+use Red2Horse\Mixins\Traits\Object\TraitSingleton;
 
-use function Red2Horse\Mixins\Functions\
-{
-    getComponents,
-    getConfig,
-    setClass
-};
+use function Red2Horse\Mixins\Functions\Config\getConfig;
+use function Red2Horse\Mixins\Functions\Instance\getComponents;
+use function Red2Horse\Mixins\Functions\Instance\setClass;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
@@ -24,6 +18,12 @@ class Event
     private array $triggered = [];
 
     private function __construct () {}
+
+    /** @var mixed $callable */
+    public function on ( $callable, string $classNamespace ) : void
+    {
+        getConfig( 'event' )->init( $callable, $classNamespace );
+    }
 
     public function trigger ( string $name, ...$args ) : bool
     {

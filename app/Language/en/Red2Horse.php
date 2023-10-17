@@ -69,4 +69,14 @@ return [
 	'selector' => 'selector',
 	'token' => 'token',
 	'ci_captcha' => 'Incorrect Captcha',
+
+	/** Database */
+	'db_hostname' => 'host name',
+	'db_username' => 'user name',
+	'db_password' => 'password',
+	'db_database' => 'database',
+	'db_port' 	  => 'port',
+
+	/** File */
+	'errorFileCannotWrite' => 'cannot write file'
 ];

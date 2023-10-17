@@ -16,10 +16,10 @@ use Red2Horse\Facade\{
 	Common\CommonFacadeInterface as common,
 };
 
-use Red2Horse\Mixins\Traits\TraitSingleton;
+use Red2Horse\Mixins\Traits\Object\TraitSingleton;
 
-use function Red2Horse\Mixins\Functions\getConfig;
-use function Red2Horse\Mixins\Functions\getInstance;
+use function Red2Horse\Mixins\Functions\Config\getConfig;
+use function Red2Horse\Mixins\Functions\Instance\getInstance;
 
 class AuthComponentBuilder
 {

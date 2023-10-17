@@ -5,11 +5,11 @@ namespace Red2Horse\Config;
 
 use Red2Horse\Mixins\
 {
-	Classes\SqlClass,
-	Traits\TraitSingleton
+	Classes\Sql\SqlClass,
+	Traits\Object\TraitSingleton
 };
 
-use function Red2Horse\Mixins\Functions\
+use function Red2Horse\Mixins\Functions\Instance\
 {
 	getComponents,
 	getInstance
@@ -44,6 +44,20 @@ class Validation
 	protected string $userGroup_permission = 'permission';
 	protected string $userGroup_role = 'role';
 	protected string $userGroup_deletedAt = 'deleted_at';
+
+	# Throttle columns
+	protected string $throttle_id = 'id';
+	protected string $throttle_ip = 'ip';
+	protected string $throttle_type = 'type';
+	protected string $throttle_createdAt = 'created_at';
+	protected string $throttle_updatedAt = 'updated_at';
+
+	# Database columns
+	protected string $database_hostname = 'db_host';
+	protected string $database_username = 'db_username';
+	protected string $database_password = 'db_password';
+	protected string $database_database = 'db_database';
+	protected string $database_port = 'database_port';
 
 	private function __construct () {}
 

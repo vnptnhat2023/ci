@@ -1,12 +1,12 @@
 <?php
 
 declare( strict_types = 1 );
-
 namespace Red2Horse\Adapter\Codeigniter\Validation;
-use Config\Services;
-use Red2Horse\Mixins\Traits\TraitSingleton;
 
-use function Red2Horse\Mixins\Functions\getConfig;
+use Config\Services;
+use Red2Horse\Mixins\Traits\Object\TraitSingleton;
+
+use function Red2Horse\Mixins\Functions\Config\getConfig;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
@@ -62,7 +62,8 @@ class ValidationAdapter implements ValidationAdapterInterface
 
 		if ( empty( $result ) )
 		{
-			$error = sprintf( 'Error rule not found. %s:%s:%s', __FILE__, __METHOD__, __LINE__ );
+			$result = is_array( $result ) ? implode( ', ', $result ) : $result ?? 'null';
+			$error = sprintf( 'Error rule not found. %s:%s. $result: [ %s ]',__METHOD__, __LINE__, $result );
 			throw new \Error( $error, 404 );
 		}
 
@@ -147,7 +148,7 @@ class ValidationAdapter implements ValidationAdapterInterface
 			],
 			$configValidation->userGroup_permission => [
 				'label' => lang( 'Red2Horse.labelGroupPermission' ),
-				'rules' => 'trim|required|min_length[5]|max_length[512]|perms'
+				'rules' => 'trim|required|min_length[3]|max_length[512]|perms'
 			],
 			$configValidation->userGroup_role => [
 				'label' => lang( 'Red2Horse.labelGroupRole' ),
@@ -156,7 +157,29 @@ class ValidationAdapter implements ValidationAdapterInterface
 			$configValidation->userGroup_deletedAt => [
 				'label' => lang( 'Red2Horse.labelGroupDeletedAt' ),
 				'rules' => 'permit_empty|exact_length[19]'
-			]
+			],
+
+			/** User Database */
+			$configValidation->database_hostname => [
+				'label' => lang( 'Red2Horse.db_hostname' ),
+				'rules' => 'required|min_length[3]|max_length[128]|alpha_dash'
+			],
+			$configValidation->database_username => [
+				'label' => lang( 'Red2Horse.db_username' ),
+				'rules' => 'required|min_length[3]|max_length[128]|alpha_dash'
+			],
+			$configValidation->database_password => [
+				'label' => lang( 'Red2Horse.db_password' ),
+				'rules' => 'required|min_length[3]|max_length[128]|alpha_numeric'
+			],
+			$configValidation->database_database => [
+				'label' => lang( 'Red2Horse.db_database' ),
+				'rules' => 'required|min_length[3]|max_length[128]|alpha_dash'
+			],
+			$configValidation->database_port => [
+				'label' => lang( 'Red2Horse.db_port' ),
+				'rules' => 'required|max_length[32]|is_natural_no_zero'
+			],
 		];
 
 		return $generalRules;

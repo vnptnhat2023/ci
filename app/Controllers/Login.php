@@ -30,18 +30,6 @@ class Login extends BaseController
 
 	private function _setting ()
 	{
-		$this->auth->setConfig ( 'BaseConfig', static function( $baseConfig )
-		{
-			$baseConfig->useRememberMe = true;
-			return $baseConfig;
-		} );
-
-		$this->auth->setConfig( 'throttle', static function ( $throttle )
-		{
-			$throttle->throttle->captchaAttempts = 2;
-			$throttle->useThrottle = true;
-			return $throttle;
-		} );
 	}
 
 	public function index ()

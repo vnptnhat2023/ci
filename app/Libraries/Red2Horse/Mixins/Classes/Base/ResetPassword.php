@@ -3,20 +3,18 @@
 declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Classes\Base;
 
+use Red2Horse\Exception\ErrorParameterException;
 use Red2Horse\Facade\Validation\ValidationFacadeInterface;
-use Red2Horse\Mixins\Traits\TraitSingleton;
+use Red2Horse\Mixins\Traits\Object\TraitSingleton;
 
-use function Red2Horse\Mixins\Functions\
-{
-	getComponents,
-    getConfig,
-    baseInstance,
-    getTable,
-    getUserField,
-    selectExports,
-    setErrorMessage,
-    setSuccessMessage
-};
+use function Red2Horse\Mixins\Functions\Config\getConfig;
+use function Red2Horse\Mixins\Functions\Instance\BaseInstance;
+use function Red2Horse\Mixins\Functions\Instance\getComponents;
+use function Red2Horse\Mixins\Functions\Message\setErrorMessage;
+use function Red2Horse\Mixins\Functions\Message\setSuccessMessage;
+use function Red2Horse\Mixins\Functions\Sql\getTable;
+use function Red2Horse\Mixins\Functions\Sql\getUserField;
+use function Red2Horse\Mixins\Functions\Sql\selectExports;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
@@ -32,7 +30,7 @@ class ResetPassword
 
 	public function requestPassword ( string $u = null, string $e = null, string $c = null ) : bool
 	{
-		return baseInstance( Utility::class ) ->typeChecker( 'forget', $u, null, $e, $c );
+		return BaseInstance( Utility::class ) ->typeChecker( 'forget', $u, null, $e, $c );
 	}
 
 	public function alreadyLoggedIn ( array $userData )
@@ -51,7 +49,7 @@ class ResetPassword
 		if ( ! $userEmail = explode( '@', $userData[ getUserField( 'email' ) ] ) )
 		{
 			getComponents( 'common' )->log_message( 'error', "{$userEmail[ 0 ]} email INVALID !" );
-			throw new \ErrorException( 'Invalid Email', 403 );
+			throw new ErrorParameterException( "{$userEmail[ 0 ]} email INVALID !" );
 		}
 
 		$email = str_repeat( '*', strlen( $userEmail[ 0 ] ) ) . '@' . $userEmail[ 1 ];

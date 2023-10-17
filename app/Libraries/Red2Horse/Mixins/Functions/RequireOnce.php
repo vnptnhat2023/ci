@@ -1,21 +1,40 @@
 <?php
 
+use function Red2Horse\helper;
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
 /** Config ConstantNamespace */
-require_once realpath( \Red2Horse\R2H_BASE_PATH . '/Config/ConstantNamespace.php' );
+// require_once realpath( \Red2Horse\R2H_BASE_PATH . '/Config/ConstantNamespace.php' );
 
-require_once realpath( $functions_path . '/FunctionEvent.php' );
-require_once realpath( $functions_path . '/FunctionInstanceBox.php' );
-require_once realpath( $functions_path . '/FunctionInstance.php' );
+$helperArray = [
+    'constant',
+    'event',
+    'instance_box',
+    'instance',
+    'message',
+    'namespace',
+    'config',
+    'sql',
+    'sql_export',
+    'authorization',
+    'password',
+    'array',
+    'query'
+];
+helper( $helperArray );
+// require_once realpath( $functions_path . '/FunctionEvent.php' );
+// require_once realpath( $functions_path . '/FunctionInstanceBox.php' );
+// require_once realpath( $functions_path . '/FunctionInstance.php' );
 
-require_once realpath( $functions_path . '/FunctionMessage.php' );
-require_once realpath( $functions_path . '/FunctionNamespace.php' );
-require_once realpath( $functions_path . '/FunctionConfig.php' );
-require_once realpath( $functions_path . '/FunctionSql.php' );
-require_once realpath( $functions_path . '/FunctionSqlExport.php' );
-require_once realpath( $functions_path . '/FunctionAuthorization.php' );
-require_once realpath( $functions_path . '/FunctionPassword.php' );
+// require_once realpath( $functions_path . '/FunctionMessage.php' );
+// require_once realpath( $functions_path . '/FunctionNamespace.php' );
+// require_once realpath( $functions_path . '/FunctionConfig.php' );
+// require_once realpath( $functions_path . '/FunctionSql.php' );
+// require_once realpath( $functions_path . '/FunctionSqlExport.php' );
+// require_once realpath( $functions_path . '/FunctionAuthorization.php' );
+// require_once realpath( $functions_path . '/FunctionPassword.php' );
+// require_once realpath( $functions_path . '/Data/FunctionsArrays.php' );
+// require_once realpath( $functions_path . '/FunctionSqlQuery.php' );
 
 
 if (!function_exists('http_response_code')) {

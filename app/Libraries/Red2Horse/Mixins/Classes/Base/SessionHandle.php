@@ -3,30 +3,29 @@
 declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Classes\Base;
 
-use Red2Horse\Mixins\Traits\TraitSingleton;
-use function Red2Horse\Mixins\Functions\
-{
-	getComponents,
-    getConfig,
-    getField,
-    baseInstance,
-	getHashPass,
-    getRandomString,
-    getTable,
-    getUserGroupField
-};
+use Red2Horse\Exception\ErrorSqlException;
+use Red2Horse\Exception\ErrorArrayException;
+
+use function Red2Horse\Mixins\Functions\Config\getConfig;
+use function Red2Horse\Mixins\Functions\Instance\BaseInstance;
+use function Red2Horse\Mixins\Functions\Instance\getComponents;
+use function Red2Horse\Mixins\Functions\Password\getHashPass;
+use function Red2Horse\Mixins\Functions\Password\getRandomString;
+use function Red2Horse\Mixins\Functions\Sql\getField;
+use function Red2Horse\Mixins\Functions\Sql\getTable;
+use function Red2Horse\Mixins\Functions\Sql\getUserGroupField;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
 class SessionHandle
 {
-	use TraitSingleton;
+	use \Red2Horse\Mixins\Traits\Object\TraitSingleton;
 
 	private function __construct () {}
 
 	public function regenerateSession ( array $userData ) : bool
 	{
-		if ( ! baseInstance( Authentication::class )->isLogged() )
+		if ( ! BaseInstance( 'Authentication' )->isLogged() )
 		{
 			return false;
 		}
@@ -55,14 +54,14 @@ class SessionHandle
 		/** DB or session */
 		if ( ! getComponents( 'common' )->valid_json( $userData[ getUserGroupField( 'role' ) ] ) )
 		{
-			throw new \Error( 'Role: Invalid json format !', 406 );
+			throw new ErrorArrayException( 'Invalid json format' );
 		}
 
 		$roleJson = json_decode( $userData[ getUserGroupField( 'role' ) ], true );
 
 		if ( ! array_key_exists( getUserGroupField( 'role' ), $roleJson ) || ! array_key_exists( 'hash', $roleJson ) )
 		{
-			throw new \Error( 'Role: Invalid json format !', 406 );
+			throw new ErrorArrayException( 'Invalid json format' );
 		}
 		/** end */
 
@@ -101,7 +100,7 @@ class SessionHandle
 			}
 			else
 			{
-				$updated = baseInstance( Authentication::class )->loggedInUpdateData(
+				$updated = baseInstance( 'Authentication' )->loggedInUpdateData(
 					$userId,
 					$updateGroupData,
 					getTable( 'user_group' )
@@ -110,12 +109,10 @@ class SessionHandle
 				/** Update to DB */
 				if ( ! $updated )
 				{
-					getComponents( 'common' )->log_message(
-						'error',
-						"{ $userId } Logged-in, but update failed"
-					);
+					getComponents( 'common' )
+						->log_message( 'error', "{ $userId } Logged-in, but update failed" );
 
-					throw new \Error( 'Authentication cannot updated.', 406 );
+					throw new ErrorSqlException( 'Authentication cannot updated.' );
 				}
 			}
 

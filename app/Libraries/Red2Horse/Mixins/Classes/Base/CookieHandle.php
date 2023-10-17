@@ -3,17 +3,15 @@
 declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Classes\Base;
 
-use Red2Horse\Mixins\Traits\TraitSingleton;
-use function Red2Horse\Mixins\Functions\
-{
-	getComponents,
-    getConfig,
-    baseInstance,
-    getTable,
-    getUserField,
-    getUserGroupField,
-    selectExports
-};
+use Red2Horse\Mixins\Traits\Object\TraitSingleton;
+
+use function Red2Horse\Mixins\Functions\Config\getConfig;
+use function Red2Horse\Mixins\Functions\Instance\BaseInstance;
+use function Red2Horse\Mixins\Functions\Instance\getComponents;
+use function Red2Horse\Mixins\Functions\Sql\getTable;
+use function Red2Horse\Mixins\Functions\Sql\getUserField;
+use function Red2Horse\Mixins\Functions\Sql\getUserGroupField;
+use function Red2Horse\Mixins\Functions\Sql\selectExports;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
@@ -47,7 +45,7 @@ class CookieHandle
 
 		if ( getComponents( 'cache' )->isSupported() )
 		{
-			baseInstance( 'SessionHandle' )->roleHandle( $user );
+			BaseInstance( 'SessionHandle' )->roleHandle( $user );
 		}
 		else
 		{
@@ -235,7 +233,7 @@ class CookieHandle
 			$cookieComponent = getComponents( 'cookie' );
 			$cookie = getConfig( 'cookie' );
 			$ttl = time() + $cookie->ttl;
-			$cookieComponent->set_cookie( $cookie->cookie, $cookieValue, ( string ) $ttl, '/' );
+			$cookieComponent->set_cookie( $cookie->cookie, $cookieValue, ( string ) $ttl );
 		}
 		else
 		{

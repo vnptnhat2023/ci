@@ -1,12 +1,10 @@
 <?php
 
 declare( strict_types = 1 );
-
 namespace Red2Horse\Facade\Common;
 
-use Red2Horse\Mixins\Traits\TraitSingleton;
-
-use function Red2Horse\Mixins\Functions\getConfig;
+use Red2Horse\Mixins\Traits\Object\TraitSingleton;
+use function Red2Horse\Mixins\Functions\Config\getConfig;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
@@ -29,6 +27,11 @@ class CommonFacade implements CommonFacadeInterface
 	public function isAssocArray( array $data ) : bool
 	{
 		return $this->common->isAssocArray( $data );
+	}
+
+	public function nonAssocArray ( array $data ) : bool
+	{
+		return ! $this->isAssocArray( $data ) && [] !== $data;
 	}
 
 	/**
@@ -101,7 +104,7 @@ class CommonFacade implements CommonFacadeInterface
 		return (string) mt_rand();
 	}
 
-	function camelCase ( string $str, bool $ucfirst = false ) : string
+	public function camelCase ( string $str, bool $ucfirst = false ) : string
 	{
 		$str = str_replace( ' ', '', ucwords( str_replace( [ '-', '_' ], ' ', $str ) ) );
 
@@ -113,6 +116,11 @@ class CommonFacade implements CommonFacadeInterface
 		return $str;
 	}
 
+	public function underString ( string $name ) : string
+    {
+        return strtolower( trim( preg_replace( '/([A-Z]){1}/', '_$1', $name ), '_' ) );
+    }
+
 	public function esc ( string $str ) : string
 	{
 		if ( getConfig( 'sql' )->esc )
@@ -122,6 +130,13 @@ class CommonFacade implements CommonFacadeInterface
 
 		return $str;
 	}
+
+	// public function esc_string ( string $str ) : string
+	// {
+	// 	# ( '|" )
+
+	// 	return $str;
+	// }
 
 	public function esc_html ( string $str ) : string
 	{

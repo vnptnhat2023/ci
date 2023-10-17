@@ -3,8 +3,8 @@
 declare( strict_types = 1 );
 namespace Red2Horse\Facade\Database;
 
-use Red2Horse\Mixins\Traits\TraitSingleton;
-use function Red2Horse\Mixins\Functions\getConfig;
+use Red2Horse\Mixins\Traits\Object\TraitSingleton;
+use function Red2Horse\Mixins\Functions\Config\getConfig;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 

@@ -4,7 +4,9 @@ declare( strict_types = 1 );
 namespace Red2Horse\Config;
 
 use Red2Horse\Mixins\Functions\UserDefinedFunctions;
-use Red2Horse\Mixins\Traits\TraitSingleton;
+use Red2Horse\Mixins\Traits\Object\TraitSingleton;
+
+use function Red2Horse\Mixins\Functions\Instance\getComponents;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
@@ -17,10 +19,12 @@ class Event
     public bool $useBefore = true;
     public bool $useAfter = true;
 
+    /** Prefix */
     public string $prefix = 'R2h';
     public string $beforePrefix = 'before';
     public string $afterPrefix = 'after';
     
+    /** Events */
     public array $events = [];
     protected array $eventReg = [
         'get_message'         => UserDefinedFunctions::class,
@@ -33,23 +37,33 @@ class Event
 
     private function __construct ()
     {
-        $this->reInit();
+        $this->init();
     }
 
-    public function reInit () : void
+    /**
+     * @var mixed $key
+     */
+    public function init ( $key = null, ?string $classNamespace = null ) : void
     {
+        if ( null !== $key && null !== $classNamespace && ! array_key_exists( $key, $this->eventReg ) )
+        {
+            $this->eventReg[ $key ] = $classNamespace;
+        }
+
         $events = [];
 
         foreach ( $this->eventReg as $stringCallable => $className )
         {
             if ( $this->useBefore )
             {
-                $events[ $this->getPrefixNamed( $this->beforePrefix, $stringCallable ) ] = $className;
+                $beforeKey = $this->getPrefixNamed( $this->beforePrefix, $stringCallable );
+                $events[ $beforeKey ] = $className;
             }
 
             if ( $this->useAfter )
             {
-                $events[ $this->getPrefixNamed( $this->afterPrefix, $stringCallable ) ] = $className;
+                $afterKey = $this->getPrefixNamed( $this->afterPrefix, $stringCallable );
+                $events[ $afterKey ] = $className;
             }
         }
 
@@ -57,10 +71,10 @@ class Event
     }
 
     /** @param string $abPrefix before or after prefix */
-    public function getPrefixNamed ( string $abPrefix, string $stringCallable ) : string
+    public function getPrefixNamed ( string $abPrefix, string $stringCallable, string $format = '%1$s_%2$s_%3$s' ) : string
     {
         return sprintf(
-            '%s_%s_%s',
+            $format,
             strtolower( $this->prefix ),
             strtolower( $abPrefix ),
             strtolower( $stringCallable )
@@ -69,6 +83,6 @@ class Event
     
     public function underString ( string $name ) : string
     {
-        return strtolower( trim( preg_replace( '/([A-Z]){1}/', '_$1', $name ), '_' ) );
+        return getComponents( 'common' )->underString( $name );
     }
 }

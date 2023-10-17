@@ -3,17 +3,15 @@
 declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Classes\Base;
 
-use Red2Horse\Mixins\Traits\TraitSingleton;
-use function Red2Horse\Mixins\Functions\
-{
-    getComponents,
-    getConfig,
-    getField,
-    baseInstance,
-    getTable,
-    getVerifyPass,
-    selectExports
-};
+use Red2Horse\Mixins\Traits\Object\TraitSingleton;
+
+use function Red2Horse\Mixins\Functions\Config\getConfig;
+use function Red2Horse\Mixins\Functions\Instance\BaseInstance;
+use function Red2Horse\Mixins\Functions\Instance\getComponents;
+use function Red2Horse\Mixins\Functions\Password\getVerifyPass;
+use function Red2Horse\Mixins\Functions\Sql\getField;
+use function Red2Horse\Mixins\Functions\Sql\getTable;
+use function Red2Horse\Mixins\Functions\Sql\selectExports;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
@@ -104,9 +102,7 @@ final class Authorization
 
 		if ( ! getVerifyPass( $this->sessionData[ 'hash' ], $userData[ 'hash' ] ) )
 		{
-			getComponents( 'common' )->log_message( 
-				'error', __FILE__ . __LINE__ . 'Unauthorized.'
-			);
+			getComponents( 'common' )->log_message( 'error', __FILE__ . __LINE__ . 'Unauthorized.' );
 
 			return false;
 		}
@@ -149,7 +145,7 @@ final class Authorization
 		$userData = [];
 		foreach ( $args as $key )
 		{
-			$userData = ( array ) baseInstance( Authentication::class )->getUserdata( $key );
+			$userData = ( array ) BaseInstance( Authentication::class )->getUserdata( $key );
 		}
 
 		return $userData;

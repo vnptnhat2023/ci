@@ -4,13 +4,10 @@ declare( strict_types = 1 );
 
 namespace Red2Horse\Mixins\Classes\Base;
 
-use Red2Horse\Mixins\Traits\TraitSingleton;
+use Red2Horse\Mixins\Traits\Object\TraitSingleton;
 
-use function Red2Horse\Mixins\Functions\
-{
-	getComponents,
-    getConfig
-};
+use function Red2Horse\Mixins\Functions\Instance\getComponents;
+use function Red2Horse\Mixins\Functions\Config\getConfig;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 

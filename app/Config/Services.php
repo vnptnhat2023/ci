@@ -19,6 +19,8 @@ use Red2Horse\{
 	Adapter\CodeIgniter\System\Red2HorseSession
 };
 
+use function Red2Horse\Mixins\Functions\Config\setConfig;
+
 class Services extends CoreServices
 {
 	public static function Red2HorseAuth ( bool $getShared = true ) : R2h
@@ -28,7 +30,29 @@ class Services extends CoreServices
 			return static::getSharedInstance( 'Red2HorseAuth' );
 		}
 
-		return R2h::getInstance();
+		$auth = R2h::getInstance();
+
+		setConfig ( 'BaseConfig', static function( $baseConfig )
+		{
+			$baseConfig->useRememberMe = true;
+			return $baseConfig;
+		} );
+
+		setConfig( 'throttle', static function ( $throttle )
+		{
+			$throttle->useThrottle = false;
+			// $throttle->throttle->captchaAttempts = 2;
+			// $throttle->useThrottle = true;
+			return $throttle;
+		} );
+
+		setConfig( 'validation', static function( $valid ) {
+			// $valid->user_username = 'qwe_username';
+			// $valid->user_password = 'qwe_password';
+			return $valid;
+		} );
+
+		return $auth;
 	}
 
 	public static function Extension ( bool $getShared = true ) : Extension

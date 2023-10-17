@@ -46,7 +46,7 @@ trait TraitRegistryClassMethod
      * @throws \Error
      * @return array|null
      */
-    public function instanceData ( string $className )
+    public function instanceData ( string $className, $params = null )
     {
         if ( null !== $classData = $this->keyName::get( $className ) )
         {
@@ -60,12 +60,13 @@ trait TraitRegistryClassMethod
         
         try
         {
-            $className::getInstance();
+            $className::getInstance( $params );
             return $this->keyName::get( $className );
         }
-        catch ( \Throwable $th )
+        // catch ( \Throwable $th )
+        catch ( \Exception $e )
         {
-            throw new \Error( $th->getMessage(), 404 );
+            throw new \Error( $e->getMessage(), 404 );
         }
     }
 

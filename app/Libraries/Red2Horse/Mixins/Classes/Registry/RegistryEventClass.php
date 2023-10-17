@@ -3,10 +3,11 @@
 declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Classes\Registry;
 
-use Red2Horse\Mixins\Interfaces\RegistryClass___Interface;
+use Red2Horse\Mixins\Interfaces\Registry\RegistryClass___Interface;
 
-use Red2Horse\Mixins\Traits\{
-    Registry\TraitRegistryClassMethod,
+use Red2Horse\Mixins\Traits\Registry\
+{
+    TraitRegistryClassMethod,
     TraitRegistry
 };
 

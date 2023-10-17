@@ -3,12 +3,10 @@
 declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Classes\Registry;
 
-use Red2Horse\Mixins\
-{
-    Classes\CallClass___,
-    Traits\Registry\TraitRegistryClassMethod,
-    function Functions\ComponentNamespace
-};
+use Red2Horse\Mixins\Classes\Object\CallClass___;
+use Red2Horse\Mixins\Traits\Registry\TraitRegistryClassMethod;
+
+use function Red2Horse\Mixins\Functions\NS\ComponentNamespace;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
@@ -46,9 +44,9 @@ final class RegistryClass extends RegistryClass___
     }
 
     /**
-     * @return self|\Red2Horse\Mixins\Traits\TraitSingleton
+     * @return self|\Red2Horse\Mixins\Traits\Object\TraitSingleton
      */
-    public function getInstance ()
+    public function getInstance ( $params = null )
     {
         if ( self::class == $this->className )
         {
@@ -57,7 +55,7 @@ final class RegistryClass extends RegistryClass___
 
         if ( $this->getShared )
         {
-            $classData = $this->instanceData( $this->className );
+            $classData = $this->instanceData( $this->className, $params );
             return $classData[ 'instance' ];
         }
 
@@ -67,7 +65,7 @@ final class RegistryClass extends RegistryClass___
     /**
      * @param string $name name only ( not namespace )
      * @param bool $getShared adapter only
-     * @return object|\Red2Horse\Mixins\Traits\TraitSingleton
+     * @return object|\Red2Horse\Mixins\Traits\Object\TraitSingleton
      */
     public function getComponents ( bool $getAdapter = false ) : object
     {
@@ -101,11 +99,11 @@ final class RegistryClass extends RegistryClass___
         return $facadeName::getInstance( $adapterInstance );
     }
 
-    public function getInstanceMethods () : array
+    public function getInstanceMethods ( $params = null ) : array
     {
         if ( $this->getShared )
         {
-            $classData = $this->instanceData( $this->className );
+            $classData = $this->instanceData( $this->className, $params );
             return $classData[ 'methods' ];
         }
 
@@ -126,7 +124,7 @@ final class RegistryClass extends RegistryClass___
         {
             $instance = new class( $this->className, $arguments )
             {
-                use \Red2Horse\Mixins\Traits\TraitCall;
+                use \Red2Horse\Mixins\Traits\Object\TraitCall;
 
                 public function __construct( string $className, array $arguments )
                 {

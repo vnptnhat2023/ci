@@ -1,8 +1,7 @@
 <?php
 
+declare( strict_types = 1 );
 namespace Red2Horse\Adapter\CodeIgniter\System;
-
-use function Red2Horse\Mixins\Functions\getHashPass;
 
 class ValidCap
 {
@@ -21,7 +20,7 @@ class ValidCap
 
 	public function perms ( string $str ) : bool
 	{
-		return preg_match( '/[a-zA-Z0-9-_\s,]/', $str );
+		return ( bool ) preg_match( '/[a-zA-Z0-9-_\s,]/', $str );
 	}
 	
 }

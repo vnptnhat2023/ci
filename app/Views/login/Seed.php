@@ -176,7 +176,7 @@ function fontFamily () : string
 							</span>
 						</div> -->
 
-						<h3 class="form-box-title"><?= r2hI18( 'seed' ) ?></h3>
+						<h3 class="form-box-title"><?= $added->title ?? 'seed' ?></h3>
 
 						<!-- Message -->
 						<?php

@@ -81,6 +81,8 @@ class Database extends \CodeIgniter\Database\Config
 
 	//--------------------------------------------------------------------
 
+	public array $red2HorseAuth;
+
 	public function __construct()
 	{
 		parent::__construct();
