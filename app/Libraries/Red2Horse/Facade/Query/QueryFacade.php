@@ -11,9 +11,14 @@ defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 class QueryFacade implements QueryFacadeInterface
 {
 	use TraitSingleton;
-
-	public function querySimple( string $sql, bool $getString = true  )
+	
+	public function query( string $sql, bool $getString = false )
 	{
-		return getComponents( 'query', true, true )->querySimple( $sql, $getString );
+		return getComponents( 'query', true, true )->query( $sql, $getString );
+	}
+
+	public function resultArray ( string $sql ) : array
+	{
+		return getComponents( 'query', true, true )->resultArray( $sql );
 	}
 }

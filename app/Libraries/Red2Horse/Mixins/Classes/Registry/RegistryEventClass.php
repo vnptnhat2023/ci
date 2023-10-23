@@ -13,13 +13,13 @@ use Red2Horse\Mixins\Traits\Registry\
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
-class RegistryEventClass implements RegistryClass___Interface
+final class RegistryEventClass implements RegistryClass___Interface
 {
     use TraitRegistry, TraitRegistryClassMethod;
 
     public static self $instance;
 
-    final public function __construct ( string $state = self::class )
+    public function __construct ( string $state = self::class )
     {
         $this->configRegistryClassMethod___( $state );
     }
@@ -33,10 +33,5 @@ class RegistryEventClass implements RegistryClass___Interface
     {
         self::$instance = isset( self::$instance ) ? self::$instance : new self( $state );
         return self::$instance;
-    }
-
-    public function __destruct()
-    {
-        // d( RegistryEventClass::getInstance() );
     }
 }

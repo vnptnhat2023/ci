@@ -12,6 +12,7 @@ use function Red2Horse\Mixins\Functions\Instance\BaseInstance;
 use function Red2Horse\Mixins\Functions\Instance\getComponents;
 use function Red2Horse\Mixins\Functions\Message\setErrorMessage;
 use function Red2Horse\Mixins\Functions\Message\setSuccessMessage;
+use function Red2Horse\Mixins\Functions\Model\model;
 use function Red2Horse\Mixins\Functions\Sql\getTable;
 use function Red2Horse\Mixins\Functions\Sql\getUserField;
 use function Red2Horse\Mixins\Functions\Sql\selectExports;
@@ -87,30 +88,21 @@ class ResetPassword
 			return false;
 		}
 
-		$querySelectSql = selectExports( [
-			getTable( 'user' ) => [],
-			getTable( 'user_group' ) => []
-		]);
-		$find_user = getComponents( 'user' ) ->getUserWithGroup( $querySelectSql, $data );
-
-		if ( empty( $find_user ) )
+		$userData = model( 'User/UserModel' )->fetchFirstUserData( $data );
+		if ( [] === $userData )
 		{
 			$message->errorInformation();
 			return false;
 		}
 
 		$common = getComponents( 'common' );
-		$randomPw = $common->random_string();
-		$hashPw = baseInstance( Password::class )->getHashPass( $randomPw );
+		$randomPw = BaseInstance( Password::class )->getHashPass( $common->random_string() );
 
-		$updatePassword = getComponents( 'user' )->updateUser(
-			[ getUserField( 'username' ) => $find_user[ getUserField( 'username' ) ] ],
-			[ getUserField( 'password' ) => $hashPw ]
-		);
+		$editSet = [ getUserField( 'username' ) => $userData[ getUserField( 'username' ) ] ];
+		$editWhere = [ getUserField( 'password' ) => $randomPw ];
+		$error = 'Cannot update password';
 
-		$error = 'The system is busy, please come back later';
-
-		if ( ! $updatePassword )
+		if ( ! model( 'User/UserModel' ) ->edit( $editSet, $editWhere ) )
 		{
 			setErrorMessage( $error );
 			return false;
@@ -119,7 +111,8 @@ class ResetPassword
 		if ( ! baseInstance( Notification::class ) ->mailSender( $randomPw ) )
 		{
 			setErrorMessage( $error );
-			$common->log_message( 'error' , "Cannot sent email: {$find_user[ getUserField( 'username' ) ]}" );
+			$errorLog = sprintf( 'Cannot sent email: %s', $userData[ getUserField( 'username' ) ] );
+			$common->log_message( 'error' , $errorLog );
 			return false;
 		}
 

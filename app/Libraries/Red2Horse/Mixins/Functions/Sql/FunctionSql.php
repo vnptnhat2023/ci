@@ -3,6 +3,8 @@
 declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Functions\Sql;
 
+use Red2Horse\Exception\ErrorArrayKeyNotFoundException;
+use Red2Horse\Exception\ErrorFileHandleException;
 use Red2Horse\Mixins\Classes\Sql\SqlClass;
 
 use function Red2Horse\Mixins\Functions\Config\getConfig;
@@ -31,12 +33,16 @@ function getUserFields ( array $keys )
     return getFields( $keys, 'user' );
 }
 
+function getUserTableField ( string $key, bool $getKey = false  )
+{
+    return sqlClassInstance()->getField( $key, 'user', $getKey, true );
+}
+
 /** @return mixed */
 function getUserGroupFields ( array $keys )
 {
     return getFields( $keys, 'user_group' );
 }
-
 
 /** @return mixed */
 function getUserGroupField ( string $key, bool $getKey = false )
@@ -44,9 +50,18 @@ function getUserGroupField ( string $key, bool $getKey = false )
     return getField( $key, 'user_group', $getKey );
 }
 
-function getTable ( string $key = 'user_group', bool $getKey = false ) : string
+function getUserGroupTableField ( string $key, bool $getKey = false )
 {
-    return sqlClassInstance()->getTable( $key, $getKey );
+    return sqlClassInstance()->getField( $key, 'user_group', $getKey, true );
+}
+
+/**
+ * @return string|false
+ * @throws ErrorArrayKeyNotFoundException
+ */
+function getTable ( string $key = 'user_group', bool $getKey = false, bool $throw = true, bool $defaultReturn = false )
+{
+    return sqlClassInstance()->getTable( $key, $getKey, $throw, $defaultReturn );
 }
 
 function getColumn ( string $key = 'user_group', string $userFunc = '' )
@@ -67,9 +82,27 @@ function getFields ( array $keys, string $table = 'user_group', bool $columnsFor
 }
 
 /** @return mixed */
-function getField ( string $key, string $table = 'user_group', bool $getKey = false )
+function getField ( string $key, string $table = 'user_group', bool $getKey = false, bool $getTableKey = false )
 {
-    return sqlClassInstance()->getField( $key, $table, $getKey );
+    return sqlClassInstance()->getField( $key, $table, $getKey, $getTableKey );
+}
+
+/** @return mixed */
+function getKeyField ( string $key, string $table = 'user_group' )
+{
+    return sqlClassInstance()->getField( $key, $table, true );
+}
+
+/** @return mixed */
+function getValueField ( string $key, string $table = 'user_group' )
+{
+    return sqlClassInstance()->getField( $key, $table );
+}
+
+/** @return mixed */
+function getValueTableField ( string $key, string $table = 'user_group' )
+{
+    return sqlClassInstance()->getField( $key, $table, false, true );
 }
 
 function createDatabase ( $s, $u, $p, $d, $port = null, array $intersect = [] ) : bool
@@ -97,7 +130,6 @@ function createDatabase ( $s, $u, $p, $d, $port = null, array $intersect = [] ) 
         return false;
     }
 
-    // dd( $s, $u, $p, $d, ( int ) $port );
     if ( ! $conn = databaseConnect( $s, $u, $p, '', ( int ) $port ) )
     {
         return false;
@@ -150,7 +182,7 @@ function createDatabase ( $s, $u, $p, $d, $port = null, array $intersect = [] ) 
 
     if ( ! $write )
     {
-        throw new \Error( 'Not Acceptable', 406 );
+        throw new ErrorFileHandleException( sprintf( 'Cannot write to file: %s', $file ) );
     }
 
     if ( ! mysqli_query( $conn, "CREATE DATABASE IF NOT EXISTS {$d}" ) )
@@ -161,7 +193,7 @@ function createDatabase ( $s, $u, $p, $d, $port = null, array $intersect = [] ) 
 
     if ( ! chmod( \Red2Horse\R2H_BASE_PATH, 775 ) )
     {
-        throw new \Error( 'Cannot chmod to 755', 406 );
+        throw new ErrorFileHandleException( 'Cannot chmod to 755' );
     }
 
     setSuccessMessage( '', true );

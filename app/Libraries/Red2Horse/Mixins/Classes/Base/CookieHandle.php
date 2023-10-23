@@ -3,11 +3,13 @@
 declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Classes\Base;
 
+use Red2Horse\Exception\ErrorValidationException;
 use Red2Horse\Mixins\Traits\Object\TraitSingleton;
 
 use function Red2Horse\Mixins\Functions\Config\getConfig;
 use function Red2Horse\Mixins\Functions\Instance\BaseInstance;
 use function Red2Horse\Mixins\Functions\Instance\getComponents;
+use function Red2Horse\Mixins\Functions\Model\model;
 use function Red2Horse\Mixins\Functions\Sql\getTable;
 use function Red2Horse\Mixins\Functions\Sql\getUserField;
 use function Red2Horse\Mixins\Functions\Sql\getUserGroupField;
@@ -96,11 +98,8 @@ class CookieHandle
 	 */
 	private function _queryValidate ( $selector, $token )
 	{
-		$querySelect = selectExports( [ getTable( 'user' ) => [], getTable( 'user_group' ) => [] ] );
-		$queryWhere = [ getUserField( 'selector' ) => $selector ];
-
-		/** Query user, group */
-		if ( [] === ( $user = getComponents( 'user' )->getUserWithGroup( $querySelect, $queryWhere ) ) )
+		$user = model( 'User/UserModel' )->fetchFirstUserData( [ getUserField( 'selector' ) => $selector ] );
+		if ( [] === $user )
 		{
 			return $this->_cleanOldCookie();
 		}
@@ -176,14 +175,7 @@ class CookieHandle
 
 	private function _cookieHandleRefresh ( array $user ) : array
 	{
-		$keyUserId = ( int ) $user[ getUserField( 'id' ) ];
-
-		# Refresh cookie
-		$setCookieParam = getComponents( 'common' )
-			->lang( 'errorCookieUpdate', [ $keyUserId ] );
-
-		$this->setCookie( $keyUserId, [], $setCookieParam );
-
+		$this->setCookie( ( int ) $user[ getUserField( 'id' ) ] );
 		$keyPermission = getUserGroupField( 'permission' );
 		$isJson = getComponents( 'common' )->valid_json( $user[ $keyPermission ] );
 
@@ -194,7 +186,7 @@ class CookieHandle
 
 	/** End-CookieHandler private function */
 
-	public function setCookie ( int $userId, array $updateData = [], string $logError = null ) : void
+	public function setCookie ( int $userId, array $updateData = [] ) : void
 	{
 		if ( ! getConfig()->useRememberMe )
 		{
@@ -205,14 +197,14 @@ class CookieHandle
 		if ( $userId <= 0 )
 		{
 			$errArg = [ 'field' => 'user_id', 'param' => $userId ];
-			throw new \Exception( $common->lang( 'Validation.greater_than', $errArg ), 1 );
+			throw new ErrorValidationException( $common->lang( 'Validation.greater_than', $errArg ), 1 );
 		}
 
 		$isAssocData = $common->isAssocArray( $updateData );
 
 		if ( ! empty( $updateData ) && ! $isAssocData )
 		{
-			throw new \Exception( $common->lang( 'Red2Horse.isAssoc' ), 1 );
+			throw new ErrorValidationException( $common->lang( 'Red2Horse.isAssoc' ), 1 );
 		}
 
 		$selector = bin2hex( random_bytes( 8 ) );

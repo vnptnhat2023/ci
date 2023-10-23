@@ -27,6 +27,8 @@ use function Red2Horse\Mixins\Functions\Sql\getColumn;
 use function Red2Horse\Mixins\Functions\Sql\getField;
 use function Red2Horse\Mixins\Functions\Sql\getFields;
 use function Red2Horse\Mixins\Functions\Sql\getTable;
+use function Red2Horse\Mixins\Functions\Sql\getUserField;
+use function Red2Horse\Mixins\Functions\Sql\getUserGroupField;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
@@ -72,7 +74,7 @@ class SqlClassExport
         $posts = $this->formData( $posts );
         $sql = $this->seedExport( $tableName, $posts );
 
-        if ( $query && ! getComponents( 'user' )->querySimple( $sql ) )
+        if ( $query && ! getComponents( 'query' )->query( $sql ) )
         {
             throw new ErrorSqlException( $sql );
         }
@@ -85,19 +87,19 @@ class SqlClassExport
 
     private function formData ( array $posts ) : array
     {
-        $user_password = getField( 'password', getTable( 'user' ) );
+        $user_password = getUserField( 'password' );
         if ( array_key_exists( $user_password, $posts ) )
         {
             $posts[ $user_password ] = getHashPass( $posts[ $user_password ] );
         }
 
-        $user_role = getField( 'role', getTable( 'user_group' ) );
+        $user_role = getUserGroupField( 'role' );
         if ( array_key_exists( $user_role, $posts ) )
         {
             $posts[ $user_role ] = json_encode( [ 'role' => $posts[ $user_role ], 'hash' => '' ] );
         }
 
-        $user_permission = getField( 'permission', getTable( 'user_group' ) );
+        $user_permission = getUserGroupField( 'permission' );
         if ( array_key_exists( $user_permission, $posts ) )
         {
             $mapFn = fn( $str ) => trim( $str );
@@ -164,7 +166,7 @@ class SqlClassExport
 
         if ( $query )
         {
-            if ( ! getComponents( 'user' )->querySimple( $sqlParser ) )
+            if ( ! getComponents( 'query' )->query( $sqlParser ) )
             {
                 throw new ErrorSqlException( $sqlParser );
             }

@@ -3,10 +3,10 @@
 declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Classes\Sql;
 
-use Red2Horse\Mixins\{
-    Interfaces\Sql\SqlClassInterface,
-    Traits\Object\TraitSingleton
-};
+use Red2Horse\Exception\ErrorArrayKeyNotFoundException;
+use Red2Horse\Exception\ErrorParameterException;
+use Red2Horse\Mixins\Interfaces\Sql\SqlClassInterface;
+use Red2Horse\Mixins\Traits\Object\TraitSingleton;
 
 use function Red2Horse\Mixins\Functions\Config\getConfig;
 use function Red2Horse\Mixins\Functions\Event\trigger;
@@ -106,15 +106,28 @@ class SqlClass implements SqlClassInterface
 	}
 
 	/**
-	 * @throws \Error
+	 * @throws ErrorArrayKeyNotFoundException
+	 * @return false|string
 	 */
-	public function getTable( string $key, bool $getKey = false )
+	public function getTable( string $key, bool $getKey = false, bool $throw = true, bool $defaultReturn = false )
 	{
-		$table = $this->database[ 'tables' ];
+		#dd( $this->database);
+		$table = $this->database[ 'tables' ];#dd($table);
 
 		if ( ! array_key_exists( $key, $table ) || empty( $table[ $key ] ) )
 		{
-			throw new \Error( 'Undefined table: ' . $key );
+			if ( $throw )
+			{
+				throw new ErrorArrayKeyNotFoundException( sprintf( 'Undefined table: %s', $key ) );
+			}
+			else if ( $defaultReturn )
+			{
+				return $key;
+			}
+			else
+			{
+				return false;
+			}
 		}
 
 		if ( $getKey )
@@ -142,7 +155,7 @@ class SqlClass implements SqlClassInterface
 	{
 		if ( in_array( $table, $this->database[ 'tables' ] ) )
 		{
-			throw new \Error( 'Table name cannot contain [ user or user_group ].' );
+			throw new ErrorParameterException( 'Parameter 1: "table" not in: "user, user_group"' );
 		}
 
 		$this->database[ 'tables' ][ $table ] = $this->_filter( $name );
@@ -162,7 +175,7 @@ class SqlClass implements SqlClassInterface
 	{
 		if ( $key == 'table' && ! $this->getTable( $key ) )
 		{
-			throw new \Error( 'The key cannot be table.' );
+			throw new ErrorParameterException( 'Parameter 1: "key" cannot equal table.' );
 		}
 
 		$this->database[ $key ] = $this->_filter( $value );
@@ -193,16 +206,55 @@ class SqlClass implements SqlClassInterface
 		return array_intersect( $column, $keys );
 	}
 
-	public function getField( string $key, string $table, bool $getKey = false )
+	public function getField(
+		string $key, 
+		string $table, 
+		bool $getKey = false, 
+		bool $getTableKey = false, 
+		bool $throw = true )
 	{
-		$table = $this->getTable( $table );
+		if ( ! $table = $this->getTable( $table, false, false ) )
+		{
+			return false;
+		}
+
+		if ( '*' === $key )
+		{
+			return sprintf( '%s.%s', $table, $key );
+		}
 
 		if ( array_key_exists( $key, $this->database[ $table ] ) )
 		{
-			return $getKey ? $key : $this->database[ $table ][ $key ];
+			if ( $getKey )
+			{
+				return $getTableKey ? sprintf( '%s.%s', $table, $key ) : $key;
+			}
+
+			$field = $this->database[ $table ][ $key ];
+
+			if ( $getTableKey )
+			{
+				if ( is_array( $field ) )
+				{
+					$fieldTableKey = array_key_exists( 0, $field ) ? $field[ 0 ] : $field;
+				}
+				else
+				{
+					$fieldTableKey = $field;
+				}
+				
+				return sprintf( '%s.%s', $table, $fieldTableKey );
+			}
+
+			return $field;
 		}
 
-		throw new \Error( "Field: {$key} not found. " . __METHOD__ );
+		if ( $throw )
+		{
+			throw new ErrorArrayKeyNotFoundException( sprintf( 'Field: "%s" not found', $key ) );
+		}
+
+		return false;
 	}
 
 	/** @param mixed $value */
@@ -210,7 +262,7 @@ class SqlClass implements SqlClassInterface
 	{
 		if ( ! $table = $this->getTable( $key ) )
 		{
-			throw new \Error( 'Undefined table: ' . $table );
+			throw new ErrorArrayKeyNotFoundException( sprintf( 'Undefined table: "%s"', $table ) );
 		}
 
 		$this->database[ $table ][ $key ] = $this->_filter( $value );

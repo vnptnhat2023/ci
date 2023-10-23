@@ -9,11 +9,13 @@ use Red2Horse\
     Mixins\Classes\Registry\RegistryClass,
     Mixins\Classes\Base\Red2Horse
 };
+use Red2Horse\Exception\ErrorPathException;
 
 use function Red2Horse\Mixins\Functions\Config\initConfig;
 use function Red2Horse\Mixins\Functions\Instance\callClass;
 
 const R2H_BASE_PATH = __DIR__;
+// require_once realpath( \Red2Horse\R2H_BASE_PATH . '/Config/ConstantNamespace.php' );
 
 /**
  * @param array $name
@@ -23,11 +25,10 @@ function helper ( array $names, ?string $add = null ) : void
 {
     if ( ! $functionPath = realpath( \Red2Horse\R2H_BASE_PATH . '/Mixins/Functions' ) )
     {
-        throw new \Error( sprintf( 'Path not found: %s', $functionPath ), 404 );
+        throw new ErrorPathException( sprintf( 'Path not found: %s', $functionPath ), 404 );
     }
 
     static $functionNames = [
-        'constant'          => \Red2Horse\R2H_BASE_PATH . '/Config/ConstantNamespace.php',
         'event'             => '/Event/FunctionEvent.php',
         'instance_box'      => '/Instance/FunctionInstanceBox.php',
         'instance'          => '/Instance/FunctionInstance.php',
@@ -39,7 +40,7 @@ function helper ( array $names, ?string $add = null ) : void
         'array'             => '/Data/FunctionsArrays.php',
         'sql'               => '/Sql/FunctionSql.php',
         'sql_export'        => '/Sql/FunctionSqlExport.php',
-        'query'             => '/Sql/FunctionSqlQuery.php'
+        'model'             => '/Model/FunctionModel.php'
     ];
 
     static $required = [];
@@ -56,16 +57,24 @@ function helper ( array $names, ?string $add = null ) : void
 
     foreach ( $diffs as $diff )
     {
-        if ( $requireStr = realpath( $functionPath . $functionNames[ $diff ] ) )
+        $path = $functionPath . $functionNames[ $diff ];
+
+        if ( $requireStr = realpath( $path ) )
         {
             $required[] = $required;
             require_once $requireStr;
         }
+        else
+        {
+            throw new ErrorPathException( sprintf( 'Path not found: %s', $path ), 404 );
+        }
     }
 }
 
-\Red2Horse\helper( [ 'constant', 'event', 'instance_box', 'instance', 'message',
-    'namespace', 'config', 'sql', 'sql_export', 'authorization', 'password', 'array', 'query'
+\Red2Horse\helper( [
+    'event', 'instance_box', 'instance', 'message',
+    'namespace', 'config', 'sql', 'sql_export', 'authorization', 
+    'password', 'array', 'model'
 ] );
 
 /** @todo [ SERIALIZE, INVOKE ] */
@@ -79,10 +88,6 @@ class R2h
 
     public function __call ( string $methodName, array $arguments )
     {
-        // if ( function_exists( $functionName = functionNamespace( $methodName ) ) )
-        // {
-        //     return call_user_func( $functionName, ...$arguments );
-        // }
         $setting = [ 'method_name' => $methodName, 'arguments' => $arguments ];
         return CallClass( Red2Horse::class, RegistryClass::class, true, $setting );
     }

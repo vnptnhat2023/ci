@@ -3,6 +3,8 @@
 declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Functions\Config;
 
+use Red2Horse\Exception\ErrorClassException;
+use Red2Horse\Exception\ErrorParameterException;
 use Red2Horse\Mixins\Classes\Registry\RegistryClass as Reg;
 
 use function Red2Horse\Mixins\Functions\Instance\getClass;
@@ -27,7 +29,6 @@ function initConfig () : void
 /**
  * @param ?string $name null: base config
 //  * @return object|\Red2Horse\Mixins\Traits\Object\TraitSingleton
- * @throws \Error
  */
 function getConfig ( ?string $name = null, bool $getShared = true ) : object
 {
@@ -36,20 +37,12 @@ function getConfig ( ?string $name = null, bool $getShared = true ) : object
         return getInstance( configNamespace( 'BaseConfig' ), Reg::class, $getShared );
     }
 
-    # Class name
-    if ( false === strpos( $name, '\\' ) )
-    {
-        $name = configNamespace( $name );
-        return getInstance( $name, Reg::class, $getShared );
-    }
-
-    # Namespace class
-    return getInstance( $name, Reg::class, $getShared );
+    return getInstance( configNamespace( $name ), Reg::class, $getShared );
 }
 
 /**
  * @return \Red2Horse\Mixins\Traits\Object\TraitSingleton
- * @throws \Error
+ * @throws ErrorParameterException
  */
 function setConfig ( ?string $name = null, \Closure $callback, bool $getShared = true ) : object
 {
@@ -58,9 +51,8 @@ function setConfig ( ?string $name = null, \Closure $callback, bool $getShared =
 
     if ( ! ( $changed instanceof $config ) )
     {
-        throw new \Error(
-            'Type of [ callback ] return must instance of ' . $name, 406 
-        );
+        $errorParam = sprintf('Parameter: "callback" return must instance of %s', $name );
+        throw new ErrorParameterException( $errorParam );
     }
 
     $namespace = get_class( $config );
@@ -77,7 +69,8 @@ function setConfig ( ?string $name = null, \Closure $callback, bool $getShared =
     
     if ( ! setClass( $namespace, $oldConfig, true ) )
     {
-        throw new \Error( 'Cannot update: ' . $namespace, 304 );
+        $errorClass = sprintf( 'Cannot update to "config-class-instance": %s ', $namespace );
+        throw new ErrorClassException( $errorClass, 304 );
     }
 
     if ( method_exists( $changed, 'reInit' ) )

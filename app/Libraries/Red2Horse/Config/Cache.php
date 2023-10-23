@@ -21,6 +21,6 @@ class Cache
 
 	public function getCacheName ( string $name ) : string
 	{
-		return str_replace( [ ':', '.', ' ', '_' ], '-', $name );
+		return str_replace( [ ':', '.', ' ', '_' ], '-', strtolower( $name ) );
 	}
 }

@@ -8,6 +8,7 @@ use CodeIgniter\Filters\FilterInterface;
 use CodeIgniter\HTTP\RequestInterface as req;
 use CodeIgniter\HTTP\ResponseInterface as res;
 use Config\Services;
+use Red2Horse\Exception\ErrorUnauthorizedException;
 
 class Red2HorseAuthRole implements FilterInterface
 {
@@ -18,7 +19,8 @@ class Red2HorseAuthRole implements FilterInterface
 
     if ( ! $isValid )
     {
-      throw PageNotFoundException::forPageNotFound();
+      throw new ErrorUnauthorizedException();
+      // throw PageNotFoundException::forPageNotFound();
 		}
   }
 

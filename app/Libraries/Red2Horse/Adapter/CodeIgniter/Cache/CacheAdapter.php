@@ -27,14 +27,14 @@ class CacheAdapter implements CacheAdapterInterface
 		return cache()->get( $key );
 	}
 
-	public function delete ( string $key )
+	public function delete ( string $key ) : bool
 	{
-		return cache()->delete( $key );
+		return ( bool ) cache()->delete( $key );
 	}
 
-	public function set ( string $key, $value, int $timeToLife = 86400 )
+	public function set ( string $key, $value, int $timeToLife = 86400 ) : bool
 	{
-		return cache()->save( $key, $value, $timeToLife );
+		return ( bool ) cache()->save( $key, $value, $timeToLife );
 	}
 
 	public function isSupported () : bool

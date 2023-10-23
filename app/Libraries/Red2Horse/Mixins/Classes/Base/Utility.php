@@ -3,6 +3,8 @@
 declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Classes\Base;
 
+use Red2Horse\Exception\ErrorArrayException;
+use Red2Horse\Exception\ErrorParameterException;
 use Red2Horse\Mixins\Traits\Object\TraitSingleton;
 
 use function Red2Horse\Mixins\Functions\Config\getConfig;
@@ -31,7 +33,7 @@ class Utility
 	{
 		if ( ! in_array( $type, $this->type ) )
 		{
-			throw new \Error( 'Invalid type checker."', 403 );
+			throw new ErrorParameterException( sprintf( 'Parameter 1: "type" not in: "login, forgot, forget"' ), 403 );
 		}
 
 		$requestType = ( $type == 'login' ) ? 'password' : 'email';

@@ -65,13 +65,13 @@ PRIMARY KEY (:id:)
     ';
     // ON DUPLICATE KEY UPDATE
     // INSERT 
-    protected $insertTemplate = 'INSERT INTO `%s` (%s) VALUES (%s);';
+    protected $insertTemplate = 'INSERT INTO `%s` (%s) VALUES (%s)';
 
     /** UPDATE */
     // UPDATE
-    protected $updateTemplate = 'UPDATE `%s` SET %s WHERE %s;';
+    protected $updateTemplate = 'UPDATE `%s` SET %s WHERE %s';
     // UPDATE IN
-    protected $updateInTemplate = 'UPDATE `%s` SET %s WHERE %s IN (%s);';
+    protected $updateInTemplate = 'UPDATE `%s` SET %s WHERE %s IN (%s)';
     // UPDATE JOIN
     protected $updateJoinTemplate = 'UPDATE %s JOIN %s SET %s WHERE %s';
     // UPDATE JOIN IN
@@ -86,38 +86,10 @@ PRIMARY KEY (:id:)
     protected $deleteJoinTemplate = 'DELETE JOIN %s FROM `%s` WHERE %s';
     // DELETE JOIN IN
     protected $deleteJoinInTemplate = 'DELETE JOIN %s FROM `%s` WHERE %s IN (%s)';
-
-/* _____________________________________________________
-SELECT 
-`user`.`id`, 
-`user`.`username`, 
-`user`.`email`, 
-`user`.`status`, 
-`user`.`last_activity`, 
-`user`.`last_login`, 
-`user`.`created_at`, 
-`user`.`updated_at`, 
-`user`.`session_id`, 
-`user`.`selector`, 
-`user`.`token`, 
-`user`.`group_id`, 
-`user`.`password`, 
-`user`.`deleted_at`,
-`user_group`.`id` AS `group_id`, 
-`user_group`.`name` AS `group_name`, 
-`user_group`.`permission`, 
-`user_group`.`role`, 
-`user_group`.`deleted_at`
-FROM `user`
-JOIN `user_group` ON `group_id` = `user`.`id`
-WHERE `user`.`username` = 'administrator' OR `user`.`email` = 'administrator'
-LIMIT 1
-
-*/
+    
 	private function __construct ()
     {
         on ( 'after_sql_class_init', self::class );
-
         $this->after_sql_class_init();
     }
 

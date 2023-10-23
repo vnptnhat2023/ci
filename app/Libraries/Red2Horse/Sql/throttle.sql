@@ -30,10 +30,15 @@ SET time_zone = "+00:00";
 DROP TABLE IF EXISTS `throttle`;
 CREATE TABLE IF NOT EXISTS `throttle` (
   `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
-  `ip` varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `attempt`int UNSIGNED NOT NULL DEFAULT '0',
   `type` int UNSIGNED NOT NULL DEFAULT '0',
+  `type_attempt` int UNSIGNED NOT NULL DEFAULT '0',
+  `type_limit` int UNSIGNED NOT NULL DEFAULT '0',
+  `timeout` int UNSIGNED NOT NULL DEFAULT '0',
+  `ip` varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `created_at` datetime DEFAULT NULL,
   `updated_at` datetime DEFAULT NULL,
+  `deleted_at` datetime DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 COMMIT;

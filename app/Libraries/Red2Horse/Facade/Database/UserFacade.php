@@ -2,6 +2,8 @@
 declare( strict_types = 1 );
 namespace Red2Horse\Facade\Database;
 
+use Red2Horse\Adapter\CodeIgniter\Database\UserAdapter;
+use Red2Horse\Exception\ErrorDatabaseConnectionException;
 use Red2Horse\Mixins\Traits\Object\TraitSingleton;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
@@ -10,9 +12,9 @@ class UserFacade implements UserFacadeInterface
 {
 	use TraitSingleton;
 
-	protected UserFacadeInterface $user;
+	protected UserAdapter $user;
 
-	public function __construct( UserFacadeInterface $user )
+	public function __construct( UserAdapter $user )
 	{
 		$this->user = $user;
 	}
@@ -42,7 +44,7 @@ class UserFacade implements UserFacadeInterface
 	{
 		if ( ! $u = $this->user->updateUser( $where, $data ) )
 		{
-			throw new \Error( 'Can not updated to database ! ' . __FILE__, __LINE__ );
+			throw new ErrorDatabaseConnectionException();
 		}
 
 		return $u;
@@ -52,7 +54,7 @@ class UserFacade implements UserFacadeInterface
 	{
 		if ( ! $u = $this->user->updateUserGroup( $where, $data ) )
 		{
-			throw new \Error( 'Can not updated to database ! ' . __FILE__, __LINE__ );
+			throw new ErrorDatabaseConnectionException();
 		}
 
 		return $u;

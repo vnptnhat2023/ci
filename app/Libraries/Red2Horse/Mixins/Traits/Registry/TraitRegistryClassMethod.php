@@ -3,6 +3,7 @@
 declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Traits\Registry;
 
+use Red2Horse\Exception\ErrorClassException;
 use Red2Horse\Mixins\Classes\Registry\
 {
     RegistryClass___,
@@ -43,8 +44,8 @@ trait TraitRegistryClassMethod
     }
 
     /**
-     * @throws \Error
-     * @return array|null
+     * @throws ErrorClassException
+     * @return mixed array|null : registryClass only
      */
     public function instanceData ( string $className, $params = null )
     {
@@ -57,16 +58,15 @@ trait TraitRegistryClassMethod
         {
             return null;
         }
-        
+
         try
         {
             $className::getInstance( $params );
             return $this->keyName::get( $className );
         }
-        // catch ( \Throwable $th )
         catch ( \Exception $e )
         {
-            throw new \Error( $e->getMessage(), 404 );
+            throw new ErrorClassException( $e->getMessage(), 404 );
         }
     }
 

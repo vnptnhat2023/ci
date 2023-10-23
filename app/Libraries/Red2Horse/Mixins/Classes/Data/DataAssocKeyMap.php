@@ -5,6 +5,7 @@ namespace Red2Horse\Mixins\Classes\Data;
 
 use Red2Horse\Exception\ErrorArrayException;
 use Red2Horse\Exception\ErrorParameterException;
+use Red2Horse\Exception\ErrorPropertyException;
 
 use function Red2Horse\Mixins\Functions\Config\getConfig;
 use function Red2Horse\Mixins\Functions\Instance\getComponents;
@@ -13,7 +14,6 @@ defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
 /**
  * __toString, __invoke
- * @throws \Error
  * @param ?\Closure $callable Escape needle
  * @return array|string $a = `a`(.`a`)* = 'a'(.'a')* | [$a] = [$a]
  */
@@ -38,17 +38,25 @@ class DataAssocKeyMap
     // public int $limit = 10;
     public array $data;
 
+    public bool $useTranslate = true;
+
+    // Before_exploded
+    protected array $methods = [
+        'before_string_combine_exploded' => \Red2Horse\Mixins\Classes\Data\DataArrayEventsClass::class,
+        'before_set_no_explode' => \Red2Horse\Mixins\Classes\Data\DataArrayEventsClass::class
+    ];
+
     /** @var string[] $dataNoExplode */
-    public array $dataNoExplode = [];
+    private array $dataNoExplode = [];
 
     /** @var string[] $keyValueNoExplode */
-    public array $keyValueNoExplode = [];
+    protected array $keyValueNoExplode = [];
 
     /** @var string[] $keyNoExplode */
-    public array $keyNoExplode = [];
+    protected array $keyNoExplode = [];
 
     /** @var string[] $valueNoExplode */
-    public array $valueNoExplode = [];
+    protected array $valueNoExplode = [];
 
     private string $toStr = '';
     private bool $mapped = false;
@@ -68,6 +76,16 @@ class DataAssocKeyMap
             ? sprintf( '\%s', $this->combineChar )
             : $this->combineChar;
     }
+
+    public function setMethods ( array $data ) : void
+    {
+        $this->methods = array_merge( $this->methods, $data );
+    }
+
+    public function getMethods () : array
+    {
+        return $this->methods;
+    }
     
     /** $before $str $after */
     public function stringCombine (
@@ -79,13 +97,13 @@ class DataAssocKeyMap
     {
         $str = trim( $str, ' ' );
         $common = getComponents( 'common' );
-
         $combineRegexChar = '/'. $this->getCombineChar() . '/';
         if ( preg_match( $combineRegexChar, $str ) && ! in_array( $str, $this->dataNoExplode, true ) )
         {
+            $str = $this->_trigger( 'before_string_combine_exploded', $str, $this->getCombineChar() );
             $exploded = explode( $this->combineChar, $str, $this->combineLimitChar );
-            $mapFn = fn( $mapStr ) 
-                => $this->stringCombine( $before, $mapStr, $after, $esc, $format );
+            $exploded = $this->_trigger( 'after_string_combine_exploded', $exploded );
+            $mapFn = fn( $mapStr ) => $this->stringCombine( $before, $mapStr, $after, $esc, $format );
             
             /** @var array $map */
             $map = array_map( $mapFn, $exploded );
@@ -95,7 +113,11 @@ class DataAssocKeyMap
         }
         
         $isEsc = $esc ? $common->esc( $str ) : $str;
-        return sprintf( $format, $before, $isEsc, $after );
+        $return = ( '*' === $str ) 
+            ? sprintf( $format, '', $isEsc, '' ) 
+            : sprintf( $format, $before, $isEsc, $after );
+
+        return $return;
     }
 
     /**
@@ -117,7 +139,7 @@ class DataAssocKeyMap
     }
 
     /**
-     * @throws \Error
+     * @throws ErrorPropertyException
      * @param array $data Associative-only
      * @param ?callable $callable Escape needle
      * @return array|string $a = `a`(.`a`)* = 'a'(.'a')* | [$a] = [$a]
@@ -126,7 +148,7 @@ class DataAssocKeyMap
     {
         if ( ! getComponents( 'common' )->isAssocArray( $data ) )
         {
-            throw new \Error( 'Property: $data cannot empty.', 406 );
+            throw new ErrorPropertyException( 'Property: $data cannot empty.', 406 );
         }
 
         $this->data = $data;
@@ -140,7 +162,7 @@ class DataAssocKeyMap
             $key = ( string ) $key;
             $value = ( string ) $value;
 
-            $this->_beforeInvoke( $key, $value );
+            $this->_filterNoExplode( $key, $value );
 
             if ( is_callable( $callable ) )
             {
@@ -166,7 +188,7 @@ class DataAssocKeyMap
     }
 
     /**
-     * @throws \Error
+     * @throws ErrorParameterException
      */
     public function matchKey ( string $str ) : string
     {
@@ -179,7 +201,7 @@ class DataAssocKeyMap
     }
 
     /**
-     * @throws \Error
+     * @throws ErrorParameterException
      */
     public function matchValue ( string $str ): string
     {
@@ -190,6 +212,28 @@ class DataAssocKeyMap
 
         return $str;
     }
+
+    /**
+     * @param string $key kv: KeyValueNoExplode, k: KeyNoExplode, v: ValueNoExplode
+     */
+    public function setNoExplode ( string $key = 'kv', string $value ) : void
+    {
+        $array = [
+            'kv'    => 'keyValueNoExplode',
+            'k'    => 'keyNoExplode',
+            'v'   => 'valueNoExplode'
+        ];
+        $key = $array[ $key ];
+        $this->_trigger( 'before_set_no_explode', $key, $this->getCombineChar() );
+        $this->{$key}[] = $value;
+        $this->_trigger( 'after_set_no_explode', $key, $this->getCombineChar() );
+    }
+
+    public function getNoExplode () : array
+    {
+        return $this->dataNoExplode;
+    }
+    
 
     /** CastToAssoc */
     private static array $castTypes = [
@@ -251,7 +295,7 @@ class DataAssocKeyMap
     /**
      * No explode
      */
-    private function _beforeInvoke ( string $key, string $value ) : void
+    private function _filterNoExplode ( string $key, string $value ) : void
     {
         $this->matchKey( $key );
         $this->matchKey( $value );
@@ -320,5 +364,30 @@ class DataAssocKeyMap
         {
             $data[ $key ] = $value;
         }
+    }
+
+    private function _trigger ( string $name, ...$args )
+    {
+        if ( ! $this->useTranslate )
+        {
+            return reset( $args );
+        }
+
+        if ( in_array( $name, $this->methods ) && method_exists( $this, $name ) )
+        {
+            return $this->$name( ...$args );
+        }
+        else if ( array_key_exists( $name, $this->methods ) )
+        {
+            $class = $this->methods[ $name ];
+            $instance = new $class;
+
+            if ( method_exists( $instance, $name ) )
+            {
+                return $instance->$name( ...$args );
+            }
+        }
+
+        return reset( $args );
     }
 }

@@ -4,8 +4,14 @@ declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Functions\NS;
 
 use Red2Horse\Config\ConstantNamespace;
+use Red2Horse\Exception\ErrorParameterException;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
+
+function modelNamespace ( string $name = '' ) : string
+{
+    return formatFunctionNamespace( $name, 'MODEL_NAMESPACE' );
+}
 
 function configNamespace ( string $name = '' ) : string
 {
@@ -27,9 +33,9 @@ function functionNamespace ( string $name = '' ) : string
     return formatFunctionNamespace( $name, 'FUNCTION_NAMESPACE' );
 }
 
-function registryNamespace ( string $name = '', string $prefix = '\\' ) : string
+function registryNamespace ( string $name = '', string $prefix = '', string $suffix = '' ) : string
 {
-    return formatFunctionNamespace( $name, 'REGISTRY_NAMESPACE' );
+    return formatFunctionNamespace( $name, 'REGISTRY_NAMESPACE', $prefix, $suffix );
 }
 
 /** @return mixed array|string */
@@ -60,7 +66,7 @@ function ComponentNamespace ( string $name, string $type = 'facade', ?string $di
 {
     if ( ! in_array( $type, [ 'facade', 'adapter' ] ) )
     {
-        throw new \Error( 'Type not in [ facade, adapter ]' );
+        throw new ErrorParameterException( 'Type not in: "facade, adapter"' );
     }
 
     $ucfirstType = ucfirst( $type == 'facade' ? 'facade' : 'adapter' );

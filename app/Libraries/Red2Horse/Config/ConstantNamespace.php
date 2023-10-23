@@ -10,18 +10,19 @@ class ConstantNamespace
 {
     use TraitSingleton;
 
-    private const BASE_NAMESPACE = 'Red2Horse\\';
-
-    private const ADAPTER_NAME = 'Codeigniter\\';
+    private const BASE_NAMESPACE    = 'Red2Horse\\';
+    private const ADAPTER_NAME      = 'Codeigniter\\';
 
     public const LIST_NAMESPACE = [
-        'CONFIG_NAMESPACE' => self::BASE_NAMESPACE . 'Config\\',
-        'FACADE_NAMESPACE' => self::BASE_NAMESPACE . 'Facade\\',
-        'ADAPTER_NAMESPACE' => self::BASE_NAMESPACE . 'Adapter\\' . self::ADAPTER_NAME,
-        'FUNCTION_NAMESPACE' => self::BASE_NAMESPACE . 'Mixins\\Functions\\',
-        'REGISTRY_NAMESPACE' => self::BASE_NAMESPACE . 'Mixins\\Classes\\Registry\\',
-        'BASE_NAMESPACE' => self::BASE_NAMESPACE . 'Mixins\\Classes\\Base\\',
-        'EXCEPTION_NAMESPACE' => self::BASE_NAMESPACE . 'Exception\\'
+        'CONFIG_NAMESPACE'          => self::BASE_NAMESPACE . 'Config\\',
+        'FACADE_NAMESPACE'          => self::BASE_NAMESPACE . 'Facade\\',
+        'ADAPTER_NAMESPACE'         => self::BASE_NAMESPACE . 'Adapter\\' . self::ADAPTER_NAME,
+        'FUNCTION_NAMESPACE'        => self::BASE_NAMESPACE . 'Mixins\\Functions\\',
+        'REGISTRY_NAMESPACE'        => self::BASE_NAMESPACE . 'Mixins\\Classes\\Registry\\',
+        'BASE_NAMESPACE'            => self::BASE_NAMESPACE . 'Mixins\\Classes\\Base\\',
+        'EXCEPTION_NAMESPACE'       => self::BASE_NAMESPACE . 'Exception\\',
+        /** Other */
+        'MODEL_NAMESPACE'           => self::BASE_NAMESPACE . 'Model\\',
     ];
 
     private function __construct () {}

@@ -6,6 +6,7 @@ use App\Libraries\DesignPattern as StateGyPattern;
 use \Config\Services;
 use CodeIgniter\Events\Events;
 
+
 class Test extends BaseController {
 
 	// use TraitEvents;

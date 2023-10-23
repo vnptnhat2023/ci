@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Red2Horse\Adapter\Codeigniter\Validation;
 
 use Config\Services;
+use Red2Horse\Exception\ErrorArrayException;
 use Red2Horse\Mixins\Traits\Object\TraitSingleton;
 
 use function Red2Horse\Mixins\Functions\Config\getConfig;
@@ -63,8 +64,7 @@ class ValidationAdapter implements ValidationAdapterInterface
 		if ( empty( $result ) )
 		{
 			$result = is_array( $result ) ? implode( ', ', $result ) : $result ?? 'null';
-			$error = sprintf( 'Error rule not found. %s:%s. $result: [ %s ]',__METHOD__, __LINE__, $result );
-			throw new \Error( $error, 404 );
+			throw new ErrorArrayException( 'Error rule not found' );
 		}
 
 		return $result;

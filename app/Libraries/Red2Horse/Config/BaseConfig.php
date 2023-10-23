@@ -14,5 +14,10 @@ class BaseConfig
 	public bool $useRememberMe = false;
 	public bool $useMultiLogin = false;
 
-	private function __construct () {}
+	public string $dateDefaultTimezone = '';
+
+	private function __construct ()
+	{
+
+	}
 }

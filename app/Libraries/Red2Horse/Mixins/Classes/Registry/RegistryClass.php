@@ -19,7 +19,7 @@ final class RegistryClass extends RegistryClass___
 
     public static self $instance;
 
-    final public function __construct ( string $state = self::class )
+    public function __construct ( string $state = self::class )
     {
         $this->configRegistryClassMethod___( $state );
     }
@@ -50,7 +50,7 @@ final class RegistryClass extends RegistryClass___
     {
         if ( self::class == $this->className )
         {
-            return self::selfInstance();
+            return self::selfInstance( $params );
         }
 
         if ( $this->getShared )
@@ -59,7 +59,7 @@ final class RegistryClass extends RegistryClass___
             return $classData[ 'instance' ];
         }
 
-        return new $this->className;
+        return new $this->className( $params );
     }
 
     /**

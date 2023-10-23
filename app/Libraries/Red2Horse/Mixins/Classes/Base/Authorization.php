@@ -3,27 +3,31 @@
 declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Classes\Base;
 
+use Red2Horse\Exception\ErrorArrayException;
+use Red2Horse\Exception\ErrorUnauthorizedException;
+use Red2Horse\Facade\Cache\CacheFacade;
 use Red2Horse\Mixins\Traits\Object\TraitSingleton;
 
 use function Red2Horse\Mixins\Functions\Config\getConfig;
 use function Red2Horse\Mixins\Functions\Instance\BaseInstance;
 use function Red2Horse\Mixins\Functions\Instance\getComponents;
+use function Red2Horse\Mixins\Functions\Model\model;
 use function Red2Horse\Mixins\Functions\Password\getVerifyPass;
-use function Red2Horse\Mixins\Functions\Sql\getField;
-use function Red2Horse\Mixins\Functions\Sql\getTable;
-use function Red2Horse\Mixins\Functions\Sql\selectExports;
+use function Red2Horse\Mixins\Functions\Sql\getUserField;
+use function Red2Horse\Mixins\Functions\Sql\getUserGroupField;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
-final class Authorization
+class Authorization
 {
 	use TraitSingleton;
+
 	private array $sessionData;
 
 	private function __construct () {}
 
 	/**
-	 * @throws \Error Unauthorized, 401
+	 * @throws ErrorUnauthorizedException Unauthorized, 401
 	 * @param string $condition [ or, !or, not_or, and, !and, not_and ]
 	 */
 	public function withSession ( string $sessKey, array $data, string $condition = 'or' ) : bool
@@ -32,7 +36,7 @@ final class Authorization
 
 		if ( ! $this->sessionData )
 		{
-			throw new \Error( 'Unauthorized.', 401 );
+			throw new ErrorUnauthorizedException( 'Unauthorized.', 401 );
 		}
 
 		return $this->_run( $data, $condition );
@@ -50,17 +54,12 @@ final class Authorization
 		}
 
 		/** @var array<int, int> @usernameSess */
-		$usernameSess = $this->_getUserData( [ getField( 'id', 'user' ) ] );
+		$usernameSess = $this->_getUserData( [ getUserField( 'id' ) ] );
 
 		if ( empty( $usernameSess[ 0 ] ) )
 		{
-			getComponents( 'common' )->log_message( 'error', __FILE__ . __LINE__ . 'Not logged in, ...' );
 			return false;
 		}
-
-		$userDataArgs = [
-			sprintf( '%s.%s', getTable( 'user' ), getField( 'id', 'user' ) ) => $usernameSess[ 0 ],
-		];
 
 		$cacheConfig = getConfig( 'cache' );
 		$cachePath = $cacheConfig->getCacheName( $cacheConfig->userGroupId );
@@ -76,16 +75,11 @@ final class Authorization
 
 		if ( ! $userData )
 		{
-			$selectArray = [
-				getTable( 'user' ) => [ [ getField( 'id', 'user' ), 'as', 'user_id' ] ],
-				getTable( 'user_group' ) => []
-			];
-			$selectStr = selectExports( $selectArray );
-			/** @var array $userDB */
-			$userDB = getComponents( 'user' )->getUserWithGroup( $selectStr, $userDataArgs );
+			$userDB = model( 'User/UserModel' )->fetchFirstUserData( [ 'user.id' => $usernameSess[ 0 ] ] );
 			unset( $userData );
-			$userData[ $usernameSess[ 0 ] ] = json_decode( $userDB[ getField( 'role', 'user_group' ) ], true );
-			/** Set cache from DB */
+			$userData[ $usernameSess[ 0 ] ] = json_decode( $userDB[ getUserGroupField( 'role' ) ], true );
+			
+			/** @var CacheFacade $cacheComponent */
 			$cacheComponent->set( $cacheConfig->userGroupId, $userData, $cacheConfig->cacheTTL );
 		}
 		
@@ -93,17 +87,15 @@ final class Authorization
 
 		if ( empty( $userData ) )
 		{
-			getComponents( 'common' )->log_message( 
-				'error', __FILE__ . __LINE__ . 'Invalid data format.'
-			);
-
+			$logError = ( new ErrorArrayException() )->getMessage();
+			getComponents( 'common' )->log_message( 'error', $logError );
 			return false;
 		}
 
 		if ( ! getVerifyPass( $this->sessionData[ 'hash' ], $userData[ 'hash' ] ) )
 		{
-			getComponents( 'common' )->log_message( 'error', __FILE__ . __LINE__ . 'Unauthorized.' );
-
+			$logError = ( new ErrorUnauthorizedException() )->getMessage();
+			getComponents( 'common' )->log_message( 'error', $logError );
 			return false;
 		}
 

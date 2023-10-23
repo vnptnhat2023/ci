@@ -5,10 +5,12 @@ namespace Red2Horse\Mixins\Classes\Base;
 
 use Red2Horse\Exception\ErrorSqlException;
 use Red2Horse\Exception\ErrorArrayException;
+use Red2Horse\Exception\ErrorJsonException;
 
 use function Red2Horse\Mixins\Functions\Config\getConfig;
 use function Red2Horse\Mixins\Functions\Instance\BaseInstance;
 use function Red2Horse\Mixins\Functions\Instance\getComponents;
+use function Red2Horse\Mixins\Functions\Model\model;
 use function Red2Horse\Mixins\Functions\Password\getHashPass;
 use function Red2Horse\Mixins\Functions\Password\getRandomString;
 use function Red2Horse\Mixins\Functions\Sql\getField;
@@ -30,16 +32,17 @@ class SessionHandle
 			return false;
 		}
 
-		$userID = getField( 'id', 'user' );
-		$isUpdated = getComponents( 'user' ) ->updateUser(
-			$userID,
-			[ getField( 'session_id', 'user' ) => session_id() ]
-		);
+		$userColumnID = getField( 'id', 'user' );
+		$editSet = [ $userColumnID => $userData[ $userColumnID ] ];
+		$editWhere = [ getField( 'session_id', 'user' ) => session_id() ];
+		$editFilter = function( $filter ) {
+			$filter->setNoExplode( 'kv', getField( 'session_id', 'user' ) );
+		};
 
-		if ( ! $isUpdated )
+		if ( ! model( 'User/UserModel' ) ->edit( $editSet, $editWhere, 1, $editFilter ) )
 		{
-			$errStr = "The session_id: {$userID} update failed";
-			getComponents( 'common' ) ->log_message( 'error', $errStr );
+			$errorLog = sprintf( 'session_id: "%s" update failed', $userColumnID );
+			getComponents( 'common' ) ->log_message( 'error', $errorLog );
 
 			return false;
 		}
@@ -54,14 +57,14 @@ class SessionHandle
 		/** DB or session */
 		if ( ! getComponents( 'common' )->valid_json( $userData[ getUserGroupField( 'role' ) ] ) )
 		{
-			throw new ErrorArrayException( 'Invalid json format' );
+			throw new ErrorJsonException( 'Invalid json format' );
 		}
 
 		$roleJson = json_decode( $userData[ getUserGroupField( 'role' ) ], true );
 
 		if ( ! array_key_exists( getUserGroupField( 'role' ), $roleJson ) || ! array_key_exists( 'hash', $roleJson ) )
 		{
-			throw new ErrorArrayException( 'Invalid json format' );
+			throw new ErrorJsonException( 'Invalid json format' );
 		}
 		/** end */
 
@@ -100,19 +103,20 @@ class SessionHandle
 			}
 			else
 			{
-				$updated = baseInstance( 'Authentication' )->loggedInUpdateData(
-					$userId,
-					$updateGroupData,
-					getTable( 'user_group' )
-				);
-
+				$roleColumn = getField( 'role', 'user_group' );
+				$updateWhere = [
+					getField( 'id', 'user_group', false, true ) => $userData[ 'group_id' ]
+				];
+				$setFilter = function( $filter ) use ( $roleColumn ) {
+					$filter->setNoExplode( 'kv', $roleColumn );
+				};
 				/** Update to DB */
-				if ( ! $updated )
+				if ( ! model( 'user_group' )->edit( $updateGroupData , $updateWhere, 1, $setFilter ) )
 				{
-					getComponents( 'common' )
-						->log_message( 'error', "{ $userId } Logged-in, but update failed" );
+					$errorLog = sprintf( 'user-id: "%s" logged-in, but update failed', $userId );
+					getComponents( 'common' )->log_message( 'error', $errorLog );
 
-					throw new ErrorSqlException( 'Authentication cannot updated.' );
+					throw new ErrorSqlException( 'Cannot updated "authentication"' );
 				}
 			}
 

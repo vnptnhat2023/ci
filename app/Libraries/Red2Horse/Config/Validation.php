@@ -59,6 +59,9 @@ class Validation
 	protected string $database_database = 'db_database';
 	protected string $database_port = 'database_port';
 
+    private string $prefix;
+    private string $suffix;
+
 	private function __construct () {}
 
 	public function reInit() : void
@@ -69,11 +72,17 @@ class Validation
 
 	public function __set( $key, $value )
 	{
+		$key = $this->_getStarFix( $this->$key );
 		$this->$key = strtolower( $value );
 	}
 
-	public function __get ($name )
+	public function __get ($key )
 	{
-		return $this->$name;
+		return $this->_getStarFix( $this->$key );
+	}
+
+	private function _getStarFix ( string $str ) : string
+	{
+		return sprintf( '%s%s%s', $this->prefix ?? '', $str, $this->suffix ?? '' );
 	}
 }

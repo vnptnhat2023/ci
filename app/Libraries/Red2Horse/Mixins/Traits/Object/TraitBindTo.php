@@ -1,7 +1,7 @@
 <?php
 
 declare( strict_types = 1 );
-namespace Red2Horse\Mixins\Trait\Object;
+namespace Red2Horse\Mixins\Traits\Object;
 
 /**
  * @source https://www.php.net/manual/en/closure.bindto.php

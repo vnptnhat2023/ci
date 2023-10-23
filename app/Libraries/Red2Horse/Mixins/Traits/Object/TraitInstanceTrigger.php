@@ -6,30 +6,26 @@ namespace Red2Horse\Mixins\Traits\Object;
 trait TraitInstanceTrigger
 {
     /**
-     * @param null|object $instanced
-     * @param string[] $calls
-     * @return mixed
+     * @param string[] $_triggerNames
      */
-    public function traitInstanceTrigger( ?object $instanced, array $calls, ...$args )
+    private function _trigger ( ?object $instance = null, array $_triggerNames, ...$args ) : array
     {
-        if ( null === $calls )
+        if ( [] === $_triggerNames )
         {
-            return $args;
+            return reset( $args );
         }
 
-        $calls = ( array ) $calls;
+        $data = [];
+        $instance = $instance ?: $this;
 
-        /** @var string $value */
-        foreach ( $calls as $value )
+        foreach ( $_triggerNames as $name )
         {
-            if ( method_exists( $instanced, $value ) )
+            if ( method_exists( $instance, $name ) )
             {
-                $data = $instanced->{ $value }( ...$args );
-            }
-            else if ( function_exists( $value ) )
-            {
-                $data = $value( ...$args );
+                $data[ $name ] = $instance->$name( ...$args );
             }
         }
+
+        return $data;
     }
 }

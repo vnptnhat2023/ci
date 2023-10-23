@@ -2,12 +2,13 @@
 
 namespace BAPI\Filters;
 
-use CodeIgniter\Exceptions\PageNotFoundException;
+// use CodeIgniter\Exceptions\PageNotFoundException;
 use CodeIgniter\Filters\FilterInterface;
 
 use CodeIgniter\HTTP\RequestInterface as req;
 use CodeIgniter\HTTP\ResponseInterface as res;
 use Config\Services;
+use Red2Horse\Exception\ErrorUnauthorizedException;
 
 class Red2Horse implements FilterInterface
 {
@@ -20,7 +21,7 @@ class Red2Horse implements FilterInterface
 		{
 			if ( ! $auth->withPermission( ( array ) $args ) )
 			{
-				throw PageNotFoundException::forPageNotFound();
+				throw new ErrorUnauthorizedException();
 			}
 		}
 	}

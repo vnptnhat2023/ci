@@ -3,6 +3,8 @@
 declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Traits\Object;
 
+use Red2Horse\Exception\ErrorMethodException;
+
 use function Red2Horse\Mixins\Functions\Config\getConfig;
 use function Red2Horse\Mixins\Functions\Instance\BaseInstance;
 use function Red2Horse\Mixins\Functions\Instance\getClass;
@@ -110,12 +112,7 @@ trait TraitCall
             return $this->traitCallInstance->$method( ...$arguments );
         }
 
-        $error = sprintf(
-            '{ ( %s )-> %s() } [ File: %s ] ( Line: %s )',
-            self::class, $method, __FILE__, __LINE__
-        );
-
-        throw new \BadMethodCallException( $error, 403 );
+        throw new ErrorMethodException( sprintf( 'Method: __CALL()::%s()', $method ) );
 	}
 
     // public function trigger ( \Closure $closure, string $event, array $eventData )

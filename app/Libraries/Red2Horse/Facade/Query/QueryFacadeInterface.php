@@ -7,5 +7,7 @@ namespace Red2Horse\Facade\Query;
 interface QueryFacadeInterface
 {
 	/** @return mixed */
-	public function querySimple ( string $sql, bool $getString = true );
+	public function query( string $sql, bool $getString = true );
+
+	public function resultArray ( string $sql ) : array;
 }

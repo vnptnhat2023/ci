@@ -3,7 +3,9 @@
 declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Functions\Instance;
 
+use Red2Horse\Facade\Query\QueryFacadeInterface;
 use Red2Horse\Mixins\Classes\Registry\RegistryClass;
+use Red2Horse\Mixins\Classes\Sql\Model;
 
 use function Red2Horse\Mixins\Functions\NS\baseNamespace;
 use function Red2Horse\Mixins\Functions\NS\exceptionNamespace;
@@ -11,7 +13,6 @@ use function Red2Horse\Mixins\Functions\NS\registryNamespace;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
-/** @return RegistryClass */
 function classInit ( string $name, string $state, bool $getShared ) : object
 {
     $state = registryNamespace( $state );
@@ -19,7 +20,7 @@ function classInit ( string $name, string $state, bool $getShared ) : object
 }
 
 /**
- * @return \Red2Horse\Mixins\Traits\Object\TraitSingleton
+ * @return object|\Red2Horse\Mixins\Traits\Object\TraitSingleton
  */
 function getInstance ( string $classNamespace, string $state = 'RegistryClass', bool $getShared = true, $params = null ) : object
 {
@@ -28,7 +29,7 @@ function getInstance ( string $classNamespace, string $state = 'RegistryClass', 
 
 /**
  * @param bool $getShared For adapter only
- * @return \Red2Horse\Mixins\Traits\Object\TraitSingleton
+ * @return object|\Red2Horse\Mixins\Traits\Object\TraitSingleton
  */
 function getComponents ( string $name, bool $getShared = true, bool $getAdapter = false ) : object
 {
@@ -36,7 +37,7 @@ function getComponents ( string $name, bool $getShared = true, bool $getAdapter 
 }
 
 /**
- * @return \Red2Horse\Mixins\Traits\Object\TraitSingleton
+ * @return object|\Red2Horse\Mixins\Traits\Object\TraitSingleton
  */
 function BaseInstance ( string $name, bool $getShared = true ) : object
 {

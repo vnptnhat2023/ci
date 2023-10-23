@@ -12,7 +12,8 @@ defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
 function withSession ( string $sessKey, array $data, string $condition = 'or' ) : bool
 {
-    /** @var string $sessKey getUserGroupField::role */
+    /** @var string $sessKey getUserGroupField::[ role, permission] */
+    $userGroupField = getUserGroupField( $sessKey );
     return BaseInstance( Authorization::class )
-        ->withSession( getUserGroupField( $sessKey ), $data, $condition );
+        ->withSession( $userGroupField, $data, $condition );
 }

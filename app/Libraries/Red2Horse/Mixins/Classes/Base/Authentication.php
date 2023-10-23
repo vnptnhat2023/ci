@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Classes\Base;
 
 use Red2Horse\Config\Validation;
+use Red2Horse\Exception\ErrorValidationException;
 use Red2Horse\Mixins\Traits\Object\TraitSingleton;
 use Red2Horse\Facade\Validation\ValidationFacadeInterface;
 
@@ -12,12 +13,13 @@ use function Red2Horse\Mixins\Functions\Instance\BaseInstance;
 use function Red2Horse\Mixins\Functions\Instance\getComponents;
 use function Red2Horse\Mixins\Functions\Message\setErrorMessage;
 use function Red2Horse\Mixins\Functions\Message\setSuccessMessage;
+use function Red2Horse\Mixins\Functions\Model\model;
 use function Red2Horse\Mixins\Functions\Sql\
 {
-	getTable,
+    getTable,
     getUserField,
     getUserGroupField,
-    selectExports,
+    getUserTableField,
 };
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
@@ -153,15 +155,10 @@ class Authentication
 
 	private function loginAfterValidation () : array
 	{
-		$userDataArgs = [
-			sprintf( '%s.%s', getTable( 'user'), getUserField( 'username' ) ) => self::$username,
-			sprintf( '%s.%s', getTable( 'user'), getUserField( 'email' ) ) => self::$username
-		];
-
-		$userData = getComponents( 'user' )->getUserWithGroup(
-			selectExports( [ getTable( 'user' ) => [], getTable( 'user_group' ) => [] ] ),
-			$userDataArgs
-		);
+		$userData = model( 'User/UserModel' ) ->fetchFirstUserData( [
+			getUserTableField( 'username' ) => self::$username,
+			getUserTableField( 'email' ) => self::$username,
+		] );
 
 		$message = baseInstance( Message::class );
 
@@ -312,7 +309,7 @@ class Authentication
 	}
 
 	/**
-	 * @throws \Exception
+	 * @throws ErrorValidationException
 	 * @return boolean
 	 */
 	public function loggedInUpdateData ( int $userId, array $updateData = [], ?string $tableArg = null ) : bool
@@ -322,14 +319,14 @@ class Authentication
 		if ( $userId <= 0 )
 		{
 			$errArg = [ 'field' => 'user_id', 'param' => $userId ];
-			throw new \Exception( $common->lang( 'Validation.greater_than', $errArg ), 406 );
+			throw new ErrorValidationException( $common->lang( 'Validation.greater_than', $errArg ), 406 );
 		}
 
 		$isAssocData = $common->isAssocArray( $updateData );
 
 		if ( ! empty( $updateData ) && ! $isAssocData )
 		{
-			throw new \Exception( $common->lang( 'Red2Horse.isAssoc' ), 406 );
+			throw new ErrorValidationException( $common->lang( 'Red2Horse.isAssoc' ), 406 );
 		}
 
 		if ( null !== $tableArg )
@@ -341,10 +338,10 @@ class Authentication
 					getUserField( 'last_activity' ) => date( 'Y-m-d H:i:s' ),
 					getUserField( 'session_id' ) 	=> session_id()
 				];
-
 				$data = array_merge( $data, $updateData );
 
-				return getComponents( 'user' )->updateUser( $userId, $data );
+				$edit = model( 'User/UserModel' )->edit( $data, [ 'user.id' => $userId ] );
+				return ( bool ) $edit;
 			}
 
 			if ( empty( $updateData ) )
@@ -354,12 +351,8 @@ class Authentication
 
 			if ( $tableArg == getTable( 'user_group' ) )
 			{
-				return getComponents( 'user' )->updateUserGroup( $userId, $updateData );
-				// die( var_dump( $updateData ) );
-				// $userGroupId = getUserField( 'group_id' );
-				// $groupId = $this->getUserdata( $userGroupId ); #dd( $this->getUserdata() );
-				// $where = [ $userGroupId => $groupId ];
-				// return sqlClassQueryInstance( getTable( 'user_group' ) ) ->edit( $updateData, $where );
+				$edit = model( 'User/UserModel' )->edit( $updateData, [ 'user.id' => $userId ] );
+				return ( bool ) $edit;
 			}
 		}
 

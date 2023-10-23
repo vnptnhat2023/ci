@@ -19,6 +19,26 @@ class CommonFacade implements CommonFacadeInterface
 		$this->common = $common;
 	}
 
+	/**
+	 * @param array $data Non-associative
+	 */
+	public function arrayInArray( array $data, array $data2 ) : bool
+	{
+		if ( $data == $data2 )
+		{
+			return true;
+		}
+		
+		$diff = array_diff( $data, $data2 );
+
+		if ( count( $diff ) != count( $data ) )
+		{
+			return true;
+		}
+
+		return false;
+	}
+
 	public function lang( string $line, array $args = [], string $locale = null )
 	{
 		return $this->common->lang( $line, $args, $locale );
