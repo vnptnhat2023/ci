@@ -59,9 +59,9 @@ function getUserGroupTableField ( string $key, bool $getKey = false )
  * @return string|false
  * @throws ErrorArrayKeyNotFoundException
  */
-function getTable ( string $key = 'user_group', bool $getKey = false, bool $throw = true, bool $defaultReturn = false )
+function getTable ( string $key = 'user_group', bool $getKey = false, bool $throw = true, bool $default = false )
 {
-    return sqlClassInstance()->getTable( $key, $getKey, $throw, $defaultReturn );
+    return sqlClassInstance()->getTable( $key, $getKey, $throw, $default );
 }
 
 function getColumn ( string $key = 'user_group', string $userFunc = '' )

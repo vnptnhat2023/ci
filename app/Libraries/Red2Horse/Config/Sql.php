@@ -17,9 +17,8 @@ class Sql
 {
 	use TraitSingleton, TraitReadOnly;
 
-    protected bool $esc = true;
-    public array $excerptEsc = [];
-    protected bool $useQuery = false;
+    protected       bool        $esc            = true;
+    protected       bool        $useQuery       = false;
 
 	protected string $userTemplateTbl = '
 CREATE TABLE IF NOT EXISTS `:user:` (
@@ -65,27 +64,13 @@ PRIMARY KEY (:id:)
     ';
     // ON DUPLICATE KEY UPDATE
     // INSERT 
-    protected $insertTemplate = 'INSERT INTO `%s` (%s) VALUES (%s)';
-
+    protected       $insertTemplate           = 'INSERT INTO `%s` (%s) VALUES (%s)';
     /** UPDATE */
-    // UPDATE
-    protected $updateTemplate = 'UPDATE `%s` SET %s WHERE %s';
-    // UPDATE IN
-    protected $updateInTemplate = 'UPDATE `%s` SET %s WHERE %s IN (%s)';
-    // UPDATE JOIN
-    protected $updateJoinTemplate = 'UPDATE %s JOIN %s SET %s WHERE %s';
-    // UPDATE JOIN IN
-    protected $updateJoinInTemplate = 'UPDATE %s JOIN %s SET %s WHERE %s IN (%s)';
-
-
+    protected       $updateTemplate           = 'UPDATE `%s` SET %s WHERE %s';
+    protected       $updateJoinTemplate       = 'UPDATE %s JOIN %s SET %s WHERE %s';
     /** DELETE */
-    protected $deleteTemplate = 'DELETE FROM `%s` WHERE %s';
-    // DELETE IN
-    protected $deleteInTemplate = 'DELETE FROM `%s` WHERE %s IN (%s)';
-    // DELETE JOIN
-    protected $deleteJoinTemplate = 'DELETE JOIN %s FROM `%s` WHERE %s';
-    // DELETE JOIN IN
-    protected $deleteJoinInTemplate = 'DELETE JOIN %s FROM `%s` WHERE %s IN (%s)';
+    protected       $deleteTemplate           = 'DELETE FROM `%s` WHERE %s';
+    protected       $deleteJoinTemplate       = 'DELETE JOIN %s FROM `%s` WHERE %s';
     
 	private function __construct ()
     {
@@ -95,6 +80,6 @@ PRIMARY KEY (:id:)
 
     public function after_sql_class_init ()
     {
-        // $this->excerptEsc[] = \Red2Horse\Mixins\Functions\getUserGroupField( 'role', true );
+        
     }
 }

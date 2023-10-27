@@ -14,8 +14,8 @@ defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 class Event
 {
     use TraitSingleton;
-    private bool $init = false;
-    private array $triggered = [];
+    private     bool        $init         = false;
+    private     array       $triggered    = [];
 
     private function __construct () {}
 
@@ -35,8 +35,8 @@ class Event
             return false;
         }
 
-        $this->triggered[] = $name;
-        $name = $eventConfig->underString( $name );
+        $this->triggered[]      = $name;
+        $name                   = $eventConfig->underString( $name );
 
         if ( array_key_exists( $name, $eventConfig->events ) )
         {
@@ -49,14 +49,21 @@ class Event
     public function init () : void
     {
         $events = getConfig( 'event' )->events;
-        if ( $this->init || empty( $events ) ) { return; }
 
-        $this->init = true;
-        $eventComponent = getComponents( 'event' );
+        if ( $this->init || empty( $events ) )
+        {
+            return;
+        }
+
+        $this->init         = true;
+        $eventComponent     = getComponents( 'event' );
 
         foreach( $events as $callableName => $scope )
         {
-            $onData = is_string( $scope ) ? [ new $scope, $callableName ] : $callableName;
+            $onData         = is_string( $scope )
+                            ? [ new $scope, $callableName ]
+                            : $callableName;
+
             $eventComponent->on( $callableName, $onData );
         }
     }
@@ -73,12 +80,13 @@ class Event
     {
         if ( array_key_exists( $methodName, getConfig( 'event' )->events ) )
         {
-            $args = reset( $args );
+            $args           = reset( $args );
+            $eventTrigger   = getComponents( 'event' )->trigger( $methodName, $args );
 
-            if ( ! empty( $this->triggered ) && getComponents( 'event' )->trigger( $methodName, $args ) )
+            if ( ! empty( $this->triggered ) && $eventTrigger )
             {
-                $evName = $this->triggered[ array_key_last( $this->triggered ) ];
-                setClass( $evName, $args, false, 'RegistryEventClass' );
+                $eventName  = $this->triggered[ array_key_last( $this->triggered ) ];
+                setClass( $eventName, $args, false, 'RegistryEventClass' );
             }
         }
     }

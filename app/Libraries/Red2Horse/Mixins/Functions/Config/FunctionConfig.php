@@ -56,6 +56,7 @@ function setConfig ( ?string $name = null, \Closure $callback, bool $getShared =
     }
 
     $namespace = get_class( $config );
+
     /** @var array $oldConfig */
     $oldConfig = getClass( $namespace );
 
@@ -63,9 +64,9 @@ function setConfig ( ?string $name = null, \Closure $callback, bool $getShared =
     {
         $oldConfig[ 'properties' ] = $changed::_getMPs( [], false, false );
     }
-    $oldConfig[ 'methods' ] = $changed::_getMPs();
-    $oldConfig[ 'instance' ] = $changed;
-    $oldConfig[ 'hasChanged' ] = true;
+    $oldConfig[ 'methods' ]     = $changed::_getMPs();
+    $oldConfig[ 'instance' ]    = $changed;
+    $oldConfig[ 'hasChanged' ]  = true;
     
     if ( ! setClass( $namespace, $oldConfig, true ) )
     {

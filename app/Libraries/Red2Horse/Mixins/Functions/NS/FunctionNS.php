@@ -70,8 +70,8 @@ function ComponentNamespace ( string $name, string $type = 'facade', ?string $di
     }
 
     $ucfirstType = ucfirst( $type == 'facade' ? 'facade' : 'adapter' );
-    $name = ucfirst( trim( $name ) );
-    $diff = ( null === $diff ) ? null : ucfirst( trim( $diff ) );
+    $name        = ucfirst( trim( $name ) );
+    $diff        = ( null === $diff ) ? null : ucfirst( trim( $diff ) );
 
     return sprintf(
         '%s%s\\%s%s',

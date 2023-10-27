@@ -34,7 +34,7 @@ class Install extends BaseController
 	public function builder ()
 	{
 		$builder = new BaseBuilder();
-		// d( $builder -> getCompilerProperties() );
+		d( $builder -> getCompilerProperties() );
 	}
 	
 	function allowedFieldsFilter ()
@@ -68,7 +68,7 @@ class Install extends BaseController
 		];
 
 		$model = model( 'User/UserModel' );# dd( $model );
-		$model->add( $add );
+		$model->add( $add, fn( $f ) => $f->setNoExplode( 'kv', 'email' ) );
 		dd( $model );
 	}
 	
@@ -80,7 +80,9 @@ class Install extends BaseController
 		
 		// dd( $model );
 
-		$model->edit(
+		$model
+		->in( [ 'user_group.permission' => [ 'all', 'null', 'post' ] ] )
+		->edit(
 			[ 'user_group.role' => $roleJson ] ,
 			[ 'user_group.id' => '1' ]
 		);
@@ -122,10 +124,11 @@ class Install extends BaseController
 			->select( [ 'user.*', 'user_group.*' ] )
 			->from( [ 'user' => 'us ' ] )
 			->join( [ 'user_group', 'ug' ], [ 'ug.id' => 'us.group_id', 'za.id' => 'us.group_id', 'zx.id' => 'cc.group_id' ] )
+			->andOn( [ 'bg.ggr_gh' => 'er.rth.fht' ] )
 			->where( [ 'id' => 3213124141 ] )
 			->orWhere( [ 'name' => 'wsx' ] )
 			->orderBy( [ 'id' => 'desc' ] )
-			->in( [ 'ad', 'lgk', 'obe' ] )
+			->in( [ 'column' => ['ad', 'lgk', 'obe'] ] )
 			->fetchFirst();
 		dd( $first );
 	}
@@ -147,46 +150,55 @@ class Install extends BaseController
 				$filter->setNoExplode( 'kv', 'email' );
 			} );
 
-		$model2->select( [ '*' ] )->limit( 2 )->get();
+		$model2->select( [ '*' ] )->limit( 2, 20 )->get();
 
 		dd( $model->getLastQueryString(),  $model2->getLastQueryString() );
 	}
 
 	public function test ()
 	{
-		$rows = model( 'User/UserModel' );
-		$rows
-			->select( [ [ 'tbl.field', 'as', 'field' ], [ 'tbl2.field2', 'DISTINCT', 'field2' ] , 'user_group.*' ] )
+		$model = model( 'User/UserModel' );
+		$model
+			->select( [ [ 'tbl.field', 'as', 'field' ], 'user_group.*' ] )
 			->from( [ 'user' => 'u', 'table 2' => 'table' ] )
-			->join(
-				// join
-				['user_group' => 'userG' ],
-				// on
-				[ 'user_group.id' => 'user.id', 'user.email' => 'abc@ewq.kg', 'abc.loi' => 'fgh.bgt' ],
-				'and',
-				null,
-				function( $filter ) {
-					$filter->setNoExplode( 'kv', 'user.email' );
-					// dd( $filter );
-				}
-			)
+			// ->join(
+			// 	// join
+			// 	['user_group' => 'userG' ],
+			// 	// on
+			// 	[ 'user_group.id' => 'user.id', 'user.email' => 'abc@ewq.kg', 'abc.loi' => 'fgh.bgt' ],
+			// 	'and',
+			// 	null,
+			// 	function( $filter ) {
+			// 		$filter->setNoExplode( 'kv', 'user.email' );
+			// 		// dd( $filter );
+			// 	}
+			// )
 			->andWhere( [
-					'user.username' => 'administrator',
-					'user.email' => 'administrator@local.host',
-					// 'userTable.email' => 'x\'za@asd.qw'
+				'user.username' => 'administrator',
+				'user.email' => 'administrator@local.host',
+				// 'userTable.email' => 'x\'za@asd.qw'
 			], function( $filter ) {
 				$filter->setNoExplode( 'kv', 'user.email' );
 			} )
-			->orWhere( [ 'u.selector' => 'b1nf_dt_hf_hf', 'user_group.name' => 'abc' ])
-			->where( [ ' ab ' => '  BA  ', 'ttt' => 'asd jhg' ] )
+			// ->orWhere( [ 'u.selector' => 'b1nf_dt_hf_hf', 'user_group.name' => 'abc' ])
+			// ->where( [ ' ab ' => '  BA  ', 'ttt' => 'asd jhg' ] )
 			// ->set( [ ' ab ' => '  BA  ', 'ttt' => 'asd jhg' ] )
-			->in( [ 1, 2, 5 , 4, 6] )
+			// ->like( [ 'user.name' => 'asq like' ] )
+			->orLike( [ 'user.name' => 'ta or_like' ] )
+			// ->andLike( [ 'user.name' => 'ad and-like', 'user.email' => 'ko isd and_like' ] )
+			// ->in( [ 'user.id' => [ 1, 2, 5 , 4, 6 ], 'user.ip' => [ '23', '34', 56 ] ] )
+			->notIn( [ 'user.name' => [ 'q.w', 'i.u', 'dq', 'pd', 'dq' ] ] )
+			// ->null( [ 'user.selector', 'user.email' ] )
+			->orNotNull( [ 'user_group.permission', 'user.group_id' ] )
+			// ->andNull( [ 'user.ip', 'user.created_at' ] )
 			->limit( 1 )
 			->orderBy( [ 'id' => 'DESC', 'user.name' => 'ASC', 'user_group.id' => 'DESC' ] )
 			->get();
-		dd( $rows -> getLastQueryString() );
 
-		print_r( $rows->__toArray() );
+		dd( $model->getLastQueryString() );
+		// dd( $model );
+
+		// print_r( $model->__toArray() );
 	}
 	
 

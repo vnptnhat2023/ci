@@ -51,7 +51,7 @@ class CommonFacade implements CommonFacadeInterface
 
 	public function nonAssocArray ( array $data ) : bool
 	{
-		return ! $this->isAssocArray( $data ) && [] !== $data;
+		return [] !== $data && ! $this->isAssocArray( $data );
 	}
 
 	/**
@@ -145,7 +145,19 @@ class CommonFacade implements CommonFacadeInterface
 	{
 		if ( getConfig( 'sql' )->esc )
 		{
-			$str = str_replace( ['\'', '\"'], ['\'\'', '\"\"'], $str );
+			$str = str_replace( [ '\\', '\'', '\"' ], [ '\\\\', '\'\'', '\"\"' ], $str );
+		}
+
+		return $str;
+	}
+
+	public function escLike ( string $str ) : string
+	{
+		$str = $this->esc( $str );
+
+		if ( getConfig( 'sql' )->esc )
+		{
+			$str = str_replace( [ '%' ], [ '\%' ], $str );
 		}
 
 		return $str;
@@ -162,7 +174,7 @@ class CommonFacade implements CommonFacadeInterface
 	{
 		if ( getConfig( 'sql' )->esc )
 		{
-			$str = str_replace( ['\'\'', '\"\"'], ['\'', '\"'], $str );
+			$str = str_replace( [ '\\\\', '\'\'', '\"\"' ], [ '\\', '\'', '\"' ], $str );
 			$str = htmlspecialchars( $str, ENT_QUOTES, 'utf-8' );
 		}
 

@@ -7,7 +7,6 @@ use Red2Horse\Exception\ErrorArrayException;
 use Red2Horse\Exception\ErrorParameterException;
 use Red2Horse\Exception\ErrorPropertyException;
 
-use function Red2Horse\Mixins\Functions\Config\getConfig;
 use function Red2Horse\Mixins\Functions\Instance\getComponents;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
@@ -19,51 +18,43 @@ defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
  */
 class DataAssocKeyMap
 {
-    public string $keyDelimiter = '`';
-    public string $valueDelimiter = '\'';
-    public string $operator = '=';
-
-    private string $combineChar = '.';
-    public int $combineLimitChar = 10;
-
-    private array $specialChars = [
+    public      string       $keyDelimiter            = '`';
+    public      string       $valueDelimiter          = '\'';
+    public      string       $operator                = '=';
+    private     string       $combineChar             = '.';
+    public      int          $combineLimitChar        = 10;
+    public      string       $escapeChar              = '\'';
+    public      bool         $escapeKeys              = true;
+    public      bool         $escapeValues            = true;
+    private     array        $specialChars            = [
         '~','`','!','@','#','$','%','^','&','*','(',')',
         '-','_','+','=','[','{',']','}','\\','|',
         ';',':','"','\'',',','<','>','.','/','?','/',
     ];
-
-    public string $toStringSepChar = ', ';
-    public string $toStringSepEndChar = '';
-
+    public      string       $toStringSepChar         = ', ';
+    public      string       $toStringSepEndChar      = '';
     // public int $limit = 10;
-    public array $data;
-
-    public bool $useTranslate = true;
-
+    public      array        $data;
+    public      bool         $useExplodeCombine       = true;
+    public      bool         $useTranslate            = true;
     // Before_exploded
-    protected array $methods = [
-        'before_string_combine_exploded' => \Red2Horse\Mixins\Classes\Data\DataArrayEventsClass::class,
-        'before_set_no_explode' => \Red2Horse\Mixins\Classes\Data\DataArrayEventsClass::class
+    protected   array        $methods                 = [
+        'before_string_combine_exploded'        => \Red2Horse\Mixins\Classes\Data\DataArrayEventsClass::class,
+        'before_set_no_explode'                 => \Red2Horse\Mixins\Classes\Data\DataArrayEventsClass::class
     ];
-
-    /** @var string[] $dataNoExplode */
-    private array $dataNoExplode = [];
-
-    /** @var string[] $keyValueNoExplode */
-    protected array $keyValueNoExplode = [];
-
-    /** @var string[] $keyNoExplode */
-    protected array $keyNoExplode = [];
-
-    /** @var string[] $valueNoExplode */
-    protected array $valueNoExplode = [];
-
-    private string $toStr = '';
-    private bool $mapped = false;
-    private int $dataLen;
-
-    private $keyPattern = '/`?[\w_]+`?|\s{1,3}+AS{1,3}\s+|`?\*{1}`?|\*{1}/';
-    private $valuePattern = '/(\'|\")?[\w_]+(\'|\")?|\s{1,3}+AS{1,3}\s+/';
+    /** @var    string[]     $dataNoExplode */
+    private     array        $dataNoExplode           = [];
+    /** @var    string[]     $keyValueNoExplode */
+    protected   array        $keyValueNoExplode       = [];
+    /** @var    string[]     $keyNoExplode */
+    protected   array        $keyNoExplode            = [];
+    /** @var    string[]     $valueNoExplode */
+    protected   array        $valueNoExplode          = [];
+    private     string       $toStr                   = '';
+    private     bool         $mapped                  = false;
+    private     int          $dataLen;
+    private     string       $keyPattern              = '/`?[\w_]+`?|\s{1,3}+AS{1,3}\s+|`?\*{1}`?|\*{1}/';
+    private     string       $valuePattern            = '/(\'|\")?[\w_]+(\'|\")?|\s{1,3}+AS{1,3}\s+/';
 
     public function setCombineChar ( string $char = '.' ) : void
     {
@@ -77,11 +68,13 @@ class DataAssocKeyMap
             : $this->combineChar;
     }
 
+    /** Set trigger property */
     public function setMethods ( array $data ) : void
     {
         $this->methods = array_merge( $this->methods, $data );
     }
 
+    /** Get trigger property */
     public function getMethods () : array
     {
         return $this->methods;
@@ -95,15 +88,22 @@ class DataAssocKeyMap
         bool $esc = true,
         string $format = '%1$s%2$s%3$s' ): string
     {
-        $str = trim( $str, ' ' );
-        $common = getComponents( 'common' );
-        $combineRegexChar = '/'. $this->getCombineChar() . '/';
-        if ( preg_match( $combineRegexChar, $str ) && ! in_array( $str, $this->dataNoExplode, true ) )
+        $str                = trim( $str, ' ' );
+        $common             = getComponents( 'common' );
+
+        $combineCondition   = $this->useExplodeCombine 
+            && preg_match( '/'. $this->getCombineChar() . '/', $str ) 
+            && ! in_array( $str, $this->dataNoExplode, true );
+
+        if ( $combineCondition )
         {
-            $str = $this->_trigger( 'before_string_combine_exploded', $str, $this->getCombineChar() );
-            $exploded = explode( $this->combineChar, $str, $this->combineLimitChar );
-            $exploded = $this->_trigger( 'after_string_combine_exploded', $exploded );
-            $mapFn = fn( $mapStr ) => $this->stringCombine( $before, $mapStr, $after, $esc, $format );
+            $str        = $this->_trigger( 'before_string_combine_exploded', $str, $this->getCombineChar() );
+
+            $exploded   = explode( $this->combineChar, $str, $this->combineLimitChar );
+
+            $exploded   = $this->_trigger( 'after_string_combine_exploded', $exploded );
+
+            $mapFn      = fn( $mapStr ) => $this->stringCombine( $before, $mapStr, $after, $esc, $format );
             
             /** @var array $map */
             $map = array_map( $mapFn, $exploded );
@@ -111,8 +111,16 @@ class DataAssocKeyMap
             /** @var string $str */
             return $str = implode( $this->combineChar, $map );
         }
-        
-        $isEsc = $esc ? $common->esc( $str ) : $str;
+
+        if ( $this->escapeChar === '\'' )
+        {
+            $isEsc = $esc ? $common->esc( $str ) : $str;
+        }
+        else if ( $this->escapeChar === '\%' )
+        {
+            $isEsc = $esc ? $common->escLike( $str ) : $str;
+        }
+
         $return = ( '*' === $str ) 
             ? sprintf( $format, '', $isEsc, '' ) 
             : sprintf( $format, $before, $isEsc, $after );
@@ -151,16 +159,25 @@ class DataAssocKeyMap
             throw new ErrorPropertyException( 'Property: $data cannot empty.', 406 );
         }
 
-        $this->data = $data;
-        $this->dataLen = count( $data ) - 1;
-        $data = [];
-        
-        $i = 0;
+        $this->data                 = $data;
+        $this->dataLen              = count( $data ) - 1;
+        $data                       = [];
+        $i                          = 0;
+
+        $dataNonAssoc               = new DataKeyMap;
+        $dataNonAssoc->keyDelimiter = '\'';
+        $dataNonAssoc->initDataAssocKeyMap( clone $this );
 
         foreach ( $this->data as $key => $value )
         {
-            $key = ( string ) $key;
-            $value = ( string ) $value;
+            if ( is_array( $value ) )
+            {
+                $value  = $dataNonAssoc->keyMap( $value );
+                $value  = sprintf( '%s%s%s', '(' , $value, ')' );
+            }
+
+            $key        = ( string ) $key;
+            $value      = ( string ) $value;
 
             $this->_filterNoExplode( $key, $value );
 
@@ -194,7 +211,8 @@ class DataAssocKeyMap
     {
         if ( ! preg_match( $this->keyPattern, $str ) )
         {
-            throw new ErrorParameterException( sprintf( 'Invalid format for $key: %s', $str ) );
+            $errorParameter = sprintf( 'Invalid format for $key: %s', $str );
+            throw new ErrorParameterException( $errorParameter );
         }
 
         return $str;
@@ -207,7 +225,8 @@ class DataAssocKeyMap
     {
         if ( ! preg_match( $this->valuePattern, $str ) )
         {
-            throw new ErrorParameterException( sprintf( 'Invalid format for $value: %s', $str ) );
+            $errorParameter = sprintf( 'Invalid format for $value: %s', $str );
+            throw new ErrorParameterException( $errorParameter );
         }
 
         return $str;
@@ -215,17 +234,35 @@ class DataAssocKeyMap
 
     /**
      * @param string $key kv: KeyValueNoExplode, k: KeyNoExplode, v: ValueNoExplode
+     * @param array|\stdClass|string $value
      */
-    public function setNoExplode ( string $key = 'kv', string $value ) : void
+    public function setNoExplode ( string $key = 'kv', $value ) : void
     {
+        if ( ! is_string( $value ) && ! getComponents( 'common' )->nonAssocArray( $value ) )
+        {
+            $errorParameter = 'Parameter 2: "value" must be a non-associative array';
+            throw new ErrorParameterException( $errorParameter );
+        }
+
         $array = [
             'kv'    => 'keyValueNoExplode',
-            'k'    => 'keyNoExplode',
-            'v'   => 'valueNoExplode'
+            'k'     => 'keyNoExplode',
+            'v'     => 'valueNoExplode'
         ];
+
         $key = $array[ $key ];
         $this->_trigger( 'before_set_no_explode', $key, $this->getCombineChar() );
-        $this->{$key}[] = $value;
+        
+        if ( ! is_string( $value ) )
+        {
+            $value = ( array ) $value;
+            $this->$key = array_merge( $this->$key, $value );
+        }
+        else
+        {
+            $this->$key[] = $value;
+        }
+
         $this->_trigger( 'after_set_no_explode', $key, $this->getCombineChar() );
     }
 
@@ -254,7 +291,9 @@ class DataAssocKeyMap
             return $default;
         }
 
-        if ( $getAssoc && is_array( $data ) && getComponents( 'common' )->isAssocArray( $data ) )
+        $isAssocArray = getComponents( 'common' )->isAssocArray( $data );
+
+        if ( $getAssoc && is_array( $data ) && $isAssocArray )
         {
             return $data;
         }
@@ -268,11 +307,21 @@ class DataAssocKeyMap
         if ( in_array( $getType = gettype( $data ), self::$castTypes ) )
         {
             $castTypes = [
-                'array' => ( [] !== $data ) ? $data : $default,
-                'string' => is_string( $data ) ? ( array ) $data : $default,
-                'object' => ( function() use ( $data, $default ) {
-                    if ( $data instanceof \stdClass ) return ( array ) $data;
-                    else return method_exists( $data, 'toArray' ) ? $data->toArray() : $default;
+                'array'     =>  ( [] !== $data )    ? $data             : $default,
+                'string'    =>  is_string( $data )  ? ( array ) $data   : $default,
+
+                'object'    =>  ( function() use ( $data, $default )
+                {
+                    if ( $data instanceof \stdClass ) 
+                    {
+                        return ( array ) $data;
+                    }
+                    else
+                    {
+                        return method_exists( $data, 'toArray' ) 
+                            ? $data->toArray() 
+                            : $default;
+                    }
                 })()
             ];
 
@@ -341,24 +390,29 @@ class DataAssocKeyMap
 
     private function _notCallableInvoke ( array &$data, string $key, string $value, bool $toString, int $i ) : void
     {
-        $esc = in_array( $key, getConfig( 'sql' )->excerptEsc, true );
         $value = $this->stringCombine(
             $this->valueDelimiter,
             ( string ) $value,
             $this->valueDelimiter,
-            ! $esc
+            $this->escapeValues
         );
 
         $key = $this->stringCombine(
             $this->keyDelimiter,
             ( string ) $key,
-            $this->keyDelimiter
+            $this->keyDelimiter,
+            $this->escapeKeys
         );
 
         if ( $toString )
         {
-            $sep = ( $i < $this->dataLen ) ? $this->toStringSepChar : $this->toStringSepEndChar;
-            $this->toStr .= $this->publicToString( $key, ( string ) $value, $sep );
+            $sep = ( $i < $this->dataLen ) 
+                ? $this->toStringSepChar 
+                : $this->toStringSepEndChar;
+
+            $this->toStr .= $this->publicToString( 
+                $key, ( string ) $value, $sep 
+            );
         }
         else
         {

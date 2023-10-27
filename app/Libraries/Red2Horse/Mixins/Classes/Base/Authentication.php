@@ -9,7 +9,7 @@ use Red2Horse\Mixins\Traits\Object\TraitSingleton;
 use Red2Horse\Facade\Validation\ValidationFacadeInterface;
 
 use function Red2Horse\Mixins\Functions\Config\getConfig;
-use function Red2Horse\Mixins\Functions\Instance\BaseInstance;
+use function Red2Horse\Mixins\Functions\Instance\getBaseInstance;
 use function Red2Horse\Mixins\Functions\Instance\getComponents;
 use function Red2Horse\Mixins\Functions\Message\setErrorMessage;
 use function Red2Horse\Mixins\Functions\Message\setSuccessMessage;
@@ -18,8 +18,7 @@ use function Red2Horse\Mixins\Functions\Sql\
 {
     getTable,
     getUserField,
-    getUserGroupField,
-    getUserTableField,
+    getUserGroupField
 };
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
@@ -42,7 +41,7 @@ class Authentication
 		self::$rememberMe = $r;
 		self::$captcha = $c;
 
-		return BaseInstance( Utility::class )->typeChecker( 'login', $u, $p, null, $c );
+		return getBaseInstance( Utility::class )->typeChecker( 'login', $u, $p, null, $c );
 	}
 
 	public function logout () : bool
@@ -52,14 +51,15 @@ class Authentication
 
 		getComponents( 'cookie' )->delete_cookie( getConfig( 'cookie' )->cookie );
 
-		if ( $session->has( getConfig('session')->session ) )
+		if ( $session->has( getConfig( 'session' )->session ) )
 		{
 			$session->destroy();
 			setSuccessMessage( $common->lang( 'Red2Horse.successLogout' ) ); 
 			return true;
 		}
 
-		$error = sprintf( '%s.%s', 
+		$error = sprintf(
+			'%s.%s', 
 			$common ->lang( 'Red2Horse.errorNeedLoggedIn'),
 			$common ->lang( 'Red2Horse.homeLink')
 		);
@@ -87,7 +87,6 @@ class Authentication
 	}
 
 	/**
-	 * Check cookie, session: when have cookie will set session
 	 * @return boolean
 	 */
 	public function isLogged ( bool $withCookie = false ) : bool
@@ -99,7 +98,7 @@ class Authentication
 
 		if ( $withCookie )
 		{
-			return baseInstance( CookieHandle::class )->cookieHandler();
+			return getBaseInstance( CookieHandle::class )->cookieHandler();
 		}
 
 		return false;
@@ -111,12 +110,11 @@ class Authentication
 		$validationComponent = getComponents( 'validation' );
 
 		/** @var Validation $configValidation */
-		$configValidation = getConfig( 'validation' );
-
-		$keyUsername = getUserField( 'username' );
-		$keyEmail 	 = getUserField( 'email' );
-		$keyPassword = getUserField( 'password' );
-		$keyCaptcha  = $configValidation->user_captcha;
+		$configValidation 	= getConfig( 'validation' );
+		$keyUsername 		= getUserField( 'username' );
+		$keyEmail 	 		= getUserField( 'email' );
+		$keyPassword 		= getUserField( 'password' );
+		$keyCaptcha  		= $configValidation->user_captcha;
 
 		if ( getComponents( 'throttle' )->showCaptcha() )
 		{
@@ -133,41 +131,42 @@ class Authentication
 			if ( ! $validationComponent->isValid( $data, $ruleCaptcha ) )
 			{
 				$errorCaptcha = $validationComponent->getErrors( $keyCaptcha );
-				return baseInstance( Message::class )->errorInformation( true, $errorCaptcha );
+				return getBaseInstance( Message::class )->errorInformation( true, $errorCaptcha );
 			}
 		}
 
-		$incorrectInfo = false;
-		$ruleUsername = [ $keyUsername => $validationComponent->getRules( $keyUsername ) ];
-		$data = [ $keyUsername => self::$username ];
+		$incorrectInfo 	= false;
+		$ruleUsername 	= [ $keyUsername => $validationComponent->getRules( $keyUsername ) ];
+		$data 			= [ $keyUsername => self::$username ];
 
 		if ( ! $validationComponent->isValid( $data, $ruleUsername ) )
 		{
+			/** Reset validation */
 			$validationComponent->reset();
-			$ruleEmail = [ $keyUsername => $validationComponent->getRules( $keyEmail ) ];
-			$incorrectInfo = ! $validationComponent->isValid( $data, $ruleEmail );
+			$ruleEmail 		= [ $keyUsername => $validationComponent->getRules( $keyEmail ) ];
+			$incorrectInfo 	= ! $validationComponent->isValid( $data, $ruleEmail );
 		}
 
-		! $incorrectInfo ?: baseInstance( Message::class )->errorInformation( true );
+		! $incorrectInfo ?: getBaseInstance( Message::class )->errorInformation( true );
 
 		return $incorrectInfo;
 	}
 
 	private function loginAfterValidation () : array
 	{
-		$userData = model( 'User/UserModel' ) ->fetchFirstUserData( [
-			getUserTableField( 'username' ) => self::$username,
-			getUserTableField( 'email' ) => self::$username,
+		$userData = model( 'User/UserModel' )->first( [
+			'user.username' => self::$username,
+			'user.email' 	=> self::$username,
 		] );
 
-		$message = baseInstance( Message::class );
+		$message = getBaseInstance( Message::class );
 
 		if ( empty( $userData ) )
 		{
 			return [ 'error' => $message->errorInformation() ];
 		}
 
-		$verifyPassword = baseInstance( Password::class )
+		$verifyPassword = getBaseInstance( Password::class )
 			->getVerifyPass( self::$password, $userData[ getUserField( 'password' ) ] );
 
 		if ( ! $verifyPassword )
@@ -188,10 +187,11 @@ class Authentication
 
 		unset( $userData[ getUserField( 'password' ) ] );
 
-		$isValidJson = getComponents( 'common' )
-			->valid_json( $userData[ getUserGroupField( 'permission' ) ] );
-		$userData[ getUserGroupField( 'permission' ) ] = ( $isValidJson )
-			? json_decode( $userData[ getUserGroupField( 'permission' ) ], true )
+		$permissionKey 	= getUserGroupField( 'permission' );
+		$isValidJson 	= getComponents( 'common' )->valid_json( $userData[ $permissionKey ] );
+
+		$userData[ $permissionKey ] = ( $isValidJson )
+			? json_decode( $userData[ $permissionKey ], true )
 			: [];
 
 		return $userData;
@@ -214,12 +214,13 @@ class Authentication
 		/** Set response success to true */
 		$this->setLoggedInSuccess( $userData );
 
-		$userData[ getUserField( 'id' ) ] = ( int ) $userData[ getUserField( 'id' ) ];
-		$userId = $userData[ getUserField( 'id' ) ];
+		$userFieldID 				= getUserField( 'id' );
+		$userData[ $userFieldID ] 	= ( int ) $userData[ $userFieldID ];
+		$userId 					= $userData[ $userFieldID ];
 
 		if ( getComponents( 'cache' )->isSupported() )
 		{
-			baseInstance( SessionHandle::class )->roleHandle( $userData );
+			getBaseInstance( SessionHandle::class )->roleHandle( $userData );
 		}
 		else
 		{
@@ -229,18 +230,18 @@ class Authentication
 		/** Set cookie */
 		if ( self::$rememberMe )
 		{
-			baseInstance( CookieHandle::class )->setCookie( $userId );
+			getBaseInstance( CookieHandle::class )->setCookie( $userId );
 		}
 
 		/** Sql update */
 		if ( ! $this->loggedInUpdateData( $userId ) )
 		{
-			getComponents( 'common' )
-				->log_message( 'error', "{ $userId } Logged-in, but update failed" );
+			$errorLog = sprintf('user-id: "%s" logged-in, but failed update', $userId );
+			getComponents( 'common' )->log_message( 'error', $errorLog );
 		}
 
 		/** Generate cookie */
-		baseInstance( CookieHandle::class )->regenerateCookie();
+		getBaseInstance( CookieHandle::class )->regenerateCookie();
 
 		/** Clean old throttle attempts */
 		if ( getConfig( 'throttle' )->useThrottle )
@@ -253,7 +254,7 @@ class Authentication
 
 	public function setLoggedInSuccess ( array $userData ) : void
 	{
-		setSuccessMessage( getComponents( 'common' ) ->lang(
+		setSuccessMessage( getComponents( 'common' )->lang(
 			'Red2Horse.successLoggedWithUsername',
 			[ $userData[ getUserField( 'username' ) ] ] 
 		) );
@@ -266,10 +267,10 @@ class Authentication
 			return true;
 		}
 
-		$session = getComponents( 'session' );
-		$pathFile = $session->sessionSavePath;
-		$pathFile .= '/' . $session->sessionCookieName . $session_id;
-		$date = getComponents( 'common' )->get_file_info( $pathFile, 'date' );
+		$session 		= getComponents( 'session' );
+		$pathFile 		= $session->sessionSavePath;
+		$pathFile 		.= '/' . $session->sessionCookieName . $session_id;
+		$date 			= getComponents( 'common' )->get_file_info( $pathFile, 'date' );
 
 		if ( empty( $date ) )
 		{
@@ -318,8 +319,11 @@ class Authentication
 
 		if ( $userId <= 0 )
 		{
-			$errArg = [ 'field' => 'user_id', 'param' => $userId ];
-			throw new ErrorValidationException( $common->lang( 'Validation.greater_than', $errArg ), 406 );
+			$errorValidation = $common->lang( 
+				'Validation.greater_than', 
+				[ 'field' => 'user_id', 'param' => $userId ]
+			);
+			throw new ErrorValidationException( $errorValidation, 406 );
 		}
 
 		$isAssocData = $common->isAssocArray( $updateData );

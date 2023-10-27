@@ -3,7 +3,7 @@
 declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Classes\Sql;
 
-use Red2Horse\Exception\ErrorArrayException;
+use Red2Horse\Exception\ErrorPropertyException;
 use Red2Horse\Facade\Query\QueryFacadeInterface;
 use Red2Horse\Mixins\Interfaces\Sql\ModelInterface;
 use Red2Horse\Mixins\Traits\Object\TraitSingleton;
@@ -13,47 +13,95 @@ use function Red2Horse\Mixins\Functions\Sql\getTable;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
-class Model/* implements ModelInterface*/
+class Model implements ModelInterface
 {
     use TraitSingleton;
 
-    protected BaseBuilder $builder;
+    protected           BaseBuilder             $builder;
 
-    /** @var string[] */
-    public array $allowedFields = [];
+    /** @var            <string, string>        $createdAt */
+    public              array                   $createdAt;
 
-    /** @var <string, string> $createdAt [ 'create_at' => 'Y-m-d H:i:s' ] */
-    public array $createdAt;
-    public array $deletedAt;
-    public array $updatedAt;
-    public array $validTimeFormat = [ 'Y-m-d H:i:s', 'Y-m-d' ];
+    /** @var            <string, string>        $deletedAt */
+    public              array                   $deletedAt;
 
-    public function __construct () {}
+    /** @var            <string, string>        $updatedAt */
+    public              array                   $updatedAt;
 
-    public static function setTable ( string $table, ?QueryFacadeInterface $connection = null, \stdClass $childProperties = null ) : self
+    /** @var            string[]                $updatedAt */
+    public              array                   $validTimeFormat = [ 'Y-m-d H:i:s', 'Y-m-d' ];
+
+    /** @var            string[]                $allowedFields */
+    public              array                   $allowedFields = [];
+
+    protected           string                  $table;
+
+    public function __construct (){}
+
+    public static function model (
+        ?string $table = null, 
+        ?QueryFacadeInterface $connection = null, 
+        \stdClass $childProperties = null, 
+        bool $getShare = true
+    ) : self
     {
-        return getInstance( self::class )->table( $table, $connection, $childProperties );
+        return $getShare
+            ? getInstance( self::class )->init( $table, $connection, $childProperties )
+            : ( new self )->init( $table, $connection, $childProperties );
     }
 
-    public function table ( string $table, ?QueryFacadeInterface $connection = null, \stdClass $childProperties = null ) : self
+    public function init ( ?string $table = null, ?QueryFacadeInterface $connection = null, \stdClass $childProperties = null ) : self
     {
         $this->builder = getInstance( BaseBuilder::class, 'RegistryClass', false );
-        $this->builder->table = getTable( $table, false, false, true );
-        $this->builder->setConnection( $connection );
-        $this->setModelProperty( $childProperties );
+
+        $this
+            ->setTable( $table )
+            ->setConnection( $connection )
+            ->setModelProperty( $childProperties );
 
         return $this;
     } 
 
-    public function setModelProperty ( \stdClass $childProperties = null )
+    public function setTable ( ?string $table = null ) : self
+    {
+        if ( null === $table )
+        {
+            if ( ! isset( $this->table ) )
+            {
+                throw new ErrorPropertyException( 'Property: "table" not found' );
+            }
+
+            $table = $this->table;
+        }
+
+        $table = getTable( $table, false, false, true );
+        $this->builder->table = $table;
+
+        return $this;
+    }
+
+    public function setConnection ( ?QueryFacadeInterface $connection = null ) : self
+    {
+        $this->builder->setConnection( $connection );
+        return $this;
+    }
+    
+    public function setModelProperty ( ?\stdClass $childProperties = null ) : self
     {
         $childProperties = $childProperties ?: $this->__toStdClass();
-        if ( $childProperties->builder )
+        if ( isset( $childProperties->builder ) )
         {
             unset( $childProperties->builder );
         }
 
         $this->builder->setModelProperty( $childProperties );
+        return $this;
+    }
+
+    public function toggleAllowedFields ( array $allowedFields ) : self
+    {
+        $this->builder->beforeAllowedFieldsFilter( $allowedFields );
+        return $this;
     }
 
     public function __toString() : string

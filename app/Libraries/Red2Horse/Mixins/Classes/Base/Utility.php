@@ -3,12 +3,11 @@
 declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Classes\Base;
 
-use Red2Horse\Exception\ErrorArrayException;
 use Red2Horse\Exception\ErrorParameterException;
 use Red2Horse\Mixins\Traits\Object\TraitSingleton;
 
 use function Red2Horse\Mixins\Functions\Config\getConfig;
-use function Red2Horse\Mixins\Functions\Instance\BaseInstance;
+use function Red2Horse\Mixins\Functions\Instance\getBaseInstance;
 use function Red2Horse\Mixins\Functions\Instance\getComponents;
 use function Red2Horse\Mixins\Functions\Message\setErrorMessage;
 
@@ -33,21 +32,21 @@ class Utility
 	{
 		if ( ! in_array( $type, $this->type ) )
 		{
-			throw new ErrorParameterException( sprintf( 'Parameter 1: "type" not in: "login, forgot, forget"' ), 403 );
+			$errorParameter = sprintf( 'Parameter 1: "type" not in: "login, forgot, forget"' );
+			throw new ErrorParameterException( $errorParameter );
 		}
 
-		$requestType = ( $type == 'login' ) ? 'password' : 'email';
+		$requestType 		= ( $type == 'login' ) ? 'password' : 'email';
+		$isNullUsername 	= null === $u;
+		$isNullType 		= null === $requestType;
+		$hasRequest 		= ! $isNullUsername && ! $isNullType;
 
-		$isNullUsername = null === $u;
-		$isNullType = null === $requestType;
-		$hasRequest = ! $isNullUsername && ! $isNullType;
-
-		$authentication = BaseInstance( Authentication::class );
+		$authentication 	= getBaseInstance( Authentication::class );
 
 		if ( $authentication->isLogged() || $authentication->isLogged( true ) )
 		{
 			$type == 'forget'
-				? baseInstance( ResetPassword::class )
+				? getBaseInstance( ResetPassword::class )
 					->alreadyLoggedIn( $authentication->getUserdata() )
 				: $authentication
 					->setLoggedInSuccess( $authentication->getUserdata() );
@@ -74,6 +73,6 @@ class Utility
 
 		return ( $type === 'login' )
 			? $authentication->loginHandler()
-			: baseInstance( ResetPassword::class )->forgetHandler( $u, $e, $c );
+			: getBaseInstance( ResetPassword::class )->forgetHandler( $u, $e, $c );
 	}
 }

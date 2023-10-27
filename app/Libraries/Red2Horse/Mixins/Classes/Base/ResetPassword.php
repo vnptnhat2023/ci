@@ -8,14 +8,12 @@ use Red2Horse\Facade\Validation\ValidationFacadeInterface;
 use Red2Horse\Mixins\Traits\Object\TraitSingleton;
 
 use function Red2Horse\Mixins\Functions\Config\getConfig;
-use function Red2Horse\Mixins\Functions\Instance\BaseInstance;
+use function Red2Horse\Mixins\Functions\Instance\getBaseInstance;
 use function Red2Horse\Mixins\Functions\Instance\getComponents;
 use function Red2Horse\Mixins\Functions\Message\setErrorMessage;
 use function Red2Horse\Mixins\Functions\Message\setSuccessMessage;
 use function Red2Horse\Mixins\Functions\Model\model;
-use function Red2Horse\Mixins\Functions\Sql\getTable;
 use function Red2Horse\Mixins\Functions\Sql\getUserField;
-use function Red2Horse\Mixins\Functions\Sql\selectExports;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
@@ -31,15 +29,19 @@ class ResetPassword
 
 	public function requestPassword ( string $u = null, string $e = null, string $c = null ) : bool
 	{
-		return BaseInstance( Utility::class ) ->typeChecker( 'forget', $u, null, $e, $c );
+		return getBaseInstance( Utility::class )
+			->typeChecker( 'forget', $u, null, $e, $c );
 	}
 
 	public function alreadyLoggedIn ( array $userData )
 	{
-		setSuccessMessage( ( array ) getComponents( 'common' )->lang(
-			'Red2Horse.successLoggedWithUsername',
-			[ $userData[ getUserField( 'username' ) ] ]
-		) );
+		$success = ( array ) getComponents( 'common' )
+			->lang(
+				'Red2Horse.successLoggedWithUsername',
+				[ $userData[ getUserField( 'username' ) ] ]
+			);
+
+		setSuccessMessage( $success );
 	}
 
 	/**
@@ -49,70 +51,91 @@ class ResetPassword
 	{
 		if ( ! $userEmail = explode( '@', $userData[ getUserField( 'email' ) ] ) )
 		{
-			getComponents( 'common' )->log_message( 'error', "{$userEmail[ 0 ]} email INVALID !" );
-			throw new ErrorParameterException( "{$userEmail[ 0 ]} email INVALID !" );
+			$errorLog = sprintf( 'Email: "%s" is invalid', $userEmail[ 0 ] );
+			getComponents( 'common' )->log_message( 'error', $errorLog );
+
+			throw new ErrorParameterException( $errorLog );
 		}
 
 		$email = str_repeat( '*', strlen( $userEmail[ 0 ] ) ) . '@' . $userEmail[ 1 ];
 
-		setSuccessMessage( ( array ) getComponents( 'common' )->lang(
-			'Red2Horse.successResetPassword',
-			[ $userData[ getUserField( 'username' ) ], $email ]
-		) );
+		$success = ( array ) getComponents( 'common' )
+			->lang(
+				'Red2Horse.successResetPassword',
+				[ $userData[ getUserField( 'username' ) ], $email ]
+			);
+
+		setSuccessMessage( $success );
 	}
 
 	public function forgetHandler ( string $u = null, string $e = null, string $c = null ) : bool
 	{
-		self::$username = $u; self::$email = $e; self::$captcha = $c;
+		self::$username 	= $u;
+		self::$email 		= $e;
+		self::$captcha 		= $c;
 
-		$configValidation = getConfig( 'validation' );
-		/** @var ValidationFacadeInterface $validationComponent */
-		$validationComponent = getComponents( 'validation' );
+		/** @var \Red2Horse\Config\Validation 	$configValidation */
+		$configValidation 						= getConfig( 'validation' );
+		/** @var ValidationFacadeInterface 		$validationComponent */
+		$validationComponent 					= getComponents( 'validation' );
 
-		$groups = getComponents( 'throttle' )->showCaptcha() 
-			? [ $configValidation->user_username, $configValidation->user_email, $configValidation->user_captcha ]
-			: [ $configValidation->user_username, $configValidation->user_email ];
-
-		$rules = $validationComponent->getRules( $groups );
-
-		$data = [
-			$configValidation->user_username => self::$username,
-			$configValidation->user_email => self::$email
+		$validateUserField 			= [
+			$configValidation->user_username,
+			$configValidation->user_email
+		];
+		$validateUserFieldWithCaptcha = [
+			$configValidation->user_username,
+			$configValidation->user_email,
+			$configValidation->user_captcha
 		];
 
-		$message = baseInstance( Message::class );
+		$groups = getComponents( 'throttle' )->showCaptcha() 
+			? $validateUserFieldWithCaptcha
+			: $validateUserField;
+		$rules 	= $validationComponent->getRules( $groups );
+		$data 	= [
+			$configValidation->user_username 	=> self::$username,
+			$configValidation->user_email 		=> self::$email
+		];
+
+		$message = getBaseInstance( Message::class );
 
 		if ( ! $validationComponent->isValid( $data, $rules ) )
 		{
-			$message ->errorInformation( true, array_values( $validationComponent->getErrors() ) );
+			$message ->errorInformation( 
+				true, 
+				array_values( $validationComponent->getErrors() )
+			);
 			return false;
 		}
 
-		$userData = model( 'User/UserModel' )->fetchFirstUserData( $data );
+		$userData = model( 'User/UserModel' )->first( $data );
 		if ( [] === $userData )
 		{
 			$message->errorInformation();
 			return false;
 		}
 
-		$common = getComponents( 'common' );
-		$randomPw = BaseInstance( Password::class )->getHashPass( $common->random_string() );
+		$common 	= getComponents( 'common' );
+		$randomPw 	= getBaseInstance( Password::class )->getHashPass( $common->random_string() );
 
-		$editSet = [ getUserField( 'username' ) => $userData[ getUserField( 'username' ) ] ];
-		$editWhere = [ getUserField( 'password' ) => $randomPw ];
-		$error = 'Cannot update password';
+		$editSet 	= [ getUserField( 'username' ) 	=> $userData[ getUserField( 'username' ) ] ];
+		$editWhere 	= [ getUserField( 'password' ) 	=> $randomPw ];
+		$error 		= 'Cannot update user password';
 
-		if ( ! model( 'User/UserModel' ) ->edit( $editSet, $editWhere ) )
+		if ( ! model( 'User/UserModel' )->edit( $editSet, $editWhere ) )
 		{
 			setErrorMessage( $error );
 			return false;
 		}
 
-		if ( ! baseInstance( Notification::class ) ->mailSender( $randomPw ) )
+		if ( ! getBaseInstance( Notification::class )->mailSender( $randomPw ) )
 		{
 			setErrorMessage( $error );
+
 			$errorLog = sprintf( 'Cannot sent email: %s', $userData[ getUserField( 'username' ) ] );
 			$common->log_message( 'error' , $errorLog );
+
 			return false;
 		}
 

@@ -46,7 +46,7 @@ function model (
 
     if ( null !== $table )
     {
-        $model->table( $table, $connection );
+        $model->init( $table, $connection );
     }
 
     return $model;
@@ -72,7 +72,7 @@ function BaseModel ( ?string $tableName = null, bool $getShared = false , ?Query
 
     if ( null !== $tableName )
     {
-        $model->table( $tableName, $connection );
+        $model->init( $tableName, $connection );
     }
 
     return $model;

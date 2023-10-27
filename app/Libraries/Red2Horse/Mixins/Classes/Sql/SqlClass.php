@@ -65,12 +65,11 @@ class SqlClass implements SqlClassInterface
 
 	public function reInit ( ?callable $configPreFields = null ) : void
 	{
-		$configValidation = getConfig( 'validation' );
-		$common = getComponents( 'common' );
-
-		$database = [];
-		$tables = $this->database[ 'tables' ];
-		$userGroupTable = $tables[ 'user_group' ];
+		$configValidation 	= getConfig( 'validation' );
+		$common 			= getComponents( 'common' );
+		$database 			= [];
+		$tables 			= $this->database[ 'tables' ];
+		$userGroupTable 	= $tables[ 'user_group' ];
 
 		foreach ( $tables as $table )
 		{
@@ -80,23 +79,23 @@ class SqlClass implements SqlClassInterface
 			{
 				/** @todo configPreFields -> props: "throttle_" */
 				$configField = ( $table == $userGroupTable )
-					? 'userGroup_' . $common->camelCase( $field )
-					: 'user_' . $common->camelCase( $field );
+					? sprintf( 'userGroup_%s', 		$common->camelCase( $field ) )
+					: sprintf( 'user_%s', 			$common->camelCase( $field ) );
 
 				if ( is_array( $this->database[ $table ][ $field ] ) )
 				{
-					$fieldArray = $this->database[ $table ][ $field ];
-					$fieldArray[ 0 ] = $configValidation->$configField;
-					$database[ $table ][ $field ] = $fieldArray;
+					$fieldArray 					= $this->database[ $table ][ $field ];
+					$fieldArray[ 0 ] 				= $configValidation->$configField;
+					$database[ $table ][ $field ] 	= $fieldArray;
 				}
 				else
 				{
-					$database[ $table ][ $field ] = $configValidation->$configField;
+					$database[ $table ][ $field ] 	= $configValidation->$configField;
 				}
 			}
 		}
 
-		$this->database = $database;
+		$this->database 			= $database;
 		$this->database[ 'tables' ] = $tables;
 	}
 
@@ -109,10 +108,10 @@ class SqlClass implements SqlClassInterface
 	 * @throws ErrorArrayKeyNotFoundException
 	 * @return false|string
 	 */
-	public function getTable( string $key, bool $getKey = false, bool $throw = true, bool $defaultReturn = false )
+	public function getTable( string $key, bool $getKey = false, bool $throw = true, bool $default = false )
 	{
 		#dd( $this->database);
-		$table = $this->database[ 'tables' ];#dd($table);
+		$table = $this->database[ 'tables' ];
 
 		if ( ! array_key_exists( $key, $table ) || empty( $table[ $key ] ) )
 		{
@@ -120,7 +119,7 @@ class SqlClass implements SqlClassInterface
 			{
 				throw new ErrorArrayKeyNotFoundException( sprintf( 'Undefined table: %s', $key ) );
 			}
-			else if ( $defaultReturn )
+			else if ( $default )
 			{
 				return $key;
 			}
@@ -155,7 +154,8 @@ class SqlClass implements SqlClassInterface
 	{
 		if ( in_array( $table, $this->database[ 'tables' ] ) )
 		{
-			throw new ErrorParameterException( 'Parameter 1: "table" not in: "user, user_group"' );
+			$errorParameter = 'Parameter 1: "table" not in: "user, user_group"';
+			throw new ErrorParameterException( $errorParameter );
 		}
 
 		$this->database[ 'tables' ][ $table ] = $this->_filter( $name );
@@ -167,7 +167,6 @@ class SqlClass implements SqlClassInterface
 	public function getColumn( string $key )
 	{
 		$table = $this->getTable( $key );
-
 		return $this->database[ $table ];
 	}
 

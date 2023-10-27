@@ -30,17 +30,20 @@ class Message
 	/** @return array */
 	public function getResult () : array
 	{
-		$baseConfig = getConfig( 'BaseConfig' );
-		$configThrottle = getConfig( 'Throttle' );
-		$configValidation = getConfig( 'Validation' );
-		$throttleComponent = getComponents( 'throttle' );
+		$baseConfig 		= getConfig( 'BaseConfig' );
+		$configThrottle 	= getConfig( 'Throttle' );
+		$configValidation 	= getConfig( 'Validation' );
+		$throttleComponent 	= getComponents( 'throttle' );
 
-		$limited = $configThrottle->useThrottle ? $throttleComponent->limited() : false;
-		$attempts = $throttleComponent->getAttempts();
-		$captcha = $throttleComponent->showCaptcha();
+		$limited = $configThrottle->useThrottle
+							? $throttleComponent->limited()
+							: false;
 
-		$suspend = self::$hasBanned;
-		$active = ! self::$accountInactive;
+		$attempts 			= $throttleComponent->getAttempts();
+		$captcha 			= $throttleComponent->showCaptcha();
+
+		$suspend 			= self::$hasBanned;
+		$active 			= ! self::$accountInactive;
 
 		/** @var bool $success */
 		$success = self::$successfully;
@@ -48,18 +51,18 @@ class Message
 		$resultMessage = [
 			// 'auth_status' => [ 'reset' => $reset, 'login' => $login ],
 			'account_status' => [
-				'suspend' => $suspend,
-				'active' => ! $active
+				'suspend' 		=> $suspend,
+				'active' 		=> ! $active
 			],
 
-			'show' => [
-				'form' => ! $limited && ! $success,
-				'remember_me' => $baseConfig->useRememberMe,
-				'captcha' => false,
-				'attempts' => $attempts
+			'show' 			=> [
+				'form' 			=> ! $limited && ! $success,
+				'remember_me' 	=> $baseConfig->useRememberMe,
+				'captcha' 		=> false,
+				'attempts' 		=> $attempts
 			],
 
-			'validation' => [
+			'validation' 	=> [
 				$configValidation->user_username,
 				$configValidation->user_email,
 				$configValidation->user_password,
@@ -69,11 +72,8 @@ class Message
 
 		if ( $configThrottle->useThrottle )
 		{
-			$resultMessage[ 'throttle_status' ] = [
-				'limited' => $limited,
-			];
-
-			$resultMessage[ 'show' ][ 'captcha' ] = $captcha;
+			$resultMessage[ 'throttle_status' ] 	= [ 'limited' => $limited ];
+			$resultMessage[ 'show' ][ 'captcha' ] 	= $captcha;
 		}
 
 		return $resultMessage;
@@ -85,10 +85,10 @@ class Message
 	public function getMessage ( array $add = [], bool $asObject = true, bool $getConfig = false )
 	{
 		$message = [
-			'message' => [
-				'success' => self::$success,
-				'errors' => self::$errors,
-				'normal' => self::$info
+			'message' 		=> [
+				'success' 		=> self::$success,
+				'errors' 		=> self::$errors,
+				'normal' 		=> self::$info
 			],
 
 			'result' => $this->getResult()
@@ -101,21 +101,23 @@ class Message
 
 		if ( ! empty( $add ) )
 		{
-			$add = [ 'added' => $add ];
-			$message = array_merge( $message, $add );
+			$add 				= [ 'added' => $add ];
+			$message 			= array_merge( $message, $add );
 		}
 
-		return ( $asObject ) ? json_decode( json_encode( $message ) ) : $message;
+		return ( $asObject ) 	? json_decode( json_encode( $message ) )
+								: $message;
 	}
 
 	/** @return mixed array|object|void */
 	public function errorMultiLogin ( bool $throttle = true, array $add = [], $getReturn = true )
 	{
-		! $throttle ?: getComponents( 'throttle' )->throttle();
-		self::$incorrectLoggedIn = true;
+		! $throttle 				?: getComponents( 'throttle' )->throttle();
+		self::$incorrectLoggedIn 	= true;
 
-		$errors[] = getComponents( 'common' )->lang( 'Red2Horse.noteLoggedInAnotherPlatform' );
-		self::$errors = [ ...$errors, ...array_values( $add ) ];
+		$errors[] 					= getComponents( 'common' )
+										->lang( 'Red2Horse.noteLoggedInAnotherPlatform' );
+		self::$errors 				= [ ...$errors, ...array_values( $add ) ];
 
 		if ( $getReturn )
 		{
@@ -126,11 +128,12 @@ class Message
 	/** @return mixed array|object */
 	public function errorInformation ( bool $throttle = true, array $add = [] )
 	{
-		! $throttle ?: getComponents( 'throttle' )->throttle();
-		self::$incorrectLoggedIn = true;
+		! $throttle 				?: getComponents( 'throttle' )->throttle();
+		self::$incorrectLoggedIn 	= true;
 
-		$errors[] = getComponents( 'common' )->lang( 'Red2Horse.errorIncorrectInformation' );
-		self::$errors = [ ...$errors, ...array_values( $add ) ];
+		$errors[] 					= getComponents( 'common' )
+										->lang( 'Red2Horse.errorIncorrectInformation' );
+		self::$errors 				= [ ...$errors, ...array_values( $add ) ];
 
 		return $this->getMessage();
 	}
@@ -140,11 +143,11 @@ class Message
 	 */
 	public function errorAccountStatus ( string $status, bool $throttle = true, $getReturn = true )
 	{
-		! $throttle ?: getComponents( 'throttle' )->throttle();
-		self::$hasBanned = ( $status === 'banned' );
-		self::$accountInactive = ( $status === 'inactive' );
-		self::$errors[] = getComponents( 'common' )
-			->lang( 'Red2Horse.errorNotReadyYet', [ $status ] );
+		! $throttle 				?: getComponents( 'throttle' )->throttle();
+		self::$hasBanned 			= ( $status === 'banned' );
+		self::$accountInactive 		= ( $status === 'inactive' );
+		self::$errors[] 			= getComponents( 'common' )
+										->lang( 'Red2Horse.errorNotReadyYet', [ $status ] );
 
 		if ( $getReturn )
 		{

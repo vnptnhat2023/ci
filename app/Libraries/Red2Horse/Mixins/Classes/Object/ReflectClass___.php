@@ -29,7 +29,8 @@ class ReflectClass___ implements ReflectClass___Interface
         $pass = [];
 
         foreach( $reflection->getParameters() as $param )
-        { /* @var $param ReflectionParameter */
+        {
+            /* @var $param ReflectionParameter */
             $pass[] = $args[ $param->getName() ] ?? $param->getDefaultValue();
         }
 
@@ -41,7 +42,8 @@ class ReflectClass___ implements ReflectClass___Interface
      */
     public function getMethods () : array
     {
-        $methods = ( new \ReflectionClass( $this->ins ) )->getMethods( \ReflectionMethod::IS_PUBLIC );
+        $methods = ( new \ReflectionClass( $this->ins ) )
+            ->getMethods( \ReflectionMethod::IS_PUBLIC );
         $pass = [];
 
         foreach ( $methods as $method ) {

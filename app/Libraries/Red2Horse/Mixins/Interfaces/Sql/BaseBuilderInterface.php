@@ -12,7 +12,6 @@ interface BaseBuilderInterface
     public function select ( array $arrays, ?Closure $callable = null, int $len = 100 ) : BaseBuilder;
 
     /** @param array $data Non-associative array */
-
     public function distinct ( array $arrays, ?Closure $callable = null, int $len = 100 ) : BaseBuilder;
 
     public function get ();
@@ -20,11 +19,9 @@ interface BaseBuilderInterface
     /**
      * @return null|object
      */
-public function update ( int $len = 1/*, ?Closure $callable = null*/ );
+    public function update ( int $len = 1/*, ?Closure $callable = null*/ );
 
     /** 
-     * @param array $where Associative
-     * @param array $in Non-associative
      * @return null|object
      */
     public function delete ( int $len = 1/*, ?Closure $callable = null*/ );
@@ -63,16 +60,16 @@ public function update ( int $len = 1/*, ?Closure $callable = null*/ );
     /** @param array $data Associative */
     public function set ( array $data, ?Closure $callable = null, int $len = 100 ) : BaseBuilder;
 
+    /** @param array $data Associative */
+    public function like ( array $data, ?Closure $callable = null, int $limit = 100 ) : BaseBuilder;
     public function limit ( int $before = 0, int $after = 0/*, ?Closure $callable = null*/ ) : BaseBuilder;
 
-    public function is (/* string $is */);
-
-    public function not (/* string $not */);
-
-    /** @param array $data Non-associative */
+    /** @param array $data Associative */
     public function in ( array $data, ?Closure $callable = null, int $len = 100 ) : BaseBuilder;
 
-    public function null (/* string $as */);
+    /** @param array $data Non-associative */
+    public function null (  array $data, ?Closure $callable = null, int $len = 100, ?string $type = null  );
 
+    /** @param array $data Associative */
     public function orderBy ( array $data, ?Closure $callable = null, int $len = 100 ) : self;
 }

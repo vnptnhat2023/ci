@@ -14,10 +14,9 @@ final class RegistryClass extends RegistryClass___
 {
     use TraitRegistryClassMethod;
 
-    private bool $getShared;
-    private string $className;
-
-    public static self $instance;
+    private     bool            $getShared;
+    private     string          $className;
+    public      static self     $instance;
 
     public function __construct ( string $state = self::class )
     {
@@ -29,7 +28,10 @@ final class RegistryClass extends RegistryClass___
      */
     public static function selfInstance ( string $state = self::class ) : self
     {
-        self::$instance = isset( self::$instance ) ? self::$instance : new self( $state );
+        self::$instance = isset( self::$instance )
+            ? self::$instance
+            : new self( $state );
+
         return self::$instance;
     }
 

@@ -3,19 +3,19 @@
 declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Functions\Password;
 
-use function Red2Horse\Mixins\Functions\Instance\BaseInstance;
+use function Red2Horse\Mixins\Functions\Instance\getBaseInstance;
 use function Red2Horse\Mixins\Functions\Instance\getComponents;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
 function getHashPass ( string $str ) : string
 {
-    return BaseInstance( 'password' )->getHashPass( $str );
+    return getBaseInstance( 'password' )->getHashPass( $str );
 }
 
 function getVerifyPass ( string $password, string $hashed ) : bool
 {
-    return baseInstance( 'password' )->getVerifyPass( $password, $hashed );
+    return getBaseInstance( 'password' )->getVerifyPass( $password, $hashed );
 }
 
 function getRandomString ( string $str ) : string

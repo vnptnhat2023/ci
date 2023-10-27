@@ -4,7 +4,6 @@ declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Classes\Data;
 
 use Red2Horse\Mixins\Classes\Sql\SqlClass;
-// use Red2Horse\Mixins\Traits\Object\TraitBindTo;
 use Red2Horse\Mixins\Traits\Object\TraitSingleton;
 
 use function Red2Horse\Mixins\Functions\Instance\getInstance;
@@ -15,7 +14,6 @@ defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 class DataArrayEventsClass
 {
     use TraitSingleton;
-    // use TraitBindTo;
 
     public function __construct () { }
 
@@ -35,7 +33,6 @@ class DataArrayEventsClass
         $exploded = explode( '.', $combineString, 2 );
         $sqlClass = getInstance( SqlClass::class );
 
-        // '*' === $combineString || 
         if ( ! $sqlClass->getTable( $exploded[ 0 ], false, false ) )
         {
             return $combineString;
@@ -46,7 +43,15 @@ class DataArrayEventsClass
             return sprintf( '%s.%s', $exploded[ 0 ], $exploded[ 1 ] );
         }
 
-        if ( $hasField = $sqlClass->getField( $exploded[ 1 ], $exploded[ 0 ], false, true, false ) )
+        $hasField = $sqlClass->getField(
+            $exploded[ 1 ],
+            $exploded[ 0 ],
+            false,
+            true,
+            false
+        );
+
+        if ( $hasField )
         {
             return $hasField;
         }
@@ -55,8 +60,8 @@ class DataArrayEventsClass
     }
 
     /** BaseBuilder::[ From,Join ] */
-    private ?string $for = null;
-    private array $forArray = [ 'from', 'join' ];
+    private     ?string     $for      = null;
+    private     array       $forArray = [ 'from', 'join' ];
 
     public function setFor ( ?string $value = null )
     {
@@ -83,6 +88,7 @@ class DataArrayEventsClass
         if ( in_array( $this->for, [ 'from', 'join' ] ) )
         {
             $this->setFor( null );
+
             if ( is_string( $arrOrStr ) )
             {
                 return $this->_fromAndJoinCallbackResponse( $arrOrStr, $combineChar );

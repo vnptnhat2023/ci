@@ -35,66 +35,59 @@ class SqlCompiler
 
         if ( $len > $this->baseBuilder->updateLimitRows )
         {
-            throw new ErrorParameterException( sprintf( 'Argument "$len" %s > %s', $len, $this->baseBuilder->updateLimitRows ) );
+            $errorParaMeter = sprintf( 
+                'Argument "$len" %s > %s',
+                $len, 
+                $this->baseBuilder->updateLimitRows 
+            );
+            throw new ErrorParameterException( $errorParaMeter );
         }
 
-        $whereSql = $this->_compileWhere();
-
-        /** SET sql string */
-        $setSql    = implode( ', ', $setData );
-
-        $isIn       = ! empty( $this->baseBuilder->in );
+        $whereSql   = $this->_compileWhere();
+        $setSql     = implode( ', ', $setData );
         $isJoin     = ! empty( $this->baseBuilder->join );
-        $isJoinIn   = $isIn && $isJoin;
 
         /** Template config */
         $sqlConfig  = getConfig( 'sql' );
 
-        if ( $isJoinIn )
-        {
-            $joinInTemplate = $sqlConfig->updateJoinInTemplate;
-            $joinSql = implode( ', ', $this->baseBuilder->join );
-            // add more ON
-            if ( '' !== ( $onSql = $this->_compileOn( false ) ) )
-            {
-                $joinSql .= sprintf( ' ON %s', trim( $onSql ) );
-            }
-            $inSql = implode( ', ', $this->baseBuilder->in );
-
-            $sql = sprintf( $joinInTemplate, $this->baseBuilder->table, $joinSql, $setSql, $whereSql, $inSql );
-        }
-        else if ( $isJoin )
+        if ( $isJoin )
         {
             $joinTemplate = $sqlConfig->updateJoinTemplate;
-            $joinSql = implode( ', ', $this->baseBuilder->join );
-            // add more ON
+            $joinSql      = implode( ', ', $this->baseBuilder->join );
+
             if ( '' !== ( $onSql = $this->_compileOn( false ) ) )
             {
-                $joinSql .= sprintf( ' ON %s', trim( $onSql ) );
+                $joinSql .= sprintf( ' ON %s', $onSql );
             }
 
-            $sql = sprintf( $joinTemplate, $this->baseBuilder->table, $joinSql, $setSql, $whereSql );
-        }
-        else if ( $isIn )
-        {
-            $inTemplate = $sqlConfig->updateInTemplate;
-            $inSql = implode( ', ', $this->baseBuilder->in );
-
-            $sql = sprintf( $inTemplate, $this->baseBuilder->table, $setSql, $whereSql, $inSql );
+            $sql = sprintf(
+                $joinTemplate,
+                $this->baseBuilder->table,
+                $joinSql,
+                $setSql,
+                $whereSql
+            );
         }
         else
         {
             $updateTemplate = $sqlConfig->updateTemplate;
-
-            $sql = sprintf( $updateTemplate, $this->baseBuilder->table, $setSql, $whereSql );
+            $sql            = sprintf(
+                $updateTemplate,
+                $this->baseBuilder->table,
+                $setSql,
+                $whereSql
+            );
         }
 
-        $sql .= " LIMIT $len";
+        if ( '' === $this->_compileLimit() )
+        {
+            $sql .= " LIMIT $len";
+        }
 
         return $sql;
     }
     
-    public function delete ( $len = 1/*, ?Closure $callable = null*/ ) : string
+    public function delete ( int $len = 1/*, ?Closure $callable = null*/ ) : string
     {
         if ( $len > $this->baseBuilder->deleteLimitRows )
         {
@@ -103,67 +96,47 @@ class SqlCompiler
         }
 
         $whereSql = $this->_compileWhere();
-
-        $isIn       = ! empty( $this->baseBuilder->in );
         $isJoin     = ! empty( $this->baseBuilder->join );
-        $isJoinIn   = $isIn && $isJoin;
 
         /** Template config */
         $sqlConfig  = getConfig( 'sql' );
 
-        if ( $isJoinIn )
+        if ( $isJoin )
         {
-            $joinInTemplate = $sqlConfig->deleteJoinInTemplate;
-            $joinSql = implode( ', ', $this->baseBuilder->join );
+            $deleteJoinTemplate = $sqlConfig->deleteJoinTemplate;
+            $joinSql            = implode( ', ', $this->baseBuilder->join );
+
             if ( '' !== ( $onSql = $this->_compileOn( false ) ) )
             {
                 $joinSql .= sprintf( ' ON %s', $onSql );
             }
 
-            $inSql = implode( ', ', $this->baseBuilder->in );
-
-            $sql = sprintf( $joinInTemplate, $joinSql, $this->baseBuilder->table, $whereSql, $inSql );
-        }
-        else if ( $isJoin )
-        {
-            $joinTemplate = $sqlConfig->deleteJoinTemplate;
-            $joinSql = implode( ', ', $this->baseBuilder->join );
-            if ( '' !== ( $onSql = $this->_compileOn( false ) ) )
-            {
-                $joinSql .= sprintf( ' ON %s', $onSql );
-            }
-
-            $sql = sprintf( $joinTemplate, $joinSql, $this->baseBuilder->table, $whereSql );
-        }
-        else if ( $isIn )
-        {
-            $inTemplate = $sqlConfig->deleteInTemplate;
-            $inSql = implode( ', ', $this->baseBuilder->in );
-
-            $sql = sprintf( $inTemplate, $this->baseBuilder->table, $whereSql, $inSql );
+            $sql = sprintf( $deleteJoinTemplate, $joinSql, $this->baseBuilder->table, $whereSql );
         }
         else
         {
             $deleteTemplate = $sqlConfig->deleteTemplate;
-
-            $sql = sprintf( $deleteTemplate, $this->baseBuilder->table, $whereSql );
+            $sql            = sprintf( $deleteTemplate, $this->baseBuilder->table, $whereSql );
         }
 
-        $sql .= " LIMIT $len";
+        if ( '' === $this->_compileLimit() )
+        {
+            $sql .= " LIMIT $len";
+        }
 
         return $sql;
     }
     
     public function get () : string
     {
-        $select = $this->_compileSelect();
-        $from   = $this->_compileFrom();
-        $join   = $this->_compileJoin();
-        $on     = $this->_compileOn( false );
-        $where  = $this->_compileWhere( false );
-        $in     = $this->_compileIn();
-        $order  = $this->_compileOrderBy();
-        $limit  = $this->_compileLimit();
+        $select         =       $this->_compileSelect();
+        // $distinct       =       $this->_compileDistinct();
+        $from           =       $this->_compileFrom();
+        $join           =       $this->_compileJoin();
+        $on             =       $this->_compileOn( false );
+        $where          =       $this->_compileWhere();
+        $orderBy        =       $this->_compileOrderBy();
+        $limit          =       $this->_compileLimit();
 
         $sql = sprintf(
             'SELECT %s FROM %s',
@@ -171,37 +144,26 @@ class SqlCompiler
             '' === $from ? dataKey( [ $this->baseBuilder->table ] ) : $from
         );
 
-        '' === $join    || $sql .= sprintf( ' JOIN %s', $join );
-        '' === $on      || $sql .= sprintf( ' ON %s', $on );
-        '' === $where   || $sql .= sprintf( ' WHERE %s', $where );
-        '' === $in      || $sql .= sprintf( ' IN (%s)', $in );
-        '' === $order   || $sql .= sprintf( ' ORDER BY %s', $order );
-        '' === $limit   || $sql .= sprintf( ' LIMIT %s', $limit );
+        // '' === $distinct    || $sql .= sprintf( ' SELECT distinct %s', $distinct );
+        '' === $join        ||      $sql .= sprintf( ' JOIN %s', $join );
+        '' === $on          ||      $sql .= sprintf( ' ON %s', $on );
+        '' === $where       ||      $sql .= sprintf( ' WHERE %s', $where );
+        '' === $orderBy     ||      $sql .= sprintf( ' ORDER BY %s', $orderBy );
+        '' === $limit       ||      $sql .= sprintf( ' LIMIT %s', $limit );
 
         return $sql;
     }
 
     public function insert ( array $data ) : string
     {
-        $columns = implode( ',', array_keys( $data ) );
-        $values = implode( ',', array_values( $data ) );
+        $columns        = implode( ',', array_keys( $data ) );
+        $values         = implode( ',', array_values( $data ) );
         $insertTemplate = getConfig( 'sql' )->insertTemplate;
+        $sql            = sprintf( $insertTemplate, $this->baseBuilder->table, $columns, $values );
 
         if ( ! empty( $this->baseBuilder->limit ) )
         {
-            $limitSql = implode( $this->baseBuilder->limit );
-
-            $sql = sprintf(
-                $insertTemplate . ' LIMIT %s', 
-                $this->baseBuilder->table, 
-                $columns, 
-                $values, 
-                $limitSql
-            );
-        }
-        else
-        {
-            $sql = sprintf( $insertTemplate, $this->baseBuilder->table, $columns, $values ); 
+            $sql = sprintf( '%s LIMIT %s', $sql, $this->_compileLimit() );
         }
 
         return $sql;
@@ -210,11 +172,11 @@ class SqlCompiler
 
     public function _compile ( string $propName, $throw = true ) : string
     {
-        $orProp = 'or' . ucfirst( $propName );
-        $andProp = 'and' . ucfirst( $propName );
-        $data = $this->baseBuilder->{ $propName };
-        $orData = $this->baseBuilder->{ $orProp };
-        $andData = $this->baseBuilder->{ $andProp };
+        $orProp         = 'or' . ucfirst( $propName );
+        $andProp        = 'and' . ucfirst( $propName );
+        $data           = $this->baseBuilder->{ $propName };
+        $orData         = $this->baseBuilder->{ $orProp };
+        $andData        = $this->baseBuilder->{ $andProp };
 
         $isEmptyData = empty( $data ) && empty( $orData ) && empty( $andData );
 
@@ -235,27 +197,89 @@ class SqlCompiler
 
         if ( ! $emptyOrData )
         {
-            $prefix = $emptyData && $emptyAndData ? '' : ' OR';
-            $sql .= sprintf( '%s %s', $prefix, implode( $orData ) );
+            $prefix     = $emptyData && $emptyAndData ? '' : ' OR ';
+            $sql        .= sprintf( '%s%s', $prefix, implode( $orData ) );
         }
 
         if ( ! $emptyAndData )
         {
-            $prefix = $emptyData && $emptyOrData ? '' : ' AND';
-            $sql .= sprintf( '%s %s', $prefix, implode( $andData ) );
+            $prefix     = $emptyData && $emptyOrData ? '' : ' AND ';
+            $sql        .= sprintf( '%s%s', $prefix, implode( $andData ) );
         }
 
         return $sql;
     }
     
-    public function _compileWhere ( $throw = true ) : string
+    public function _compileWhere ( $throw = false ) : string
     {
-        return $this->_compile( 'where', $throw );
+        $text       = '';
+        $where      = $this->_compile( 'where', $throw );
+        $like       = $this->_compileLike();
+        $null       = $this->_compileNullGeneral();
+        $in         = $this->_compileInGeneral();
+
+        '' === $where   || $text .= $where;
+        '' === $like    || $text .= sprintf( '%s%s', '' !== $text ? ' OR '  : '', $like );
+        '' === $null    || $text .= sprintf( '%s%s', '' !== $text ? ' OR '   : '', $null );
+        '' === $in      || $text .= sprintf( '%s%s', '' !== $text ? ' OR '   : '', $in );
+
+        return $text;
     }
 
     public function _compileOn ( $throw = true ) : string
     {
-        return $this->_compile( 'on', $throw );
+        $text = $this->_compile( 'on', $throw );
+        return $text;
+    }
+
+    public function _compileLike ( $throw = false ) : string
+    {
+        return $this->_compile( 'like', $throw );
+    }
+
+    public function _compileInGeneral ( string $seperatorChar = ' OR') : string
+    {
+        $in             = $this->_compileIn();
+        $notIn          = $this->_compileNotIn();
+
+        $haveOr         = '' !== $in ? $seperatorChar : '';
+        $seperator      = sprintf( '%s%s', $haveOr, $notIn );
+        $haveNotIn      = '' !== $notIn ? $seperator : '';
+
+        return sprintf( '%s%s', '' ?: $in, $haveNotIn );
+    }
+
+    public function _compileNullGeneral ( string $seperatorChar = ' OR') : string
+    {
+        $null           = $this->_compileNull();
+        $notNull        = $this->_compileNotNull();
+
+        $haveOr         = '' !== $null ? $seperatorChar : '';
+        $seperator      = sprintf( '%s%s', $haveOr, $notNull );
+        $haveNotNull    = '' !== $notNull ? $seperator : '';
+
+        return sprintf( '%s%s', '' ?: $null, $haveNotNull );
+    }
+    
+
+    public function _compileIn ( $throw = false ) : string
+    {
+        return $this->_compile( 'in', $throw );
+    }
+
+    public function _compileNotIn ( $throw = false ) : string
+    {
+        return $this->_compile( 'notIn', $throw );
+    }
+
+    public function _compileNull ( $throw = false ) : string
+    {
+        return $this->_compile( 'null', $throw );
+    }
+
+    public function _compileNotNull ( $throw = false ) : string
+    {
+        return $this->_compile( 'notNull', $throw );
     }
 
     public function _compileOtherProps ( string $propName, string $implodeChar = ', ' ) : string
@@ -275,27 +299,18 @@ class SqlCompiler
 
     public function _compileJoin ( string $implodeChar = ', ') : string
     {
-        return $this->_compileOtherProps( 'join', $implodeChar );
+        $text = $this->_compileOtherProps( 'join', $implodeChar );
+        return $text;
     }
 
     public function _compileLimit ( string $implodeChar = ', ') : string
     {
-        return $this->_compileOtherProps( 'limit', $implodeChar );
-    }
-
-    public function _compileIn ( string $implodeChar = ', ') : string
-    {
-        return $this->_compileOtherProps( 'in', $implodeChar );
+        $text = $this->_compileOtherProps( 'limit', $implodeChar );
+        return $text;
     }
 
     public function _compileSelect ( string $implodeChar = ', ') : string
     {
-        // $select = $this->_compileOtherProps( 'select', $implodeChar );
-
-        // if ( '' !== $distinct = $this->_compileDistinct() )
-        // {
-
-        // } 
         return $this->_compileOtherProps( 'select', $implodeChar );
     }
 
@@ -306,6 +321,7 @@ class SqlCompiler
 
     public function _compileOrderBy ( string $implodeChar = ', ') : string
     {
-        return $this->_compileOtherProps( 'orderBy', $implodeChar );
+        $text = $this->_compileOtherProps( 'orderBy', $implodeChar );
+        return $text;
     }
 }

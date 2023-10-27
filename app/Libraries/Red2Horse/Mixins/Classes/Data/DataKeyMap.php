@@ -6,6 +6,8 @@ namespace Red2Horse\Mixins\Classes\Data;
 use Red2Horse\Exception\ErrorPropertyException;
 use Red2Horse\Exception\ErrorParameterException;
 
+use Red2Horse\Mixins\Classes\Data\DataAssocKeyMap;
+
 use function Red2Horse\Mixins\Functions\Instance\getInstance;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
@@ -15,28 +17,22 @@ defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
  */
 class DataKeyMap
 {
-    public string $tbl;
-    // public int $limit = 10;
-    public array $map;
-
-    private bool $mapped = false;
-
-    public string $operator = '.';
-    public string $keyDelimiter = '`';
-    public string $valueDelimiter = '\'';
-
-    public string $toStringSepChar = ', ';
-    public string $toStringSepEndChar = '';
-
-    public bool $useTranslate = true;
-    
-    public array $methods = [
+    public      string       $format                    = '%1$s.%2$s';
+    public      string       $tbl;
+    // public   int          $limit                     = 10;
+    public      array        $map;
+    private     bool         $mapped                    = false;
+    public      string       $operator                  = '.';
+    public      string       $keyDelimiter              = '`';
+    // public   string       $valueDelimiter            = '\'';
+    public      string       $toStringSepChar           = ', ';
+    public      string       $toStringSepEndChar        = '';
+    public      bool         $useTranslate              = true;
+    public      array        $methods                   = [
         'before_key_map_callback' => \Red2Horse\Mixins\Classes\Data\DataArrayEventsClass::class
     ];
-
     // public bool $isSelect = true;
-
-    private DataAssocKeyMap $dataAssocKeyMap;
+    private                  DataAssocKeyMap            $dataAssocKeyMap;
 
     /**
      * @throws ErrorPropertyException
@@ -105,38 +101,53 @@ class DataKeyMap
             throw new ErrorPropertyException( 'Property $map cannot empty' );
         }
 
-        //  trigger
         $this->tbl = $tbl;
         $this->map = $map;
-        // $this->runNoExplode( function( array $NEP ) {
-        //     return array_map( fn( $value ) => sprintf( '%s.%s', $this->tbl, $value ) ,$NEP );
-        // } );
 
         $i = 1;
 
         $mapFunc = function ( $value ) use ( $callable, &$i )
         {
             $this->_trigger( 'before_key_map_invoke_callback', $value );
+
             if ( is_array( $value ) )
             {
-                if ( 'AS' === $value[ 1 ] ) { throw new ErrorParameterException; }
-                // $this->_triggerKeyMap( $value );
-                $res = sprintf( '%s AS %s', $this->matchString( $value[ 0 ] ), $this->matchString( $value[ 2 ] ) );
+                if ( 'AS' === $value[ 1 ] ) 
+                { 
+                    throw new ErrorParameterException; 
+                }
+
+                $res = sprintf(
+                    '%s AS %s', 
+                    $this->matchString( $value[ 0 ] ), 
+                    $this->matchString( $value[ 2 ] ) 
+                );
             }
             else if ( is_callable( $callable ) )
-            {
-                // need esc
+            { // need esc
                 $res = $callable( $this, $this->tbl, $value );
             }
             else
             {
                 if ( $value === '*' )
                 {
-                    $res = sprintf( '%s.%s', $this->matchString( $this->tbl ), '*' );
+                    $res = sprintf( 
+                        $this->format,
+                        $this->matchString( $this->tbl ), 
+                        '*' 
+                    );
                 }
                 else
                 {
-                    $res = sprintf( '%s.%s', $this->matchString( $this->tbl ), $this->matchString( $value ) );
+                    $value              = $this->matchString( $value ) ;
+
+                    $oldKeyDelimiter    = $this->keyDelimiter;
+                    $this->keyDelimiter = '';
+
+                    $tblString          = $this->matchString( $this->tbl );
+
+                    $this->keyDelimiter = $oldKeyDelimiter;
+                    $res = sprintf( $this->format, $tblString, $value );
                 }
             }
             $i++;
@@ -160,12 +171,17 @@ class DataKeyMap
         return implode( $this->toStringSepChar, $this->map );
     }
 
-    private function matchString ( string $str ) : string
+    private function matchString ( string $str, ?\Closure $callable = null ) : string
     {
-        $arrayAssocKeyMap = $this->initDataAssocKeyMap();
-        $arrayAssocKeyMap->operator = $this->operator;
-        $arrayAssocKeyMap->toStringSepChar = $this->toStringSepChar;
-        $arrayAssocKeyMap->toStringSepEndChar = $this->toStringSepEndChar;
+        $arrayAssocKeyMap                       = $this->initDataAssocKeyMap();
+        $arrayAssocKeyMap->operator             = $this->operator;
+        $arrayAssocKeyMap->toStringSepChar      = $this->toStringSepChar;
+        $arrayAssocKeyMap->toStringSepEndChar   = $this->toStringSepEndChar;
+        
+        if ( null !== $callable )
+        {
+            $arrayAssocKeyMap = $callable( $arrayAssocKeyMap );
+        }
 
         $str = $arrayAssocKeyMap->stringCombine(
             $this->keyDelimiter,
@@ -176,8 +192,16 @@ class DataKeyMap
         return $str;
     }
 
-    private function initDataAssocKeyMap ()
+    public function initDataAssocKeyMap ( ?DataAssocKeyMap $assocKeyMap = null ) : DataAssocKeyMap
     {
+        if (  null !== $assocKeyMap )
+        {
+            $assocKeyMap->useExplodeCombine     = false;
+            $this->dataAssocKeyMap              = $assocKeyMap;
+
+            return $assocKeyMap;
+        }
+
         if ( ! isset( $this->dataAssocKeyMap))
         {
             $this->dataAssocKeyMap = new DataAssocKeyMap;
@@ -185,19 +209,6 @@ class DataKeyMap
 
         return $this->dataAssocKeyMap;
     }
-
-    /*
-    private function runNoExplode ( ?\Closure $callable = null ) : void
-    {
-        if ( ! empty( $this->setNoExplode ) )
-        {
-            $data = is_callable( $callable ) ? $callable( $this->setNoExplode ) : $this->setNoExplode;
-            foreach( $data as $key => $value )
-            {
-                $this->initDataAssocKeyMap()->setNoExplode( $key, $value );
-            }
-        }
-    }*/
 
     private function _keyMapIsArray ( array $value, int $count ) : string
     {
@@ -209,7 +220,6 @@ class DataKeyMap
         else if ( $count === 2 )
         {
             $key = $value[ 0 ];
-            
             $res = sprintf(
                 '%s %s',
                 $this->matchString( ( string ) $key ),
@@ -222,15 +232,17 @@ class DataKeyMap
 
             if ( 'as' !== strtolower( $value[ 1 ] ) && 'distinct' !== strtolower( $value[ 1 ] ) )
             {
-                $value = $this->matchString( ( string )  $value[ 1 ] );
+                $value = $this->matchString( ( string ) $value[ 1 ] );
             }
             else if ( 'as' === strtolower( $value[ 1 ] ) )
             {
-                $value = sprintf( 'AS %s',  $this->matchString( ( string ) $value[ 2 ] ) );
+                $matchString = $this->matchString( ( string ) $value[ 2 ] );
+                $value = sprintf( 'AS %s', $matchString );
             }
             else if ( 'distinct' === strtolower( $value[ 1 ] ) )
             {
-                $value = sprintf( 'DISTINCT %s',  $this->matchString( ( string ) $value[ 2 ] ) );
+                $matchString = $this->matchString( ( string ) $value[ 2 ] );
+                $value = sprintf( 'DISTINCT %s', $matchString );
             }
 
             $res = sprintf( '%s %s', $this->matchString( ( string ) $key ), $value );

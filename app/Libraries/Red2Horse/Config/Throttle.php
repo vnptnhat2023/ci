@@ -30,13 +30,12 @@ class Throttle
         'cache'     => \Red2Horse\Mixins\Classes\Base\Throttle\ThrottleCache::class,
         'database'  => \Red2Horse\Mixins\Classes\Base\Throttle\ThrottleDatabase::class
     ];
-	public string $currentAdapter = 'cache';
-
-	private int $attempt = 0;
-	private int $type = 1;
-	private int $limitType = 1;
-	private int $limit = 5;
-	private int $timeout = 1800;
+	public 			string 		$currentAdapter  = 'cache';
+	private 		int 		$attempt		 = 0;
+	private 		int 		$type		 	 = 1;
+	private 		int 		$limitType		 = 1;
+	private 		int 		$limit		 	 = 5;
+	private 		int 		$timeout		 = 1800;
 
 	public string $cacheName = '';
 	/** END NEW */

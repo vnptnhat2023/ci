@@ -13,24 +13,22 @@ class Session
 {
 	use TraitSingleton;
 
-    private const SESSION_NAME = 'r2h';
-
-	public string $session = self::SESSION_NAME;
-	public string $sessionSavePath = '';
-	public string $sessionCookieName = 'r2h';
-	public int $sessionExpiration = 0;
-	public int $sessionTimeToUpdate = 0;
-	public array $sessionKey;
+    private 	const 		SESSION_NAME 			= 'r2h';
+	public 		string 		$session 				= self::SESSION_NAME;
+	public 		string 		$sessionSavePath 		= '';
+	public 		string 		$sessionCookieName 		= 'r2h';
+	public 		int 		$sessionExpiration 		= 0;
+	public 		int 		$sessionTimeToUpdate 	= 0;
+	public 		array 		$sessionKey;
 
 	private function __construct ()
 	{
 		$configFacade = getComponents( 'config' );
 		
-		$this->sessionSavePath = $configFacade->sessionSavePath();
-		$this->sessionCookieName = $configFacade->sessionCookieName();
-		$this->sessionExpiration = $configFacade->sessionExpiration();
-		$this->sessionTimeToUpdate = $configFacade->sessionTimeToUpdate();
-
-		$this->sessionKey = $configFacade->getSessionKey();
+		$this->sessionSavePath 		= $configFacade->sessionSavePath();
+		$this->sessionCookieName 	= $configFacade->sessionCookieName();
+		$this->sessionExpiration 	= $configFacade->sessionExpiration();
+		$this->sessionTimeToUpdate 	= $configFacade->sessionTimeToUpdate();
+		$this->sessionKey 			= $configFacade->getSessionKey();
 	}
 }

@@ -11,11 +11,10 @@ class Cache
 {
 	use TraitSingleton;
 
-	public string $storePath = 'Red2HorseAuth';
-	public bool $enabled = true;
-
-	public string $userGroupId = 'get_user_with_group_user_id';
-	public int $cacheTTL = 2592000;
+	public 		string 		$storePath 			= 'Red2HorseAuth';
+	public 		bool 		$enabled 			= true;
+	public 		string 		$userGroupId 		= 'get_user_with_group_user_id';
+	public 		int 		$cacheTTL		 	= 2592000;
 
 	private function __construct () {}
 

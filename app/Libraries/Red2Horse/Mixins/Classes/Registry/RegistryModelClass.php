@@ -4,12 +4,8 @@ declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Classes\Registry;
 
 use Red2Horse\Mixins\Interfaces\Registry\RegistryClass___Interface;
-
-use Red2Horse\Mixins\Traits\Registry\
-{
-    TraitRegistryClassMethod,
-    TraitRegistry
-};
+use Red2Horse\Mixins\Traits\Registry\TraitRegistryClassMethod;
+use Red2Horse\Mixins\Traits\Registry\TraitRegistry;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
@@ -31,7 +27,10 @@ final class RegistryModelClass implements RegistryClass___Interface
 
     public static function selfInstance (  string $state = self::class  ) : self
     {
-        self::$instance = isset( self::$instance ) ? self::$instance : new self( $state );
+        self::$instance = isset( self::$instance )
+            ? self::$instance
+            : new self( $state );
+
         return self::$instance;
     }
 }

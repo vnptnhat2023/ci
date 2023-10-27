@@ -5,22 +5,22 @@ namespace Red2Horse\Mixins\Functions\Message;
 
 use Red2Horse\Mixins\Classes\Base\Message;
 
-use function Red2Horse\Mixins\Functions\Instance\BaseInstance;
+use function Red2Horse\Mixins\Functions\Instance\getBaseInstance;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
 /** @todo set: log,throttle */
 function getMessageInstance () : Message
 {
-    return BaseInstance( Message::class );
+    return getBaseInstance( Message::class );
 }
 
 /** @param string|array $msgData */
 function setErrorMessage ( $msgData ) : void
 {
-    $msgData = ( array ) $msgData;
-    $msg = getMessageInstance();
-    $msg::$errors = array_merge( $msg::$errors, $msgData );
+    $msgData        = ( array ) $msgData;
+    $msg            = getMessageInstance();
+    $msg::$errors   = array_merge( $msg::$errors, $msgData );
 }
 
 /** @param string|array $msgData */
@@ -40,7 +40,7 @@ function setSuccessMessage ( $msgData = [], bool $withSuccessfully = true ) : vo
 function setInfoMessage ( $msgData ) : void
 {
     $msgData = ( array ) $msgData;
-    $msg = getMessageInstance();
+    $msg        = getMessageInstance();
     $msg::$info = array_merge( $msg::$info, $msgData );
 }
 

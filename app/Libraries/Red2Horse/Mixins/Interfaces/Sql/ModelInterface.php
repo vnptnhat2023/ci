@@ -8,15 +8,14 @@ use Red2Horse\Mixins\Classes\Sql\Model;
 
 interface ModelInterface
 {
-    public static function setTable ( string $table, ?QueryFacadeInterface $connection = null ) : Model;
+    public static function model ( string $table, ?QueryFacadeInterface $connection = null ) : Model;
     
-    public function table ( string $table, ?QueryFacadeInterface $connection = null ) : Model;
+    public function init ( ?string $table, ?QueryFacadeInterface $connection = null ) : Model;
 
-    public function fetchFirst ( array $where = [], array $orderBy = [] );
+    /** @param string[] $allowedFields */
+    public function toggleAllowedFields ( array $allowedFields ) : Model;
 
-    public function edit ( array $set, array $where, int $len = 1, ?\Closure $callable = null );
+    public function setConnection ( ?QueryFacadeInterface $connection = null ) : Model;
 
-    public function remove ( array $where = [], array $in = [], int $len = 1, ?\Closure $callable = null );
-
-    public function add ( array $data, ?\Closure $callable = null, int $len = 100 );
+    public function setModelProperty ( ?\stdClass $childProperties = null ) : Model;
 }

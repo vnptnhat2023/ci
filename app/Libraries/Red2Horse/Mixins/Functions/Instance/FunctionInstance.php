@@ -3,10 +3,6 @@
 declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Functions\Instance;
 
-use Red2Horse\Facade\Query\QueryFacadeInterface;
-use Red2Horse\Mixins\Classes\Registry\RegistryClass;
-use Red2Horse\Mixins\Classes\Sql\Model;
-
 use function Red2Horse\Mixins\Functions\NS\baseNamespace;
 use function Red2Horse\Mixins\Functions\NS\exceptionNamespace;
 use function Red2Horse\Mixins\Functions\NS\registryNamespace;
@@ -19,9 +15,9 @@ function classInit ( string $name, string $state, bool $getShared ) : object
     return $state::selfInstance() ->init( $name, $getShared );
 }
 
-/**
- * @return object|\Red2Horse\Mixins\Traits\Object\TraitSingleton
- */
+// /**
+//  * @return object|\Red2Horse\Mixins\Traits\Object\TraitSingleton
+//  */
 function getInstance ( string $classNamespace, string $state = 'RegistryClass', bool $getShared = true, $params = null ) : object
 {
     return classInit( $classNamespace, $state, $getShared ) ->getInstance( $params );
@@ -39,7 +35,7 @@ function getComponents ( string $name, bool $getShared = true, bool $getAdapter 
 /**
  * @return object|\Red2Horse\Mixins\Traits\Object\TraitSingleton
  */
-function BaseInstance ( string $name, bool $getShared = true ) : object
+function getBaseInstance ( string $name, bool $getShared = true ) : object
 {
     return classInit( baseNamespace( $name ), 'RegistryClass', $getShared ) ->getInstance();
 }

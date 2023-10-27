@@ -11,10 +11,9 @@ class BaseConfig
 {
 	use TraitSingleton;
 
-	public bool $useRememberMe = false;
-	public bool $useMultiLogin = false;
-
-	public string $dateDefaultTimezone = '';
+	public 		bool 		$useRememberMe 			= false;
+	public 		bool 		$useMultiLogin 			= false;
+	public 		string 		$dateDefaultTimezone 	= '';
 
 	private function __construct ()
 	{

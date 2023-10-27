@@ -6,7 +6,7 @@ namespace Red2Horse\Mixins\Traits\Object;
 use Red2Horse\Exception\ErrorMethodException;
 
 use function Red2Horse\Mixins\Functions\Config\getConfig;
-use function Red2Horse\Mixins\Functions\Instance\BaseInstance;
+use function Red2Horse\Mixins\Functions\Instance\getBaseInstance;
 use function Red2Horse\Mixins\Functions\Instance\getClass;
 use function Red2Horse\Mixins\Functions\Instance\getComponents;
 use function Red2Horse\Mixins\Functions\Instance\getInstance;
@@ -42,7 +42,7 @@ trait TraitCall
         $this->traitCallMethods = getInstanceMethods( $className );
         $this->traitCallback[ 'callback' ] = function( string $name, $args ) : bool
         {
-            return BaseInstance( 'event' )->trigger( $name, $args );
+            return getBaseInstance( 'event' )->trigger( $name, $args );
         };
     }
 

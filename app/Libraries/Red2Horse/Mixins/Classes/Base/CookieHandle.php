@@ -7,13 +7,11 @@ use Red2Horse\Exception\ErrorValidationException;
 use Red2Horse\Mixins\Traits\Object\TraitSingleton;
 
 use function Red2Horse\Mixins\Functions\Config\getConfig;
-use function Red2Horse\Mixins\Functions\Instance\BaseInstance;
+use function Red2Horse\Mixins\Functions\Instance\getBaseInstance;
 use function Red2Horse\Mixins\Functions\Instance\getComponents;
 use function Red2Horse\Mixins\Functions\Model\model;
-use function Red2Horse\Mixins\Functions\Sql\getTable;
 use function Red2Horse\Mixins\Functions\Sql\getUserField;
 use function Red2Horse\Mixins\Functions\Sql\getUserGroupField;
-use function Red2Horse\Mixins\Functions\Sql\selectExports;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
@@ -21,9 +19,9 @@ class CookieHandle
 {
 	use TraitSingleton;
 
-	private string $hash = 'sha256';
+	private 	string 		$hash 		= 'sha256';
 
-	private array $userStatus = [ 'inactive', 'banned' ];
+	private 	array 		$userStatus = [ 'inactive', 'banned' ];
 
 	private function __construct () {}
 
@@ -47,7 +45,7 @@ class CookieHandle
 
 		if ( getComponents( 'cache' )->isSupported() )
 		{
-			BaseInstance( 'SessionHandle' )->roleHandle( $user );
+			getBaseInstance( 'SessionHandle' )->roleHandle( $user );
 		}
 		else
 		{
@@ -62,7 +60,8 @@ class CookieHandle
 	/** CookieHandler private function */
 	private function _cleanOldCookie ()
 	{
-		getComponents( 'cookie' )->delete_cookie( getConfig( 'cookie' )->cookie );
+		$configCookieName = getConfig( 'cookie' )->cookie;
+		getComponents( 'cookie' )->delete_cookie( $configCookieName );
 		return false;
 	}
 
@@ -74,9 +73,9 @@ class CookieHandle
 			return false;
 		}
 
-		$configCookie = getConfig( 'cookie' );
-		$cookie = getComponents( 'cookie' );
-		$userCookie = $cookie->get_cookie( $configCookie->cookie );
+		$configCookie 	= getConfig( 'cookie' );
+		$cookie 		= getComponents( 'cookie' );
+		$userCookie 	= $cookie->get_cookie( $configCookie->cookie );
 
 		if ( empty( $userCookie ) || ! is_string( $userCookie ) )
 		{
@@ -90,7 +89,10 @@ class CookieHandle
 			return $this->_cleanOldCookie();
 		}
 
-		return [ 'selector' => $separate[ 0 ], 'token' => $separate[ 1 ] ];
+		return [
+			'selector' 	=> $separate[ 0 ], 
+			'token' 	=> $separate[ 1 ]
+		];
 	}
 
 	/**
@@ -98,14 +100,19 @@ class CookieHandle
 	 */
 	private function _queryValidate ( $selector, $token )
 	{
-		$user = model( 'User/UserModel' )->fetchFirstUserData( [ getUserField( 'selector' ) => $selector ] );
+		$user = model( 'User/UserModel' )->first( [ 'user.selector' => $selector ] );
+
 		if ( [] === $user )
 		{
 			return $this->_cleanOldCookie();
 		}
 
 		/** Validate cookie */
-		$isValid = hash_equals( $user[ getUserField( 'token' ) ], hash( 'sha256', $token ) );
+		$isValid = hash_equals(
+			$user[ getUserField( 'token' ) ],
+			hash( 'sha256', $token )
+		);
+
 		$isUserIp = $user[ getUserField( 'last_login' ) ] == getComponents( 'request' )->getIPAddress();
 
 		if ( ! $isValid || ! $isUserIp )
@@ -118,12 +125,12 @@ class CookieHandle
 
 	private function _userStatus ( array $user ) : bool
 	{
-		# Check status
 		if ( in_array( $user[ getUserField( 'status' ) ] , $this->userStatus ) )
 		{
-			baseInstance( Message::class )->errorAccountStatus(
+			getBaseInstance( Message::class )->errorAccountStatus(
 				$user[ getUserField( 'status' ) ], false, false
 			);
+
 			return $this->_cleanOldCookie();
 		}
 
@@ -133,12 +140,12 @@ class CookieHandle
 	private function _userCheckMultiLogin ( array $user ) : bool
 	{
 		# @Todo: declare inside the config file: is using this feature
-		$isMultiLogin = baseInstance( 'Authentication' )
+		$isMultiLogin = getBaseInstance( 'Authentication' )
 						->isMultiLogin( $user[ getUserField( 'session_id' ) ] );
 
 		if ( ! $isMultiLogin )
 		{
-			baseInstance( 'Message' )->errorMultiLogin( true, [], false );
+			getBaseInstance( 'Message' )->errorMultiLogin( true, [], false );
 			return false;
 		}
 
@@ -176,10 +183,13 @@ class CookieHandle
 	private function _cookieHandleRefresh ( array $user ) : array
 	{
 		$this->setCookie( ( int ) $user[ getUserField( 'id' ) ] );
-		$keyPermission = getUserGroupField( 'permission' );
-		$isJson = getComponents( 'common' )->valid_json( $user[ $keyPermission ] );
 
-		$user[ $keyPermission ] = $isJson ? json_decode( $user[ $keyPermission ], true ) : [];
+		$keyPermission 			= getUserGroupField( 'permission' );
+		$isJson 				= getComponents( 'common' )->valid_json( $user[ $keyPermission ] );
+
+		$user[ $keyPermission ] = $isJson 
+			? json_decode( $user[ $keyPermission ], true ) 
+			: [];
 
 		return $user;
 	}
@@ -194,10 +204,15 @@ class CookieHandle
 		}
 
 		$common = getComponents( 'common' );
+
 		if ( $userId <= 0 )
 		{
-			$errArg = [ 'field' => 'user_id', 'param' => $userId ];
-			throw new ErrorValidationException( $common->lang( 'Validation.greater_than', $errArg ), 1 );
+			$errorValidation = $common->lang(
+				'Validation.greater_than',
+				[ 'field' => 'user_id', 'param' => $userId ]
+			);
+
+			throw new ErrorValidationException( $errorValidation, 1 );
 		}
 
 		$isAssocData = $common->isAssocArray( $updateData );
@@ -207,30 +222,29 @@ class CookieHandle
 			throw new ErrorValidationException( $common->lang( 'Red2Horse.isAssoc' ), 1 );
 		}
 
-		$selector = bin2hex( random_bytes( 8 ) );
-		$token = bin2hex( random_bytes( 20 ) );
-
-		$cookieValue = "{$selector}:{$token}";
-		$data = [
-			'selector' => $selector,
-			'token' => hash( 'sha256', $token )
+		$selector 		= bin2hex( random_bytes( 8 ) );
+		$token 			= bin2hex( random_bytes( 20 ) );
+		$cookieValue 	= "{$selector}:{$token}";
+		$data 			= [
+			'selector' 	=> $selector,
+			'token' 	=> hash( 'sha256', $token )
 		];
-		$data = array_merge( $data, $updateData );
+		$data 			= array_merge( $data, $updateData );
 
-		$updatedSuccess = baseInstance( 'Authentication' )
-			->loggedInUpdateData( $userId, $data );
+		$updatedSuccess = getBaseInstance( 'Authentication' )->loggedInUpdateData( $userId, $data );
 
 		if ( $updatedSuccess )
 		{
-			$cookieComponent = getComponents( 'cookie' );
-			$cookie = getConfig( 'cookie' );
-			$ttl = time() + $cookie->ttl;
+			$cookieComponent 	= getComponents( 'cookie' );
+			$cookie 			= getConfig( 'cookie' );
+			$ttl 				= time() + $cookie->ttl;
+
 			$cookieComponent->set_cookie( $cookie->cookie, $cookieValue, ( string ) $ttl );
 		}
 		else
 		{
-			$error = "{$userId} LoggedIn with remember-me, but update failed";
-			$common->log_message( 'error', $error );
+			$errorLog = sprintf( '%s LoggedIn with remember-me, but update failed', $userId );
+			$common->log_message( 'error', $errorLog );
 		}
 	}
 }

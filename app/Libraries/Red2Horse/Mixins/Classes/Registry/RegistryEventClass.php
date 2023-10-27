@@ -31,7 +31,10 @@ final class RegistryEventClass implements RegistryClass___Interface
 
     public static function selfInstance (  string $state = self::class  ) : self
     {
-        self::$instance = isset( self::$instance ) ? self::$instance : new self( $state );
+        self::$instance = isset( self::$instance )
+            ? self::$instance 
+            : new self( $state );
+
         return self::$instance;
     }
 }

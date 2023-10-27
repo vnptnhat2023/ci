@@ -47,13 +47,18 @@ class SqlClassExport
      */
     public function seed ( string $tableName, array $intersect = [], bool $query = false ) : array
     {
-        $validation = getComponents( 'validation' );
-        $req = getComponents( 'request' );
-        $keys = getFields( $intersect, $tableName, true, false );
+        $validation     = getComponents( 'validation' );
+        $req            = getComponents( 'request' );
+        $keys           = getFields( $intersect, $tableName, true, false );
+        $return         = [
+            'intersect'     => $intersect,
+            'sql'           => ''
+        ];
 
-        $return = [ 'intersect' => $intersect, 'sql' => '' ];
-
-        if ( empty( $posts = $req->post() ) ) { return $return; }
+        if ( empty( $posts = $req->post() ) )
+        {
+            return $return;
+        }
 
         if ( ! empty( $intersect ) )
         {
@@ -71,8 +76,8 @@ class SqlClassExport
             return $return;
         }
 
-        $posts = $this->formData( $posts );
-        $sql = $this->seedExport( $tableName, $posts );
+        $posts  = $this->formData( $posts );
+        $sql    = $this->seedExport( $tableName, $posts );
 
         if ( $query && ! getComponents( 'query' )->query( $sql ) )
         {
@@ -93,19 +98,23 @@ class SqlClassExport
             $posts[ $user_password ] = getHashPass( $posts[ $user_password ] );
         }
 
-        $user_role = getUserGroupField( 'role' );
+        $user_role      = getUserGroupField( 'role' );
         if ( array_key_exists( $user_role, $posts ) )
         {
-            $posts[ $user_role ] = json_encode( [ 'role' => $posts[ $user_role ], 'hash' => '' ] );
+            $role = json_encode([
+                'role' => $posts[ $user_role ],
+                'hash' => ''
+            ] );
+            $posts[ $user_role ] = $role;
         }
 
         $user_permission = getUserGroupField( 'permission' );
         if ( array_key_exists( $user_permission, $posts ) )
         {
-            $mapFn = fn( $str ) => trim( $str );
-            $explode = explode( ',', str_replace( '  ', '', $posts[ $user_permission ] ) );
-            $permissions = array_map( $mapFn, $explode );
-            $posts[ $user_permission ] = json_encode( $permissions, 100 );
+            $mapFn                      = fn( $str ) => trim( $str );
+            $explode                    = explode( ',', str_replace( '  ', '', $posts[ $user_permission ] ) );
+            $permissions                = array_map( $mapFn, $explode );
+            $posts[ $user_permission ]  = json_encode( $permissions, 100 );
         }
 
         return $posts;
@@ -131,8 +140,8 @@ class SqlClassExport
             return "'{$str}'";
         };
 
-        $columns = implode( ',', array_map( $escColumns , array_keys( $data ) ) );
-        $values = implode( ',', array_map( $escValue , array_values( $data ) ) );
+        $columns    = implode( ',', array_map( $escColumns , array_keys( $data ) ) );
+        $values     = implode( ',', array_map( $escValue , array_values( $data ) ) );
 
         $sql = sprintf(
             'INSERT INTO `%s`(%s) VALUES(%s);',
@@ -150,19 +159,19 @@ class SqlClassExport
      */
     public function createTable ( string $tableName, bool $query = false ) : string
     {
-        $tableName = getTable( $tableName );
-        $tableKeyName = getTable( $tableName, true );
-        $columns = getColumn( $tableName );
+        $tableName      = getTable( $tableName );
+        $tableKeyName   = getTable( $tableName, true );
+        $columns        = getColumn( $tableName );
 
-        $varsFn = fn ( $val ) => is_array( $val ) && array_key_exists( 0, $val ) ? $val[ 0 ] : $val;
-        $vars = array_map( $varsFn, $columns );
+        $varsFn         = fn ( $val ) => is_array( $val ) && array_key_exists( 0, $val ) ? $val[ 0 ] : $val;
+        $vars           = array_map( $varsFn, $columns );
         $vars[ $tableKeyName ] = $tableName;
 
-        $tableVarName = sprintf( '%sTemplateTbl', getComponents( 'common' )->camelCase( $tableKeyName ) );
-        $tableTemplate = getConfig( 'sql' )->{ $tableVarName };
+        $tableVarName   = sprintf( '%sTemplateTbl', getComponents( 'common' )->camelCase( $tableKeyName ) );
+        $tableTemplate  = getConfig( 'sql' )->{ $tableVarName };
 
-        $match = function( $match ) use ( $vars ) { return $vars[ $match[ 1 ] ]; };
-        $sqlParser = preg_replace_callback( '/:(.*?):/', $match, $tableTemplate );
+        $match          = function( $match ) use ( $vars ) { return $vars[ $match[ 1 ] ]; };
+        $sqlParser      = preg_replace_callback( '/:(.*?):/', $match, $tableTemplate );
 
         if ( $query )
         {
@@ -214,6 +223,7 @@ class SqlClassExport
             {
                 throw new ErrorArrayException;
             }
+
             /** @var string[] $fields */
             $fields[] = $this->selectExport( $tbl, $field );
         }
@@ -223,7 +233,8 @@ class SqlClassExport
 
     private function _selectExportFormat ( array $data ) : array
     {
-        $dataTables = []; $dataColumns = [];
+        $dataTables     = [];
+        $dataColumns    = [];
 
         foreach ( $data as $table => $columns )
         {
@@ -255,8 +266,8 @@ class SqlClassExport
         }
 
         $data = [
-            'tables' => $dataTables,
-            'data' => $dataColumns
+            'tables'    => $dataTables,
+            'data'      => $dataColumns
         ];
 
         return $data;

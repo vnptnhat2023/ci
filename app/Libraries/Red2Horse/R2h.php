@@ -15,7 +15,6 @@ use function Red2Horse\Mixins\Functions\Config\initConfig;
 use function Red2Horse\Mixins\Functions\Instance\callClass;
 
 const R2H_BASE_PATH = __DIR__;
-// require_once realpath( \Red2Horse\R2H_BASE_PATH . '/Config/ConstantNamespace.php' );
 
 /**
  * @param array $name

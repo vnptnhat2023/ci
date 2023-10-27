@@ -9,7 +9,7 @@ use Red2Horse\Facade\Cache\CacheFacade;
 use Red2Horse\Mixins\Traits\Object\TraitSingleton;
 
 use function Red2Horse\Mixins\Functions\Config\getConfig;
-use function Red2Horse\Mixins\Functions\Instance\BaseInstance;
+use function Red2Horse\Mixins\Functions\Instance\getBaseInstance;
 use function Red2Horse\Mixins\Functions\Instance\getComponents;
 use function Red2Horse\Mixins\Functions\Model\model;
 use function Red2Horse\Mixins\Functions\Password\getVerifyPass;
@@ -61,9 +61,10 @@ class Authorization
 			return false;
 		}
 
-		$cacheConfig = getConfig( 'cache' );
-		$cachePath = $cacheConfig->getCacheName( $cacheConfig->userGroupId );
-		$cacheComponent = getComponents( 'cache' );
+		$cacheConfig 			= getConfig( 'cache' );
+		$cachePath 				= $cacheConfig->getCacheName( $cacheConfig->userGroupId );
+		$cacheComponent 		= getComponents( 'cache' );
+
 		$cacheComponent->cacheAdapterConfig->storePath .= $cachePath;
 
 		if ( ! $cacheConfig->enabled )
@@ -75,7 +76,7 @@ class Authorization
 
 		if ( ! $userData )
 		{
-			$userDB = model( 'User/UserModel' )->fetchFirstUserData( [ 'user.id' => $usernameSess[ 0 ] ] );
+			$userDB = model( 'User/UserModel' )->first( [ 'user.id' => $usernameSess[ 0 ] ] );
 			unset( $userData );
 			$userData[ $usernameSess[ 0 ] ] = json_decode( $userDB[ getUserGroupField( 'role' ) ], true );
 			
@@ -134,10 +135,12 @@ class Authorization
 
 	private function _getUserData ( array $args ) : array
 	{
-		$userData = [];
+		$baseAuthentication = getBaseInstance( Authentication::class );
+		$userData 			= [];
+
 		foreach ( $args as $key )
 		{
-			$userData = ( array ) BaseInstance( Authentication::class )->getUserdata( $key );
+			$userData 		= ( array ) $baseAuthentication->getUserdata( $key );
 		}
 
 		return $userData;
