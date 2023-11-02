@@ -33,6 +33,7 @@ class DataKeyMap
     ];
     // public bool $isSelect = true;
     private                  DataAssocKeyMap            $dataAssocKeyMap;
+    public                   bool                       $useExplodeCombine = true;
 
     /**
      * @throws ErrorPropertyException
@@ -177,6 +178,7 @@ class DataKeyMap
         $arrayAssocKeyMap->operator             = $this->operator;
         $arrayAssocKeyMap->toStringSepChar      = $this->toStringSepChar;
         $arrayAssocKeyMap->toStringSepEndChar   = $this->toStringSepEndChar;
+        $arrayAssocKeyMap->useExplodeCombine    = $this->useExplodeCombine;
         
         if ( null !== $callable )
         {

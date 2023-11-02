@@ -30,7 +30,19 @@ interface BaseBuilderInterface
      * @param array $data Associative
      * @return null|object
      */
-    public function insert ( array $data, ?Closure $callable = null, int $len = 100 );
+    public function insert ( array $data, ?Closure $callable = null, bool $replace = false, int $len = 100 );
+
+    public function replace ( array $data, ?Closure $callable = null, int $len = 100 );
+
+    public function fetch ( array $where = [], array $orderBy = [], ?Closure $callableWhere = null, ?Closure $callableOrderBy = null ) : array;
+
+    public function fetchFirst ( array $where = [], array $orderBy = [], ?Closure $callableWhere = null, ?Closure $callableOrderBy = null );
+
+    public function edit ( array $set, array $where, int $len = 1, ?Closure $setCallable = null, ?Closure $whereCallable = null);
+
+    public function remove ( array $where = [], array $in = [], int $len = 1, ?Closure $callableWhere = null, ?Closure $callableIn = null );
+
+    public function add ( array $data, ?Closure $callable = null, bool $replace = false, int $len = 100 );
 
     /** @param array $data (Non-)Associative */
     public function from ( array $data, ?Closure $callable = null, int $len = 100 ) : BaseBuilder;

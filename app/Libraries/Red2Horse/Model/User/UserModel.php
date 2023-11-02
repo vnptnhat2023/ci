@@ -33,7 +33,7 @@ class UserModel extends Model
 			['user_group.id'  => 'user.group_id' 
 		] )
 		->orWhere( $where, static function( $filter ) {
-			$filter->setNoExplode( 'kv', 'user.email' );
+			$filter->setNoExplode( 'kv', [ 'user.username', 'user.email' ] );
 		} )
 		->fetchFirst();
 		

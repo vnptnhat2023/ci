@@ -3,8 +3,6 @@
 declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Functions\Instance;
 
-use Red2Horse\Mixins\Classes\Registry\RegistryClass;
-
 use function Red2Horse\Mixins\Functions\NS\registryNamespace;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
@@ -25,7 +23,7 @@ function instanceData ( string $classNamespace, string $state = 'RegistryClass' 
 
 /**
  * @param string $key
- * @return mixed array|object ( call )
+ * @return mixed
  * @throws $th
  */
 function getClass ( string $classNamespace, string $key = '', string $state = 'RegistryClass' )

@@ -3,23 +3,20 @@
 declare( strict_types = 1 );
 namespace App\Controllers;
 
-use Red2Horse\Mixins\Classes\Sql\BaseBuilder;
-use Red2Horse\Mixins\Classes\Sql\Model;
-
+use function Red2Horse\helpers;
 use function Red2Horse\Mixins\Functions\Config\getConfig;
-use function Red2Horse\Mixins\Functions\Instance\getInstance;
-use function Red2Horse\Mixins\Functions\Instance\getModel;
-// use function Red2Horse\Mixins\Functions\Model\model;
 use function Red2Horse\Mixins\Functions\Message\setInfoMessage;
 use function Red2Horse\Mixins\Functions\Message\setSuccessMessage;
-use function Red2Horse\Mixins\Functions\Model\BaseModel;
 use function Red2Horse\Mixins\Functions\Model\model;
 use function Red2Horse\Mixins\Functions\Sql\createDatabase;
 use function Red2Horse\Mixins\Functions\Sql\createTable;
-use function Red2Horse\Mixins\Functions\Sql\getField;
-use function Red2Horse\Mixins\Functions\Sql\getTable;
-use function Red2Horse\Mixins\Functions\Sql\getUserTableField;
 use function Red2Horse\Mixins\Functions\Sql\seed;
+
+use function Red2Horse\Mixins\Functions\Throttle\throttleCleanup;
+use function Red2Horse\Mixins\Functions\Throttle\throttleDecrement;
+use function Red2Horse\Mixins\Functions\Throttle\throttleGetTypes;
+use function Red2Horse\Mixins\Functions\Throttle\throttleIncrement;
+use function Red2Horse\Mixins\Functions\Throttle\throttleInstance;
 
 class Install extends BaseController
 {
@@ -29,12 +26,43 @@ class Install extends BaseController
 	{
 		$this->auth = \Config\Services::Red2HorseAuth();
         helper( [ 'form', 'url', 'filesystem' ] );
+
+		helpers( [ 'model' ] );
 	}
 
-	public function builder ()
+	public function type ( $attempt )
 	{
-		$builder = new BaseBuilder();
-		d( $builder -> getCompilerProperties() );
+		$type = 0;
+		$typeAttempt = 5;
+		$typeLimit = 5;
+
+		if ( $type < 2 && $attempt <= $typeAttempt )
+        {
+            $type = 1;
+        }
+        else if ( $type > $typeLimit || $attempt > $typeAttempt * $typeLimit )
+        {
+			d( false );
+            // return false;
+        }
+        else
+        {
+            $type = ( int ) ceil( $attempt / $typeAttempt );
+        }
+
+		d ( $type );
+	}
+
+	public function throttle ()
+	{
+		\Red2Horse\helpers( [ 'throttle' ] );
+		$ins = throttleInstance();
+		
+		// dd( $ins );
+		var_dump( throttleGetTypes(), $ins );
+		// var_dump( throttleDecrement(), $ins );
+		// d( throttleIncrement(), $ins );
+		// var_dump( throttleCleanup(), $ins );
 	}
 	
 	function allowedFieldsFilter ()
@@ -51,13 +79,6 @@ class Install extends BaseController
             ->arrayInArray( $allowedFields, $rawData );
 		var_dump( $rs );
     }
-
-	public function model ()
-	{
-		$baseModel = BaseModel( 'user' );dd($baseModel);
-		// $user = getTable( 'user_group', true );
-		// dd( $user );
-	}
 	
 	public function add ()
 	{
@@ -70,8 +91,7 @@ class Install extends BaseController
 		$model = model( 'User/UserModel' );# dd( $model );
 		$model->add( $add, fn( $f ) => $f->setNoExplode( 'kv', 'email' ) );
 		dd( $model );
-	}
-	
+	}	
 
 	public function update_compile ()
 	{
@@ -221,11 +241,11 @@ class Install extends BaseController
 
 		if ( ! empty( $posts ) )
 		{
-			$s = $posts[ $intersect[ 0 ] ];
-			$u = $posts[ $intersect[ 1 ] ];
-			$p = $posts[ $intersect[ 2 ] ];
-			$d = $posts[ $intersect[ 3 ] ];
-			$port = $posts[ $intersect[ 4 ] ];
+			$s 		= $posts[ $intersect[ 0 ] ];
+			$u 		= $posts[ $intersect[ 1 ] ];
+			$p 		= $posts[ $intersect[ 2 ] ];
+			$d 		= $posts[ $intersect[ 3 ] ];
+			$port 	= $posts[ $intersect[ 4 ] ];
 
 			if ( createDatabase( $s, $u, $p, $d, $port, $intersect ) )
 			{
@@ -244,18 +264,18 @@ class Install extends BaseController
 		return view( 'login/seed', ( array ) $msg );
 	}
 
-    public function table ( string $param = 'user_group' )
+    public function create_table ( string $param = 'user_group' )
     {
 		if ( $param == 'user_group' && $sql = createTable( 'user_group', true ) )
 		{
-			$msgInfo = [ anchor( [ 'install', 'table', 'user' ], 'Next' ) ];
+			$msgInfo = [ anchor( [ 'install', 'create_table', 'user' ], 'Next' ) ];
 			setInfoMessage( $msgInfo );
 			setSuccessMessage( 'Table created successfully: user_group' );
 		}
 		
 		if ( $param == 'user' && $sql = createTable( 'user', true ) )
 		{
-			$msgInfo = [ anchor( [ 'install', 'table', 'throttle' ], 'Next' ) ];
+			$msgInfo = [ anchor( [ 'install', 'create_table', 'throttle' ], 'Next' ) ];
 			setInfoMessage( $msgInfo );
 			setSuccessMessage( 'Table created successfully: user' );
 		}

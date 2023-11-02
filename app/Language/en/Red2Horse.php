@@ -78,5 +78,15 @@ return [
 	'db_port' 	  => 'port',
 
 	/** File */
-	'errorFileCannotWrite' => 'cannot write file'
+	'errorFileCannotWrite' => 'cannot write file',
+
+	/** Throttle */
+	'throttle_id' 				=> 'throttle id',
+	'throttle_attempt' 			=> 'attempt',
+	'throttle_ip' 				=> 'ip address',
+	'throttle_createdAt' 		=> 'created at',
+	'throttle_updatedAt' 	  	=> 'updated at',
+
+	'errorThrottleIsOff'			=> 'Throttle is off',
+	'errorThrottleNotSupported'		=> 'Throttle not supported',
 ];

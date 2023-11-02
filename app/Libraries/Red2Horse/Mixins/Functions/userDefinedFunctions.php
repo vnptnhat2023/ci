@@ -3,15 +3,29 @@
 declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Functions;
 
+use Red2Horse\Mixins\Classes\Base\Throttle\Throttle;
+
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
 class UserDefinedFunctions
 {
     // use TraitSingleton;
 
-    public function __construct ()
+    public function __construct () {}
+    
+    public function message_show_captcha_condition ( int $attempt, int $type ) : bool
     {
-        
+        return $attempt >= 3;
+    }
+
+    public function authentication_show_captcha_condition ( int $attempt, int $type ) : bool
+    {
+        return $attempt >= 3;
+    }
+    
+    public function resetpassword_show_captcha_condition ( int $attempt, int $type ) : bool
+    {
+        return $attempt >= 3;
     }
     
 

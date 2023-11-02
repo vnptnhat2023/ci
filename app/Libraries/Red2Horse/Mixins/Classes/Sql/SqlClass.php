@@ -8,6 +8,7 @@ use Red2Horse\Exception\ErrorParameterException;
 use Red2Horse\Mixins\Interfaces\Sql\SqlClassInterface;
 use Red2Horse\Mixins\Traits\Object\TraitSingleton;
 
+use function Red2Horse\helpers;
 use function Red2Horse\Mixins\Functions\Config\getConfig;
 use function Red2Horse\Mixins\Functions\Event\trigger;
 use function Red2Horse\Mixins\Functions\Instance\getComponents;
@@ -20,44 +21,52 @@ class SqlClass implements SqlClassInterface
 	use TraitSingleton;
 
 	/** Select & import */
-	private array $database = [
+	private array $database = 	[
 		'tables' => [
-			'user' => 'user',
-			'user_group' => 'user_group'
+			'user' 						=> 'user',
+			'user_group' 				=> 'user_group',
+			'throttle' 					=> 'throttle'
 		],
 
 		'user' => [
 			// keys => alias keys
-			'id' => 'id',
-			'username' => 'username',
-			'email' => 'email',
-			'status' => 'status',
-			'last_activity' => 'last_activity',
-			'last_login' => 'last_login',
-			'created_at' => 'created_at',
-			'updated_at' => 'updated_at',
-			'session_id' => 'session_id',
-			'selector' => 'selector',
-			'token' => 'token',
-
-			// Sql
-			'group_id' => 'group_id',
-			'password' => 'password',
-			'deleted_at' => 'deleted_at'
+			'id' 						=> 'id',
+			'username' 					=> 'username',
+			'email' 					=> 'email',
+			'status' 					=> 'status',
+			'last_activity' 			=> 'last_activity',
+			'last_login' 				=> 'last_login',
+			'created_at' 				=> 'created_at',
+			'updated_at' 				=> 'updated_at',
+			'session_id' 				=> 'session_id',
+			'selector' 					=> 'selector',
+			'token' 					=> 'token',
+			'group_id' 					=> 'group_id',
+			'password' 					=> 'password',
+			'deleted_at' 				=> 'deleted_at'
 		],
 
 		'user_group' => [
 			// keys => alias keys
-			'id' => [ 'id', 'as', 'group_id' ],
-			'name' => [ 'name', 'as', 'group_name' ],
-			'permission' => 'permission',
-			'role' => 'role',
-			'deleted_at' => 'deleted_at'// Import only
+			'id' 						=> [ 'id', 'as', 'group_id' ],
+			'name' 						=> [ 'name', 'as', 'group_name' ],
+			'permission' 				=> 'permission',
+			'role' 						=> 'role',
+			'deleted_at' 				=> 'deleted_at'// Import only
+		],
+
+		'throttle' => [
+			'id'						=> 'id',
+			'attempt'					=> 'attempt',
+			'ip'						=> 'ip',
+			'created_at'				=> 'created_at',
+			'updated_at'				=> 'updated_at',
 		]
 	];
 
 	private function __construct ( ?callable $configPreFields = null )
 	{
+		helpers( [ 'event' ] );
 		trigger( 'before_sql_class_init' );
 		$this->reInit( $configPreFields );
 		trigger( 'after_sql_class_init' );
@@ -66,10 +75,12 @@ class SqlClass implements SqlClassInterface
 	public function reInit ( ?callable $configPreFields = null ) : void
 	{
 		$configValidation 	= getConfig( 'validation' );
-		$common 			= getComponents( 'common' );
+		// $common 			= getComponents( 'common' );
 		$database 			= [];
 		$tables 			= $this->database[ 'tables' ];
 		$userGroupTable 	= $tables[ 'user_group' ];
+		$userTable 			= $tables[ 'user' ];
+		$throttleTable 		= $tables[ 'throttle' ];
 
 		foreach ( $tables as $table )
 		{
@@ -78,9 +89,18 @@ class SqlClass implements SqlClassInterface
 			foreach ( $fields as $field )
 			{
 				/** @todo configPreFields -> props: "throttle_" */
-				$configField = ( $table == $userGroupTable )
-					? sprintf( 'userGroup_%s', 		$common->camelCase( $field ) )
-					: sprintf( 'user_%s', 			$common->camelCase( $field ) );
+				if ( $table == $userGroupTable )
+				{
+					$configField = $this->_getConfigField( $field, 'userGroup' );
+				}
+				else if ( $table == $userTable )
+				{
+					$configField = $this->_getConfigField( $field, 'user' );
+				}
+				else if ( $table == $throttleTable )
+				{
+					$configField = $this->_getConfigField( $field, 'throttle' );
+				}
 
 				if ( is_array( $this->database[ $table ][ $field ] ) )
 				{
@@ -97,6 +117,16 @@ class SqlClass implements SqlClassInterface
 
 		$this->database 			= $database;
 		$this->database[ 'tables' ] = $tables;
+	}
+
+	private function _camelCase ( string $field ) : string
+	{
+		return getComponents( 'common' )->camelCase( $field );
+	}
+
+	private function _getConfigField ( string $field, string $prefix ) : string
+	{
+		return sprintf( '%s_%s', $prefix, $this->_camelCase( $field ) );
 	}
 
 	public function getData ( ?string $key = null )

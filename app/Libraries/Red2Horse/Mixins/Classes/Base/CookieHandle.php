@@ -6,9 +6,12 @@ namespace Red2Horse\Mixins\Classes\Base;
 use Red2Horse\Exception\ErrorValidationException;
 use Red2Horse\Mixins\Traits\Object\TraitSingleton;
 
+use function Red2Horse\helpers;
 use function Red2Horse\Mixins\Functions\Config\getConfig;
 use function Red2Horse\Mixins\Functions\Instance\getBaseInstance;
 use function Red2Horse\Mixins\Functions\Instance\getComponents;
+use function Red2Horse\Mixins\Functions\Message\getMessageInstance;
+use function Red2Horse\Mixins\Functions\Message\setErrorMessage;
 use function Red2Horse\Mixins\Functions\Model\model;
 use function Red2Horse\Mixins\Functions\Sql\getUserField;
 use function Red2Horse\Mixins\Functions\Sql\getUserGroupField;
@@ -127,9 +130,16 @@ class CookieHandle
 	{
 		if ( in_array( $user[ getUserField( 'status' ) ] , $this->userStatus ) )
 		{
-			getBaseInstance( Message::class )->errorAccountStatus(
-				$user[ getUserField( 'status' ) ], false, false
-			);
+			helpers( [ 'message' ] );
+
+			$status = $user[ getUserField( 'status' ) ];
+			$messageInstance = getMessageInstance();
+
+			$messageInstance::$hasBanned 			= ( $status === 'banned' );
+			$messageInstance::$accountInactive 		= ( $status === 'inactive' );
+			$errorMessage = getComponents( 'common' )->lang( 'Red2Horse.errorNotReadyYet', [ $status ] );
+
+			setErrorMessage( $errorMessage );
 
 			return $this->_cleanOldCookie();
 		}
@@ -139,13 +149,17 @@ class CookieHandle
 
 	private function _userCheckMultiLogin ( array $user ) : bool
 	{
+		$userSessionId = $user[ getUserField( 'session_id' ) ];
 		# @Todo: declare inside the config file: is using this feature
-		$isMultiLogin = getBaseInstance( 'Authentication' )
-						->isMultiLogin( $user[ getUserField( 'session_id' ) ] );
+		$isMultiLogin = getBaseInstance( 'Authentication' )->isMultiLogin( $userSessionId );
 
 		if ( ! $isMultiLogin )
 		{
-			getBaseInstance( 'Message' )->errorMultiLogin( true, [], false );
+			helpers( [ 'message' ] );
+
+			$errorMessage = getComponents( 'common' )->lang( 'Red2Horse.noteLoggedInAnotherPlatform' );
+			setErrorMessage( $errorMessage, true );
+
 			return false;
 		}
 

@@ -14,12 +14,13 @@ use Red2Horse\Exception\
 
 use Red2Horse\Facade\Query\QueryFacadeInterface;
 use Red2Horse\Mixins\Classes\Data\DataArrayEventsClass;
+use Red2Horse\Mixins\Classes\Sql\Builder\SqlBuilderData;
 use Red2Horse\Mixins\Classes\Sql\Builder\SqlCompiler;
 use Red2Horse\Mixins\Interfaces\Sql\BaseBuilderInterface;
 use Red2Horse\Mixins\Traits\Object\TraitInstanceTrigger;
 use Red2Horse\Mixins\Traits\Object\TraitSingleton;
 
-
+use function Red2Horse\helpers;
 use function Red2Horse\Mixins\Functions\Config\getConfig;
 use function Red2Horse\Mixins\Functions\Data\
 {
@@ -36,74 +37,37 @@ class BaseBuilder implements BaseBuilderInterface
 {
     use TraitSingleton, TraitInstanceTrigger;
 
-    public      string      $table;
+    public      string                          $table;
+    private     QueryFacadeInterface            $connection;
+    private     \stdClass                       $modelProperty;
+    private     SqlCompiler                     $compiler;
+    private     SqlBuilderData                  $data;
+    private     array                           $lastQueryString  = [];
 
-    public      int         $updateLimitRows        = 1000;
-    public      int         $deleteLimitRows        = 1000;
-    public      int         $getLimitRows           = 1000;
-
-    private     array       $select                 = [];
-    private     array       $distinct               = [];
-    private     array       $update                 = [];
-    private     array       $delete                 = [];
-    private     array       $insert                 = [];
-    private     array       $from                   = [];
-    private     array       $andWhere               = [];
-    private     array       $orWhere                = [];
-    private     array       $where                  = [];
-    private     array       $join                   = [];
-    private     array       $set                    = [];
-    private     array       $limit                  = [];
-
-    private     array       $andOn                  = [];
-    private     array       $orOn                   = [];
-    private     array       $on                     = [];
-
-    //       IN   
-    private     array       $in                     = [];
-    private     array       $notIn                  = [];
-    private     array       $orIn                   = [];
-    private     array       $orNotIn                = [];
-    private     array       $andIn                  = [];
-    private     array       $andNotIn               = [];
-
-    //       LIKE 
-    private     array       $like                   = [];
-    private     array       $orLike                 = [];
-    private     array       $andLike                = [];
-
-    //       NULL 
-    private     array       $null                   = [];
-    private     array       $notNull                = [];
-    private     array       $orNull                 = [];
-    private     array       $orNotNull              = [];
-    private     array       $andNull                = [];
-    private     array       $andNotNull             = [];
-    /** End     new      */
-
-    private     array       $orderBy                = [];
-    private     array       $get                    = [];
-
-    private     QueryFacadeInterface                $connection;
-
-    private     \stdClass                           $modelProperty;
-
-    private     string                              $compilerNamespace;
-
-    private     array                               $lastQueryString  = [];
-
-    private     array                               $allowedFieldsFilters = [
+    private     array                           $allowedFieldsFilters = [
         'beforeAllowedFieldsFilter',
         '_allowedFieldsFilter',
         '_afterAllowedFieldsFilter'
     ];
-
     /** Temporary Allowed-fields */
-    private     array                               $toggleAllowedFields = [];
+    private     array                           $toggleAllowedFields = [];
 
-    public function __construct ( ?string $sqlCompilerClassNamespace = null ) 
+    public function __construct ()
     {
-        $this->compilerNamespace = $sqlCompilerClassNamespace ?: SqlCompiler::class;
+        helpers( [ 'array_data' ] );
+    }
+
+    public function init(  ?string $compilerNamespace = null, ?string $dataNamespace = null  )
+    {
+        $compilerNS = $compilerNamespace    ?: SqlCompiler::class;
+        $dataNS     = $dataNamespace        ?: SqlBuilderData::class;
+
+        $this->compiler  = getInstance( $compilerNS );
+        $this->data      = getInstance( $dataNS );
+
+        $this->compiler->init( $this->table );
+
+        return $this;
     }
 
     public function getConnection () : QueryFacadeInterface
@@ -163,13 +127,6 @@ class BaseBuilder implements BaseBuilderInterface
         return '';
     }
 
-    public function getCompilerProperties () : SqlCompiler
-    {
-        /** @var SqlCompiler $compilerInstance */
-        $compilerInstance = getInstance( $this->compilerNamespace );
-        return $compilerInstance->init( $this->__toStdClass() );
-    }
-
     public function select ( array $data, ?Closure $callable = null, int $len = 100 ) : self
     {
         if ( ! getComponents( 'common' )->nonAssocArray( $data ) )
@@ -181,7 +138,8 @@ class BaseBuilder implements BaseBuilderInterface
         $dataNonAssoc = dataKeyInstance();
         $this->_afterCall( $callable, $dataNonAssoc );
 
-        $this->select[] = $dataNonAssoc->keyMap( $data );
+        $this->data->select[] = $dataNonAssoc->keyMap( $data );
+
         return $this;
     }
 
@@ -196,44 +154,50 @@ class BaseBuilder implements BaseBuilderInterface
         $dataNonAssoc = dataKeyInstance();
         $this->_afterCall( $callable, $dataNonAssoc );
 
-        $this->distinct[] = $dataNonAssoc->keyMap( $data );
+        $this->data->distinct[] = $dataNonAssoc->keyMap( $data );
         return $this;
     }
 
     public function get ()
     {
-        if ( [] === $this->limit )
+        if ( [] === $this->data->limit )
         {
-            $this->limit( $this->getLimitRows );
+            $this->limit( $this->data->getLimitRows );
         }
 
-        $sql = $this->getCompilerProperties()->get();
-        $this->get[] = $sql;
+        $sql = $this->compiler->get();
         $this->lastQueryString[] = $sql;
 
-        return $this->fetchArray();
+        $query = $this->fetchArray();
+        $this->data->reset();
+
+        return $query;
     }
 
     public function update ( int $len = 1 )
     {
-        $sql = $this->getCompilerProperties()->update( $len );
-        $this->update[] = $sql;
+        $sql = $this->compiler->update( $len );
         $this->lastQueryString[] = $sql;
 
-        return $this->query();
+        $query = $this->query();
+        $this->data->reset();
+
+        return $query;
     }
 
     public function delete ( $len = 1/*, ?Closure $callable = null*/ )
     {
-        $sql = $this->getCompilerProperties()->delete( $len/*, $callable */ );
-        $this->delete[] = $sql;
+        $sql = $this->compiler->delete( $len/*, $callable */ );
         $this->lastQueryString[] = $sql;
 
-        return $this->query();
+        $query = $this->query();
+        $this->data->reset();
+
+        return $query;
     }
 
     /** @TODO ON DUPLICATE KEY UPDATE */
-    public function insert ( array $data, ?Closure $callable = null, int $len = 100 )
+    public function insert ( array $data, ?Closure $callable = null, bool $replace = false, int $len = 100 )
     {
         $this->_beforeCall( $data, $len );
         $columns = array_keys( $data );
@@ -249,12 +213,41 @@ class BaseBuilder implements BaseBuilderInterface
         $data = $dataAssoc( $data, false );
 
         /** Compile */
-        $sql = $this->getCompilerProperties()->insert( $data );
+        $sql = $this->compiler->insert( $data, $replace );
         
-        $this->insert[] = $sql;
+        $this->data->insert[] = $sql;
         $this->lastQueryString[] = $sql;
         
-        return $this->query();
+        $query = $this->query();
+        $this->data->reset();
+        
+        return $query;
+    }
+
+    public function replace ( array $data, ?Closure $callable = null, int $len = 100 )
+    {
+        $this->_beforeCall( $data, $len );
+        $columns = array_keys( $data );
+
+        $this->_trigger( null, $this->allowedFieldsFilters, $columns );
+
+        /** @var array $data */
+        [ '_timeFormatter' => $data ] = $this->_trigger( null, [ '_timeFormatter' ], $data );
+
+        $dataNonAssoc = dataKeyInstance();
+        $dataNonAssoc->keyDelimiter = '\'';
+        $this->_afterCall( $callable, $dataNonAssoc );
+
+        $data = $dataNonAssoc->keyMap( $data, false );
+
+        /** Compile */
+        $sql = $this->compiler->replace( $data );
+        $this->lastQueryString[]    = $sql;
+        
+        $query = $this->query();
+        $this->data->reset();
+
+        return $query;
     }
 
     public function fetch ( array $where = [], array $orderBy = [], ?Closure $callableWhere = null, ?Closure $callableOrderBy = null ) : array
@@ -269,7 +262,7 @@ class BaseBuilder implements BaseBuilderInterface
      * @throws ErrorArrayException
      * @return array|object
      */
-    public function fetchFirst ( array $where = [], array $orderBy = [], bool $asObject = false, ?Closure $callableWhere = null, ?Closure $callableOrderBy = null )
+    public function fetchFirst ( array $where = [], array $orderBy = [], ?Closure $callableWhere = null, ?Closure $callableOrderBy = null )
     {
         empty( $where )   || $this->where( $where, $callableWhere );
         empty( $orderBy ) || $this->orderBy( $orderBy, $callableOrderBy );
@@ -278,10 +271,10 @@ class BaseBuilder implements BaseBuilderInterface
 
         if ( ! array_key_exists( 0, $data ) )
         {
-            throw new ErrorArrayException;
+            return $data;
         }
 
-        return $asObject ? ( object ) $data[ 0 ] : $data[ 0 ];
+        return $data[ 0 ];
     }
 
     public function edit ( array $set, array $where, int $len = 1, ?Closure $setCallable = null, ?Closure $whereCallable = null)
@@ -300,9 +293,9 @@ class BaseBuilder implements BaseBuilderInterface
         return $this->delete( $len );
     }
 
-    public function add ( array $data, ?Closure $callable = null, int $len = 100 )
+    public function add ( array $data, ?Closure $callable = null, bool $replace = false, int $len = 100 )
     {
-        return $this->insert( $data, $callable, $len );
+        return $this->insert( $data, $callable, $replace, $len );
     }
 
     public function from ( array $data, ?Closure $callable = null, int $len = 100 ) : self
@@ -326,7 +319,7 @@ class BaseBuilder implements BaseBuilderInterface
             $data = $dataNonAssoc->keyMap( $data );
         }
 
-        $this->from[] = $data;
+        $this->data->from[] = $data;
         return $this;
     }
 
@@ -355,22 +348,23 @@ class BaseBuilder implements BaseBuilderInterface
     // Not: `a.b` != `d.e`
     public function andWhere ( array $data, ?Closure $callable = null, int $len = 100 ) : self
     {
-        $this->andWhere[] = $this->_where( $data, $callable, $len, 'AND' );
+        $this->data->andWhere[] = $this->_where( $data, $callable, $len, 'AND' );
         return $this;
     }
 
     // Not: `a.b` != `d.e`
     public function orWhere ( array $data, ?Closure $callable = null, int $len = 100 ) : self
     {
-        $this->orWhere[] = $this->_where( $data, $callable, $len, 'OR' );
+        $this->data->orWhere[] = $this->_where( $data, $callable, $len, 'OR' );
         return $this;
     }
+
     // (not)(whereIn, orWhereIn, andWhereIn)
     // (not)(whereNull, orWhereNull, andWhereNull)
     // whereLike, orWhereLike, andWhereLike,
     public function where ( array $data, ?Closure $callable = null, int $len = 100 ) : self
     {
-        $this->where[] = $this->_where( $data, $callable, $len, 'OR' );
+        $this->data->where[] = $this->_where( $data, $callable, $len, 'OR' );
         return $this;
     }
 
@@ -385,8 +379,6 @@ class BaseBuilder implements BaseBuilderInterface
         $this->_beforeCall( $data, $len );
 
         $dataAssoc = dataKeyAssocInstance();
-
-        // $dataAssoc->valueDelimiter      = '\'';
         $dataAssoc->escapeChar          = '\%';
         $dataAssoc->operator            = ' LIKE ';
 
@@ -402,19 +394,19 @@ class BaseBuilder implements BaseBuilderInterface
 
     public function andLike ( array $data, ?Closure $callable = null, int $len = 100 ) : self
     {
-        $this->andLike[] = $this->_like( $data, $callable, $len, 'AND' );
+        $this->data->andLike[] = $this->_like( $data, $callable, $len, 'AND' );
         return $this;
     }
 
     public function orLike ( array $data, ?Closure $callable = null, int $len = 100 ) : self
     {
-        $this->orLike[] = $this->_like( $data, $callable, $len, 'OR' );
+        $this->data->orLike[] = $this->_like( $data, $callable, $len, 'OR' );
         return $this;
     }
 
     public function like ( array $data, ?Closure $callable = null, int $len = 100 ) : self
     {
-        $this->like[] = $this->_like( $data, $callable, $len, 'OR' );
+        $this->data->like[] = $this->_like( $data, $callable, $len, 'OR' );
         return $this;
     }
 
@@ -447,7 +439,7 @@ class BaseBuilder implements BaseBuilderInterface
             $data = $dataNonAssoc->keyMap( $data );
         }
 
-        $this->join[] = $data;
+        $this->data->join[] = $data;
 
         if ( null !== $on )
         {
@@ -480,7 +472,7 @@ class BaseBuilder implements BaseBuilderInterface
         $dataAssoc = dataKeyAssocInstance();
         $this->_afterCall( $callable, $dataAssoc );
 
-        $this->set[] = $dataAssoc( $data );
+        $this->data->set[] = $dataAssoc( $data );
 
         return $this;
     }
@@ -493,7 +485,7 @@ class BaseBuilder implements BaseBuilderInterface
 
         if ( '' !== $str )
         { // $str = $this->_afterCall( $str, $callable );
-            $this->limit[] = $str;
+            $this->data->limit[] = $str;
         }
 
         return $this;
@@ -524,19 +516,19 @@ class BaseBuilder implements BaseBuilderInterface
 
     public function andOn ( array $data, ?Closure $callable = null, int $len = 100 ) : self
     {
-        $this->andOn[] = $this->_on( $data, $callable, $len, 'AND' );
+        $this->data->andOn[] = $this->_on( $data, $callable, $len, 'AND' );
         return $this;
     }
 
     public function orOn ( array $data, ?Closure $callable = null, int $len = 100 ) : self
     {
-        $this->orOn[] = $this->_on( $data, $callable, $len, 'OR' );
+        $this->data->orOn[] = $this->_on( $data, $callable, $len, 'OR' );
         return $this;
     }
 
     public function on ( array $data, ?Closure $callable = null, int $len = 100 ) : self
     {
-        $this->on[] = $this->_on( $data, $callable, $len, 'OR' );
+        $this->data->on[] = $this->_on( $data, $callable, $len, 'OR' );
         return $this;
     }
 
@@ -584,37 +576,37 @@ class BaseBuilder implements BaseBuilderInterface
 
     public function in ( array $data, ?Closure $callable = null, int $len = 100 ) : self
     {
-        $this->in[] = $this->_in( $data, $callable, $len, 'OR' );
+        $this->data->in[] = $this->_in( $data, $callable, $len, 'OR' );
         return $this;
     }
 
     public function notIn ( array $data, ?Closure $callable = null, int $len = 100 ) : self
     {
-        $this->notIn[] = $this->_in( $data, $callable, $len, 'OR', true );
+        $this->data->notIn[] = $this->_in( $data, $callable, $len, 'OR', true );
         return $this;
     }
 
     public function orIn ( array $data, ?Closure $callable = null, int $len = 100 ) : self
     {
-        $this->orIn[] = $this->_in( $data, $callable, $len, 'OR' );
+        $this->data->orIn[] = $this->_in( $data, $callable, $len, 'OR' );
         return $this;
     }
 
     public function orNotIn ( array $data, ?Closure $callable = null, int $len = 100 ) : self
     {
-        $this->orNotIn[] = $this->_in( $data, $callable, $len, 'OR', true );
+        $this->data->orNotIn[] = $this->_in( $data, $callable, $len, 'OR', true );
         return $this;
     }
 
     public function andIn ( array $data, ?Closure $callable = null, int $len = 100 ) : self
     {
-        $this->andIn[] = $this->_in( $data, $callable, $len, 'AND' );
+        $this->data->andIn[] = $this->_in( $data, $callable, $len, 'AND' );
         return $this;
     }
 
     public function andNotIn ( array $data, ?Closure $callable = null, int $len = 100 ) : self
     {
-        $this->andNotIn[] = $this->_in( $data, $callable, $len, 'AND', TRUE );
+        $this->data->andNotIn[] = $this->_in( $data, $callable, $len, 'AND', TRUE );
         return $this;
     }
 
@@ -645,34 +637,34 @@ class BaseBuilder implements BaseBuilderInterface
 
     public function null( array $data, ?Closure $callable = null, int $len = 100, ?string $type = null ) : self
     {
-        $this->null[] = $this->_null( $data, $callable, $len, 'OR' );
+        $this->data->null[] = $this->_null( $data, $callable, $len, 'OR' );
         return $this;
     }
 
     public function notNull( array $data, ?Closure $callable = null, int $len = 100 ) : self
     {
-        $this->notNull[] = $this->_null( $data, $callable, $len, 'OR', true );
+        $this->data->notNull[] = $this->_null( $data, $callable, $len, 'OR', true );
         return $this;
     }
 
     public function orNull( array $data, ?Closure $callable = null, int $len = 100 ) : self
     {
-        $this->orNull[] = $this->_null( $data, $callable, $len, 'OR' );
+        $this->data->orNull[] = $this->_null( $data, $callable, $len, 'OR' );
         return $this;
     }
     public function orNotNull( array $data, ?Closure $callable = null, int $len = 100 ) : self
     {
-        $this->orNotNull[] = $this->_null( $data, $callable, $len, 'OR', true );
+        $this->data->orNotNull[] = $this->_null( $data, $callable, $len, 'OR', true );
         return $this;
     }
     public function andNull( array $data, ?Closure $callable = null, int $len = 100 ) : self
     {
-        $this->andNull[] = $this->_null( $data, $callable, $len, 'AND' );
+        $this->data->andNull[] = $this->_null( $data, $callable, $len, 'AND' );
         return $this;
     }
     public function andNotNull( array $data, ?Closure $callable = null, int $len = 100 ) : self
     {
-        $this->andNotNull[] = $this->_null( $data, $callable, $len, 'AND', true );
+        $this->data->andNotNull[] = $this->_null( $data, $callable, $len, 'AND', true );
         return $this;
     }
 
@@ -701,7 +693,7 @@ class BaseBuilder implements BaseBuilderInterface
         $dataAssoc->operator = ' ';
         $this->_afterCall( $callable, $dataAssoc );
 
-        $this->orderBy[] = $dataAssoc( $data );
+        $this->data->orderBy[] = $dataAssoc( $data );
         return $this;
     }
 
@@ -776,7 +768,7 @@ class BaseBuilder implements BaseBuilderInterface
         if ( ! $common->arrayInArray( $this->modelProperty->allowedFields, $rawData ) )
         {
             $errorException = sprintf( 
-                '"Column" variable need in list of allowed: "%s", given: "%s"', 
+                '"Column" variable need in list of allowed fields: "%s", given: "%s"', 
                 implode( ', ', $this->modelProperty->allowedFields ), 
                 $rawDataFields
             );
@@ -802,7 +794,7 @@ class BaseBuilder implements BaseBuilderInterface
             return $data;
         }
 
-        $mapFn = function ( array $prop ) use ( $data ) : array
+        $mapFn = function ( array $prop ) : array
         {
             if ( $this->_allowedFieldsFilter( $prop ) )
             {
@@ -813,15 +805,14 @@ class BaseBuilder implements BaseBuilderInterface
                     throw new ErrorParameterException( sprintf( 'Invalid parameter: "%s"', $key ) );
                 }
 
-                $data[ $key ] = date( $prop[ $key ] );
-                return $data;
+                $prop[ $key ] = date( $prop[ $key ] );
             }
 
             return $prop;
         };
 
         $res = array_map( $mapFn, $this->_getTimesFormatter() );
-        return reset( $res );
+        return array_merge( $data, ...$res );
     }
 
     public function __toString() : string

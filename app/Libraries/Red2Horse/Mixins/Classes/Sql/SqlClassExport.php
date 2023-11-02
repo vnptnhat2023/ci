@@ -18,6 +18,7 @@ use Red2Horse\Mixins\Classes\Data\
 
 use Red2Horse\Mixins\Traits\Object\TraitSingleton;
 
+use function Red2Horse\helpers;
 use function Red2Horse\Mixins\Functions\Config\getConfig;
 use function Red2Horse\Mixins\Functions\Instance\getComponents;
 use function Red2Horse\Mixins\Functions\Message\setErrorMessage;
@@ -72,6 +73,7 @@ class SqlClassExport
 
         if ( ! $validation->isValid( $posts, $rules ) )
         {
+            helpers( [ 'message' ] );
             setErrorMessage( $validation->getErrors() );
             return $return;
         }
@@ -84,6 +86,7 @@ class SqlClassExport
             throw new ErrorSqlException( $sql );
         }
 
+        helpers( [ 'message' ] );
         setSuccessMessage();
 
         $return[ 'sql' ] = $sql;
@@ -95,6 +98,7 @@ class SqlClassExport
         $user_password = getUserField( 'password' );
         if ( array_key_exists( $user_password, $posts ) )
         {
+            helpers( [ 'password' ] );
             $posts[ $user_password ] = getHashPass( $posts[ $user_password ] );
         }
 
@@ -181,6 +185,7 @@ class SqlClassExport
             }
         }
 
+        helpers( [ 'message' ] );
         setSuccessMessage();
 
         return $sqlParser;

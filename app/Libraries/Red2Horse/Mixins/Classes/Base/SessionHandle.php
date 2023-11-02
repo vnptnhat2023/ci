@@ -6,6 +6,7 @@ namespace Red2Horse\Mixins\Classes\Base;
 use Red2Horse\Exception\ErrorSqlException;
 use Red2Horse\Exception\ErrorJsonException;
 
+use function Red2Horse\helpers;
 use function Red2Horse\Mixins\Functions\Config\getConfig;
 use function Red2Horse\Mixins\Functions\Instance\getBaseInstance;
 use function Red2Horse\Mixins\Functions\Instance\getComponents;
@@ -54,6 +55,7 @@ class SessionHandle
 		return true;
 	}
 
+	/** @param array @userData Associative */
 	public function roleHandle ( array $userData ) : void
 	{
 		/** DB or session */
@@ -80,46 +82,39 @@ class SessionHandle
 		/** End cache config */
 
 		$roleField 		= getUserGroupField( 'role' );
-		// if ( $cacheConfig->enabled && $cacheData = $cacheComponent->get( $cacheName ) )
-		// {
-		// 	$sessId = ( int ) getField( 'id', 'user' );
-		// 	$userData[ $roleField ] = $cacheData[ $sessId ];
-		// 	getComponents( 'session' )->set( getConfig( 'session' )->session, $userData );
-		// }
-		// else
-		// {
-			$roleString 	= $roleJson[ $roleField ];
-			$randomString 	= getRandomString( $roleString );
-			$roleData 		= [ $roleField => $roleString, 'hash' => $randomString ];
-			$userData[ $roleField ] = $roleData;
+		$roleString 	= $roleJson[ $roleField ];
+		helpers( [ 'password' ] );
+		$randomString 	= getRandomString( $roleString );
+		$roleData 		= [ $roleField => $roleString, 'hash' => $randomString ];
+		$userData[ $roleField ] = $roleData;
 
-			$roleDB 		= [ $roleField => $roleString, 'hash' => getHashPass( $randomString ) ];
-			$updateSet 		= [ $roleField => json_encode( $roleDB ) ];
+		helpers( [ 'password' ] );
+		$roleDB 		= [ $roleField => $roleString, 'hash' => getHashPass( $randomString ) ];
+		$updateSet 		= [ $roleField => json_encode( $roleDB ) ];
 
-			$userId 		= $userData[ getUserField( 'id' ) ];
+		$userId 		= $userData[ getUserField( 'id' ) ];
 
-			if ( $cacheConfig->enabled && $cachedData = $cacheComponent->get( $cacheName ) )
+		if ( $cacheConfig->enabled && $cachedData = $cacheComponent->get( $cacheName ) )
+		{
+			$cachedData[ $userId ] = $roleDB;
+			$cacheComponent->set( $cacheName, $cachedData, $cacheConfig->cacheTTL );
+		}
+		else
+		{
+			$updateWhere 	= [ 'user_group.id' => $userData[ 'user.group_id' ] ];
+			$updateFilter 	= fn( $filter ) => $filter->setNoExplode( 'kv', $roleField );
+
+			/** Update to DB */
+			if ( ! model( 'user_group' )->edit( $updateSet , $updateWhere, 1, $updateFilter ) )
 			{
-				$cachedData[ $userId ] = $roleDB;
-				$cacheComponent->set( $cacheName, $cachedData, $cacheConfig->cacheTTL );
+				$errorLog = sprintf( 'user-id: "%s" logged-in, but update failed', $userId );
+				getComponents( 'common' )->log_message( 'error', $errorLog );
+
+				throw new ErrorSqlException( 'Cannot update: "Authentication"' );
 			}
-			else
-			{
-				$updateWhere 	= [ 'user_group.id' => $userData[ 'group_id' ] ];
-				$updateFilter 	= fn( $filter ) => $filter->setNoExplode( 'kv', $roleField );
+		}
 
-				/** Update to DB */
-				if ( ! model( 'user_group' )->edit( $updateSet , $updateWhere, 1, $updateFilter ) )
-				{
-					$errorLog = sprintf( 'user-id: "%s" logged-in, but update failed', $userId );
-					getComponents( 'common' )->log_message( 'error', $errorLog );
-
-					throw new ErrorSqlException( 'Cannot update: "Authentication"' );
-				}
-			}
-
-			/** Set session */
-			getComponents( 'session' )->set( getConfig( 'session' )->session, $userData );
-		// }
+		/** Set session */
+		getComponents( 'session' )->set( getConfig( 'session' )->session, $userData );
 	}
 }

@@ -40,8 +40,8 @@ class Services extends CoreServices
 
 		setConfig( 'throttle', static function ( $throttle )
 		{
-			$throttle->useThrottle = false;
-			// $throttle->throttle->captchaAttempts = 2;
+			// $throttle->useThrottle = false;
+			// $throttle->throttle->attempt = 2;
 			// $throttle->useThrottle = true;
 			return $throttle;
 		} );

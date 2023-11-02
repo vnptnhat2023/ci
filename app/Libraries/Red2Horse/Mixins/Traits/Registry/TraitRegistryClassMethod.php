@@ -66,7 +66,7 @@ trait TraitRegistryClassMethod
         }
         catch ( \Exception $e )
         {
-            throw new ErrorClassException( $e->getMessage(), 404 );
+            throw new ErrorClassException( $e->getMessage(), 406 );
         }
     }
 

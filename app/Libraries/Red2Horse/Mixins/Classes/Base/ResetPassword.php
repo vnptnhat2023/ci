@@ -7,13 +7,18 @@ use Red2Horse\Exception\ErrorParameterException;
 use Red2Horse\Facade\Validation\ValidationFacadeInterface;
 use Red2Horse\Mixins\Traits\Object\TraitSingleton;
 
+use function Red2Horse\helpers;
 use function Red2Horse\Mixins\Functions\Config\getConfig;
+use function Red2Horse\Mixins\Functions\Event\eventReturnedData;
 use function Red2Horse\Mixins\Functions\Instance\getBaseInstance;
 use function Red2Horse\Mixins\Functions\Instance\getComponents;
 use function Red2Horse\Mixins\Functions\Message\setErrorMessage;
 use function Red2Horse\Mixins\Functions\Message\setSuccessMessage;
 use function Red2Horse\Mixins\Functions\Model\model;
+use function Red2Horse\Mixins\Functions\Password\getHashPass;
 use function Red2Horse\Mixins\Functions\Sql\getUserField;
+use function Red2Horse\Mixins\Functions\Throttle\throttleGetAttempts;
+use function Red2Horse\Mixins\Functions\Throttle\throttleGetTypes;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
@@ -41,6 +46,7 @@ class ResetPassword
 				[ $userData[ getUserField( 'username' ) ] ]
 			);
 
+		helpers( [ 'message' ] );
 		setSuccessMessage( $success );
 	}
 
@@ -65,6 +71,7 @@ class ResetPassword
 				[ $userData[ getUserField( 'username' ) ], $email ]
 			);
 
+		helpers( [ 'message' ] );
 		setSuccessMessage( $success );
 	}
 
@@ -89,39 +96,46 @@ class ResetPassword
 			$configValidation->user_captcha
 		];
 
-		$groups = getComponents( 'throttle' )->showCaptcha() 
-			? $validateUserFieldWithCaptcha
-			: $validateUserField;
+		[ 'resetpassword_show_captcha_condition' => $showCaptchaCondition ]= eventReturnedData( 
+			'resetpassword_show_captcha_condition', 
+			throttleGetAttempts(),
+			throttleGetTypes()
+		);
+		
+		$groups = ( bool ) $showCaptchaCondition ? $validateUserFieldWithCaptcha : $validateUserField;
 		$rules 	= $validationComponent->getRules( $groups );
 		$data 	= [
 			$configValidation->user_username 	=> self::$username,
 			$configValidation->user_email 		=> self::$email
 		];
 
-		$message = getBaseInstance( Message::class );
+		helpers( [ 'message' ] );
 
 		if ( ! $validationComponent->isValid( $data, $rules ) )
 		{
-			$message ->errorInformation( 
-				true, 
-				array_values( $validationComponent->getErrors() )
-			);
+			$errorMessage = [
+				...array_values( $validationComponent->getErrors() ),
+				getComponents( 'common' )->lang( 'Red2Horse.errorIncorrectInformation' )
+			];
+			setErrorMessage( $errorMessage, true );
 			return false;
 		}
 
 		$userData = model( 'User/UserModel' )->first( $data );
 		if ( [] === $userData )
 		{
-			$message->errorInformation();
+			setErrorMessage( getComponents( 'common' )->lang( 'Red2Horse.errorIncorrectInformation' ), true );
 			return false;
 		}
 
 		$common 	= getComponents( 'common' );
-		$randomPw 	= getBaseInstance( Password::class )->getHashPass( $common->random_string() );
+		helpers( [ 'password' ] );
+		$randomPw 	= getHashPass( $common->random_string() );
 
 		$editSet 	= [ getUserField( 'username' ) 	=> $userData[ getUserField( 'username' ) ] ];
 		$editWhere 	= [ getUserField( 'password' ) 	=> $randomPw ];
 		$error 		= 'Cannot update user password';
+		helpers( [ 'message' ] );
 
 		if ( ! model( 'User/UserModel' )->edit( $editSet, $editWhere ) )
 		{

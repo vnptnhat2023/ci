@@ -7,6 +7,7 @@ use Red2Horse\Exception\ErrorArrayKeyNotFoundException;
 use Red2Horse\Exception\ErrorFileHandleException;
 use Red2Horse\Mixins\Classes\Sql\SqlClass;
 
+use function Red2Horse\helpers;
 use function Red2Horse\Mixins\Functions\Config\getConfig;
 use function Red2Horse\Mixins\Functions\Instance\getComponents;
 use function Red2Horse\Mixins\Functions\Instance\getInstance;
@@ -123,6 +124,7 @@ function createDatabase ( $s, $u, $p, $d, $port = null, array $intersect = [] ) 
 
     $rules = $validationComponent->getRules( $intersect );
     $data = array_combine( $intersect, [ $s, $u, $p, $d, $port ] );
+    helpers( [ 'message' ] );
 
     if ( ! $validationComponent->isValid( $data, $rules ) )
     {
@@ -143,7 +145,6 @@ function createDatabase ( $s, $u, $p, $d, $port = null, array $intersect = [] ) 
     }
 
     $d = getComponents( 'common' )->esc( $d );
-    
     
     if ( ! chmod(\Red2Horse\R2H_BASE_PATH, 777 ) )
     {
@@ -214,6 +215,7 @@ function databaseConnect ( string $s, string $u, string $p, string $d, ?int $por
 
     if ( ! $conn = mysqli_connect( $s, $u, $p, $d, $port ) )
     {
+        helpers( [ 'message' ] );
         setErrorMessage( $common->lang( 'Red2Horse.errorDatabaseConnect' ) );
         return false;
     }

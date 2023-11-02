@@ -3,7 +3,8 @@
 declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Classes\Base\Throttle;
 
-use Red2Horse\Mixins\Classes\Base\Throttle\Throttle;
+use Red2Horse\Exception\ErrorMethodException;
+use Red2Horse\Exception\ErrorValidationException;
 use Red2Horse\Facade\Cache\CacheFacade;
 use Red2Horse\Mixins\Classes\Base\Throttle\ThrottleInterface\ThrottleAdapterInterface;
 use Red2Horse\Mixins\Traits\Object\TraitSingleton;
@@ -16,49 +17,98 @@ class ThrottleCache implements ThrottleAdapterInterface
 {
     use TraitSingleton;
 
+    private         array           $props;
+    private         CacheFacade     $cache;
+    private         string          $attemptKey     = 'throttle_attempt';
+    private         int             $throttleAttempt;
+
     public function __construct () {}
+
+    public function init ( array $props ) : int
+    {
+        $this->props = $props;
+        $this->cache = getComponents( 'cache' );
+
+        if ( ! isset( $this->throttleAttempt ) )
+        {
+            $this->throttleAttempt = $this->fetch();
+        }
+
+        return $this->throttleAttempt;
+    }
+
+    private function fetch () : int
+    {
+        if ( is_int( $attempt = $this->get() ) )
+        {
+            return $attempt;
+        }
+
+        $this->handle( [ $this->attemptKey => 1 ] );
+
+        return 1;
+    }
 
     public function isSupported () : bool
     {
-        return $this->getCache()->isSupported();
+        return $this->cache->isSupported();
     }
 
-    public function increment ( Throttle $baseThrottle ) : bool
+    public function increment () : bool
     {
-        return $this->handle( $baseThrottle );
+        return $this->handle( [ $this->attemptKey => $this->props[ 'attempt' ] ] );
     }
 
-    public function cleanup ( Throttle $baseThrottle ) : void
+    public function decrement () : bool
     {
-        $this->handle( $baseThrottle, true );
+        return $this->handle( [ $this->attemptKey => $this->props[ 'attempt' ] ] );
     }
 
-    public function delete ( Throttle $baseThrottle ) : bool
+    public function cleanup () : void
     {
-        return $this->getCache()->delete( $baseThrottle->cacheName );
+        $this->handle( [ $this->attemptKey => 0 ] );
     }
 
-    private function handle ( Throttle $baseThrottle, bool $reset = false ) : bool
+    public function delete () : bool
     {
-        $setData = [];
+        return $this->cache->delete( $this->props[ 'cacheName' ] );
+    }
 
-        if ( $reset || empty( $this->getCache() ->get( $baseThrottle->cacheName ) ) )
-		{
-			$setData[ 'throttle_attempt' ] = 1;
-		}
-        else
+    /**
+     * @throws ErrorMethodException
+     */
+    private function handle ( array $data ) : bool
+    {
+        $cached = $this->cache->set( $this->props[ 'cacheName' ], $data, $this->props[ 'timeout' ] );
+        
+        if ( ! $cached )
         {
-            $setData[ 'throttle_attempt' ] += 1;
+            throw new ErrorMethodException( 'Cannot set throttle attempt' );
         }
 
-		$isset = $this->getCache() ->set( $baseThrottle->cacheName, $setData, $baseThrottle->timeout );
-
-		return $isset;
+        return $cached;
     }
-    
 
-    private function getCache() : CacheFacade
+    /** 
+     * @throws ErrorValidationException
+     * @return false|int
+     */
+    private function get ()
     {
-        return getComponents( 'cache' );
+        $attempt = $this->cache->get( $this->props[ 'cacheName' ] );
+
+        if ( isset( $attempt[ $this->attemptKey ] ) && is_numeric( $attempt[ $this->attemptKey ] ) )
+        {
+            $attempt = ( int ) $attempt[ $this->attemptKey ];
+
+            if ( $attempt < 0 )
+            {
+                throw new ErrorValidationException( 'Invalid data format: "attempt"' );
+            }
+
+            return $attempt;
+        }
+
+        return false;
     }
 }

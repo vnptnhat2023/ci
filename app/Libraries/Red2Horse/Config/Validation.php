@@ -44,8 +44,8 @@ class Validation
 
 	// Throttle columns
 	protected 		string 		$throttle_id 			= 'id';
+	protected 		string 		$throttle_attempt		= 'attempt';
 	protected 		string 		$throttle_ip 			= 'ip';
-	protected 		string 		$throttle_type 			= 'type';
 	protected 		string 		$throttle_createdAt 	= 'created_at';
 	protected 		string 		$throttle_updatedAt 	= 'updated_at';
 

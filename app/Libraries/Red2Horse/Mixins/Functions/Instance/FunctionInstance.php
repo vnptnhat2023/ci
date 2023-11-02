@@ -35,14 +35,14 @@ function getComponents ( string $name, bool $getShared = true, bool $getAdapter 
 /**
  * @return object|\Red2Horse\Mixins\Traits\Object\TraitSingleton
  */
-function getBaseInstance ( string $name, bool $getShared = true ) : object
+function getBaseInstance ( string $name, bool $getShared = true, string $prefix = '', string $suffix = '' ) : object
 {
-    return classInit( baseNamespace( $name ), 'RegistryClass', $getShared ) ->getInstance();
+    return classInit( baseNamespace( $name, $prefix, $suffix ), 'RegistryClass', $getShared ) ->getInstance();
 }
 
-function ExceptionInstance ( string $name, bool $getShared = true ) : object
+function ExceptionInstance ( string $name, bool $getShared = true, string $prefix = '', string $suffix = '' ) : object
 {
-    return classInit( exceptionNamespace( $name ), 'RegistryClass', $getShared ) ->getInstance();
+    return classInit( exceptionNamespace( $name, $prefix, $suffix ), 'RegistryClass', $getShared ) ->getInstance();
 }
 
 function getInstanceMethods ( string $classNamespace, string $state = 'RegistryClass', bool $getShared = true ) : array

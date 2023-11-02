@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Classes\Sql;
 
 use Red2Horse\Exception\ErrorPropertyException;
-use Red2Horse\Facade\Query\QueryFacadeInterface;
+use Red2Horse\Facade\Query\QueryFacadeInterface as connection;
 use Red2Horse\Mixins\Interfaces\Sql\ModelInterface;
 use Red2Horse\Mixins\Traits\Object\TraitSingleton;
 
@@ -18,31 +18,24 @@ class Model implements ModelInterface
     use TraitSingleton;
 
     protected           BaseBuilder             $builder;
-
     /** @var            <string, string>        $createdAt */
     public              array                   $createdAt;
-
     /** @var            <string, string>        $deletedAt */
     public              array                   $deletedAt;
-
     /** @var            <string, string>        $updatedAt */
     public              array                   $updatedAt;
-
     /** @var            string[]                $updatedAt */
     public              array                   $validTimeFormat = [ 'Y-m-d H:i:s', 'Y-m-d' ];
-
     /** @var            string[]                $allowedFields */
-    public              array                   $allowedFields = [];
-
+    public              array                   $allowedFields  = [];
     protected           string                  $table;
+    private             bool                    $init           = false;
+    protected           bool                    $useSoftDelete  = false;
 
-    public function __construct (){}
+    public function __construct () {}
 
     public static function model (
-        ?string $table = null, 
-        ?QueryFacadeInterface $connection = null, 
-        \stdClass $childProperties = null, 
-        bool $getShare = true
+        ?string $table = null, ?connection $connection = null, \stdClass $childProperties = null, bool $getShare = true
     ) : self
     {
         return $getShare
@@ -50,7 +43,7 @@ class Model implements ModelInterface
             : ( new self )->init( $table, $connection, $childProperties );
     }
 
-    public function init ( ?string $table = null, ?QueryFacadeInterface $connection = null, \stdClass $childProperties = null ) : self
+    public function init ( ?string $table = null, ?connection $connection = null, \stdClass $childProperties = null ) : self
     {
         $this->builder = getInstance( BaseBuilder::class, 'RegistryClass', false );
 
@@ -59,8 +52,17 @@ class Model implements ModelInterface
             ->setConnection( $connection )
             ->setModelProperty( $childProperties );
 
+        $this->builder->init();
+
+        $this->init = true;
+
         return $this;
-    } 
+    }
+
+    public function getInit ()
+    {
+        return $this->init;
+    }
 
     public function setTable ( ?string $table = null ) : self
     {
@@ -80,7 +82,7 @@ class Model implements ModelInterface
         return $this;
     }
 
-    public function setConnection ( ?QueryFacadeInterface $connection = null ) : self
+    public function setConnection ( ?connection $connection = null ) : self
     {
         $this->builder->setConnection( $connection );
         return $this;

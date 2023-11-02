@@ -5,8 +5,12 @@ namespace Red2Horse\Mixins\Classes\Base;
 
 use Red2Horse\Mixins\Traits\Object\TraitSingleton;
 
+use function Red2Horse\helpers;
 use function Red2Horse\Mixins\Functions\Auth\withSession;
 use function Red2Horse\Mixins\Functions\Instance\getBaseInstance;
+use function Red2Horse\Mixins\Functions\Message\getMessageInstance;
+use function Red2Horse\Mixins\Functions\Password\getHashPass;
+use function Red2Horse\Mixins\Functions\Password\getVerifyPass;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
@@ -47,33 +51,39 @@ class Red2Horse
 
 	public function getHashPass ( string $password ) : string
 	{
-		return getBaseInstance( Password::class )->getHashPass( $password );
+		helpers( [ 'password' ] );
+		return getHashPass( $password );
 	}
 
 	public function getVerifyPass ( string $p, string $hashed ) : bool
 	{
-		return getBaseInstance( Password::class )->getVerifyPass( $p, $hashed );
+		helpers( [ 'password' ] );
+		return getVerifyPass( $p, $hashed );
 	}
 
 	/** @return object|array */
 	public function getResult ()
 	{
-		return getBaseInstance( Message::class )->getResult();
+		helpers( [ 'message' ] );
+		return getMessageInstance()->getResult();
 	}
 
 	/** @return mixed */
 	public function getMessage ( array $add = [], bool $asObject = true )
 	{
-		return getBaseInstance( Message::class )->getMessage( $add, $asObject );
+		helpers( [ 'message' ] );
+		return getMessageInstance()->getMessage( $add, $asObject );
 	}
 
 	public function withPermission ( array $data, string $condition = 'or' ) : bool
 	{
+		\Red2Horse\helpers( [ 'authorization' ] );
 		return withSession( 'permission', $data, $condition );
 	}
 
 	public function withRole ( array $data, string $condition = 'or' ) : bool
 	{
+		\Red2Horse\helpers( [ 'authorization' ] );
 		return withSession( 'role', $data, $condition );
 	}
 

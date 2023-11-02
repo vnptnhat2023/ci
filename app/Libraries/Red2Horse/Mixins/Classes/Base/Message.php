@@ -6,8 +6,14 @@ namespace Red2Horse\Mixins\Classes\Base;
 
 use Red2Horse\Mixins\Traits\Object\TraitSingleton;
 
-use function Red2Horse\Mixins\Functions\Instance\getComponents;
+use function Red2Horse\helpers;
 use function Red2Horse\Mixins\Functions\Config\getConfig;
+use function Red2Horse\Mixins\Functions\Event\eventReturnedData;
+use function Red2Horse\Mixins\Functions\Throttle\throttleGetAttempts;
+use function Red2Horse\Mixins\Functions\Throttle\throttleGetTypes;
+use function Red2Horse\Mixins\Functions\Throttle\throttleInstance;
+use function Red2Horse\Mixins\Functions\Throttle\throttleIsLimited;
+use function Red2Horse\Mixins\Functions\Throttle\throttleIsSupported;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
@@ -15,38 +21,28 @@ class Message
 {
 	use TraitSingleton;
 
-	public static bool $incorrectResetPassword = false;
-	public static bool $incorrectLoggedIn = false;
-	public static bool $successfully = false;
-	public static bool $hasBanned = false;
-	public static bool $accountInactive = false;
+	public static 		bool 		$incorrectResetPassword 	= false;
+	public static 		bool 		$incorrectLoggedIn 			= false;
+	public static 		bool 		$successfully 				= false;
+	public static 		bool 		$hasBanned 					= false;
+	public static 		bool 		$accountInactive 			= false;
+	public static 		array 		$errors 					= [];
+	public static 		array 		$success					= [];
+	public static 		array 		$info 						= [];
 
-	public static array $errors = [];
-	public static array $success = [];
-	public static array $info = [];
-
-	private function __construct () {}
+	private function __construct ()
+	{
+		getConfig( 'event' )->init('message_show_captcha_condition', null, false );
+	}
 
 	/** @return array */
-	public function getResult () : array
+	public function getResult ( ?array $add = null ) : array
 	{
+		helpers( [ 'throttle' ] );
 		$baseConfig 		= getConfig( 'BaseConfig' );
-		$configThrottle 	= getConfig( 'Throttle' );
 		$configValidation 	= getConfig( 'Validation' );
-		$throttleComponent 	= getComponents( 'throttle' );
-
-		$limited = $configThrottle->useThrottle
-							? $throttleComponent->limited()
-							: false;
-
-		$attempts 			= $throttleComponent->getAttempts();
-		$captcha 			= $throttleComponent->showCaptcha();
-
 		$suspend 			= self::$hasBanned;
 		$active 			= ! self::$accountInactive;
-
-		/** @var bool $success */
-		$success = self::$successfully;
 
 		$resultMessage = [
 			// 'auth_status' => [ 'reset' => $reset, 'login' => $login ],
@@ -54,14 +50,13 @@ class Message
 				'suspend' 		=> $suspend,
 				'active' 		=> ! $active
 			],
-
 			'show' 			=> [
-				'form' 			=> ! $limited && ! $success,
+				'form' 			=> ! throttleIsLimited() && ! self::$successfully,
 				'remember_me' 	=> $baseConfig->useRememberMe,
 				'captcha' 		=> false,
-				'attempts' 		=> $attempts
+				'attempts' 		=> throttleGetAttempts(),
+				'attempts_type' => throttleGetTypes()
 			],
-
 			'validation' 	=> [
 				$configValidation->user_username,
 				$configValidation->user_email,
@@ -70,10 +65,21 @@ class Message
 			]
 		];
 
-		if ( $configThrottle->useThrottle )
+		if ( throttleIsSupported() )
 		{
-			$resultMessage[ 'throttle_status' ] 	= [ 'limited' => $limited ];
-			$resultMessage[ 'show' ][ 'captcha' ] 	= $captcha;
+			[ 'message_show_captcha_condition' => $showCaptcha ] = eventReturnedData( 
+				'message_show_captcha_condition', 
+				throttleGetAttempts(), throttleGetTypes() 
+			);
+			
+			$resultMessage[ 'throttle_status' ] 	= [ 'limited' => throttleIsLimited() ];
+			$resultMessage[ 'show' ][ 'captcha' ] 	= ( bool ) $showCaptcha;
+		}
+
+		if ( null !== $add || ! empty( $add ) )
+		{
+			$add 			= [ 'added' => $add ];
+			$resultMessage 	= array_merge( $resultMessage, $add );
 		}
 
 		return $resultMessage;
@@ -82,16 +88,15 @@ class Message
 	/**
 	 * @return mixed array|object
 	 */
-	public function getMessage ( array $add = [], bool $asObject = true, bool $getConfig = false )
+	public function getMessage ( ?array $add = null, bool $asObject = true, bool $getConfig = false )
 	{
 		$message = [
-			'message' 		=> [
-				'success' 		=> self::$success,
-				'errors' 		=> self::$errors,
-				'normal' 		=> self::$info
+			'message' 	=> [
+				'success' 	=> self::$success,
+				'errors' 	=> self::$errors,
+				'normal' 	=> self::$info
 			],
-
-			'result' => $this->getResult()
+			'result' 	=> $this->getResult()
 		];
 
 		if ( $getConfig )
@@ -99,59 +104,12 @@ class Message
 			$message[ 'config' ] = get_object_vars( getConfig() );
 		}
 
-		if ( ! empty( $add ) )
+		if ( null !== $add || ! empty( $add ) )
 		{
-			$add 				= [ 'added' => $add ];
-			$message 			= array_merge( $message, $add );
+			$add 		= [ 'added' => $add ];
+			$message 	= array_merge( $message, $add );
 		}
 
-		return ( $asObject ) 	? json_decode( json_encode( $message ) )
-								: $message;
-	}
-
-	/** @return mixed array|object|void */
-	public function errorMultiLogin ( bool $throttle = true, array $add = [], $getReturn = true )
-	{
-		! $throttle 				?: getComponents( 'throttle' )->throttle();
-		self::$incorrectLoggedIn 	= true;
-
-		$errors[] 					= getComponents( 'common' )
-										->lang( 'Red2Horse.noteLoggedInAnotherPlatform' );
-		self::$errors 				= [ ...$errors, ...array_values( $add ) ];
-
-		if ( $getReturn )
-		{
-			return $this->getMessage();
-		}
-	}
-
-	/** @return mixed array|object */
-	public function errorInformation ( bool $throttle = true, array $add = [] )
-	{
-		! $throttle 				?: getComponents( 'throttle' )->throttle();
-		self::$incorrectLoggedIn 	= true;
-
-		$errors[] 					= getComponents( 'common' )
-										->lang( 'Red2Horse.errorIncorrectInformation' );
-		self::$errors 				= [ ...$errors, ...array_values( $add ) ];
-
-		return $this->getMessage();
-	}
-
-	/**
-	 * @return mixed array|object|void
-	 */
-	public function errorAccountStatus ( string $status, bool $throttle = true, $getReturn = true )
-	{
-		! $throttle 				?: getComponents( 'throttle' )->throttle();
-		self::$hasBanned 			= ( $status === 'banned' );
-		self::$accountInactive 		= ( $status === 'inactive' );
-		self::$errors[] 			= getComponents( 'common' )
-										->lang( 'Red2Horse.errorNotReadyYet', [ $status ] );
-
-		if ( $getReturn )
-		{
-			return $this->getMessage();
-		}
+		return ( $asObject ) ? json_decode( json_encode( $message ) ) : $message;
 	}
 }

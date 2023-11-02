@@ -14,25 +14,28 @@ class Event
 {
     use TraitSingleton;
 
-    /** Many times trigger */
-    public bool $manyTrigger = false;
-    public bool $useBefore = true;
-    public bool $useAfter = true;
-
+    /** Use */
+    public          bool            $manyTrigger        = false;
+    public          bool            $useBefore          = true;
+    public          bool            $useAfter           = true;
     /** Prefix */
-    public string $prefix = 'R2h';
-    public string $beforePrefix = 'before';
-    public string $afterPrefix = 'after';
-    
+    public          string          $prefix             = 'R2h';
+    public          string          $beforePrefix       = 'before';
+    public          string          $afterPrefix        = 'after';
     /** Events */
-    public array $events = [];
-    protected array $eventReg = [
-        'get_message'         => UserDefinedFunctions::class,
-        'is_logged'           => UserDefinedFunctions::class,
-        'get_result'          => UserDefinedFunctions::class,
-        'login'               => UserDefinedFunctions::class,
-        'logout'              => UserDefinedFunctions::class,
-        'request_password'    => UserDefinedFunctions::class
+    public          array           $events             = [];
+    protected array $eventPrefix = [
+        'get_message'      => UserDefinedFunctions::class,
+        'is_logged'        => UserDefinedFunctions::class,
+        'get_result'       => UserDefinedFunctions::class,
+        'login'            => UserDefinedFunctions::class,
+        'logout'           => UserDefinedFunctions::class,
+        'request_password' => UserDefinedFunctions::class
+    ];
+    protected array $eventNoPrefix = [
+        'message_show_captcha_condition'        => UserDefinedFunctions::class,
+        'authentication_show_captcha_condition' => UserDefinedFunctions::class,
+        'resetpassword_show_captcha_condition'  => UserDefinedFunctions::class
     ];
 
     private function __construct ()
@@ -43,21 +46,33 @@ class Event
     /**
      * @var mixed $key
      */
-    public function init ( $key = null, ?string $classNamespace = null ) : void
+    public function init ( ?string $key = null, ?string $classNamespace = UserDefinedFunctions::class, bool $withPrefix = true ) : void
     {
-        if ( null !== $key && null !== $classNamespace && ! array_key_exists( $key, $this->eventReg ) )
+        if ( null !== $key && ! array_key_exists( $key, $this->eventPrefix ) )
         {
-            $this->eventReg[ $key ] = $classNamespace;
+            $this->eventNoPrefix[ $key ] = $classNamespace ?: UserDefinedFunctions::class;
         }
 
-        $events = [];
+        if ( $withPrefix )
+        {
+            $this->handle();
+        }
 
-        foreach ( $this->eventReg as $stringCallable => $className )
+        $this->events = array_merge( $this->eventPrefix, $this->eventNoPrefix );
+    }
+
+    private function handle () : void
+    {
+        foreach ( $this->eventPrefix as $stringCallable => $className )
         {
             if ( $this->useBefore )
             {
                 $beforeKey = $this->getPrefixNamed( $this->beforePrefix, $stringCallable );
                 $events[ $beforeKey ] = $className;
+            }
+            else
+            {
+                $events[ $stringCallable ] = $className;
             }
 
             if ( $this->useAfter )
@@ -65,9 +80,13 @@ class Event
                 $afterKey = $this->getPrefixNamed( $this->afterPrefix, $stringCallable );
                 $events[ $afterKey ] = $className;
             }
+            else
+            {
+                $events[ $stringCallable ] = $className;
+            }
         }
 
-        $this->events = $events;
+        $this->eventPrefix = $events;
     }
 
     /** @param string $abPrefix before or after prefix */

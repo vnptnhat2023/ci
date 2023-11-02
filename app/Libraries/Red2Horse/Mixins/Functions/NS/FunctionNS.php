@@ -8,29 +8,29 @@ use Red2Horse\Exception\ErrorParameterException;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
-function modelNamespace ( string $name = '' ) : string
+function modelNamespace ( string $name = '', string $prefix = '', string $suffix = '' ) : string
 {
-    return formatFunctionNamespace( $name, 'MODEL_NAMESPACE' );
+    return formatFunctionNamespace( $name, 'MODEL_NAMESPACE', $prefix, $suffix );
 }
 
-function configNamespace ( string $name = '' ) : string
+function configNamespace ( string $name = '', string $prefix = '', string $suffix = '' ) : string
 {
-    return formatFunctionNamespace( $name, 'CONFIG_NAMESPACE' );
+    return formatFunctionNamespace( $name, 'CONFIG_NAMESPACE', $prefix, $suffix );
 }
 
-function baseNamespace ( string $name = '' ) : string
+function baseNamespace ( string $name = '', string $prefix = '', string $suffix = '' ) : string
 {
-    return formatFunctionNamespace( $name, 'BASE_NAMESPACE' );
+    return formatFunctionNamespace( $name, 'BASE_NAMESPACE', $prefix, $suffix );
 }
 
-function exceptionNamespace ( string $name = '' ) : string
+function exceptionNamespace ( string $name = '', string $prefix = '', string $suffix = '' ) : string
 {
-    return formatFunctionNamespace( $name, 'EXCEPTION_NAMESPACE' );
+    return formatFunctionNamespace( $name, 'EXCEPTION_NAMESPACE', $prefix, $suffix );
 }
 
-function functionNamespace ( string $name = '' ) : string
+function functionNamespace ( string $name = '', string $prefix = '', string $suffix = '' ) : string
 {
-    return formatFunctionNamespace( $name, 'FUNCTION_NAMESPACE' );
+    return formatFunctionNamespace( $name, 'FUNCTION_NAMESPACE', $prefix, $suffix );
 }
 
 function registryNamespace ( string $name = '', string $prefix = '', string $suffix = '' ) : string
@@ -50,11 +50,15 @@ function formatFunctionNamespace ( string $name = '', string $configNamespace, s
 
     if ( false === strpos( $name, '\\' ) )
     {
+        '' === $prefix || $prefix = sprintf( '%s\\', ucfirst( trim( $prefix, ' \\' ) ) );
+        '' === $suffix || $suffix = sprintf( '\\%s', ucfirst( trim( $suffix, ' \\' ) ) );
+        $name = ucfirst( trim( $name, '' ) );
+
         $name = sprintf(
             '%s%s%s%s',
             $prefix,
             $configNamespaces[ strtoupper( $configNamespace ) ],
-            ucfirst( trim( $name ) ),
+            $name,
             $suffix
         );
     }

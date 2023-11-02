@@ -9,6 +9,7 @@ use Red2Horse\Mixins\Traits\
     Object\TraitReadOnly
 };
 
+use function Red2Horse\helpers;
 use function Red2Horse\Mixins\Functions\Event\on;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
@@ -18,7 +19,7 @@ class Sql
 	use TraitSingleton, TraitReadOnly;
 
     protected       bool        $esc            = true;
-    protected       bool        $useQuery       = false;
+    protected       bool        $useQuery       = true;
 
 	protected string $userTemplateTbl = '
 CREATE TABLE IF NOT EXISTS `:user:` (
@@ -55,25 +56,22 @@ PRIMARY KEY (`:id:`)
     protected string $throttleTemplateTbl = '
 CREATE TABLE IF NOT EXISTS :throttle: (
 :id: bigint UNSIGNED NOT NULL AUTO_INCREMENT,
-:ip: varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL,
-:type: int UNSIGNED NOT NULL DEFAULT 0,
+:attempt: bigint UNSIGNED NOT NULL DEFAULT 0,
+:ip: varchar(128) COLLATE utf8mb4_general_ci DEFAULT NULL,
 :created_at: datetime DEFAULT NULL,
 :updated_at: datetime DEFAULT NULL,
 PRIMARY KEY (:id:)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-    ';
-    // ON DUPLICATE KEY UPDATE
-    // INSERT 
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;';
     protected       $insertTemplate           = 'INSERT INTO `%s` (%s) VALUES (%s)';
-    /** UPDATE */
+    protected       $replaceTemplate          = 'REPLACE INTO `%s` VALUES (%s)';
     protected       $updateTemplate           = 'UPDATE `%s` SET %s WHERE %s';
     protected       $updateJoinTemplate       = 'UPDATE %s JOIN %s SET %s WHERE %s';
-    /** DELETE */
     protected       $deleteTemplate           = 'DELETE FROM `%s` WHERE %s';
     protected       $deleteJoinTemplate       = 'DELETE JOIN %s FROM `%s` WHERE %s';
     
 	private function __construct ()
     {
+        helpers( [ 'event' ] );
         on ( 'after_sql_class_init', self::class );
         $this->after_sql_class_init();
     }

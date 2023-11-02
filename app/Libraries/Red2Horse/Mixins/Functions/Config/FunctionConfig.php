@@ -16,16 +16,6 @@ use function Red2Horse\Mixins\Functions\NS\configNamespace;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
-function initConfig () : void
-{
-    getConfig( 'BaseConfig' );
-
-    if ( getConfig( 'throttle' )->useThrottle )
-    {
-        getComponents( 'Throttle' );
-    }
-}
-
 /**
  * @param ?string $name null: base config
 //  * @return object|\Red2Horse\Mixins\Traits\Object\TraitSingleton

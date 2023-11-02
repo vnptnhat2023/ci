@@ -3,16 +3,15 @@
 namespace App\Controllers;
 
 use App\Libraries\DesignPattern as StateGyPattern;
-use \Config\Services;
 use CodeIgniter\Events\Events;
 
+use function Red2Horse\Mixins\Functions\Model\model;
 
 class Test extends BaseController {
 
-	// use TraitEvents;
-	public function index($a = '')
+	public function index()
 	{
-		setcookie( 'abc', 'xyz', 60, null, null, null, null );
+		
 	}
 
 	public function migrate()
@@ -237,13 +236,6 @@ class Test extends BaseController {
 		} else {
 			echo 'pass';
 		}
-	}
-
-	public function throttle ()
-	{
-		$throttler = \Config\Services::throttler();
-		// $getIPAddress = \Config\Services::request();
-		$throttler->check($this->request->getIPAddress(), 5, MINUTE);
 	}
 
 }

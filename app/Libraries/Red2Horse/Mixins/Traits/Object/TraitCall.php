@@ -15,32 +15,28 @@ use function Red2Horse\Mixins\Functions\Instance\getInstanceMethods;
 /** Using with TraitSingleton::class only ... */
 trait TraitCall
 {
-	private object $traitCallInstance;
-
-	private array $traitCallMethods;
-    
-    private array $traitCallback = [
-        'callback' => null,
+	private     object      $traitCallInstance;
+	private     array       $traitCallMethods;
+    private     bool        $traitUseBefore;
+    private     bool        $traitUseAfter;
+    private     string      $traitBeforePrefix;
+    private     string      $traitAfterPrefix;
+    private     array       $traitCallback = [
+        'callback'  => null,
         'arguments' => []
     ];
-
-    private bool $traitUseBefore;
-    private bool $traitUseAfter;
-    private string $traitBeforePrefix;
-    private string $traitAfterPrefix;
 
     public function run ( string $className = '' ) : void
     {
         $eventConfig = getConfig( 'event' );
 
-        $this->traitUseBefore ??= $eventConfig->useBefore;
-        $this->traitUseAfter ??= $eventConfig->useAfter;
-        $this->traitBeforePrefix ??= $eventConfig->beforePrefix;
-        $this->traitAfterPrefix ??= $eventConfig->afterPrefix;
-
-        $this->traitCallInstance = getInstance( $className );
-        $this->traitCallMethods = getInstanceMethods( $className );
-        $this->traitCallback[ 'callback' ] = function( string $name, $args ) : bool
+        $this->traitUseBefore               ??= $eventConfig->useBefore;
+        $this->traitUseAfter                ??= $eventConfig->useAfter;
+        $this->traitBeforePrefix            ??= $eventConfig->beforePrefix;
+        $this->traitAfterPrefix             ??= $eventConfig->afterPrefix;
+        $this->traitCallInstance            = getInstance( $className );
+        $this->traitCallMethods             = getInstanceMethods( $className );
+        $this->traitCallback[ 'callback' ]  = function( string $name, $args ) : bool
         {
             return getBaseInstance( 'event' )->trigger( $name, $args );
         };
@@ -50,17 +46,10 @@ trait TraitCall
     {
         if ( in_array( $method, $this->traitCallMethods, true ) )
         {
-            $eventConfig = getConfig( 'event' );
-            $beforeName = $eventConfig->getPrefixNamed(
-                $this->traitBeforePrefix,
-                $eventConfig->underString( $method )
-            );
-            $afterName = $eventConfig->getPrefixNamed(
-                $this->traitAfterPrefix,
-                $eventConfig->underString( $method )
-            );
-
-            $callback = $this->traitCallback[ 'callback' ] ?? null;
+            $eventConfig    =   getConfig( 'event' );
+            $beforeName     =   $eventConfig->getPrefixNamed( $this->traitBeforePrefix, $eventConfig->underString( $method ) );
+            $afterName      =   $eventConfig->getPrefixNamed( $this->traitAfterPrefix, $eventConfig->underString( $method ) );
+            $callback       =   $this->traitCallback[ 'callback' ] ?? null;
 
             if ( is_callable( $callback ) )
             {

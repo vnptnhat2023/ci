@@ -25,12 +25,18 @@ function RegModelInstance () : RegistryModelClass
 function model ( 
     ?string $name = null,  
     ?string $table = null, 
-    bool $getShared = true, 
+    bool $getShared = false, 
     ?QueryFacadeInterface $connection = null ) : Model
 {
-    $instance = RegModelInstance();
     $namespace = str_replace( '/', '\\', modelNamespace( $name ) );
 
+    if ( ! $getShared )
+    {
+        return new $namespace;
+    }
+
+    $instance = RegModelInstance();
+    
     if ( $instance->hasClass( $namespace ) )
     {
         return $instance->instanceData( $namespace );
@@ -42,8 +48,8 @@ function model (
         throw new ErrorClassException( $errorClassException );
     }
 
-    $model = $getShared ? new $namespace() : $instance->getClass( $namespace );
-
+    $model = $instance->getClass( $namespace );
+    // dd( $model, $instance );
     if ( null !== $table )
     {
         $model->init( $table, $connection );
@@ -54,8 +60,14 @@ function model (
 
 function BaseModel ( ?string $tableName = null, bool $getShared = false , ?QueryFacadeInterface $connection = null ) : Model
 {
-    $instance = RegModelInstance();
     $namespace = Model::class;
+
+    if ( ! $getShared )
+    {
+        return new $namespace;
+    }
+
+    $instance = RegModelInstance();
 
     if ( $instance->hasClass( $namespace ) )
     {
@@ -68,7 +80,7 @@ function BaseModel ( ?string $tableName = null, bool $getShared = false , ?Query
         throw new ErrorClassException( $errorClassException );
     }
 
-    $model = $getShared ? new $namespace() : $instance->getClass( $namespace );
+    $model = $instance->getClass( $namespace );
 
     if ( null !== $tableName )
     {

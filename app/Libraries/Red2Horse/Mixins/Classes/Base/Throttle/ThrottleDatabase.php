@@ -15,28 +15,64 @@ class ThrottleDatabase implements ThrottleAdapterInterface
 {
     use TraitSingleton;
 
-    protected Model $model;
+    // Throttle/ThrottleModel
+    protected       string      $modelName = 'Throttle/ThrottleModel';
+    protected       Model       $model;
+    private         array       $props;
+    private         array       $rowAttempt;
 
-    public function __construct () { }
+    public function __construct (){}
 
+    public function init ( array $props ) : int
+    {
+        $this->props = $props;
+        // $this->modelName = $props[ 'model_namespace' ];
+
+        if ( ! isset( $this->model ) )
+        {
+            $this->model = model( $this->modelName );
+        }
+
+        if ( ! isset( $this->rowAttempt ) )
+        {
+            $this->rowAttempt = $this->fetch();
+        }
+
+        return ( int ) $this->rowAttempt[ 'attempt' ];
+    }
+    
     public function isSupported () : bool
     {
-        $this->model = model( 'Throttle/ThrottleModel' );
-        return isset( $this->model );
+        return $this->model->getInit();
     }
 
-    public function increment ( Throttle $baseThrottle ) : bool
+    private function fetch () : array
     {
-        return true;
+        return $this->model->throttleFetch( $this->props );
     }
 
-    public function cleanup ( Throttle $baseThrottle ) : void
+    private function throttleModelUpdate ( bool $reset = false ) : bool
     {
-        
+        return $this->model->throttleUpdate( $this->props, $reset );
     }
 
-    public function delete ( Throttle $baseThrottle ) : bool
+    public function increment () : bool
     {
-        return true;
+        return $this->throttleModelUpdate();
+    }
+
+    public function decrement () : bool
+    {
+        return $this->throttleModelUpdate();
+    }
+
+    public function cleanup () : void
+    {
+        $this->throttleModelUpdate( true );
+    }
+
+    public function delete () : bool
+    {
+        return $this->throttleModelUpdate();
     }
 }

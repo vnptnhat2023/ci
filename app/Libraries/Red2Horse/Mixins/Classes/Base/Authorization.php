@@ -8,6 +8,7 @@ use Red2Horse\Exception\ErrorUnauthorizedException;
 use Red2Horse\Facade\Cache\CacheFacade;
 use Red2Horse\Mixins\Traits\Object\TraitSingleton;
 
+use function Red2Horse\helpers;
 use function Red2Horse\Mixins\Functions\Config\getConfig;
 use function Red2Horse\Mixins\Functions\Instance\getBaseInstance;
 use function Red2Horse\Mixins\Functions\Instance\getComponents;
@@ -93,6 +94,7 @@ class Authorization
 			return false;
 		}
 
+		helpers( [ 'password' ] );
 		if ( ! getVerifyPass( $this->sessionData[ 'hash' ], $userData[ 'hash' ] ) )
 		{
 			$logError = ( new ErrorUnauthorizedException() )->getMessage();

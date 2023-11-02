@@ -7,8 +7,10 @@ use Red2Horse\Exception\ErrorArrayException;
 use Red2Horse\Exception\ErrorParameterException;
 use Red2Horse\Mixins\Traits\Object\TraitSingleton;
 
+use function Red2Horse\helpers;
 use function Red2Horse\Mixins\Functions\Config\getConfig;
 use function Red2Horse\Mixins\Functions\Data\dataKey;
+use function Red2Horse\Mixins\Functions\Instance\getInstance;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
@@ -16,36 +18,42 @@ class SqlCompiler
 {
     use TraitSingleton;
 
-    private ?\stdClass $baseBuilder;
+    private     SqlBuilderData  $data;
+    private     string          $table;
 
-    public function __construct () { }
-
-    public function init ( ?\stdClass $baseBuilder ) : self
+    public function __construct ()
     {
-        $this->baseBuilder = $baseBuilder;
+        helpers( [ 'array_data' ] );
+    }
+
+    public function init ( string $table ) : self
+    {
+        $this->data = getInstance( SqlBuilderData::class );
+        $this->table = $table;
+
         return $this;
     }
 
     public function update ( int $len = 1/*, ?Closure $callable = null*/ ) : string
     {
-        if ( empty( $setData = $this->baseBuilder->set ) )
+        if ( empty( $setData = $this->data->set ) )
         {
             throw new ErrorArrayException;
         }
 
-        if ( $len > $this->baseBuilder->updateLimitRows )
+        if ( $len > $this->data->updateLimitRows )
         {
             $errorParaMeter = sprintf( 
                 'Argument "$len" %s > %s',
                 $len, 
-                $this->baseBuilder->updateLimitRows 
+                $this->data->updateLimitRows 
             );
             throw new ErrorParameterException( $errorParaMeter );
         }
 
         $whereSql   = $this->_compileWhere();
         $setSql     = implode( ', ', $setData );
-        $isJoin     = ! empty( $this->baseBuilder->join );
+        $isJoin     = ! empty( $this->data->join );
 
         /** Template config */
         $sqlConfig  = getConfig( 'sql' );
@@ -53,7 +61,7 @@ class SqlCompiler
         if ( $isJoin )
         {
             $joinTemplate = $sqlConfig->updateJoinTemplate;
-            $joinSql      = implode( ', ', $this->baseBuilder->join );
+            $joinSql      = implode( ', ', $this->data->join );
 
             if ( '' !== ( $onSql = $this->_compileOn( false ) ) )
             {
@@ -62,7 +70,7 @@ class SqlCompiler
 
             $sql = sprintf(
                 $joinTemplate,
-                $this->baseBuilder->table,
+                $this->table,
                 $joinSql,
                 $setSql,
                 $whereSql
@@ -73,7 +81,7 @@ class SqlCompiler
             $updateTemplate = $sqlConfig->updateTemplate;
             $sql            = sprintf(
                 $updateTemplate,
-                $this->baseBuilder->table,
+                $this->table,
                 $setSql,
                 $whereSql
             );
@@ -81,7 +89,7 @@ class SqlCompiler
 
         if ( '' === $this->_compileLimit() )
         {
-            $sql .= " LIMIT $len";
+            $sql .= " LIMIT $len;";
         }
 
         return $sql;
@@ -89,14 +97,14 @@ class SqlCompiler
     
     public function delete ( int $len = 1/*, ?Closure $callable = null*/ ) : string
     {
-        if ( $len > $this->baseBuilder->deleteLimitRows )
+        if ( $len > $this->data->deleteLimitRows )
         {
-            $error = sprintf( 'Argument "$len" %s > %s', $len, $this->baseBuilder->deleteLimitRows );
+            $error = sprintf( 'Argument "$len" %s > %s', $len, $this->data->deleteLimitRows );
             throw new ErrorParameterException( $error );
         }
 
         $whereSql = $this->_compileWhere();
-        $isJoin     = ! empty( $this->baseBuilder->join );
+        $isJoin     = ! empty( $this->data->join );
 
         /** Template config */
         $sqlConfig  = getConfig( 'sql' );
@@ -104,24 +112,24 @@ class SqlCompiler
         if ( $isJoin )
         {
             $deleteJoinTemplate = $sqlConfig->deleteJoinTemplate;
-            $joinSql            = implode( ', ', $this->baseBuilder->join );
+            $joinSql            = implode( ', ', $this->data->join );
 
             if ( '' !== ( $onSql = $this->_compileOn( false ) ) )
             {
                 $joinSql .= sprintf( ' ON %s', $onSql );
             }
 
-            $sql = sprintf( $deleteJoinTemplate, $joinSql, $this->baseBuilder->table, $whereSql );
+            $sql = sprintf( $deleteJoinTemplate, $joinSql, $this->table, $whereSql );
         }
         else
         {
             $deleteTemplate = $sqlConfig->deleteTemplate;
-            $sql            = sprintf( $deleteTemplate, $this->baseBuilder->table, $whereSql );
+            $sql            = sprintf( $deleteTemplate, $this->table, $whereSql );
         }
 
         if ( '' === $this->_compileLimit() )
         {
-            $sql .= " LIMIT $len";
+            $sql .= " LIMIT $len;";
         }
 
         return $sql;
@@ -141,7 +149,7 @@ class SqlCompiler
         $sql = sprintf(
             'SELECT %s FROM %s',
             '' === $select ? '*' : $select,
-            '' === $from ? dataKey( [ $this->baseBuilder->table ] ) : $from
+            '' === $from ? dataKey( [ $this->table ] ) : $from
         );
 
         // '' === $distinct    || $sql .= sprintf( ' SELECT distinct %s', $distinct );
@@ -153,30 +161,41 @@ class SqlCompiler
 
         return $sql;
     }
-
-    public function insert ( array $data ) : string
+    public function insert ( array $data, bool $replace = false ) : string
     {
         $columns        = implode( ',', array_keys( $data ) );
         $values         = implode( ',', array_values( $data ) );
         $insertTemplate = getConfig( 'sql' )->insertTemplate;
-        $sql            = sprintf( $insertTemplate, $this->baseBuilder->table, $columns, $values );
+        $sql            = sprintf( $insertTemplate, $this->table, $columns, $values );
 
-        if ( ! empty( $this->baseBuilder->limit ) )
-        {
-            $sql = sprintf( '%s LIMIT %s', $sql, $this->_compileLimit() );
-        }
+        // if ( ! empty( $this->data->limit ) )
+        // {
+        //     $sql = sprintf( '%s LIMIT %s;', $sql, $this->_compileLimit() );
+        // }
 
         return $sql;
     }
     
+    public function replace ( array $data ) : string
+    {
+        $data               = implode( ',', $data );
+        $replaceTemplate    = getConfig( 'sql' )->replaceTemplate;
+        $sql                = sprintf( $replaceTemplate, $this->table, $data );
+
+        // $sql = ! empty( $this->data->limit ) 
+        //     ? sprintf( '%s LIMIT %s', $sql, $this->_compileLimit() )
+        //     : sprintf( '%s LIMIT %s;', $sql, '1' );
+
+        return $sql;
+    }
 
     public function _compile ( string $propName, $throw = true ) : string
     {
         $orProp         = 'or' . ucfirst( $propName );
         $andProp        = 'and' . ucfirst( $propName );
-        $data           = $this->baseBuilder->{ $propName };
-        $orData         = $this->baseBuilder->{ $orProp };
-        $andData        = $this->baseBuilder->{ $andProp };
+        $data           = $this->data->{ $propName };
+        $orData         = $this->data->{ $orProp };
+        $andData        = $this->data->{ $andProp };
 
         $isEmptyData = empty( $data ) && empty( $orData ) && empty( $andData );
 
@@ -285,9 +304,9 @@ class SqlCompiler
     public function _compileOtherProps ( string $propName, string $implodeChar = ', ' ) : string
     {
         $str = '';
-        if ( ! empty( $this->baseBuilder->$propName ) )
+        if ( ! empty( $this->data->$propName ) )
         {
-            $str = implode( "{$implodeChar} ", $this->baseBuilder->$propName );
+            $str = implode( "{$implodeChar} ", $this->data->$propName );
         }
         return $str;
     }
