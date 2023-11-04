@@ -5,7 +5,7 @@ namespace Red2Horse\Mixins\Classes\Sql\Builder;
 
 use Red2Horse\Exception\ErrorArrayException;
 use Red2Horse\Exception\ErrorParameterException;
-use Red2Horse\Mixins\Traits\Object\TraitSingleton;
+// use Red2Horse\Mixins\Traits\Object\TraitSingleton;
 
 use function Red2Horse\helpers;
 use function Red2Horse\Mixins\Functions\Config\getConfig;
@@ -16,7 +16,7 @@ defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
 class SqlCompiler
 {
-    use TraitSingleton;
+    // use TraitSingleton;
 
     private     SqlBuilderData  $data;
     private     string          $table;
@@ -89,7 +89,7 @@ class SqlCompiler
 
         if ( '' === $this->_compileLimit() )
         {
-            $sql .= " LIMIT $len;";
+            $sql .= sprintf( ' LIMIT %s', $len );
         }
 
         return $sql;
@@ -129,7 +129,7 @@ class SqlCompiler
 
         if ( '' === $this->_compileLimit() )
         {
-            $sql .= " LIMIT $len;";
+            $sql .= sprintf( ' LIMIT %s', $len );
         }
 
         return $sql;
@@ -168,11 +168,6 @@ class SqlCompiler
         $insertTemplate = getConfig( 'sql' )->insertTemplate;
         $sql            = sprintf( $insertTemplate, $this->table, $columns, $values );
 
-        // if ( ! empty( $this->data->limit ) )
-        // {
-        //     $sql = sprintf( '%s LIMIT %s;', $sql, $this->_compileLimit() );
-        // }
-
         return $sql;
     }
     
@@ -181,10 +176,6 @@ class SqlCompiler
         $data               = implode( ',', $data );
         $replaceTemplate    = getConfig( 'sql' )->replaceTemplate;
         $sql                = sprintf( $replaceTemplate, $this->table, $data );
-
-        // $sql = ! empty( $this->data->limit ) 
-        //     ? sprintf( '%s LIMIT %s', $sql, $this->_compileLimit() )
-        //     : sprintf( '%s LIMIT %s;', $sql, '1' );
 
         return $sql;
     }

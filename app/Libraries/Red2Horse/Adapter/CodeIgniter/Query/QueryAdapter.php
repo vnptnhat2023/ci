@@ -27,38 +27,19 @@ class QueryAdapter implements QueryAdapterInterface
 			$this->db = db_connect( $Red2HorseDatabase );
 			$this->installed = true;
 		}
-		// else
-		// {
-		// 	$this->db = db_connect();
-		// }
 	}
 
 	public function query ( string $sql, bool $getString = false  )
 	{
-		if ( isset( $this->db ) )
-		{
-			$query = $this->db->query( $sql );
-		}
-		else
-		{
-			$query = db_connect()->query( $sql );
-		}
-
+		$query = isset( $this->db ) ? $this->db : db_connect();
+		$query->query( $sql );
 		return $getString ? $sql : $query;
 	}
 
 	public function resultArray ( string $sql ) : array
 	{
-		if ( isset( $this->db ) )
-		{
-			$query = $this->db->query( $sql );
-		}
-		else
-		{
-			$query = db_connect()->query( $sql );
-		}
-
-		return $query->getResultArray();
+		$query = isset( $this->db ) ? $this->db : db_connect();
+		$data = $query->query( $sql )->getResultArray();
+		return $data;
 	}
-	
 }

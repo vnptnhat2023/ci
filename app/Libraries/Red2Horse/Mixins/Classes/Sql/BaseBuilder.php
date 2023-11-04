@@ -18,7 +18,6 @@ use Red2Horse\Mixins\Classes\Sql\Builder\SqlBuilderData;
 use Red2Horse\Mixins\Classes\Sql\Builder\SqlCompiler;
 use Red2Horse\Mixins\Interfaces\Sql\BaseBuilderInterface;
 use Red2Horse\Mixins\Traits\Object\TraitInstanceTrigger;
-use Red2Horse\Mixins\Traits\Object\TraitSingleton;
 
 use function Red2Horse\helpers;
 use function Red2Horse\Mixins\Functions\Config\getConfig;
@@ -27,7 +26,7 @@ use function Red2Horse\Mixins\Functions\Data\
     dataKeyAssocInstance,
     dataKeyInstance
 };
-
+use function Red2Horse\Mixins\Functions\Instance\getBaseInstance;
 use function Red2Horse\Mixins\Functions\Instance\getComponents;
 use function Red2Horse\Mixins\Functions\Instance\getInstance;
 
@@ -35,7 +34,7 @@ defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
 class BaseBuilder implements BaseBuilderInterface
 {
-    use TraitSingleton, TraitInstanceTrigger;
+    use TraitInstanceTrigger;
 
     public      string                          $table;
     private     QueryFacadeInterface            $connection;
@@ -62,8 +61,8 @@ class BaseBuilder implements BaseBuilderInterface
         $compilerNS = $compilerNamespace    ?: SqlCompiler::class;
         $dataNS     = $dataNamespace        ?: SqlBuilderData::class;
 
-        $this->compiler  = getInstance( $compilerNS );
-        $this->data      = getInstance( $dataNS );
+        $this->compiler  = new $compilerNS;
+        $this->data      = getBaseInstance( $dataNS );
 
         $this->compiler->init( $this->table );
 
@@ -187,6 +186,11 @@ class BaseBuilder implements BaseBuilderInterface
 
     public function delete ( $len = 1/*, ?Closure $callable = null*/ )
     {
+        if ( $this->modelProperty->useSoftDelete )
+        {
+            return $this->update( $len );
+        }
+
         $sql = $this->compiler->delete( $len/*, $callable */ );
         $this->lastQueryString[] = $sql;
 
@@ -204,8 +208,16 @@ class BaseBuilder implements BaseBuilderInterface
 
         $this->_trigger( null, $this->allowedFieldsFilters, $columns );
 
+        $timeFormatData = isset( $this->modelProperty->createdAt )
+            ? [ array_key_first( $this->modelProperty->createdAt ) ]
+            : [ 'insert' ];
         /** @var array $data */
-        [ '_timeFormatter' => $data ] = $this->_trigger( null, [ '_timeFormatter' ], $data );
+        [ '_timeFormatter' => $data ] = $this->_trigger( 
+            null, 
+            [ '_timeFormatter' ],
+            $data,
+            $timeFormatData
+        );
 
         $dataAssoc = dataKeyAssocInstance();
         $this->_afterCall( $callable, $dataAssoc );
@@ -231,8 +243,16 @@ class BaseBuilder implements BaseBuilderInterface
 
         $this->_trigger( null, $this->allowedFieldsFilters, $columns );
 
+        $timeFormatData = isset( $this->modelProperty->updatedAt )
+            ? [ array_key_first( $this->modelProperty->updatedAt ) ]
+            : [ 'update', 'replace', 'insert' ];
         /** @var array $data */
-        [ '_timeFormatter' => $data ] = $this->_trigger( null, [ '_timeFormatter' ], $data );
+        [ '_timeFormatter' => $data ] = $this->_trigger( 
+            null, 
+            [ '_timeFormatter' ], 
+            $data, 
+            $timeFormatData
+        );
 
         $dataNonAssoc = dataKeyInstance();
         $dataNonAssoc->keyDelimiter = '\'';
@@ -343,6 +363,42 @@ class BaseBuilder implements BaseBuilderInterface
         $this->_afterCall( $callable, $dataAssoc );
 
         return $dataAssoc( $data );
+    }
+
+    // where game_date  BETWEEN                                   '0000-00-00 00:00:00'       AND     '0000-00-00 00:00:00' 
+    //                      SELECT [ `b`.`c` =>   BETWEEN    [    '0000-00-00 00:00:00'       =>      '0000-00-00 00:00:00' ] ]
+    private function _between ( array $data, ?Closure $callable = null, int $len = 100, ?string $type = null )
+    {
+        if ( ! getComponents( 'common' )->isAssocArray( $data ) )
+        {
+            throw new ErrorParameterException( 'Invalid format property: data' );
+        }
+
+        $this->_beforeCall( $data, $len );
+        $dataAssoc = dataKeyAssocInstance();
+        $dataAssoc->operator = ' AND ';
+
+        if ( null !== $type )
+        {
+            $dataAssoc->toStringSepChar = " {$type} ";
+        }
+
+        $this->_afterCall( $callable, $dataAssoc );
+
+        return $dataAssoc( $data );
+    }
+
+    public function betWeen ( array $data, ?Closure $callable = null, int $len = 100 ) : self
+    {
+        if ( ! getComponents( 'common' )->isAssocArray( $data ) )
+        {
+            throw new ErrorParameterException( 'Invalid format property: data' );
+        }
+
+        $this->data->between[] = $this->_between( array_values( $data ), $callable, $len, 'AND' );
+
+        // $this->data->between[] = $this->_where( $data, $callable, $len, 'AND' );
+        return $this;
     }
 
     // Not: `a.b` != `d.e`
@@ -463,11 +519,22 @@ class BaseBuilder implements BaseBuilderInterface
         /** Trigger _allowedFieldsFilter */
         $this->_trigger( null, $this->allowedFieldsFilters, $data );
 
+        $updateFormatData = isset( $this->modelProperty->updatedAt )
+            ? [ array_key_first( $this->modelProperty->updatedAt ) ]
+            : [ 'update' ];
+        $deleteFormatData = isset( $this->modelProperty->deletedAt )
+            ? [ array_key_first( $this->modelProperty->deletedAt ) ]
+            : [ 'delete' ];
         /**
          * Trigger _timeFormatter
          * @var array $data
          */
-        [ '_timeFormatter' => $data ] = $this->_trigger( null, [ '_timeFormatter' ], $data );
+        [ '_timeFormatter' => $data ] = $this->_trigger( 
+            null, 
+            [ '_timeFormatter' ], 
+            $data, 
+            array_merge( $updateFormatData, $deleteFormatData )
+        );
 
         $dataAssoc = dataKeyAssocInstance();
         $this->_afterCall( $callable, $dataAssoc );
@@ -787,32 +854,39 @@ class BaseBuilder implements BaseBuilderInterface
      * @param array $data Associative
      * @param array $timeProperty Associative
      */
-    private function _timeFormatter ( array $data ) : array
+    private function _timeFormatter ( array $data, array $method ) : array
     {
+        if ( ! getComponents( 'common' )->nonAssocArray( $method ) )
+        {
+            throw new ErrorParameterException( 'Parameter 2: "method" array non-associative only' );
+        }
         if ( [] === $this->_getTimesFormatter() )
         {
             return $data;
         }
 
-        $mapFn = function ( array $prop ) : array
+        $res = [];
+        foreach ( $this->_getTimesFormatter() as $prop )
         {
             if ( $this->_allowedFieldsFilter( $prop ) )
             {
                 $key = array_key_first( $prop );
 
-                if ( ! in_array( $prop[ $key ], $this->modelProperty->validTimeFormat ) )
+                if ( ! in_array( $prop[ $key ], $this->modelProperty->validTimeFormat  ) )
                 {
                     throw new ErrorParameterException( sprintf( 'Invalid parameter: "%s"', $key ) );
                 }
 
-                $prop[ $key ] = date( $prop[ $key ] );
+                if ( in_array( $key, $method ) )
+                {
+                    $res[ $key ] = date( $prop[ $key ] );
+                }
             }
+        }
 
-            return $prop;
-        };
-
-        $res = array_map( $mapFn, $this->_getTimesFormatter() );
-        return array_merge( $data, ...$res );
+        $data = array_merge( $data, $res );
+        
+        return $data;
     }
 
     public function __toString() : string

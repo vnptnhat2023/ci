@@ -14,7 +14,7 @@ class Throttle
 	use TraitSingleton;
 
 	public 		bool 		$useThrottle 		= true;
-	public 		string 		$currentAdapter  	= 'cache';
+	public 		string 		$currentAdapter  	= 'database';
 	public 		int 		$attempt		 	= 0;
 	public 		int 		$type		 	 	= 0;
 	public 		int 		$typeAttempt	 	= 3;

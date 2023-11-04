@@ -10,21 +10,21 @@ trait TraitSingleton
 	/** @return static|self */
 	final public static function getInstance( $params = null, ...$args ) : object
 	{
-		if ( $data = RegistryClass___::get( self::class ) )
+		if ( $data = RegistryClass___::get( static::class ) )
 		{
 			/** @var object $instance */
 			$instance = $data[ 'instance' ];
 			return $instance;
 		}
 
-		$instance = new self( $params, ...$args );
+		$instance = new static( $params, ...$args );
 		$values = [
-			// 'properties' => self::_getMPs( [], false, false ),
-			'methods' => self::_getMPs(),
+			// 'properties' => static::_getMPs( [], false, false ),
+			'methods' => static::_getMPs(),
 			'instance' => $instance
 		];
 
-		RegistryClass___::set( self::class, $values );
+		RegistryClass___::set( static::class, $values );
 
 		return $instance;
 	}

@@ -38,18 +38,16 @@ class Services extends CoreServices
 			return $baseConfig;
 		} );
 
-		setConfig( 'throttle', static function ( $throttle )
+		setConfig( 'session', static function ( $session )
 		{
-			// $throttle->useThrottle = false;
-			// $throttle->throttle->attempt = 2;
-			// $throttle->useThrottle = true;
-			return $throttle;
-		} );
+			$configApp = config( 'app' );
 
-		setConfig( 'validation', static function( $valid ) {
-			// $valid->user_username = 'qwe_username';
-			// $valid->user_password = 'qwe_password';
-			return $valid;
+			$session->sessionSavePath 		= $configApp->sessionSavePath;
+			$session->sessionCookieName 	= $configApp->sessionCookieName;
+			$session->sessionExpiration 	= $configApp->sessionExpiration;
+			$session->sessionTimeToUpdate 	= $configApp->sessionTimeToUpdate;
+
+			return $session;
 		} );
 
 		return $auth;

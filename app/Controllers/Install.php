@@ -111,7 +111,7 @@ class Install extends BaseController
 	
 	public function fetch ()
 	{
-		$first = model( 'User/UserModel', 'user' )
+		$first = model( 'User/UserModel' )
 			->select( [
 				'user.id', 
 				'user.username', 
@@ -172,7 +172,12 @@ class Install extends BaseController
 
 		$model2->select( [ '*' ] )->limit( 2, 20 )->get();
 
-		dd( $model->getLastQueryString(),  $model2->getLastQueryString() );
+		var_dump( $model->getLastQueryString(),  $model2->getLastQueryString() );
+
+		$modelA = model( 'User/UserModel' );
+		$modelB = model( 'UserGroup/UserGroupModel' );
+
+		var_dump( $model, $model2, $modelA, $modelB); die;
 	}
 
 	public function test ()

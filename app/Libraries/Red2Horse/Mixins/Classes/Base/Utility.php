@@ -61,7 +61,7 @@ class Utility
 		if ( throttleIsLimited() )
 		{
 			$errorStr = [
-				'number' => gmdate( 'i', getConfig( 'throttle' )->throttle->timeoutAttempts ),
+				'number' => gmdate( 'i', getConfig( 'throttle' )->timeout ),
 				'minutes' => 'minutes'
 			];
 

@@ -8,7 +8,6 @@ use Red2Horse\Mixins\Traits\Object\TraitSingleton;
 
 use function Red2Horse\helpers;
 use function Red2Horse\Mixins\Functions\Config\getConfig;
-use function Red2Horse\Mixins\Functions\Instance\getClass;
 use function Red2Horse\Mixins\Functions\Instance\getComponents;
 use function Red2Horse\Mixins\Functions\Instance\setClass;
 use function Red2Horse\Mixins\Functions\Message\setErrorMessage;
@@ -36,8 +35,8 @@ class Event
 
         if ( ! $eventConfig->manyTrigger && in_array( $name, $this->triggered ) )
         {
-            helpers( [ 'message' ] );
-            setErrorMessage( sprintf( 'Event: "%s" is not triggered', $name ) );
+            // helpers( [ 'message' ] );
+            // setErrorMessage( sprintf( 'Event: "%s" is not triggered', $name ) );
             return false;
         }
 

@@ -17,6 +17,7 @@ class SqlBuilderData
 
     public     array       $select                 = [];
     public     array       $distinct               = [];
+    public     array       $between                = [];
     public     array       $insert                 = [];
     public     array       $from                   = [];
     public     array       $andWhere               = [];

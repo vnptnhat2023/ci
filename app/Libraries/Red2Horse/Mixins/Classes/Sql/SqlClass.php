@@ -140,7 +140,6 @@ class SqlClass implements SqlClassInterface
 	 */
 	public function getTable( string $key, bool $getKey = false, bool $throw = true, bool $default = false )
 	{
-		#dd( $this->database);
 		$table = $this->database[ 'tables' ];
 
 		if ( ! array_key_exists( $key, $table ) || empty( $table[ $key ] ) )

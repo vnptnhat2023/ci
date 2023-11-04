@@ -45,7 +45,7 @@ class Model implements ModelInterface
 
     public function init ( ?string $table = null, ?connection $connection = null, \stdClass $childProperties = null ) : self
     {
-        $this->builder = getInstance( BaseBuilder::class, 'RegistryClass', false );
+        $this->builder = new BaseBuilder;
 
         $this
             ->setTable( $table )
@@ -53,7 +53,6 @@ class Model implements ModelInterface
             ->setModelProperty( $childProperties );
 
         $this->builder->init();
-
         $this->init = true;
 
         return $this;
@@ -66,17 +65,12 @@ class Model implements ModelInterface
 
     public function setTable ( ?string $table = null ) : self
     {
-        if ( null === $table )
+        if ( null === $table &&  ! isset( $this->table ) )
         {
-            if ( ! isset( $this->table ) )
-            {
-                throw new ErrorPropertyException( 'Property: "table" not found' );
-            }
-
-            $table = $this->table;
+            throw new ErrorPropertyException( 'Property: "table" not found' );
         }
 
-        $table = getTable( $table, false, false, true );
+        $table = getTable( $table ?? $this->table, false, false, true );
         $this->builder->table = $table;
 
         return $this;

@@ -5,8 +5,6 @@ namespace Red2Horse\Config;
 
 use Red2Horse\Mixins\Traits\Object\TraitSingleton;
 
-use function Red2Horse\Mixins\Functions\Instance\getComponents;
-
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
 class Session
@@ -17,18 +15,11 @@ class Session
 	public 		string 		$session 				= self::SESSION_NAME;
 	public 		string 		$sessionSavePath 		= '';
 	public 		string 		$sessionCookieName 		= 'r2h';
-	public 		int 		$sessionExpiration 		= 0;
-	public 		int 		$sessionTimeToUpdate 	= 0;
-	public 		array 		$sessionKey;
+	public 		int 		$sessionExpiration 		= 3600;
+	public 		int 		$sessionTimeToUpdate 	= 300;
 
 	private function __construct ()
 	{
-		$configFacade = getComponents( 'config' );
-		
-		$this->sessionSavePath 		= $configFacade->sessionSavePath();
-		$this->sessionCookieName 	= $configFacade->sessionCookieName();
-		$this->sessionExpiration 	= $configFacade->sessionExpiration();
-		$this->sessionTimeToUpdate 	= $configFacade->sessionTimeToUpdate();
-		$this->sessionKey 			= $configFacade->getSessionKey();
+
 	}
 }

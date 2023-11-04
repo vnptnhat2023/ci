@@ -22,11 +22,7 @@ function RegModelInstance () : RegistryModelClass
  * @return Model|\Red2Horse\Mixins\Traits\Object\TraitSingleton
  * @throws ErrorClassException
  */
-function model ( 
-    ?string $name = null,  
-    ?string $table = null, 
-    bool $getShared = false, 
-    ?QueryFacadeInterface $connection = null ) : Model
+function model ( ?string $name = null, bool $getShared = false) : Model
 {
     $namespace = str_replace( '/', '\\', modelNamespace( $name ) );
 
@@ -36,29 +32,21 @@ function model (
     }
 
     $instance = RegModelInstance();
-    
-    if ( $instance->hasClass( $namespace ) )
-    {
-        return $instance->instanceData( $namespace );
-    }
 
-    if ( ! $instance->setClass( $namespace, $namespace::getInstance() ) )
+    if ( ! $model = $instance->getClass( $name ) )
     {
-        $errorClassException = sprintf( 'Cannot create instance from class: "%s"', $namespace );
-        throw new ErrorClassException( $errorClassException );
-    }
-
-    $model = $instance->getClass( $namespace );
-    // dd( $model, $instance );
-    if ( null !== $table )
-    {
-        $model->init( $table, $connection );
+        $model = new $namespace;
+        if ( ! $instance->setClass( $name, $model ) )
+        {
+            $errorClassException = sprintf( 'Cannot create instance from class: "%s"', $namespace );
+            throw new ErrorClassException( $errorClassException );
+        }
     }
 
     return $model;
 }
 
-function BaseModel ( ?string $tableName = null, bool $getShared = false , ?QueryFacadeInterface $connection = null ) : Model
+function BaseModel ( bool $getShared = false ) : Model
 {
     $namespace = Model::class;
 
@@ -69,22 +57,13 @@ function BaseModel ( ?string $tableName = null, bool $getShared = false , ?Query
 
     $instance = RegModelInstance();
 
-    if ( $instance->hasClass( $namespace ) )
+    if ( ! $model = $instance->getClass( $namespace ) )
     {
-        return $instance->instanceData( $namespace );
-    }
-
-    if ( ! $instance->setClass( $namespace, $namespace::getInstance() ) )
-    {
-        $errorClassException = sprintf( 'Cannot create instance from class: "%s"', $namespace );
-        throw new ErrorClassException( $errorClassException );
-    }
-
-    $model = $instance->getClass( $namespace );
-
-    if ( null !== $tableName )
-    {
-        $model->init( $tableName, $connection );
+        if ( ! $instance->setClass( $namespace, $namespace::getInstance() ) )
+        {
+            $errorClassException = sprintf( 'Cannot create instance from class: "%s"', $namespace );
+            throw new ErrorClassException( $errorClassException );
+        }
     }
 
     return $model;
