@@ -10,8 +10,8 @@ use function Red2Horse\helpers;
 use function Red2Horse\Mixins\Functions\Config\getConfig;
 use function Red2Horse\Mixins\Functions\Instance\getBaseInstance;
 use function Red2Horse\Mixins\Functions\Instance\getComponents;
-use function Red2Horse\Mixins\Functions\Message\getMessageInstance;
 use function Red2Horse\Mixins\Functions\Message\setErrorMessage;
+use function Red2Horse\Mixins\Functions\Message\setErrorWithLang;
 use function Red2Horse\Mixins\Functions\Model\model;
 use function Red2Horse\Mixins\Functions\Sql\getUserField;
 use function Red2Horse\Mixins\Functions\Sql\getUserGroupField;
@@ -23,8 +23,6 @@ class CookieHandle
 	use TraitSingleton;
 
 	private 	string 		$hash 		= 'sha256';
-
-	private 	array 		$userStatus = [ 'inactive', 'banned' ];
 
 	private function __construct () {}
 
@@ -103,6 +101,7 @@ class CookieHandle
 	 */
 	private function _queryValidate ( $selector, $token )
 	{
+		helpers( 'model' );
 		$user = model( 'User/UserModel' )->first( [ 'user.selector' => $selector ] );
 
 		if ( [] === $user )
@@ -126,21 +125,13 @@ class CookieHandle
 		return $user;
 	}
 
-	private function _userStatus ( array $user ) : bool
+	private function _userStatus ( array $userData ) : bool
 	{
-		if ( in_array( $user[ getUserField( 'status' ) ] , $this->userStatus ) )
+		$userStatus = $userData[ getUserField( 'status' ) ];
+		if ( ! getBaseInstance( Authentication::class )->statusValidate( $userStatus ) )
 		{
-			helpers( [ 'message' ] );
-
-			$status = $user[ getUserField( 'status' ) ];
-			$messageInstance = getMessageInstance();
-
-			$messageInstance::$hasBanned 			= ( $status === 'banned' );
-			$messageInstance::$accountInactive 		= ( $status === 'inactive' );
-			$errorMessage = getComponents( 'common' )->lang( 'Red2Horse.errorNotReadyYet', [ $status ] );
-
-			setErrorMessage( $errorMessage );
-
+			helpers( 'message' );
+			setErrorWithLang( 'errorNotReadyYet', [ $userStatus ] );
 			return $this->_cleanOldCookie();
 		}
 
@@ -155,11 +146,8 @@ class CookieHandle
 
 		if ( ! $isMultiLogin )
 		{
-			helpers( [ 'message' ] );
-
-			$errorMessage = getComponents( 'common' )->lang( 'Red2Horse.noteLoggedInAnotherPlatform' );
-			setErrorMessage( $errorMessage, true );
-
+			helpers( 'message' );
+			setErrorWithLang( 'noteLoggedInAnotherPlatform', [], true );
 			return false;
 		}
 
@@ -207,7 +195,6 @@ class CookieHandle
 
 		return $user;
 	}
-
 	/** End-CookieHandler private function */
 
 	public function setCookie ( int $userId, array $updateData = [] ) : void
@@ -218,22 +205,16 @@ class CookieHandle
 		}
 
 		$common = getComponents( 'common' );
-
 		if ( $userId <= 0 )
 		{
-			$errorValidation = $common->lang(
-				'Validation.greater_than',
-				[ 'field' => 'user_id', 'param' => $userId ]
-			);
-
-			throw new ErrorValidationException( $errorValidation, 1 );
+			$errorLangArgs = [ 'field' => 'user_id', 'param' => $userId ];
+			$errorValidation = $common->lang( 'Validation.greater_than', $errorLangArgs );
+			throw new ErrorValidationException( $errorValidation );
 		}
 
-		$isAssocData = $common->isAssocArray( $updateData );
-
-		if ( ! empty( $updateData ) && ! $isAssocData )
+		if ( ! $common->isAssocArray( $updateData ) )
 		{
-			throw new ErrorValidationException( $common->lang( 'Red2Horse.isAssoc' ), 1 );
+			throw new ErrorValidationException( $common->lang( 'Red2Horse.isAssoc' ) );
 		}
 
 		$selector 		= bin2hex( random_bytes( 8 ) );
@@ -245,20 +226,14 @@ class CookieHandle
 		];
 		$data 			= array_merge( $data, $updateData );
 
-		$updatedSuccess = getBaseInstance( 'Authentication' )->loggedInUpdateData( $userId, $data );
-
-		if ( $updatedSuccess )
+		if ( ! model( 'User/UserModel' )->edit( $data, [ 'user.id' => $userId ] ) )
 		{
-			$cookieComponent 	= getComponents( 'cookie' );
-			$cookie 			= getConfig( 'cookie' );
-			$ttl 				= time() + $cookie->ttl;
+			$common->log_message( 'error', sprintf( 'Cookie update failed, userID: "%s"', $userId ) );
+		}
 
-			$cookieComponent->set_cookie( $cookie->cookie, $cookieValue, ( string ) $ttl );
-		}
-		else
-		{
-			$errorLog = sprintf( '%s LoggedIn with remember-me, but update failed', $userId );
-			$common->log_message( 'error', $errorLog );
-		}
+		$cookieComponent 	= getComponents( 'cookie' );
+		$cookie 			= getConfig( 'cookie' );
+		$ttl 				= time() + $cookie->ttl;
+		$cookieComponent->set_cookie( $cookie->cookie, $cookieValue, ( string ) $ttl );
 	}
 }

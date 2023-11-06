@@ -7,8 +7,8 @@ use Red2Horse\Exception\ErrorClassException;
 use Red2Horse\Exception\ErrorParameterException;
 use Red2Horse\Mixins\Classes\Registry\RegistryClass as Reg;
 
+use function Red2Horse\helpers;
 use function Red2Horse\Mixins\Functions\Instance\getClass;
-use function Red2Horse\Mixins\Functions\Instance\getComponents;
 use function Red2Horse\Mixins\Functions\Instance\getInstance;
 use function Red2Horse\Mixins\Functions\Instance\hasClass;
 use function Red2Horse\Mixins\Functions\Instance\setClass;
@@ -22,6 +22,7 @@ defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
  */
 function getConfig ( ?string $name = null, bool $getShared = true ) : object
 {
+    helpers( 'namespace' );
     if ( '' === $name || null === $name )
     {
         return getInstance( configNamespace( 'BaseConfig' ), Reg::class, $getShared );
@@ -74,5 +75,6 @@ function setConfig ( ?string $name = null, \Closure $callback, bool $getShared =
 
 function hasConfig ( string $name ) : bool
 {
+    helpers( 'namespace' );
     return hasClass( configNamespace( $name ) );
 }

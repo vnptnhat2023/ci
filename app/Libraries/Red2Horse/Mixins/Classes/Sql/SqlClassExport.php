@@ -41,7 +41,7 @@ class SqlClassExport
     private function __construct () { }
 
     /**
-     * Seeder
+     * Seeder ESCAPED
      * Validate, query with intersect array
      * @return array [ intersect ] | [ intersect, sql ]
      * @throws ErrorSqlException
@@ -87,7 +87,7 @@ class SqlClassExport
         }
 
         helpers( [ 'message' ] );
-        setSuccessMessage();
+        setSuccessMessage( '', true );
 
         $return[ 'sql' ] = $sql;
         return $return;
@@ -124,7 +124,10 @@ class SqlClassExport
         return $posts;
     }
 
-    /** @throws ErrorParameterException */
+    /**
+     * ESCAPED
+     * @throws ErrorParameterException
+     */
     public function seedExport ( string $tableName, array $data ) : string
     {
         if ( empty( $tableName ) || empty( $data ) )
@@ -158,6 +161,7 @@ class SqlClassExport
     }
 
     /**
+     * ESCAPED
      * @throws ErrorSqlException
      * @param bool $query true: ( string + query ); false ( string ) only
      */
@@ -175,20 +179,20 @@ class SqlClassExport
         $tableTemplate  = getConfig( 'sql' )->{ $tableVarName };
 
         $match          = function( $match ) use ( $vars ) { return $vars[ $match[ 1 ] ]; };
-        $sqlParser      = preg_replace_callback( '/:(.*?):/', $match, $tableTemplate );
+        $sql      = preg_replace_callback( '/:(.*?):/', $match, $tableTemplate );
 
         if ( $query )
         {
-            if ( ! getComponents( 'query' )->query( $sqlParser ) )
+            if ( ! getComponents( 'query' )->query( $sql ) )
             {
-                throw new ErrorSqlException( $sqlParser );
+                throw new ErrorSqlException( $sql );
             }
         }
 
         helpers( [ 'message' ] );
-        setSuccessMessage();
+        setSuccessMessage( '', true );
 
-        return $sqlParser;
+        return $sql;
     }
 
     /**

@@ -13,7 +13,7 @@ class Throttle
 {
 	use TraitSingleton;
 
-	public 		bool 		$useThrottle 		= true;
+	public 		bool 		$useThrottle 		= false;
 	public 		string 		$currentAdapter  	= 'database';
 	public 		int 		$attempt		 	= 0;
 	public 		int 		$type		 	 	= 0;
@@ -28,6 +28,12 @@ class Throttle
 
 	private function __construct ()
 	{
+		$this->reInit();
+	}
+
+	public function reInit ()
+	{
 		$this->cacheName = getConfig( 'cache' )->getCacheName( $this->cacheName );
 	}
+	
 }

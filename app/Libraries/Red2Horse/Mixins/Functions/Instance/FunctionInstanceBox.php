@@ -3,12 +3,14 @@
 declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Functions\Instance;
 
+use function Red2Horse\helpers;
 use function Red2Horse\Mixins\Functions\NS\registryNamespace;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
 function RegInstance ( string $state ) : object
 {
+    helpers( 'namespace' );
     $state = registryNamespace( $state );
     return $state::selfInstance();
 }

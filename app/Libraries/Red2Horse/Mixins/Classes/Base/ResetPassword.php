@@ -13,12 +13,15 @@ use function Red2Horse\Mixins\Functions\Event\eventReturnedData;
 use function Red2Horse\Mixins\Functions\Instance\getBaseInstance;
 use function Red2Horse\Mixins\Functions\Instance\getComponents;
 use function Red2Horse\Mixins\Functions\Message\setErrorMessage;
-use function Red2Horse\Mixins\Functions\Message\setSuccessMessage;
+use function Red2Horse\Mixins\Functions\Message\setErrorWithLang;
+use function Red2Horse\Mixins\Functions\Message\setSuccessWithLang;
 use function Red2Horse\Mixins\Functions\Model\model;
 use function Red2Horse\Mixins\Functions\Password\getHashPass;
 use function Red2Horse\Mixins\Functions\Sql\getUserField;
 use function Red2Horse\Mixins\Functions\Throttle\throttleGetAttempts;
 use function Red2Horse\Mixins\Functions\Throttle\throttleGetTypes;
+use function Red2Horse\Mixins\Functions\Throttle\throttleIsLimited;
+use function Red2Horse\Mixins\Functions\Throttle\throttleIsSupported;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
@@ -26,28 +29,41 @@ class ResetPassword
 {
 	use TraitSingleton;
 
-	private static ?string $username;
-	private static ?string $email;
-	private static ?string $captcha;
+	private		?string 	$username;
+	private		?string 	$email;
+	private		?string 	$captcha;
 
 	private function __construct () {}
 
 	public function requestPassword ( string $u = null, string $e = null, string $c = null ) : bool
 	{
-		return getBaseInstance( Utility::class )
-			->typeChecker( 'forget', $u, null, $e, $c );
+		if ( null === $u )
+		{
+			return false;
+		}
+		
+		$authen = getBaseInstance( Authentication::class );
+		
+		if ( $authen->isLogged() || $authen->isLogged( true ) )
+		{
+			$this->alreadyLoggedIn( $authen->getUserdata() );
+			return true;
+		}
+		
+		helpers( 'throttle' );
+		
+		if ( throttleIsLimited( true ) )
+		{
+			return false;
+		}
+
+		return $this->forgetHandle( $u, $e, $c );
 	}
 
 	public function alreadyLoggedIn ( array $userData )
 	{
-		$success = ( array ) getComponents( 'common' )
-			->lang(
-				'Red2Horse.successLoggedWithUsername',
-				[ $userData[ getUserField( 'username' ) ] ]
-			);
-
-		helpers( [ 'message' ] );
-		setSuccessMessage( $success );
+		helpers( 'message' );
+		setSuccessWithLang( true, 'successLogin', ( array ) $userData[ getUserField( 'username' ) ] );
 	}
 
 	/**
@@ -58,28 +74,39 @@ class ResetPassword
 		if ( ! $userEmail = explode( '@', $userData[ getUserField( 'email' ) ] ) )
 		{
 			$errorLog = sprintf( 'Email: "%s" is invalid', $userEmail[ 0 ] );
-			getComponents( 'common' )->log_message( 'error', $errorLog );
-
+			getComponents( 'common' )->log_message( 'error', sprintf( 'Email: "%s" is invalid', $userEmail[ 0 ] ) );
 			throw new ErrorParameterException( $errorLog );
 		}
 
 		$email = str_repeat( '*', strlen( $userEmail[ 0 ] ) ) . '@' . $userEmail[ 1 ];
-
-		$success = ( array ) getComponents( 'common' )
-			->lang(
-				'Red2Horse.successResetPassword',
-				[ $userData[ getUserField( 'username' ) ], $email ]
-			);
-
-		helpers( [ 'message' ] );
-		setSuccessMessage( $success );
+		helpers( 'message' );
+		$successArgs = [ $userData[ getUserField( 'username' ) ], $email ];
+		setSuccessWithLang( true, 'successResetPassword', $successArgs );
 	}
 
-	public function forgetHandler ( string $u = null, string $e = null, string $c = null ) : bool
+	private function captchaRegister () : bool
 	{
-		self::$username 	= $u;
-		self::$email 		= $e;
-		self::$captcha 		= $c;
+		helpers( 'event' );
+
+		if ( ! throttleIsSupported() )
+		{
+			return false;
+		}
+
+		$captcha = 'resetpassword_show_captcha_condition';
+		[ $captcha => $showCaptchaCondition ] = eventReturnedData( 
+			$captcha, throttleGetAttempts(), throttleGetTypes()
+		);
+		$showCaptchaCondition = ( bool ) ( $showCaptchaCondition ?? false );
+
+		return $showCaptchaCondition;
+	}
+
+	public function forgetHandle ( string $u = null, string $e = null, string $c = null ) : bool
+	{
+		$this->username 	= $u;
+		$this->email 		= $e;
+		$this->captcha 		= $c;
 
 		/** @var \Red2Horse\Config\Validation 	$configValidation */
 		$configValidation 						= getConfig( 'validation' );
@@ -96,20 +123,16 @@ class ResetPassword
 			$configValidation->user_captcha
 		];
 
-		[ 'resetpassword_show_captcha_condition' => $showCaptchaCondition ]= eventReturnedData( 
-			'resetpassword_show_captcha_condition', 
-			throttleGetAttempts(),
-			throttleGetTypes()
-		);
-		
-		$groups = ( bool ) $showCaptchaCondition ? $validateUserFieldWithCaptcha : $validateUserField;
+		$showCaptchaCondition = $this->captchaRegister();
+
+		$groups = $showCaptchaCondition ? $validateUserFieldWithCaptcha : $validateUserField;
 		$rules 	= $validationComponent->getRules( $groups );
 		$data 	= [
-			$configValidation->user_username 	=> self::$username,
-			$configValidation->user_email 		=> self::$email
+			$configValidation->user_username 	=> $this->username,
+			$configValidation->user_email 		=> $this->email
 		];
 
-		helpers( [ 'message' ] );
+		helpers( [ 'message', 'model', 'password' ] );
 
 		if ( ! $validationComponent->isValid( $data, $rules ) )
 		{
@@ -124,18 +147,15 @@ class ResetPassword
 		$userData = model( 'User/UserModel' )->first( $data );
 		if ( [] === $userData )
 		{
-			setErrorMessage( getComponents( 'common' )->lang( 'Red2Horse.errorIncorrectInformation' ), true );
+			setErrorWithLang( 'errorIncorrectInformation', [], true );
 			return false;
 		}
 
 		$common 	= getComponents( 'common' );
-		helpers( [ 'password' ] );
 		$randomPw 	= getHashPass( $common->random_string() );
-
 		$editSet 	= [ getUserField( 'username' ) 	=> $userData[ getUserField( 'username' ) ] ];
 		$editWhere 	= [ getUserField( 'password' ) 	=> $randomPw ];
 		$error 		= 'Cannot update user password';
-		helpers( [ 'message' ] );
 
 		if ( ! model( 'User/UserModel' )->edit( $editSet, $editWhere ) )
 		{
@@ -153,7 +173,7 @@ class ResetPassword
 			return false;
 		}
 
-		setSuccessMessage( $common->lang( 'Red2Horse.successResetPassword' ) );
+		setSuccessWithLang( true, 'successResetPassword' );
 
 		return true;
 	}

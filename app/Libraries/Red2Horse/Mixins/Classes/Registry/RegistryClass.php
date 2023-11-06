@@ -6,6 +6,7 @@ namespace Red2Horse\Mixins\Classes\Registry;
 use Red2Horse\Mixins\Classes\Object\CallClass___;
 use Red2Horse\Mixins\Traits\Registry\TraitRegistryClassMethod;
 
+use function Red2Horse\helpers;
 use function Red2Horse\Mixins\Functions\NS\ComponentNamespace;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
@@ -71,6 +72,8 @@ final class RegistryClass extends RegistryClass___
      */
     public function getComponents ( bool $getAdapter = false ) : object
     {
+        helpers( 'namespace' );
+
         $name = ucfirst( $this->className );
         $facadeName = ComponentNamespace( $name );
 

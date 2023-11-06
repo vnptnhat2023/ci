@@ -43,7 +43,13 @@ class SqlClass implements SqlClassInterface
 			'token' 					=> 'token',
 			'group_id' 					=> 'group_id',
 			'password' 					=> 'password',
-			'deleted_at' 				=> 'deleted_at'
+			'deleted_at' 				=> 'deleted_at',
+			/** Not in db table */
+			'status_list'				=> [ 
+				'active' 	=> 'active', 
+				'banned' 	=> 'banned', 
+				'inactive' 	=> 'inactive' 
+			]
 		],
 
 		'user_group' => [

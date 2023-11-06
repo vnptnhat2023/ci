@@ -77,6 +77,7 @@ class Authorization
 
 		if ( ! $userData )
 		{
+			helpers( 'model' );
 			$userDB = model( 'User/UserModel' )->first( [ 'user.id' => $usernameSess[ 0 ] ] );
 			unset( $userData );
 			$userData[ $usernameSess[ 0 ] ] = json_decode( $userDB[ getUserGroupField( 'role' ) ], true );

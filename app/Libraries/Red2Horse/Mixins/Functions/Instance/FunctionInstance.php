@@ -3,6 +3,7 @@
 declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Functions\Instance;
 
+use function Red2Horse\helpers;
 use function Red2Horse\Mixins\Functions\NS\baseNamespace;
 use function Red2Horse\Mixins\Functions\NS\exceptionNamespace;
 use function Red2Horse\Mixins\Functions\NS\registryNamespace;
@@ -11,6 +12,7 @@ defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
 function classInit ( string $name, string $state, bool $getShared ) : object
 {
+    helpers( 'namespace' );
     $state = registryNamespace( $state );
     return $state::selfInstance() ->init( $name, $getShared );
 }
@@ -37,11 +39,13 @@ function getComponents ( string $name, bool $getShared = true, bool $getAdapter 
  */
 function getBaseInstance ( string $name, bool $getShared = true, string $prefix = '', string $suffix = '' ) : object
 {
+    helpers( 'namespace' );
     return classInit( baseNamespace( $name, $prefix, $suffix ), 'RegistryClass', $getShared ) ->getInstance();
 }
 
 function ExceptionInstance ( string $name, bool $getShared = true, string $prefix = '', string $suffix = '' ) : object
 {
+    helpers( 'namespace' );
     return classInit( exceptionNamespace( $name, $prefix, $suffix ), 'RegistryClass', $getShared ) ->getInstance();
 }
 

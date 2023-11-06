@@ -7,6 +7,7 @@ use Red2Horse\Mixins\Classes\Base\Throttle\ThrottleInterface\ThrottleAdapterInte
 use Red2Horse\Mixins\Classes\Sql\Model;
 use Red2Horse\Mixins\Traits\Object\TraitSingleton;
 
+use function Red2Horse\helpers;
 use function Red2Horse\Mixins\Functions\Model\model;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
@@ -30,6 +31,7 @@ class ThrottleDatabase implements ThrottleAdapterInterface
 
         if ( ! isset( $this->model ) )
         {
+            helpers( 'model' );
             $this->model = model( $this->modelName );
         }
 

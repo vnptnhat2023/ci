@@ -48,17 +48,9 @@ class ValidationAdapter implements ValidationAdapterInterface
 			$result = dot_array_search( $keys, $generalRules );
 		}
 
-		if ( is_array( $keys ) )
+		if ( is_array( $keys ) && [] !== $keys )
 		{
-			$result = [];
-
-			foreach ( $keys as $key )
-			{
-				if ( isset( $generalRules[ $key ] ) )
-				{
-					$result[ $key ] = $generalRules[ $key ];
-				}
-			}
+			$result = array_map( fn( string $key ) => $generalRules[ $key ], $keys );
 		}
 
 		if ( empty( $result ) )
@@ -78,7 +70,7 @@ class ValidationAdapter implements ValidationAdapterInterface
 
 		if ( $required )
 		{
-			$text .= sprintf( '%s|required', $text );
+			$text = 'trim|required';
 		}
 
 		if ( null !== $minLen )
@@ -91,7 +83,7 @@ class ValidationAdapter implements ValidationAdapterInterface
 			$text .= sprintf( '%s|max_length[%s]', $text, $maxLen );
 		}
 
-		return sprintf( '%s%s', $text, 'is_natural_no_zero' );
+		return sprintf( '%s|is_natural_no_zero', $text );
 	}
 
 	public function ruleStore() : array
@@ -202,7 +194,7 @@ class ValidationAdapter implements ValidationAdapterInterface
 			],
 			$configValidation->database_port => [
 				'label' => lang( 'Red2Horse.db_port' ),
-				'rules' => $this->numericRules( false, 1, 128 )
+				'rules' => 'trim|min_length[1]|max_length[128]|is_natural_no_zero'
 			],
 
 			/** User Database */

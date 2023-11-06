@@ -34,6 +34,7 @@ class Validation
 	protected 		string 		$user_selector 			= 'selector';
 	protected 		string 		$user_token 			= 'token';
 	protected 		string 		$user_captcha 			= 'captcha';
+	protected		string		$user_statusList		= 'status_list';
 
 	// User group columns
 	protected 		string 		$userGroup_id 			= 'id';

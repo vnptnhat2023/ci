@@ -18,7 +18,7 @@ if ( ! $baseHelper = realpath( \Red2Horse\R2H_BASE_PATH . '/BaseHelper.php' ) )
 }
 require_once( $baseHelper );
 
-helpers( [ 'namespace', 'instance_box', 'instance', 'config', 'sql', 'sql_export', 'model' ] );
+helpers( [ 'instance_box', 'instance', 'config', 'sql' ] );
 
 /** @todo [ SERIALIZE, INVOKE ] */
 class R2h

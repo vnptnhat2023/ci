@@ -12,6 +12,7 @@ use function Red2Horse\Mixins\Functions\Config\getConfig;
 use function Red2Horse\Mixins\Functions\Instance\getComponents;
 use function Red2Horse\Mixins\Functions\Instance\getInstance;
 use function Red2Horse\Mixins\Functions\Message\setErrorMessage;
+use function Red2Horse\Mixins\Functions\Message\setErrorWithLang;
 use function Red2Horse\Mixins\Functions\Message\setInfoMessage;
 use function Red2Horse\Mixins\Functions\Message\setSuccessMessage;
 
@@ -106,11 +107,19 @@ function getValueTableField ( string $key, string $table = 'user_group' )
     return sqlClassInstance()->getField( $key, $table, false, true );
 }
 
-function createDatabase ( $s, $u, $p, $d, $port = null, array $intersect = [] ) : bool
+/** @param null|int|string $port */
+function createDatabase (
+    string $s,
+    string $u,
+    string $p,
+    string $d,
+    $port = null,
+    array $intersect = []
+) : bool
 {
     $configValidation = getConfig( 'validation' );
     $validationComponent = getComponents( 'validation' );
-    
+
     if ( empty( $intersect ) )
     {
         $intersect = [
@@ -140,7 +149,7 @@ function createDatabase ( $s, $u, $p, $d, $port = null, array $intersect = [] ) 
     $common = getComponents( 'common' );
     if ( null === $d )
     {
-        setErrorMessage( $common->lang( 'Red2Horse.errorDatabaseNotDefined' ) );
+        setErrorWithLang( 'errorDatabaseNotDefined' );
         return disconnectDatabase( $conn );
     }
 
@@ -148,7 +157,7 @@ function createDatabase ( $s, $u, $p, $d, $port = null, array $intersect = [] ) 
     
     if ( ! chmod(\Red2Horse\R2H_BASE_PATH, 777 ) )
     {
-        setErrorMessage( $common->lang( 'Cannot chmod file' ) );
+        setErrorWithLang( 'errorFileCannotWrite' );
         return disconnectDatabase( $conn );
     }
     

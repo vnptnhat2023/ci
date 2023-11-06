@@ -11,7 +11,6 @@ use function Red2Horse\Mixins\Functions\Config\getConfig;
 use function Red2Horse\Mixins\Functions\Event\eventReturnedData;
 use function Red2Horse\Mixins\Functions\Throttle\throttleGetAttempts;
 use function Red2Horse\Mixins\Functions\Throttle\throttleGetTypes;
-use function Red2Horse\Mixins\Functions\Throttle\throttleInstance;
 use function Red2Horse\Mixins\Functions\Throttle\throttleIsLimited;
 use function Red2Horse\Mixins\Functions\Throttle\throttleIsSupported;
 
@@ -21,68 +20,154 @@ class Message
 {
 	use TraitSingleton;
 
-	public static 		bool 		$incorrectResetPassword 	= false;
-	public static 		bool 		$incorrectLoggedIn 			= false;
-	public static 		bool 		$successfully 				= false;
-	public static 		bool 		$hasBanned 					= false;
-	public static 		bool 		$accountInactive 			= false;
-	public static 		array 		$errors 					= [];
-	public static 		array 		$success					= [];
-	public static 		array 		$info 						= [];
+	private 		 		bool 		$successfully 				= false;
+	public static 			bool 		$hasBanned 					= false;
+	public static 			bool 		$accountInactive 			= false;
+	private 		 		array 		$errors 					= [];
+	private 		 		array 		$success					= [];
+	private 		 		array 		$info 						= [];
 
 	private function __construct ()
 	{
 		getConfig( 'event' )->init('message_show_captcha_condition', null, false );
 	}
 
-	/** @return array */
-	public function getResult ( ?array $add = null ) : array
+	public function setSuccessfully ( bool $successfully ) : void
+	{
+		$this->successfully = $successfully;
+	}
+
+	public function getSuccessfully () : bool
+	{
+		return $this->successfully;
+	}
+
+	/** @param array|string|\stdClass $data */
+	public function setErrors ( $data ) : void
+	{
+		if ( ! is_array( $data ) )
+		{
+			$data = ( array ) $data;
+		}
+
+		$this->errors = array_merge( $this->errors, $data );
+	}
+
+	/** @param array|string|\stdClass $data */
+	public function setSuccess ( $data ) : void
+	{
+		if ( ! is_array( $data ) )
+		{
+			$data = ( array ) $data;
+		}
+
+		$this->success = array_merge( $this->success, $data );
+	}
+
+	/** @param array|string|\stdClass $data */
+	public function setInfo ( $data ) : void
+	{
+		if ( ! is_array( $data ) )
+		{
+			$data = ( array ) $data;
+		}
+
+		$this->info = array_merge( $this->info, $data );
+	}
+
+	public function getErrors ()
+	{
+		return $this->errors;
+	}
+	
+	public function getSuccess ()
+	{
+		return $this->success;
+	}
+
+	public function getInfo ()
+	{
+		return $this->info;
+	}
+
+	private function _resultStatus () : array
+	{
+		$data = [
+			'suspend' 		=> self::$hasBanned,
+			'active' 		=> ! self::$accountInactive
+		];
+
+		return $data;
+	}
+
+	private function _resultShow () : array
 	{
 		helpers( [ 'throttle' ] );
-		$baseConfig 		= getConfig( 'BaseConfig' );
-		$configValidation 	= getConfig( 'Validation' );
-		$suspend 			= self::$hasBanned;
-		$active 			= ! self::$accountInactive;
 
-		$resultMessage = [
-			// 'auth_status' => [ 'reset' => $reset, 'login' => $login ],
-			'account_status' => [
-				'suspend' 		=> $suspend,
-				'active' 		=> ! $active
-			],
-			'show' 			=> [
-				'form' 			=> ! throttleIsLimited() && ! self::$successfully,
-				'remember_me' 	=> $baseConfig->useRememberMe,
-				'captcha' 		=> false,
-				'attempts' 		=> throttleGetAttempts(),
-				'attempts_type' => throttleGetTypes()
-			],
-			'validation' 	=> [
-				$configValidation->user_username,
-				$configValidation->user_email,
-				$configValidation->user_password,
-				$configValidation->user_captcha
-			]
+		$data = [
+			'form' 			=> ! throttleIsLimited() && ! $this->successfully,
+			'remember_me' 	=> getConfig( 'BaseConfig' )->useRememberMe,
+			'captcha' 		=> false,
+			'attempts' 		=> throttleGetAttempts(),
+			'attempts_type' => throttleGetTypes()
 		];
+
+		return $data;
+	}
+
+	private function _resultValidation  () : array
+	{
+		$configValidation 	= getConfig( 'Validation' );
+
+		$data = [
+			$configValidation->user_username,
+			$configValidation->user_email,
+			$configValidation->user_password,
+			$configValidation->user_captcha
+		];
+
+		return $data;
+	}
+	
+	private function _resultThrottle ( array &$data ) : array
+	{
+		helpers( [ 'event', 'throttle' ] );
 
 		if ( throttleIsSupported() )
 		{
 			[ 'message_show_captcha_condition' => $showCaptcha ] = eventReturnedData( 
 				'message_show_captcha_condition', 
-				throttleGetAttempts(), throttleGetTypes() 
+				throttleGetAttempts(),
+				throttleGetTypes() 
 			);
 			
-			$resultMessage[ 'throttle_status' ] 	= [ 'limited' => throttleIsLimited() ];
-			$resultMessage[ 'show' ][ 'captcha' ] 	= ( bool ) $showCaptcha;
+			$data[ 'throttle_status' ] 	= [ 'limited' => throttleIsLimited() ];
+			$data[ 'show' ][ 'captcha' ] 	= ( bool ) $showCaptcha;
 		}
 
-		if ( null !== $add || ! empty( $add ) )
+		return $data;
+	}
+	
+
+	/** @return array */
+	public function getResult ( ?array $add = null ) : array
+	{
+		$data = [
+			'account_status' 	=> $this->_resultStatus(),
+			'show' 				=> $this->_resultShow(),
+			'validation' 		=> $this->_resultValidation()
+		];
+
+		// Reference: "$data"
+		$this->_resultThrottle( $data );
+
+		if ( null !== $add || [] !== $add )
 		{
-			$add 			= [ 'added' => $add ];
-			$resultMessage 	= array_merge( $resultMessage, $add );
+			$add	= [ 'added' => $add ];
+			$data 	= array_merge( $data, $add );
 		}
 
-		return $resultMessage;
+		return $data;
 	}
 
 	/**
@@ -92,16 +177,16 @@ class Message
 	{
 		$message = [
 			'message' 	=> [
-				'success' 	=> self::$success,
-				'errors' 	=> self::$errors,
-				'normal' 	=> self::$info
+				'success' 	=> $this->success,
+				'errors' 	=> $this->errors,
+				'normal' 	=> $this->info
 			],
 			'result' 	=> $this->getResult()
 		];
 
 		if ( $getConfig )
 		{
-			$message[ 'config' ] = get_object_vars( getConfig() );
+			$message[ 'config' ] = get_object_vars( getConfig( 'BaseConfig' ) );
 		}
 
 		if ( null !== $add || ! empty( $add ) )

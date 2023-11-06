@@ -15,20 +15,21 @@ use function Red2Horse\Mixins\Functions\Event\eventReturnedData;
 use function Red2Horse\Mixins\Functions\Instance\getBaseInstance;
 use function Red2Horse\Mixins\Functions\Instance\getComponents;
 use function Red2Horse\Mixins\Functions\Message\getMessageInstance;
-use function Red2Horse\Mixins\Functions\Message\messenger;
 use function Red2Horse\Mixins\Functions\Message\setErrorMessage;
-use function Red2Horse\Mixins\Functions\Message\setSuccessMessage;
+use function Red2Horse\Mixins\Functions\Message\setErrorWithLang;
+use function Red2Horse\Mixins\Functions\Message\setSuccessWithLang;
 use function Red2Horse\Mixins\Functions\Model\model;
 use function Red2Horse\Mixins\Functions\Password\getVerifyPass;
 use function Red2Horse\Mixins\Functions\Sql\
 {
-    getTable,
     getUserField,
     getUserGroupField
 };
 use function Red2Horse\Mixins\Functions\Throttle\throttleCleanup;
 use function Red2Horse\Mixins\Functions\Throttle\throttleGetAttempts;
 use function Red2Horse\Mixins\Functions\Throttle\throttleGetTypes;
+use function Red2Horse\Mixins\Functions\Throttle\throttleIsLimited;
+use function Red2Horse\Mixins\Functions\Throttle\throttleIsSupported;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
@@ -36,35 +37,52 @@ class Authentication
 {
 	use TraitSingleton, TraitInstanceTrigger;
 
-	private static ?string $username = null;
-	private static ?string $password = null;
-	private static ?string $captcha = null;
-	private static bool $rememberMe = false;
+	private		?string		$username = null;
+	private		?string		$password = null;
+	private		?string		$captcha = null;
+	private		bool		$rememberMe = false;
 
 	private function __construct () {}
 
 	public function login ( string $u = null, string $p = null, bool $r = false, string $c = null ) : bool
 	{
-		self::$username = $u;
-		self::$password = $p;
-		self::$rememberMe = $r;
-		self::$captcha = $c;
+		if ( null === $u )
+		{
+			return false;
+		}
 
-		return getBaseInstance( Utility::class )->typeChecker( 'login', $u, $p, null, $c );
+		if ( $this->isLogged() || $this->isLogged( true ) )
+		{
+			$this->successWithMessage( $this->getUserdata() );
+			return true;
+		}
+
+		helpers( 'throttle' );
+		if ( throttleIsLimited( true ) )
+		{
+			return false;
+		}
+
+		$this->username 	= $u;
+		$this->password 	= $p;
+		$this->rememberMe 	= $r;
+		$this->captcha 		= $c;
+
+		return $this->loginHandle();
 	}
 
 	public function logout () : bool
 	{
 		$common = getComponents( 'common' );
 		$session = getComponents( 'session' );
-		helpers( [ 'message' ] );
+		helpers( 'message' );
 
 		getComponents( 'cookie' )->delete_cookie( getConfig( 'cookie' )->cookie );
 
 		if ( $session->has( getConfig( 'session' )->session ) )
 		{
 			$session->destroy();
-			setSuccessMessage( $common->lang( 'Red2Horse.successLogout' ) ); 
+			setSuccessWithLang( true, 'successLogout' ); 
 			return true;
 		}
 
@@ -80,20 +98,12 @@ class Authentication
 	}
 
 	/**
-	 * @param string|null $key
+	 * @param array|string|null $keys
 	 * @return mixed
 	 */
-	public function getUserdata ( ?string $key = null )
+	public function getUserdata ( $keys = null )
 	{
-		if ( ! $this->isLogged() )
-		{
-			return false;
-		}
-
-		$session = getComponents( 'session' );
-		$userData = $session->get( getConfig( 'session' )->session );
-
-		return empty( $key ) ? $userData : $userData[ $key ] ?? null;
+		return getBaseInstance( 'SessionHandle' )->getSession( $keys );
 	}
 
 	/**
@@ -101,20 +111,29 @@ class Authentication
 	 */
 	public function isLogged ( bool $withCookie = false ) : bool
 	{
-		if ( getComponents( 'session' )->has( getConfig( 'session' )->session ) )
-		{
-			return true;
-		}
-
-		if ( $withCookie )
-		{
-			return getBaseInstance( CookieHandle::class )->cookieHandler();
-		}
-
-		return false;
+		return getBaseInstance( SessionHandle::class )->isLogged( $withCookie );
 	}
 
-	private function isValidLogin () : bool
+	private function captchaRegister () : bool
+	{
+		helpers( [ 'event', 'throttle' ] );
+		
+		if ( ! throttleIsSupported() )
+		{
+			return false;
+		}
+
+		$captcha = 'authentication_show_captcha_condition';
+		[ $captcha => $showCaptchaCondition ] = eventReturnedData( 
+			$captcha, throttleGetAttempts(), throttleGetTypes()
+		);
+
+		$showCaptchaCondition = ( bool ) ( $showCaptchaCondition ?? false );
+
+		return $showCaptchaCondition;
+	}
+
+	private function formValidate () : bool
 	{
 		/** @var ValidationFacadeInterface $validationComponent */
 		$validationComponent = getComponents( 'validation' );
@@ -125,19 +144,15 @@ class Authentication
 		$keyEmail 	 		= getUserField( 'email' );
 		$keyPassword 		= getUserField( 'password' );
 		$keyCaptcha  		= $configValidation->user_captcha;
-		helpers( [ 'event', 'message', 'throttle' ] );
 
-		[ 'authentication_show_captcha_condition' => $showCaptchaCondition ] = eventReturnedData( 
-			'authentication_show_captcha_condition', 
-			throttleGetAttempts(), 
-			throttleGetTypes()
-		);
-		if ( $showCaptchaCondition )
+		helpers( 'message' );
+
+		if ( $this->captchaRegister() )
 		{
 			$data = [
-				$keyUsername => self::$username,
-				$keyPassword => self::$password,
-				$keyCaptcha	 => self::$captcha
+				$keyUsername => $this->username,
+				$keyPassword => $this->password,
+				$keyCaptcha	 => $this->captcha
 			];
 
 			$ruleCaptcha = [
@@ -157,8 +172,8 @@ class Authentication
 			$keyPassword => $validationComponent->getRules( $keyPassword )
 		];
 		$data 			= [
-			$keyUsername => self::$username,
-			$keyPassword => self::$password
+			$keyUsername => $this->username,
+			$keyPassword => $this->password
 		];
 
 		if ( ! $validationComponent->isValid( $data, $ruleUsername ) )
@@ -193,44 +208,58 @@ class Authentication
 		return true;
 	}
 
-	private function loginAfterValidation () : array
+	public function statusValidate ( string $status ) : bool
 	{
-		$userData = model( 'User/UserModel' )->first( [
-			'user.username' => self::$username,
-			'user.email' 	=> self::$username,
-		] );
+		/** @var array $userStatusList */
+		$userStatusList 	= getUserField( 'status_list' );
 
-		helpers( [ 'message' ] );
+		if ( ! in_array( $status, array_values( $userStatusList ) ) )
+		{
+			return false;
+		}
+
+		$messageInstance 						= getMessageInstance();
+		$messageInstance::$hasBanned 			= ( $status === $userStatusList[ 'banned' ] );
+		$messageInstance::$accountInactive 		= ( $status === $userStatusList[ 'inactive' ] );
+
+		return $status === $userStatusList[ 'active' ];
+	}
+
+	/** @return bool|array */
+	private function formData ()
+	{
+		helpers( [ 'message', 'model' ] );
+
+		$userData = model( 'User/UserModel' )->first( [
+			'user.username' => $this->username,
+			'user.email' 	=> $this->username,
+		] );
 
 		if ( empty( $userData ) )
 		{
-			setErrorMessage( getComponents( 'common' )->lang( 'Red2Horse.errorIncorrectInformation' ), true );
-			return [ 'error' => messenger() ];
+			setErrorWithLang(  'errorIncorrectInformation', [], true );
+			return false;
 		}
 
-		helpers( [ 'password' ] );
-		$verifyPassword = getVerifyPass( self::$password, $userData[ getUserField( 'password' ) ] );
+		helpers( 'password' );
+		$verifyPassword = getVerifyPass( $this->password, $userData[ getUserField( 'password' ) ] );
 
 		if ( ! $verifyPassword )
 		{
-			setErrorMessage( getComponents( 'common' )->lang( 'Red2Horse.errorIncorrectInformation' ), true );
-			return [ 'error' => messenger() ];
+			setErrorWithLang(  'errorIncorrectInformation', [], true );
+			return false;
 		}
 
-		if ( 'active' !== $userData[ getUserField( 'status' ) ] )
+		if ( ! $this->statusValidate( $userStatus = $userData[ getUserField( 'status' ) ] ) )
 		{
-			$messageInstance 						= getMessageInstance();
-			$status 								= $userData[ getUserField( 'status' ) ];
-			$messageInstance::$hasBanned 			= ( $status === 'banned' );
-			$messageInstance::$accountInactive 		= ( $status === 'inactive' );
-			setErrorMessage( getComponents( 'common' )->lang( 'Red2Horse.errorNotReadyYet', [ $status ] ), true );
-			return [ 'error' => messenger() ];
+			setErrorWithLang(  'errorNotReadyYet', [ $userStatus ], true );
+			return false;
 		}
 
 		if ( ! $this->isMultiLogin( $userData[ getUserField( 'session_id' ) ] ) )
 		{
-			setErrorMessage( getComponents( 'common' )->lang( 'Red2Horse.noteLoggedInAnotherPlatform' ), true );
-			return [ 'error' => false ];
+			setErrorWithLang(  'noteLoggedInAnotherPlatform', [], true );
+			return false;
 		}
 
 		unset( $userData[ getUserField( 'password' ) ] );
@@ -245,22 +274,20 @@ class Authentication
 		return $userData;
 	}
 
-	public function loginHandler () : bool
+	public function loginHandle () : bool
 	{
-		if ( ! $this->isValidLogin() )
+		if ( ! $this->formValidate() )
 		{
 			return false;
 		}
 
-		$userData = $this->loginAfterValidation();
-
-		if ( array_key_exists( 'error', $userData ) )
+		if ( false === $userData = $this->formData() )
 		{
 			return false;
 		}
 
 		/** Set response success to true */
-		$this->setLoggedInSuccess( $userData );
+		$this->successWithMessage( $userData );
 
 		$userFieldID 				= getUserField( 'id' );
 		$userData[ $userFieldID ] 	= ( int ) $userData[ $userFieldID ];
@@ -276,13 +303,13 @@ class Authentication
 		}
 
 		/** Set cookie */
-		if ( self::$rememberMe )
+		if ( $this->rememberMe )
 		{
 			getBaseInstance( CookieHandle::class )->setCookie( $userId );
 		}
 
 		/** Sql update */
-		if ( ! $this->loggedInUpdateData( $userId ) )
+		if ( ! $this->update( $userId ) )
 		{
 			$errorLog = sprintf('user-id: "%s" logged-in, but failed update', $userId );
 			getComponents( 'common' )->log_message( 'error', $errorLog );
@@ -293,18 +320,18 @@ class Authentication
 
 		/** Clean old throttle attempts */
 		helpers( [ 'throttle' ] );
-		throttleCleanup();
+		if ( throttleIsSupported() )
+		{
+			throttleCleanup();
+		}
 
 		return true;
 	}
 
-	public function setLoggedInSuccess ( array $userData ) : void
+	public function successWithMessage ( array $userData ) : void
 	{
-		helpers( [ 'message' ] );
-		setSuccessMessage( getComponents( 'common' )->lang(
-			'Red2Horse.successLoggedWithUsername',
-			[ $userData[ getUserField( 'username' ) ] ] 
-		) );
+		helpers( 'message' );
+		setSuccessWithLang( true, 'successLogin', ( array ) $userData[ getUserField( 'username' ) ] );
 	}
 
 	public function isMultiLogin ( ?string $session_id = null ) : bool
@@ -361,7 +388,7 @@ class Authentication
 	 * @throws ErrorValidationException
 	 * @return boolean
 	 */
-	public function loggedInUpdateData ( int $userId, array $updateData = [], ?string $tableArg = null ) : bool
+	public function update ( int $userId ) : bool
 	{
 		$common = getComponents( 'common' );
 
@@ -374,40 +401,13 @@ class Authentication
 			throw new ErrorValidationException( $errorValidation, 406 );
 		}
 
-		$isAssocData = $common->isAssocArray( $updateData );
+		$data = [
+			getUserField( 'last_login' ) 	=> getComponents( 'request' )->getIPAddress(),
+			getUserField( 'last_activity' ) => date( 'Y-m-d H:i:s' ),
+			getUserField( 'session_id' ) 	=> session_id()
+		];
+		$where = [ 'user.id' => $userId ];
 
-		if ( ! empty( $updateData ) && ! $isAssocData )
-		{
-			throw new ErrorValidationException( $common->lang( 'Red2Horse.isAssoc' ), 406 );
-		}
-
-		if ( null !== $tableArg )
-		{
-			if ( $tableArg == getTable( 'user' ) )
-			{
-				$data = [
-					getUserField( 'last_login' ) 	=> getComponents( 'request' )->getIPAddress(),
-					getUserField( 'last_activity' ) => date( 'Y-m-d H:i:s' ),
-					getUserField( 'session_id' ) 	=> session_id()
-				];
-				$data = array_merge( $data, $updateData );
-
-				$edit = model( 'User/UserModel' )->edit( $data, [ 'user.id' => $userId ] );
-				return ( bool ) $edit;
-			}
-
-			if ( empty( $updateData ) )
-			{
-				return false;
-			}
-
-			if ( $tableArg == getTable( 'user_group' ) )
-			{
-				$edit = model( 'User/UserModel' )->edit( $updateData, [ 'user.id' => $userId ] );
-				return ( bool ) $edit;
-			}
-		}
-
-		return false;
+		return ( bool ) model( 'User/UserModel' )->edit( $data, $where );
 	}
 }

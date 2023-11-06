@@ -3,8 +3,11 @@
 declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Classes\Base;
 
+use Red2Horse\Exception\ErrorArrayException;
 use Red2Horse\Exception\ErrorSqlException;
 use Red2Horse\Exception\ErrorJsonException;
+use Red2Horse\Exception\ErrorUnauthorizedException;
+use Red2Horse\Mixins\Traits\Object\TraitSingleton;
 
 use function Red2Horse\helpers;
 use function Red2Horse\Mixins\Functions\Config\getConfig;
@@ -20,9 +23,79 @@ defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
 class SessionHandle
 {
-	use \Red2Horse\Mixins\Traits\Object\TraitSingleton;
+	use TraitSingleton;
 
-	private function __construct () {}
+	/** @var array $sessionData Associative */
+	private array $sessionData;
+
+	private function __construct ()
+	{
+		// if ( ! $this->isLogged() )
+		// {
+		// 	throw new ErrorUnauthorizedException();
+		// }
+	}
+
+	public function setSession ( array $data )
+	{
+		if ( ! getComponents( 'common' )->isAssocArray( $data ) )
+		{
+			throw new ErrorArrayException( 'Invalid format array' );
+		}
+
+		$this->sessionData = $data;
+	}
+
+	/**
+	 * @param array|string|null
+	 * @return mixed
+	 */
+	public function getSession ( $keys = null )
+	{
+		if ( ! $this->isLogged() )
+		{
+			return false;
+		}
+
+		$sessionName = getConfig( 'session' )->session;
+		$userData = getComponents( 'session' )->get( $sessionName );
+
+		if ( null === $keys )
+		{
+			/** @var array $userData */
+			return $userData;
+		}
+		else if ( is_string( $keys ) )
+		{
+			return $userData[ $keys ] ?? null;
+		}
+		else
+		{
+			$keys = ( array ) $keys;
+			if ( [] === $keys )
+			{
+				return null;
+			}
+
+			$filter = array_filter( array_values( $keys ), fn( $k ) => $userData[ $k ] );
+			return $filter;
+		}		
+	}
+
+	public function isLogged ( bool $withCookie = false ) : bool
+	{
+		if ( getComponents( 'session' )->has( getConfig( 'session' )->session ) )
+		{
+			return true;
+		}
+
+		if ( $withCookie )
+		{
+			return getBaseInstance( CookieHandle::class )->cookieHandler();
+		}
+
+		return false;
+	}
 
 	public function regenerateSession ( array $userData ) : bool
 	{
@@ -31,6 +104,7 @@ class SessionHandle
 			return false;
 		}
 
+		helpers( 'model' );
 		$userColumnID 	= getUserField( 'id' );
 		$userColumnSess = getUserField( 'session_id' );
 		$editSessionId 	= model( 'User/UserModel' ) 
@@ -83,15 +157,13 @@ class SessionHandle
 
 		$roleField 		= getUserGroupField( 'role' );
 		$roleString 	= $roleJson[ $roleField ];
+
 		helpers( [ 'password' ] );
 		$randomString 	= getRandomString( $roleString );
 		$roleData 		= [ $roleField => $roleString, 'hash' => $randomString ];
 		$userData[ $roleField ] = $roleData;
-
-		helpers( [ 'password' ] );
 		$roleDB 		= [ $roleField => $roleString, 'hash' => getHashPass( $randomString ) ];
 		$updateSet 		= [ $roleField => json_encode( $roleDB ) ];
-
 		$userId 		= $userData[ getUserField( 'id' ) ];
 
 		if ( $cacheConfig->enabled && $cachedData = $cacheComponent->get( $cacheName ) )
@@ -104,6 +176,7 @@ class SessionHandle
 			$updateWhere 	= [ 'user_group.id' => $userData[ 'user.group_id' ] ];
 			$updateFilter 	= fn( $filter ) => $filter->setNoExplode( 'kv', $roleField );
 
+			helpers( 'model' );
 			/** Update to DB */
 			if ( ! model( 'user_group' )->edit( $updateSet , $updateWhere, 1, $updateFilter ) )
 			{

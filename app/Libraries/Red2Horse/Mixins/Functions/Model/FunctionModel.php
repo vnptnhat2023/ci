@@ -4,10 +4,10 @@ declare( strict_types = 1 );
 namespace Red2Horse\Mixins\Functions\Model;
 
 use Red2Horse\Exception\ErrorClassException;
-use Red2Horse\Facade\Query\QueryFacadeInterface;
 use Red2Horse\Mixins\Classes\Registry\RegistryModelClass;
 use Red2Horse\Mixins\Classes\Sql\Model;
 
+use function Red2Horse\helpers;
 use function Red2Horse\Mixins\Functions\NS\modelNamespace;
 use function Red2Horse\Mixins\Functions\NS\registryNamespace;
 
@@ -15,6 +15,7 @@ defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
 function RegModelInstance () : RegistryModelClass
 {
+    helpers( 'namespace' );
     return registryNamespace( 'RegistryModelClass' )::selfInstance();
 }
 
@@ -24,6 +25,7 @@ function RegModelInstance () : RegistryModelClass
  */
 function model ( ?string $name = null, bool $getShared = false) : Model
 {
+    helpers( 'namespace' );
     $namespace = str_replace( '/', '\\', modelNamespace( $name ) );
 
     if ( ! $getShared )

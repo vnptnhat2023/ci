@@ -12,10 +12,7 @@ use function Red2Horse\Mixins\Functions\Sql\createDatabase;
 use function Red2Horse\Mixins\Functions\Sql\createTable;
 use function Red2Horse\Mixins\Functions\Sql\seed;
 
-use function Red2Horse\Mixins\Functions\Throttle\throttleCleanup;
-use function Red2Horse\Mixins\Functions\Throttle\throttleDecrement;
 use function Red2Horse\Mixins\Functions\Throttle\throttleGetTypes;
-use function Red2Horse\Mixins\Functions\Throttle\throttleIncrement;
 use function Red2Horse\Mixins\Functions\Throttle\throttleInstance;
 
 class Install extends BaseController
@@ -27,7 +24,7 @@ class Install extends BaseController
 		$this->auth = \Config\Services::Red2HorseAuth();
         helper( [ 'form', 'url', 'filesystem' ] );
 
-		helpers( [ 'model' ] );
+		helpers( [ 'model', 'sql_export' ] );
 	}
 
 	public function type ( $attempt )

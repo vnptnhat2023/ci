@@ -8,6 +8,7 @@ use function Red2Horse\Mixins\Functions\Instance\getInstance;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
+/** Database Forge */
 function sqlClassExportInstance() : SqlClassExport
 {
     return getInstance( SqlClassExport::class );

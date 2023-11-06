@@ -8,7 +8,7 @@ use Red2Horse\Exception\ErrorPathException;
 
 defined( '\Red2Horse\R2H_BASE_PATH' ) or exit( 'Access is not allowed.' );
 
-/** @param array|string $helperName */
+/** @param array|\stdClass|string $helperName */
 function helpers ( $helperName, array $add = [] ) : void
 {
     if ( ! $functionPath = realpath( \Red2Horse\R2H_BASE_PATH . '/Mixins/Functions' ) )
@@ -29,7 +29,8 @@ function helpers ( $helperName, array $add = [] ) : void
         'sql'               => '/Sql/FunctionSql.php',
         'sql_export'        => '/Sql/FunctionSqlExport.php',
         'model'             => '/Model/FunctionModel.php',
-        'throttle'          => '/Throttle/FunctionThrottle.php'
+        'throttle'          => '/Throttle/FunctionThrottle.php',
+        'common'            => '/Common/FunctionCommon.php'
     ];
 
     if ( [] !== $add )
@@ -45,6 +46,11 @@ function helpers ( $helperName, array $add = [] ) : void
     }
 
     static $required = [];
+
+    if ( is_string( $helperName ) || $helperName instanceof \stdClass ) 
+    {
+        $helperName = ( array ) $helperName;
+    }
 
     foreach ( $helperName as $name )
     {

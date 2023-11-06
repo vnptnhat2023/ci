@@ -26,7 +26,7 @@ return [
 
 	'success' => '{0} successfully.',
 	'successLogged' => 'You are already logged in. ' . $homeLink,
-	'successLoggedWithUsername' => 'Hi {0}, you are already logged in. ' . $homeLink,
+	'successLogin' => 'Hi {0}, you are already logged in. ' . $homeLink,
 	'successLogoutWithUsername' => '{0} you have been logged out. ' . $homeLink,
 	'successLogout' => 'You have been logged out. ' . $homeLink,
 	'successResetPassword' => 'Hi {0}, your password has been reset to {1}.',
